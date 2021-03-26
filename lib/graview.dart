@@ -61,10 +61,10 @@ class GraPainter extends CustomPainter {
     var path = new Path();
     final len = p.anchors.length;
     for (var i = 2; i < len - 1; i++) {
-      final pre = p.anchors[max(0, i - 2)].vector();
-      final beg = p.anchors[i - 1].vector();
-      final end = p.anchors[i].vector();
-      final next = p.anchors[min(i + 1, len - 1)].vector();
+      final pre = p.anchors[max(0, i - 2)].vector;
+      final beg = p.anchors[i - 1].vector;
+      final end = p.anchors[i].vector;
+      final next = p.anchors[min(i + 1, len - 1)].vector;
       if (i == 2) {
         final initCoord = toCanvasCoord(beg, size);
         path.moveTo(initCoord.x, initCoord.y);
@@ -105,15 +105,15 @@ class GraPainter extends CustomPainter {
 
   void drawPolyLine(PolyLine p, Size size, Canvas canvas, Paint paint) {
     for (var i = 1; i < p.anchors.length; i++) {
-      final from = toCanvasCoord(p.anchors[i - 1].vector(), size);
-      final to = toCanvasCoord(p.anchors[i].vector(), size);
+      final from = toCanvasCoord(p.anchors[i - 1].vector, size);
+      final to = toCanvasCoord(p.anchors[i].vector, size);
       canvas.drawLine(toOffset(from), toOffset(to), paint);
     }
   }
 
   void drawPolyDot(PolyDot p, Size size, Canvas canvas, Paint paint) {
     for (var a in p.anchors) {
-      final point = toCanvasCoord(a.vector(), size);
+      final point = toCanvasCoord(a.vector, size);
       canvas.drawCircle(toOffset(point), paint.strokeWidth / 2, paint);
     }
   }

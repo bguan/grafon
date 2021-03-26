@@ -12,7 +12,6 @@ enum Anchor { E, NE, N, NW, W, SW, S, SE, O }
 /// Polar coordinates is used for defining anchor points of a Gra Atom
 class Polar {
   static const DEFAULT_ANCHOR_DIST = 0.5;
-  static const CURVE_CONTROL_DIST = 0.707; // sqrt(2)/2 = 0.707
 
   final double angle; // clockwise 0' is North, 90' is East
   final double distance; // distance from origin
@@ -35,39 +34,30 @@ class Polar {
 
 /// Extending Anchor to returns its polar coordinate
 extension AnchorExtension on Anchor {
-  Polar polar({bool isControl = false}) {
+  Polar get polar {
     switch (this) {
       case Anchor.E:
         return const Polar(angle: 0);
       case Anchor.NE:
-        return isControl
-            ? const Polar(angle: .25 * pi, distance: Polar.CURVE_CONTROL_DIST)
-            : const Polar(angle: .25 * pi);
+        return const Polar(angle: .25 * pi);
       case Anchor.N:
         return const Polar(angle: .5 * pi);
       case Anchor.NW:
-        return isControl
-            ? const Polar(angle: .75 * pi, distance: Polar.CURVE_CONTROL_DIST)
-            : const Polar(angle: .75 * pi);
+        return const Polar(angle: .75 * pi);
       case Anchor.W:
         return const Polar(angle: pi);
       case Anchor.SW:
-        return isControl
-            ? const Polar(angle: 1.25 * pi, distance: Polar.CURVE_CONTROL_DIST)
-            : const Polar(angle: 1.25 * pi);
+        return const Polar(angle: 1.25 * pi);
       case Anchor.S:
         return const Polar(angle: 1.5 * pi);
       case Anchor.SE:
-        return isControl
-            ? const Polar(angle: 1.75 * pi, distance: Polar.CURVE_CONTROL_DIST)
-            : const Polar(angle: 1.75 * pi);
+        return const Polar(angle: 1.75 * pi);
       default:
         return const Polar(distance: 0);
     }
   }
 
-  Vector2 vector({bool isControl = false}) =>
-      polar(isControl: isControl).vector;
+  Vector2 get vector => polar.vector;
 }
 
 /// A Gra Atom has 5 orientations: Facing Right, Up, Left, Down or Center

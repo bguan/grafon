@@ -111,7 +111,7 @@ extension ConsPairExtension on ConsPair {
       case ConsPair.GAKA:
         return Consonant.K;
       case ConsPair.LARA:
-        return Consonant.L;
+        return Consonant.R;
       case ConsPair.MANA:
         return Consonant.N;
       case ConsPair.SASHA:

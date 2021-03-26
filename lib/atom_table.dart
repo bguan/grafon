@@ -163,8 +163,6 @@ class _QuadHelper {
     PolySpline([
       Anchor.NW,
       Anchor.N,
-      // Anchor.NE,
-      // Anchor.SW,
       Anchor.S,
       Anchor.SE,
     ])
@@ -172,8 +170,7 @@ class _QuadHelper {
 
   static const _swirlPaths = [
     PolySpline([
-      Anchor.E,
-      Anchor.O,
+      Anchor.NE,
       Anchor.O,
       Anchor.N,
       Anchor.E,

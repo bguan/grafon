@@ -9,5 +9,8 @@ consonant and a vowel).
 
 The symbols can be further arranged in a handful of 2 dimensional operations to form words.
 
-A binary dimensional operations takes 2 symbols or expressions are associated with an ending 
-consonant to be appended to the end of the first symbol or expression.
+An unary operation manipulating a symbol is associated with an ending 
+vowel to be appended to the end of the symbol.
+
+A binary operation manipulating 2 symbols (or expressions) is associated with an ending 
+consonant to be appended to the end of the first symbol (or expression).

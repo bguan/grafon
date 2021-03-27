@@ -1,20 +1,26 @@
+import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
+import 'atom_infra.dart';
 import 'phonetics.dart';
 
-enum BinaryEnding { F, SSh, MNg, LR }
+enum BinaryEnding { H, DT, MN, SSh, Ng }
 
 extension BinaryEndingExtension on BinaryEnding {
+  String get shortName => this.toString().split('.').last;
+
   String get base {
     switch (this) {
-      case BinaryEnding.F:
+      case BinaryEnding.H:
         return '';
+      case BinaryEnding.DT:
+        return 'd';
+      case BinaryEnding.MN:
+        return 'm';
       case BinaryEnding.SSh:
         return 's';
-      case BinaryEnding.MNg:
-        return 'm';
-      case BinaryEnding.LR:
-        return 'l';
+      case BinaryEnding.Ng:
+        return 'ng';
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -23,14 +29,16 @@ extension BinaryEndingExtension on BinaryEnding {
   // use tail when it is the last operator in a cluster group
   String get tail {
     switch (this) {
-      case BinaryEnding.F:
-        return 'f';
+      case BinaryEnding.H:
+        return 'h';
+      case BinaryEnding.DT:
+        return 't';
+      case BinaryEnding.MN:
+        return 'n';
       case BinaryEnding.SSh:
         return 'sh';
-      case BinaryEnding.MNg:
-        return 'ng';
-      case BinaryEnding.LR:
-        return 'r';
+      case BinaryEnding.Ng:
+        return '';
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -60,49 +68,62 @@ class TransformationHelper {
 }
 
 /// Binary Operator works on a pair of Gra Expression
-enum Binary { BEFORE, OVER, AROUND, MERGE }
+enum Binary { Before, Over, Around, Merge, Combo }
 
 extension BinaryExtension on Binary {
+  String get shortName => this.toString().split('.').last;
+
+  String get symbol {
+    switch (this) {
+      case Binary.Before:
+        return '|';
+      case Binary.Over:
+        return '/';
+      case Binary.Around:
+        return '@';
+      case Binary.Merge:
+        return '~';
+      case Binary.Combo:
+        return ':';
+      default:
+        throw Exception("Unexpected Binary Enum ${this}");
+    }
+  }
+
   BinaryEnding get ending {
     switch (this) {
-      case Binary.BEFORE:
-        return BinaryEnding.F;
-      case Binary.OVER:
+      case Binary.Before:
+        return BinaryEnding.H;
+      case Binary.Over:
+        return BinaryEnding.DT;
+      case Binary.Around:
+        return BinaryEnding.MN;
+      case Binary.Merge:
         return BinaryEnding.SSh;
-      case Binary.AROUND:
-        return BinaryEnding.MNg;
-      case Binary.MERGE:
-        return BinaryEnding.LR;
+      case Binary.Combo:
+        return BinaryEnding.Ng;
       default:
         throw Exception("Unexpected Binary Enum ${this}");
     }
   }
 
-  Matrix3 get transform1 {
+  Tuple2<Matrix3, Matrix3> get transforms {
     switch (this) {
-      case Binary.BEFORE:
-        return TransformationHelper.noTransform;
-      case Binary.OVER:
-        return TransformationHelper.shrinkUp;
-      case Binary.AROUND:
-        return TransformationHelper.noTransform;
-      case Binary.MERGE:
-        return TransformationHelper.noTransform;
-      default:
-        throw Exception("Unexpected Binary Enum ${this}");
-    }
-  }
-
-  Matrix3 get transform2 {
-    switch (this) {
-      case Binary.BEFORE:
-        return TransformationHelper.stepRight;
-      case Binary.OVER:
-        return TransformationHelper.shrinkDown;
-      case Binary.AROUND:
-        return TransformationHelper.shrinkIn;
-      case Binary.MERGE:
-        return TransformationHelper.noTransform;
+      case Binary.Before:
+        return Tuple2(
+            TransformationHelper.shrinkLeft, TransformationHelper.shrinkRight);
+      case Binary.Over:
+        return Tuple2(
+            TransformationHelper.shrinkUp, TransformationHelper.shrinkDown);
+      case Binary.Around:
+        return Tuple2(
+            TransformationHelper.noTransform, TransformationHelper.shrinkIn);
+      case Binary.Merge:
+        return Tuple2(
+            TransformationHelper.noTransform, TransformationHelper.noTransform);
+      case Binary.Combo:
+        return Tuple2(
+            TransformationHelper.noTransform, TransformationHelper.stepRight);
       default:
         throw Exception("Unexpected Binary Enum ${this}");
     }
@@ -111,19 +132,21 @@ extension BinaryExtension on Binary {
 
 /// Unary Operator can only operate on Gra's
 /// by supplying a transformation as well as ending vowel
-enum Unary { RIGHT, UP, LEFT, DOWN }
+enum Unary { ShrinkRight, ShrinkUp, ShrinkLeft, ShrinkDown }
 
 extension UnaryExtension on Unary {
+  String get shortName => this.toString().split('.').last;
+
   Vowel get ending {
     switch (this) {
-      case Unary.RIGHT:
-        return Vowel.A;
-      case Unary.UP:
-        return Vowel.I;
-      case Unary.LEFT:
-        return Vowel.O;
-      case Unary.DOWN:
-        return Vowel.U;
+      case Unary.ShrinkRight:
+        return Face.Right.vowel;
+      case Unary.ShrinkUp:
+        return Face.Up.vowel;
+      case Unary.ShrinkLeft:
+        return Face.Left.vowel;
+      case Unary.ShrinkDown:
+        return Face.Down.vowel;
       default:
         throw Exception("Unexpected Unary Enum ${this}");
     }
@@ -131,13 +154,13 @@ extension UnaryExtension on Unary {
 
   Matrix3 get transform {
     switch (this) {
-      case Unary.RIGHT:
+      case Unary.ShrinkRight:
         return TransformationHelper.shrinkRight;
-      case Unary.UP:
+      case Unary.ShrinkUp:
         return TransformationHelper.shrinkUp;
-      case Unary.LEFT:
+      case Unary.ShrinkLeft:
         return TransformationHelper.shrinkLeft;
-      case Unary.DOWN:
+      case Unary.ShrinkDown:
         return TransformationHelper.shrinkDown;
       default:
         throw Exception("Unexpected Unary Enum ${this}");

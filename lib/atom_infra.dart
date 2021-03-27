@@ -61,7 +61,7 @@ extension AnchorExtension on Anchor {
 }
 
 /// A Gra Atom has 5 orientations: Facing Right, Up, Left, Down or Center
-enum Face { RIGHT, UP, LEFT, DOWN, CENTER }
+enum Face { Right, Up, Left, Down, Center }
 
 /// Map a Face to a Vowel
 extension FaceExtension on Face {
@@ -69,13 +69,13 @@ extension FaceExtension on Face {
 
   Vowel get vowel {
     switch (this) {
-      case Face.RIGHT:
+      case Face.Right:
         return Vowel.A;
-      case Face.UP:
+      case Face.Up:
         return Vowel.I;
-      case Face.LEFT:
+      case Face.Left:
         return Vowel.O;
-      case Face.DOWN:
+      case Face.Down:
         return Vowel.U;
       default:
         return Vowel.E;
@@ -90,15 +90,15 @@ extension VowelExtension on Vowel {
   Face get face {
     switch (this) {
       case Vowel.A:
-        return Face.RIGHT;
+        return Face.Right;
       case Vowel.I:
-        return Face.UP;
+        return Face.Up;
       case Vowel.O:
-        return Face.LEFT;
+        return Face.Left;
       case Vowel.U:
-        return Face.DOWN;
+        return Face.Down;
       default:
-        return Face.CENTER;
+        return Face.Center;
     }
   }
 }
@@ -181,7 +181,7 @@ abstract class Gra {
 
 /// MonoGra looks the same when rotated 90' i.e. only 1 variation hence Mono
 class MonoGra extends Gra {
-  final face = Face.CENTER;
+  final face = Face.Center;
 
   const MonoGra(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
 }
@@ -312,10 +312,10 @@ abstract class QuadGras {
   QuadGras(this.consPair,
       {List<PolyPath> r, List<PolyPath> u, List<PolyPath> l, List<PolyPath> d})
       : face2gra = Map.unmodifiable({
-          Face.RIGHT: QuadGra(r, Face.RIGHT, consPair),
-          Face.UP: QuadGra(u, Face.UP, consPair),
-          Face.LEFT: QuadGra(l, Face.LEFT, consPair),
-          Face.DOWN: QuadGra(d, Face.DOWN, consPair)
+          Face.Right: QuadGra(r, Face.Right, consPair),
+          Face.Up: QuadGra(u, Face.Up, consPair),
+          Face.Left: QuadGra(l, Face.Left, consPair),
+          Face.Down: QuadGra(d, Face.Down, consPair)
         });
 
   Gra operator [](Face f) => face2gra[f];
@@ -379,15 +379,15 @@ class FlipQuads extends QuadGras {
 
 /// In DoubleFlipRow:
 /// Right paths are flipped horizontally and vertically to make Left Path;
-/// Up paths are obtained by rotating Right paths by 90' and flipped vertically;
+/// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically and horizontally flipping Up paths.
 class DoubleFlipQuads extends QuadGras {
   DoubleFlipQuads(List<PolyPath> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
-  static List<PolyPath> r2u(List<PolyPath> r) => turn(r);
+  static List<PolyPath> r2u(List<PolyPath> r) => hFlip(turn(r));
 
   static List<PolyPath> r2l(List<PolyPath> r) => vFlip(hFlip(r));
 
-  static List<PolyPath> r2d(List<PolyPath> r) => vFlip(r2u(r));
+  static List<PolyPath> r2d(List<PolyPath> r) => hFlip(vFlip(r2u(r)));
 }

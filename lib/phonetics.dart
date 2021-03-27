@@ -69,7 +69,7 @@ extension ConsonantExtension on Consonant {
     }
   }
 
-  String get shortString => this.toString().split('.').last;
+  String get shortName => this.toString().split('.').last;
 }
 
 extension ConsPairExtension on ConsPair {

@@ -5,6 +5,7 @@ import 'package:grafon/atom_infra.dart';
 import 'package:grafon/graview.dart';
 
 import 'atom_table.dart';
+import 'operators.dart';
 import 'phonetics.dart';
 
 void main() {
@@ -35,43 +36,49 @@ class GrafonHome extends StatelessWidget {
     final scheme = Theme.of(ctx).colorScheme;
     final width = MediaQuery.of(ctx).size.width;
     final height = MediaQuery.of(ctx).size.height;
-    const vpad = 20.0;
-    const hpad = 10.0;
-    const space = 5.0;
-    const inset = 5.0;
+    const vpad = 15.0;
+    const hpad = 15.0;
+    const space = 2.0;
+    const inset = 10.0;
     final dim = min((width - 2 * hpad) / (GraTable.numCols + 2),
         0.8 * (height - 2 * vpad) / (GraTable.numRows + 1));
     final gridSize = Size(dim - 2 * inset - space, dim - 2 * inset - space);
 
-    final allGras = [
-      for (var chdr in [
+    final graTable = [
+      for (var header in [
         '',
-        ...Vowel.values.map((Vowel v) => v.shortName.toLowerCase()),
+        ...Vowel.values
+            .map((v) => '${v.face.shortName}\n${v.shortName.toLowerCase()}'),
         ''
       ])
-        chdr.length <= 0
+        header.length <= 0
             ? SizedBox()
             : Container(
-                padding: const EdgeInsets.all(inset),
                 child: Center(
                   child: Text(
-                    '$chdr',
+                    '$header',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      height: 1.5,
                       color: Colors.white,
+                      fontSize: 12,
                     ),
                   ),
                 ),
-                color: chdr.length <= 0 ? scheme.surface : scheme.background,
+                color: header.length <= 0 ? scheme.surface : scheme.background,
               ),
       for (var m in Mono.values) ...[
         Container(
-          padding: const EdgeInsets.all(inset),
           child: Center(
             child: Text(
-              '${m.gra.consPair.base.shortString}, ${m.gra.consPair.head.shortString}',
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              '${m.gra.consPair.base.shortName}, ${m.gra.consPair.head.shortName}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 12,
+              ),
             ),
           ),
           color: scheme.background,
@@ -83,20 +90,44 @@ class GrafonHome extends StatelessWidget {
             color: scheme.surface,
           ),
         Container(
-          padding: const EdgeInsets.all(inset),
           child: Center(
             child: Text(
-              '${m.quadPeer.shortName} ${m.shortName}',
+              '${m.quadPeer.shortName}\n${m.shortName}',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: scheme.primary,
-                  fontSize: 9),
+                fontWeight: FontWeight.bold,
+                height: 1.5,
+                color: scheme.primary,
+                fontSize: 12,
+              ),
             ),
           ),
           color: scheme.surface,
         ),
       ],
+      for (var footer in [
+        'Binary Spatial Operator',
+        ...Binary.values.map((b) =>
+            '${b.shortName}\n${b.symbol}\n' +
+            '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
+      ])
+        footer.length <= 0
+            ? SizedBox()
+            : Container(
+                child: Center(
+                  child: Text(
+                    '$footer',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                      color: scheme.secondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                color: scheme.surface,
+              ),
     ];
 
     return Scaffold(
@@ -110,7 +141,7 @@ class GrafonHome extends StatelessWidget {
             crossAxisCount: GraTable.numCols + 2,
             crossAxisSpacing: space,
             mainAxisSpacing: space,
-            children: allGras,
+            children: graTable,
           ),
         ),
       ),

@@ -69,7 +69,7 @@ class TransformationHelper {
 }
 
 /// Binary Operator works on a pair of Gra Expression
-enum Binary { Combo, Before, Over, Around, Merge }
+enum Binary { Merge, Before, Over, Around, Compound }
 
 extension BinaryExtension on Binary {
   String get shortName => this.toString().split('.').last;
@@ -84,7 +84,7 @@ extension BinaryExtension on Binary {
         return '@';
       case Binary.Merge:
         return '~';
-      case Binary.Combo:
+      case Binary.Compound:
         return ':';
       default:
         throw Exception("Unexpected Binary Enum ${this}");
@@ -101,7 +101,7 @@ extension BinaryExtension on Binary {
         return BinaryEnding.MN;
       case Binary.Merge:
         return BinaryEnding.SSh;
-      case Binary.Combo:
+      case Binary.Compound:
         return BinaryEnding.Ng;
       default:
         throw Exception("Unexpected Binary Enum ${this}");
@@ -122,7 +122,7 @@ extension BinaryExtension on Binary {
       case Binary.Merge:
         return Tuple2(
             TransformationHelper.noTransform, TransformationHelper.noTransform);
-      case Binary.Combo:
+      case Binary.Compound:
         return Tuple2(
             TransformationHelper.noTransform, TransformationHelper.stepRight);
       default:

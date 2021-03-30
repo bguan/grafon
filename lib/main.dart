@@ -36,7 +36,7 @@ class GrafonHome extends StatelessWidget {
     final scheme = Theme.of(ctx).colorScheme;
     final width = MediaQuery.of(ctx).size.width.clamp(500.0, 1000.0);
     final height = MediaQuery.of(ctx).size.height.clamp(500.0, 1000.0);
-    final widthHeightRatio = (width / height).clamp(.5, 2);
+    final widthHeightRatio = (width / height).clamp(.75, 2);
     final vpad = 20.0;
     final hpad = 20.0;
     final space = 5.0;
@@ -73,7 +73,7 @@ class GrafonHome extends StatelessWidget {
 
     final binaryOpRow = [
       for (var bTxt in [
-        'Binary\nOperator',
+        'Binary\nOperator\ndecreasing precedence',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
             '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),

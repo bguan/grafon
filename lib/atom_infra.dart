@@ -61,7 +61,7 @@ extension AnchorExtension on Anchor {
 }
 
 /// A Gra Atom has 5 orientations: Facing Right, Up, Left, Down or Center
-enum Face { Right, Up, Left, Down, Center }
+enum Face { Center, Right, Up, Left, Down }
 
 /// Map a Face to a Vowel
 extension FaceExtension on Face {
@@ -109,6 +109,8 @@ abstract class PolyPath {
 
   const PolyPath(this.anchors);
 
+  List<Anchor> get visibleAnchors => anchors;
+
   @override
   int get hashCode {
     var hash = anchors.hashCode;
@@ -141,6 +143,9 @@ class PolyLine extends PolyPath {
 /// first point and last point is for direction computation only
 class PolySpline extends PolyPath {
   const PolySpline(anchors) : super(anchors);
+
+  @override
+  List<Anchor> get visibleAnchors => anchors.sublist(1, anchors.length - 1);
 }
 
 /// Gra is a Graphical Symbol Atom
@@ -176,6 +181,21 @@ abstract class Gra {
         this.face == that.face &&
         this.vowel == that.vowel &&
         eq(this.paths, that.paths);
+  }
+
+  Vector2 get avgAnchor {
+    double x = 0, y = 0;
+    int aCount = 0;
+    final Set<Anchor> pathAnchors = {
+      for (final p in paths) ...p.visibleAnchors,
+    };
+
+    for (final a in pathAnchors) {
+      x += a.vector.x;
+      y += a.vector.y;
+      aCount++;
+    }
+    return Vector2(x / aCount, y / aCount);
   }
 }
 

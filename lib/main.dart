@@ -34,40 +34,97 @@ class GrafonHome extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final scheme = Theme.of(ctx).colorScheme;
-    final width = MediaQuery.of(ctx).size.width;
-    final height = MediaQuery.of(ctx).size.height;
-    const vpad = 15.0;
-    const hpad = 15.0;
-    const space = 2.0;
-    const inset = 10.0;
+    final width = MediaQuery.of(ctx).size.width.clamp(500.0, 1000.0);
+    final height = MediaQuery.of(ctx).size.height.clamp(500.0, 1000.0);
+    final widthHeightRatio = (width / height).clamp(.5, 2);
+    final vpad = 20.0;
+    final hpad = 20.0;
+    final space = 5.0;
+    final inset = widthHeightRatio * 10.0;
     final dim = min((width - 2 * hpad) / (GraTable.numCols + 2),
-        0.8 * (height - 2 * vpad) / (GraTable.numRows + 1));
+        (0.8 * height - 2 * vpad) / (GraTable.numRows + 3));
     final gridSize = Size(dim - 2 * inset - space, dim - 2 * inset - space);
 
-    final graTable = [
-      for (var header in [
-        '',
-        ...Vowel.values
-            .map((v) => '${v.face.shortName}\n${v.shortName.toLowerCase()}'),
-        ''
+    final headerRow = [
+      for (var fTxt in [
+        'Face vowel - \nConsonant\nbase, head',
+        ...Face.values
+            .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
+        'Symbol\nName'
       ])
-        header.length <= 0
+        fTxt.length <= 0
             ? SizedBox()
             : Container(
                 child: Center(
                   child: Text(
-                    '$header',
+                    '$fTxt',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                      color: Colors.white,
+                      fontSize: widthHeightRatio * 12,
+                    ),
+                  ),
+                ),
+                color: scheme.secondaryVariant,
+              ),
+    ];
+
+    final binaryOpRow = [
+      for (var bTxt in [
+        'Binary\nOperator',
+        ...Binary.values.map((b) =>
+            '${b.shortName}\n${b.symbol}\n' +
+            '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
+        'Ending\nConsonant\nbase, tail'
+      ])
+        bTxt.length <= 0
+            ? SizedBox()
+            : Container(
+                child: Center(
+                  child: Text(
+                    '$bTxt',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       height: 1.5,
-                      color: Colors.white,
-                      fontSize: 12,
+                      color: scheme.surface,
+                      fontSize: widthHeightRatio * 12,
                     ),
                   ),
                 ),
-                color: header.length <= 0 ? scheme.surface : scheme.background,
+                color: scheme.primaryVariant,
               ),
+    ];
+
+    final unaryOpRow = [
+      for (var uTxt in [
+        'Unary\nOperator',
+        ...Unary.values.map((u) =>
+            '${u.shortName}\n${u.symbol}\n_${u.ending.shortName.toLowerCase()}'),
+        'Ending\nVowel'
+      ])
+        uTxt.length <= 0
+            ? SizedBox()
+            : Container(
+                child: Center(
+                  child: Text(
+                    '$uTxt',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.5,
+                      color: scheme.surface,
+                      fontSize: widthHeightRatio * 12,
+                    ),
+                  ),
+                ),
+                color: scheme.primaryVariant,
+              ),
+    ];
+
+    final graTable = [
       for (var m in Mono.values) ...[
         Container(
           child: Center(
@@ -77,7 +134,7 @@ class GrafonHome extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: widthHeightRatio * 15,
               ),
             ),
           ),
@@ -85,49 +142,26 @@ class GrafonHome extends StatelessWidget {
         ),
         for (var f in Face.values)
           Container(
-            padding: const EdgeInsets.all(inset),
+            padding: EdgeInsets.all(inset),
             child: GraView(GraTable.atMonoFace(m, f), gridSize),
             color: scheme.surface,
           ),
         Container(
           child: Center(
             child: Text(
-              '${m.quadPeer.shortName}\n${m.shortName}',
+              '${m.shortName}\n${m.quadPeer.shortName}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 height: 1.5,
-                color: scheme.primary,
-                fontSize: 12,
+                color: scheme.surface,
+                fontSize: widthHeightRatio * 15,
               ),
             ),
           ),
-          color: scheme.surface,
+          color: scheme.background,
         ),
       ],
-      for (var footer in [
-        'Binary Spatial Operator',
-        ...Binary.values.map((b) =>
-            '${b.shortName}\n${b.symbol}\n' +
-            '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
-      ])
-        footer.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$footer',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
-                      color: scheme.secondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                color: scheme.surface,
-              ),
     ];
 
     return Scaffold(
@@ -135,13 +169,18 @@ class GrafonHome extends StatelessWidget {
         title: Text(title),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: vpad, horizontal: hpad),
+        padding: EdgeInsets.symmetric(vertical: vpad, horizontal: hpad),
         child: Center(
           child: GridView.count(
             crossAxisCount: GraTable.numCols + 2,
             crossAxisSpacing: space,
             mainAxisSpacing: space,
-            children: graTable,
+            children: [
+              ...headerRow,
+              ...graTable,
+              ...unaryOpRow,
+              ...binaryOpRow
+            ],
           ),
         ),
       ),

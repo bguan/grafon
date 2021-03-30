@@ -4,10 +4,9 @@ import 'phonetics.dart';
 enum Mono {
   Space,
   Dot,
-  X,
   Cross,
   Square,
-  Diamond,
+  X,
   Sun,
   Circle,
   Flower,
@@ -35,11 +34,13 @@ extension MonoExtension on Mono {
     ];
 
     const squarePaths = [
-      PolyLine([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW, Anchor.NW])
-    ];
-
-    const diamondPaths = [
-      PolyLine([Anchor.N, Anchor.E, Anchor.S, Anchor.W, Anchor.N])
+      PolyLine([
+        Anchor.NW,
+        Anchor.NE,
+        Anchor.SE,
+        Anchor.SW,
+        Anchor.NW,
+      ])
     ];
 
     const sunPaths = [
@@ -129,15 +130,13 @@ extension MonoExtension on Mono {
 
     switch (this) {
       case Mono.Dot:
-        return const MonoGra(dotPaths, ConsPair.SASHA);
+        return const MonoGra(dotPaths, ConsPair.SAZA);
       case Mono.X:
-        return const MonoGra(xPaths, ConsPair.ZAZHA);
+        return const MonoGra(xPaths, ConsPair.GAKA);
       case Mono.Cross:
         return const MonoGra(crossPaths, ConsPair.BAPA);
       case Mono.Square:
         return const MonoGra(squarePaths, ConsPair.DATA);
-      case Mono.Diamond:
-        return const MonoGra(diamondPaths, ConsPair.GAKA);
       case Mono.Sun:
         return const MonoGra(sunPaths, ConsPair.JACHA);
       case Mono.Circle:
@@ -155,7 +154,17 @@ extension MonoExtension on Mono {
       Quad.values.firstWhere((q) => q.gras.consPair == this.gra.consPair);
 }
 
-enum Quad { Line, Drip, Angle, Corner, Gate, Triangle, Arrow, Arc, Flow, Swirl }
+enum Quad {
+  Line,
+  Drip,
+  Angle,
+  Corner,
+  Gate,
+  Arrow,
+  Arch,
+  Flow,
+  Swirl,
+}
 
 /// QuadHelper is a singleton to only instantiates QuadGras and Quad once
 class _QuadHelper {
@@ -168,7 +177,7 @@ class _QuadHelper {
   ];
 
   static const anglePaths = [
-    PolyLine([Anchor.NW, Anchor.E, Anchor.SW]),
+    PolyLine([Anchor.N, Anchor.E, Anchor.S]),
   ];
 
   static const cornerPaths = [
@@ -179,10 +188,6 @@ class _QuadHelper {
     PolyLine([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
   ];
 
-  static const trianglePaths = [
-    PolyLine([Anchor.NW, Anchor.E, Anchor.SW, Anchor.NW]),
-  ];
-
   static const arrowPaths = [
     PolyLine([Anchor.N, Anchor.E, Anchor.S]),
     PolyLine([Anchor.W, Anchor.E])
@@ -191,9 +196,9 @@ class _QuadHelper {
   static const arcPaths = [
     PolySpline([
       Anchor.W,
-      Anchor.NW,
+      Anchor.N,
       Anchor.E,
-      Anchor.SW,
+      Anchor.S,
       Anchor.W,
     ]),
   ];
@@ -221,13 +226,12 @@ class _QuadHelper {
 
   static final Map<Quad, QuadGras> enum2quads = Map.unmodifiable({
     Quad.Line: SemiRotatingQuads(linePaths, ConsPair.AHA),
-    Quad.Drip: SemiRotatingQuads(dripPaths, ConsPair.SASHA),
-    Quad.Angle: RotatingQuads(anglePaths, ConsPair.ZAZHA),
+    Quad.Drip: SemiRotatingQuads(dripPaths, ConsPair.SAZA),
+    Quad.Angle: RotatingQuads(anglePaths, ConsPair.GAKA),
     Quad.Corner: RotatingQuads(cornerPaths, ConsPair.BAPA),
     Quad.Gate: RotatingQuads(gatePaths, ConsPair.DATA),
-    Quad.Triangle: RotatingQuads(trianglePaths, ConsPair.GAKA),
     Quad.Arrow: RotatingQuads(arrowPaths, ConsPair.JACHA),
-    Quad.Arc: RotatingQuads(arcPaths, ConsPair.MANA),
+    Quad.Arch: RotatingQuads(arcPaths, ConsPair.MANA),
     Quad.Flow: FlipQuads(flowPaths, ConsPair.VAFA),
     Quad.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LARA),
   });

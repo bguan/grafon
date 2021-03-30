@@ -22,7 +22,7 @@ class GraView extends StatelessWidget {
 
 class GraPainter extends CustomPainter {
   static const STROKE_WIDTH_SCALE = 0.1;
-  static const DOMINANT_CTRL_SCALE = 0.707;
+  static const DOMINANT_CTRL_SCALE = 0.7;
   static const STD_CTRL_SCALE = 0.4;
   final Gra gra;
   final ColorScheme scheme;
@@ -37,7 +37,7 @@ class GraPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final penWidth = size.shortestSide * STROKE_WIDTH_SCALE;
+    final penWidth = (size.shortestSide * STROKE_WIDTH_SCALE).clamp(1.0, 10.0);
 
     final paint = Paint()
       ..color = scheme.primary
@@ -46,25 +46,33 @@ class GraPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
+    final centerShift = -gra.avgAnchor;
+
     for (final p in gra.paths) {
       if (p is PolyDot) {
-        drawPolyDot(p, size, canvas, paint);
+        drawPolyDot(p, centerShift, size, canvas, paint);
       } else if (p is PolyLine) {
-        drawPolyLine(p, size, canvas, paint);
+        drawPolyLine(p, centerShift, size, canvas, paint);
       } else if (p is PolySpline) {
-        drawPolySpline(p, size, canvas, paint);
+        drawPolySpline(p, centerShift, size, canvas, paint);
       }
     }
   }
 
-  void drawPolySpline(PolySpline p, Size size, Canvas canvas, Paint paint) {
+  void drawPolySpline(
+    PolySpline p,
+    Vector centerShift,
+    Size size,
+    Canvas canvas,
+    Paint paint,
+  ) {
     var path = new Path();
     final len = p.anchors.length;
     for (var i = 2; i < len - 1; i++) {
-      final pre = p.anchors[max(0, i - 2)].vector;
-      final beg = p.anchors[i - 1].vector;
-      final end = p.anchors[i].vector;
-      final next = p.anchors[min(i + 1, len - 1)].vector;
+      final pre = p.anchors[max(0, i - 2)].vector + centerShift;
+      final beg = p.anchors[i - 1].vector + centerShift;
+      final end = p.anchors[i].vector + centerShift;
+      final next = p.anchors[min(i + 1, len - 1)].vector + centerShift;
       if (i == 2) {
         final initCoord = toCanvasCoord(beg, size);
         path.moveTo(initCoord.x, initCoord.y);
@@ -103,17 +111,29 @@ class GraPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void drawPolyLine(PolyLine p, Size size, Canvas canvas, Paint paint) {
+  void drawPolyLine(
+    PolyLine p,
+    Vector2 centerShift,
+    Size size,
+    Canvas canvas,
+    Paint paint,
+  ) {
     for (var i = 1; i < p.anchors.length; i++) {
-      final from = toCanvasCoord(p.anchors[i - 1].vector, size);
-      final to = toCanvasCoord(p.anchors[i].vector, size);
+      final from = toCanvasCoord(p.anchors[i - 1].vector + centerShift, size);
+      final to = toCanvasCoord(p.anchors[i].vector + centerShift, size);
       canvas.drawLine(toOffset(from), toOffset(to), paint);
     }
   }
 
-  void drawPolyDot(PolyDot p, Size size, Canvas canvas, Paint paint) {
+  void drawPolyDot(
+    PolyDot p,
+    Vector2 centerShift,
+    Size size,
+    Canvas canvas,
+    Paint paint,
+  ) {
     for (var a in p.anchors) {
-      final point = toCanvasCoord(a.vector, size);
+      final point = toCanvasCoord(a.vector + centerShift, size);
       canvas.drawCircle(toOffset(point), paint.strokeWidth / 2, paint);
     }
   }

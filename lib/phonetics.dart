@@ -1,29 +1,8 @@
-enum Vowel { A, I, O, U, E }
+enum Vowel { E, A, I, O, U }
 
-enum Consonant {
-  nil,
-  H,
-  B,
-  P,
-  J,
-  Ch,
-  D,
-  T,
-  V,
-  F,
-  G,
-  K,
-  L,
-  R,
-  M,
-  N,
-  S,
-  Sh,
-  Z,
-  Zh
-}
+enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
 
-enum ConsPair { AHA, BAPA, JACHA, DATA, VAFA, GAKA, LARA, MANA, SASHA, ZAZHA }
+enum ConsPair { AHA, BAPA, JACHA, DATA, VAFA, GAKA, LARA, MANA, SAZA }
 
 extension ConsonantExtension on Consonant {
   ConsPair get pair {
@@ -57,12 +36,8 @@ extension ConsonantExtension on Consonant {
         return ConsPair.MANA;
 
       case Consonant.S:
-      case Consonant.Sh:
-        return ConsPair.SASHA;
-
       case Consonant.Z:
-      case Consonant.Zh:
-        return ConsPair.ZAZHA;
+      return ConsPair.SAZA;
 
       default:
         return ConsPair.AHA;
@@ -89,10 +64,8 @@ extension ConsPairExtension on ConsPair {
         return Consonant.L;
       case ConsPair.MANA:
         return Consonant.M;
-      case ConsPair.SASHA:
+      case ConsPair.SAZA:
         return Consonant.S;
-      case ConsPair.ZAZHA:
-        return Consonant.Z;
       default:
         return Consonant.nil;
     }
@@ -114,10 +87,8 @@ extension ConsPairExtension on ConsPair {
         return Consonant.R;
       case ConsPair.MANA:
         return Consonant.N;
-      case ConsPair.SASHA:
-        return Consonant.Sh;
-      case ConsPair.ZAZHA:
-        return Consonant.Zh;
+      case ConsPair.SAZA:
+        return Consonant.Z;
       default:
         return Consonant.H;
     }

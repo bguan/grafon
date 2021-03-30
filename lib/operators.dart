@@ -4,7 +4,7 @@ import 'package:vector_math/vector_math.dart';
 import 'atom_infra.dart';
 import 'phonetics.dart';
 
-enum BinaryEnding { H, DT, MN, SSh, Ng }
+enum BinaryEnding { Ng, H, DT, MN, SSh }
 
 extension BinaryEndingExtension on BinaryEnding {
   String get shortName => this.toString().split('.').last;
@@ -61,6 +61,7 @@ class TransformationHelper {
   static final Matrix3 stepRight = Matrix3(1, 0, 1, 0, 1, 0, 0, 0, 1);
 
   static final noTransform = Matrix3.identity();
+  static final shrinkCenter = xShrink.multiplied(yShrink);
   static final shrinkRight = xShrink.multiplied(rightShift);
   static final shrinkUp = yShrink.multiplied(upShift);
   static final shrinkLeft = xShrink.multiplied(leftShift);
@@ -68,7 +69,7 @@ class TransformationHelper {
 }
 
 /// Binary Operator works on a pair of Gra Expression
-enum Binary { Before, Over, Around, Merge, Combo }
+enum Binary { Combo, Before, Over, Around, Merge }
 
 extension BinaryExtension on Binary {
   String get shortName => this.toString().split('.').last;
@@ -132,20 +133,39 @@ extension BinaryExtension on Binary {
 
 /// Unary Operator can only operate on Gra's
 /// by supplying a transformation as well as ending vowel
-enum Unary { ShrinkRight, ShrinkUp, ShrinkLeft, ShrinkDown }
+enum Unary { Shrink, Right, Up, Left, Down }
 
 extension UnaryExtension on Unary {
   String get shortName => this.toString().split('.').last;
 
+  String get symbol {
+    switch (this) {
+      case Unary.Shrink:
+        return '•';
+      case Unary.Right:
+        return '>';
+      case Unary.Up:
+        return '^';
+      case Unary.Left:
+        return '<';
+      case Unary.Down:
+        return 'v';
+      default:
+        throw Exception("Unexpected Unary Enum ${this}");
+    }
+  }
+
   Vowel get ending {
     switch (this) {
-      case Unary.ShrinkRight:
+      case Unary.Shrink:
+        return Face.Center.vowel;
+      case Unary.Right:
         return Face.Right.vowel;
-      case Unary.ShrinkUp:
+      case Unary.Up:
         return Face.Up.vowel;
-      case Unary.ShrinkLeft:
+      case Unary.Left:
         return Face.Left.vowel;
-      case Unary.ShrinkDown:
+      case Unary.Down:
         return Face.Down.vowel;
       default:
         throw Exception("Unexpected Unary Enum ${this}");
@@ -154,13 +174,15 @@ extension UnaryExtension on Unary {
 
   Matrix3 get transform {
     switch (this) {
-      case Unary.ShrinkRight:
+      case Unary.Shrink:
+        return TransformationHelper.shrinkCenter;
+      case Unary.Right:
         return TransformationHelper.shrinkRight;
-      case Unary.ShrinkUp:
+      case Unary.Up:
         return TransformationHelper.shrinkUp;
-      case Unary.ShrinkLeft:
+      case Unary.Left:
         return TransformationHelper.shrinkLeft;
-      case Unary.ShrinkDown:
+      case Unary.Down:
         return TransformationHelper.shrinkDown;
       default:
         throw Exception("Unexpected Unary Enum ${this}");

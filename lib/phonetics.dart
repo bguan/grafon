@@ -93,4 +93,6 @@ extension ConsPairExtension on ConsPair {
         return Consonant.H;
     }
   }
+
+  String get shortName => this.toString().split('.').last;
 }

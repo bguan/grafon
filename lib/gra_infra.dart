@@ -5,10 +5,6 @@ import 'package:vector_math/vector_math.dart';
 
 import 'phonetics.dart';
 
-/// Anchor points to construct a Gra Atom
-/// 1 mid point + 8 directions distance of .5 from origin
-enum Anchor { E, NE, N, NW, W, SW, S, SE, O }
-
 /// Polar coordinates is used for defining anchor points of a Gra Atom
 class Polar {
   static const DEFAULT_ANCHOR_DIST = 0.5;
@@ -28,9 +24,17 @@ class Polar {
     if (other is! Polar) return false;
 
     Polar that = other;
-    return angle == that.angle && distance == that.distance;
+    if (distance != that.distance) return false;
+    if (distance == 0.0) return true; // angle doesn't matter
+
+    // dart's Euclidean modulus works nicely here
+    return angle % (2 * pi) == that.angle % (2 * pi);
   }
 }
+
+/// Anchor points to construct a Gra Atom
+/// 1 mid point + 8 directions distance of .5 from origin
+enum Anchor { E, NE, N, NW, W, SW, S, SE, O }
 
 /// Extending Anchor to returns its polar coordinate
 extension AnchorExtension on Anchor {

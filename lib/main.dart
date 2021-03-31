@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grafon/atom_infra.dart';
-import 'package:grafon/graview.dart';
+import 'package:grafon/gra_infra.dart';
+import 'package:grafon/gra_view.dart';
 
-import 'atom_table.dart';
+import 'gra_table.dart';
 import 'operators.dart';
 import 'phonetics.dart';
 
@@ -36,9 +36,9 @@ class GrafonHome extends StatelessWidget {
     final scheme = Theme.of(ctx).colorScheme;
     final width = MediaQuery.of(ctx).size.width.clamp(500.0, 1000.0);
     final height = MediaQuery.of(ctx).size.height.clamp(500.0, 1000.0);
-    final widthHeightRatio = (width / height).clamp(.75, 2);
-    final vpad = 20.0;
-    final hpad = 20.0;
+    final widthHeightRatio = (width / height).clamp(.75, 1.75);
+    final vpad = widthHeightRatio * 10.0;
+    final hpad = widthHeightRatio * 10.0;
     final space = 5.0;
     final inset = widthHeightRatio * 10.0;
     final dim = min((width - 2 * hpad) / (GraTable.numCols + 2),
@@ -71,33 +71,6 @@ class GrafonHome extends StatelessWidget {
               ),
     ];
 
-    final binaryOpRow = [
-      for (var bTxt in [
-        'Binary\nOperator\ndecreasing precedence',
-        ...Binary.values.map((b) =>
-            '${b.shortName}\n${b.symbol}\n' +
-            '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
-        'Ending\nConsonant\nbase, tail'
-      ])
-        bTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$bTxt',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.5,
-                      color: scheme.surface,
-                      fontSize: widthHeightRatio * 12,
-                    ),
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
-    ];
-
     final unaryOpRow = [
       for (var uTxt in [
         'Unary\nOperator',
@@ -115,6 +88,33 @@ class GrafonHome extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       height: 1.5,
+                      color: scheme.surface,
+                      fontSize: widthHeightRatio * 12,
+                    ),
+                  ),
+                ),
+                color: scheme.primaryVariant,
+              ),
+    ];
+
+    final binaryOpRow = [
+      for (var bTxt in [
+        'Binary\nOperator\ndecreasing precedence',
+        ...Binary.values.map((b) =>
+            '${b.shortName}\n${b.symbol}\n' +
+            '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
+        'Ending\nConsonant\nbase, tail'
+      ])
+        bTxt.length <= 0
+            ? SizedBox()
+            : Container(
+                child: Center(
+                  child: Text(
+                    '$bTxt',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.4,
                       color: scheme.surface,
                       fontSize: widthHeightRatio * 12,
                     ),

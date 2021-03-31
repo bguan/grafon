@@ -1,7 +1,7 @@
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'atom_infra.dart';
+import 'gra_infra.dart';
 import 'phonetics.dart';
 
 enum BinaryEnding { Ng, H, DT, MN, SSh }

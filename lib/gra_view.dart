@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'atom_infra.dart';
+import 'gra_infra.dart';
 
 class GraView extends StatelessWidget {
   final Gra gra;

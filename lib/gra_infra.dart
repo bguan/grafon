@@ -127,15 +127,33 @@ abstract class PolyPath {
     if (other.runtimeType != this.runtimeType) return false;
 
     PolyPath that = other;
-    final eq = ListEquality<Anchor>().equals;
+    final leq = ListEquality<Anchor>().equals;
 
-    return eq(this.anchors, that.anchors);
+    return leq(this.anchors, that.anchors);
   }
 }
 
 /// Dotted pen stroke paths
 class PolyDot extends PolyPath {
   const PolyDot(anchors) : super(anchors);
+
+  /// dots ordering shouldn't matter
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != this.runtimeType) return false;
+
+    PolyDot that = other;
+    final seq = SetEquality<Anchor>().equals;
+
+    return seq(Set.of(this.anchors), Set.of(that.anchors));
+  }
+
+  @override
+  int get hashCode {
+    var hash = anchors.hashCode;
+    for (var a in Set.of(anchors)) hash ^= a.hashCode;
+    return hash;
+  }
 }
 
 /// Straight Line from anchor point to anchor point

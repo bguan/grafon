@@ -118,7 +118,184 @@ void main() {
     expect(shortNamesFromFaces.length, Face.values.length);
   });
 
-  //TODO: write PolyPath (PolyDot, PolyLine, PolyCurve) tests
+  test('PolyDot equality tests', () {
+    for (final a1 in Anchor.values) {
+      final dotPaths1 = [
+        PolyDot([a1])
+      ];
+
+      final emptyPaths = [];
+      expect(dotPaths1, isNot(equals(emptyPaths)));
+
+      // PolyDots repeated dots are redundant
+      final doubleDotPaths = [
+        PolyDot([a1, a1]),
+      ];
+      expect(dotPaths1, equals(doubleDotPaths));
+
+      final linePaths = [
+        PolyLine([a1]),
+      ];
+      expect(dotPaths1, isNot(equals(linePaths)));
+
+      final splinePaths = [
+        PolySpline([a1]),
+      ];
+      expect(dotPaths1, isNot(equals(splinePaths)));
+
+      final comboPaths = [
+        PolyDot([a1]),
+        PolyLine([a1]),
+      ];
+      expect(dotPaths1, isNot(equals(comboPaths)));
+
+      for (final a2 in Anchor.values) {
+        final dotPaths2 = [
+          PolyDot([a2])
+        ];
+        if (a1 == a2) {
+          expect(dotPaths1, equals(dotPaths2));
+        } else {
+          expect(dotPaths1, isNot(equals(dotPaths2)));
+        }
+
+        final doubleDotPaths1 = [
+          PolyDot([a1, a2]),
+        ];
+        final doubleDotPaths2 = [
+          PolyDot([a1, a2]),
+        ];
+        expect(doubleDotPaths1, equals(doubleDotPaths2));
+
+        /// for PolyDots ordering doesn't matter
+        final doubleDotPathsReversed = [
+          PolyDot([a2, a1]),
+        ];
+        expect(doubleDotPaths1, equals(doubleDotPathsReversed));
+      }
+    }
+  });
+
+  test('PolyLine equality tests', () {
+    for (final a1 in Anchor.values) {
+      final linePaths1 = [
+        PolyLine([a1])
+      ];
+
+      final emptyPaths = [];
+      expect(linePaths1, isNot(equals(emptyPaths)));
+
+      // PolyLine length is important
+      final doubleLinePaths = [
+        PolyLine([a1, a1]),
+      ];
+      expect(linePaths1, isNot(equals(doubleLinePaths)));
+
+      final dotPaths = [
+        PolyDot([a1]),
+      ];
+      expect(linePaths1, isNot(equals(dotPaths)));
+
+      final splinePaths = [
+        PolySpline([a1]),
+      ];
+      expect(linePaths1, isNot(equals(splinePaths)));
+
+      final comboPaths = [
+        PolyDot([a1]),
+        PolyLine([a1]),
+      ];
+      expect(linePaths1, isNot(equals(comboPaths)));
+
+      for (final a2 in Anchor.values) {
+        final linePaths2 = [
+          PolyLine([a2])
+        ];
+        if (a1 == a2) {
+          expect(linePaths1, equals(linePaths2));
+        } else {
+          expect(linePaths1, isNot(equals(linePaths2)));
+        }
+
+        final doubleLinePaths1 = [
+          PolyLine([a1, a2]),
+        ];
+        final doubleLinePaths2 = [
+          PolyLine([a1, a2]),
+        ];
+        expect(doubleLinePaths1, equals(doubleLinePaths2));
+
+        if (a1 != a2) {
+          /// for PolyLines ordering matters
+          final doubleDotPathsReversed = [
+            PolyLine([a2, a1]),
+          ];
+          expect(doubleLinePaths1, isNot(equals(doubleDotPathsReversed)));
+        }
+      }
+    }
+  });
+
+  test('PolySpline equality tests', () {
+    for (final a1 in Anchor.values) {
+      final splinePaths1 = [
+        PolySpline([a1])
+      ];
+
+      final emptyPaths = [];
+      expect(splinePaths1, isNot(equals(emptyPaths)));
+
+      // PolySpline length is important
+      final doubleSplinePaths = [
+        PolySpline([a1, a1]),
+      ];
+      expect(splinePaths1, isNot(equals(doubleSplinePaths)));
+
+      final dotPaths = [
+        PolyDot([a1]),
+      ];
+      expect(splinePaths1, isNot(equals(dotPaths)));
+
+      final linePaths = [
+        PolyLine([a1]),
+      ];
+      expect(splinePaths1, isNot(equals(linePaths)));
+
+      final comboPaths = [
+        PolyDot([a1]),
+        PolySpline([a1]),
+      ];
+      expect(splinePaths1, isNot(equals(comboPaths)));
+
+      for (final a2 in Anchor.values) {
+        final splinePaths2 = [
+          PolySpline([a2])
+        ];
+        if (a1 == a2) {
+          expect(splinePaths1, equals(splinePaths2));
+        } else {
+          expect(splinePaths1, isNot(equals(splinePaths2)));
+        }
+
+        final doubleSplinePaths1 = [
+          PolySpline([a1, a2]),
+        ];
+        final doubleSplinePaths2 = [
+          PolySpline([a1, a2]),
+        ];
+        expect(doubleSplinePaths1, equals(doubleSplinePaths2));
+
+        if (a1 != a2) {
+          /// for PolySplines ordering matters
+          final doubleSplinePathsReversed = [
+            PolySpline([a2, a1]),
+          ];
+          expect(doubleSplinePaths1, isNot(equals(doubleSplinePathsReversed)));
+        }
+      }
+    }
+  });
+
   //TODO: write flip, rotate tests
   //TODO: write MonoGra tests
   //TODO: write QuadGras tests (Rotating, SemiRotating, Flip, DoubleFlip)

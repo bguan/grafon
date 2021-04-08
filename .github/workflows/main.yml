@@ -19,10 +19,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Install flutter v2.0.4
+      # Install flutter
       - name: Install Flutter and pull dependencies
         run: |
-          subosito/flutter-action@v2.0.4
+          subosito/flutter-action@v1.3.2
           flutter pub get
 
       - name: Test app 

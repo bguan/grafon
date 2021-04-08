@@ -1,3 +1,4 @@
+# based on https://poetryincode.dev/testing-dart-packages-with-github-actions
 name: Test
 
 on:
@@ -19,11 +20,13 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Install flutter
       - name: Install Flutter and pull dependencies
-        run: |
-          subosito/flutter-action@v1.3.2
-          flutter pub get
+        uses: subosito/flutter-action@v1.4.0
+        with:
+          flutter-version: '2.0.4'
+          
+      - name: Pull dependencies
+      - run: flutter pub get
 
       - name: Test app 
         run: flutter test --coverage

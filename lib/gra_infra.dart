@@ -117,8 +117,11 @@ abstract class PolyPath {
 
   @override
   int get hashCode {
-    var hash = anchors.hashCode;
-    for (var a in anchors) hash ^= a.hashCode;
+    var hash = this.runtimeType.hashCode;
+    for (var a in anchors) {
+      // order matters so hash is shifted for every anchor
+      hash = hash << 1 ^ a.hashCode;
+    }
     return hash;
   }
 
@@ -150,7 +153,7 @@ class PolyDot extends PolyPath {
 
   @override
   int get hashCode {
-    var hash = anchors.hashCode;
+    var hash = this.runtimeType.hashCode;
     for (var a in Set.of(anchors)) hash ^= a.hashCode;
     return hash;
   }
@@ -190,7 +193,10 @@ abstract class Gra {
 
   @override
   int get hashCode =>
-      consPair.hashCode ^ vowel.hashCode ^ face.hashCode ^ paths.hashCode;
+      consPair.hashCode ^
+      vowel.hashCode ^
+      face.hashCode ^
+      paths.fold(0, (int h, PolyPath p) => h ^ p.hashCode);
 
   @override
   bool operator ==(Object other) {
@@ -205,12 +211,12 @@ abstract class Gra {
         eq(this.paths, that.paths);
   }
 
-  Vector2 get avgAnchor {
+  Vector2 get visualCenter {
     double x = 0, y = 0;
     int aCount = 0;
-    final Set<Anchor> pathAnchors = {
+    final Set<Anchor> pathAnchors = Set.of([
       for (final p in paths) ...p.visibleAnchors,
-    };
+    ]);
 
     for (final a in pathAnchors) {
       x += a.vector.x;
@@ -363,16 +369,26 @@ abstract class QuadGras {
   Gra operator [](Face f) => face2gra[f];
 
   @override
-  int get hashCode => consPair.hashCode ^ face2gra.hashCode;
+  int get hashCode =>
+      consPair.hashCode ^
+      Face.values.fold(
+          // use Face.values instead of face2gra.keys for fixed order
+          0,
+          (prev, f) => face2gra[f] == null
+              ? prev
+              : prev << 1 ^ f.hashCode ^ face2gra[f].hashCode);
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != this.runtimeType) return false;
 
     QuadGras that = other;
-    final eq = MapEquality<Face, Gra>().equals;
 
-    return this.consPair == that.consPair && eq(this.face2gra, that.face2gra);
+    return this.consPair == that.consPair &&
+        this.face2gra[Face.Right] == that.face2gra[Face.Right] &&
+        this.face2gra[Face.Up] == that.face2gra[Face.Up] &&
+        this.face2gra[Face.Left] == that.face2gra[Face.Left] &&
+        this.face2gra[Face.Down] == that.face2gra[Face.Down];
   }
 }
 

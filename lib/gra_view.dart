@@ -46,7 +46,7 @@ class GraPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final centerShift = -gra.avgAnchor;
+    final centerShift = -gra.visualCenter;
 
     for (final p in gra.paths) {
       if (p is PolyDot) {

@@ -10,9 +10,33 @@ void main() {
     }
   });
 
+  test('Every Mono has ConsPair', () {
+    for (final m in Mono.values) {
+      expect(m.gra.consPair, isNotNull);
+    }
+  });
+
+  test('Every ConsPair maps to a Mono', () {
+    for (final cp in ConsPair.values) {
+      expect(Mono.values.firstWhere((m) => m.gra.consPair == cp), isNotNull);
+    }
+  });
+
   test('Every Quad has shortName', () {
     for (final q in Quad.values) {
       expect(q.shortName, isNotEmpty);
+    }
+  });
+
+  test('Every Quad has ConsPair', () {
+    for (final q in Quad.values) {
+      expect(q.gras.consPair, isNotNull);
+    }
+  });
+
+  test('Every ConsPair maps to a Quad', () {
+    for (final cp in ConsPair.values) {
+      expect(Quad.values.firstWhere((q) => q.gras.consPair == cp), isNotNull);
     }
   });
 
@@ -52,5 +76,25 @@ void main() {
         }
       }
     }
+  });
+
+  test('GraTable numRows match num of Mono', () {
+    expect(GraTable.numRows, Mono.values.length);
+  });
+
+  test('GraTable numRows match num of Quad', () {
+    expect(GraTable.numRows, Quad.values.length);
+  });
+
+  test('GraTable numRows match num of ConsPair', () {
+    expect(GraTable.numRows, ConsPair.values.length);
+  });
+
+  test('GraTable numCols match num of Vowels', () {
+    expect(GraTable.numCols, Vowel.values.length);
+  });
+
+  test('GraTable numCols match num of Faces', () {
+    expect(GraTable.numCols, Face.values.length);
   });
 }

@@ -4,6 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grafon/gra_infra.dart';
 import 'package:grafon/phonetics.dart';
 
+class PolyTester extends PolyPath {
+  PolyTester(List<Anchor> anchors) : super(anchors);
+}
+
 void main() {
   test('Polar Coordinates test unequal distance', () {
     const p1 = Polar(angle: 0, distance: 1);
@@ -425,6 +429,14 @@ void main() {
     }
   });
 
+  test('turn throws exception with unexpected PolyPath', () {
+    final testPaths = [
+      PolyDot([Anchor.O]),
+      PolyTester([Anchor.O])
+    ];
+    expect(() => turn(testPaths), throwsA(isA<UnimplementedError>()));
+  });
+
   test('vFlip all anchors except at Origin', () {
     final paths = [
       PolyDot([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
@@ -450,6 +462,14 @@ void main() {
     expect(vFlip(flipped), equals(paths));
   });
 
+  test('vFlip throws exception with unexpected PolyPath', () {
+    final testPaths = [
+      PolyDot([Anchor.O]),
+      PolyTester([Anchor.O])
+    ];
+    expect(() => vFlip(testPaths), throwsA(isA<UnimplementedError>()));
+  });
+
   test('hFlip all anchors except at Origin', () {
     final paths = [
       PolyDot([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
@@ -473,6 +493,14 @@ void main() {
 
     expect(flipped, equals(expected));
     expect(hFlip(flipped), equals(paths));
+  });
+
+  test('hFlip throws exception with unexpected PolyPath', () {
+    final testPaths = [
+      PolyDot([Anchor.O]),
+      PolyTester([Anchor.O])
+    ];
+    expect(() => hFlip(testPaths), throwsA(isA<UnimplementedError>()));
   });
 
   test('MonoGra equality and hashcode', () {

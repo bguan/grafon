@@ -49,7 +49,7 @@ void main() {
         }
       }
     }
-      });
+  });
 
   test('test GraPainter toCanvasCoord and Offset Calculation', () {
     final size = Size(100, 100);

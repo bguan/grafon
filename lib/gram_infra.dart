@@ -390,7 +390,7 @@ abstract class QuadGrams {
   int get hashCode =>
       consPair.hashCode ^
       Face.values.fold(
-        // use Face.values instead of face2gra.keys for fixed order
+          // use Face.values instead of face2gra.keys for fixed order
           0,
               (prev, f) => face2gra[f] == null
               ? prev

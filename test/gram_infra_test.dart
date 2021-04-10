@@ -95,7 +95,7 @@ void main() {
     final outerAnchors = [...Anchor.values]..remove(Anchor.O);
 
     final sumOuterVectors =
-    outerAnchors.map((a) => a.vector).reduce((accum, v) => v + accum);
+        outerAnchors.map((a) => a.vector).reduce((accum, v) => v + accum);
 
     expect(sumOuterVectors.length, moreOrLessEquals(0.0, epsilon: 0.001));
   });

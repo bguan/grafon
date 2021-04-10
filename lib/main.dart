@@ -73,73 +73,73 @@ class GrafonHome extends StatelessWidget {
         fTxt.length <= 0
             ? SizedBox()
             : Container(
-          child: Center(
-            child: Text(
-              '$fTxt',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                height: 1.3,
-                color: Colors.white,
-                fontSize: widthHeightRatio * 12,
+                child: Center(
+                  child: Text(
+                    '$fTxt',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                      color: Colors.white,
+                      fontSize: widthHeightRatio * 12,
+                    ),
+                  ),
+                ),
+                color: scheme.secondaryVariant,
               ),
-            ),
-          ),
-          color: scheme.secondaryVariant,
-        ),
     ];
 
     final unaryOpRow = [
       for (var uTxt in [
         'Unary\nOperator',
         ...Unary.values.map((u) =>
-        '${u.shortName}\n${u.symbol}\n_${u.ending.shortName.toLowerCase()}'),
+            '${u.shortName}\n${u.symbol}\n_${u.ending.shortName.toLowerCase()}'),
         'Ending\nVowel'
       ])
         uTxt.length <= 0
             ? SizedBox()
             : Container(
-          child: Center(
-            child: Text(
-              '$uTxt',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                height: 1.5,
-                color: scheme.surface,
-                fontSize: widthHeightRatio * 12,
+                child: Center(
+                  child: Text(
+                    '$uTxt',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.5,
+                      color: scheme.surface,
+                      fontSize: widthHeightRatio * 12,
+                    ),
+                  ),
+                ),
+                color: scheme.primaryVariant,
               ),
-            ),
-          ),
-          color: scheme.primaryVariant,
-        ),
     ];
 
     final binaryOpRow = [
       for (var bTxt in [
         'Binary\nOperator\ndecreasing precedence',
         ...Binary.values.map((b) =>
-        '${b.shortName}\n${b.symbol}\n' +
+            '${b.shortName}\n${b.symbol}\n' +
             '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
         'Ending\nConsonant\nbase, tail'
       ])
         bTxt.length <= 0
             ? SizedBox()
             : Container(
-          child: Center(
-            child: Text(
-              '$bTxt',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                height: 1.4,
-                color: scheme.surface,
-                fontSize: widthHeightRatio * 12,
+                child: Center(
+                  child: Text(
+                    '$bTxt',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      height: 1.4,
+                      color: scheme.surface,
+                      fontSize: widthHeightRatio * 12,
+                    ),
+                  ),
+                ),
+                color: scheme.primaryVariant,
               ),
-            ),
-          ),
-          color: scheme.primaryVariant,
-        ),
     ];
 
     final gramTable = [

@@ -78,11 +78,13 @@ class GramPainter extends CustomPainter {
     }
   }
 
-  void drawPolySpline(PolySpline p,
-      Vector centerShift,
-      Size size,
-      Canvas canvas,
-      Paint paint,) {
+  void drawPolySpline(
+    PolySpline p,
+    Vector centerShift,
+    Size size,
+    Canvas canvas,
+    Paint paint,
+  ) {
     var path = new Path();
     final len = p.anchors.length;
     for (var i = 2; i < len - 1; i++) {
@@ -128,11 +130,13 @@ class GramPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void drawPolyLine(PolyLine p,
-      Vector2 centerShift,
-      Size size,
-      Canvas canvas,
-      Paint paint,) {
+  void drawPolyLine(
+    PolyLine p,
+    Vector2 centerShift,
+    Size size,
+    Canvas canvas,
+    Paint paint,
+  ) {
     for (var i = 1; i < p.anchors.length; i++) {
       final from = toCanvasCoord(p.anchors[i - 1].vector + centerShift, size);
       final to = toCanvasCoord(p.anchors[i].vector + centerShift, size);
@@ -140,11 +144,13 @@ class GramPainter extends CustomPainter {
     }
   }
 
-  void drawPolyDot(PolyDot p,
-      Vector2 centerShift,
-      Size size,
-      Canvas canvas,
-      Paint paint,) {
+  void drawPolyDot(
+    PolyDot p,
+    Vector2 centerShift,
+    Size size,
+    Canvas canvas,
+    Paint paint,
+  ) {
     for (var a in p.anchors) {
       final point = toCanvasCoord(a.vector + centerShift, size);
       canvas.drawCircle(toOffset(point), paint.strokeWidth / 2, paint);

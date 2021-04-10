@@ -392,7 +392,7 @@ abstract class QuadGrams {
       Face.values.fold(
           // use Face.values instead of face2gra.keys for fixed order
           0,
-              (prev, f) => face2gra[f] == null
+          (prev, f) => face2gra[f] == null
               ? prev
               : prev << 1 ^ f.hashCode ^ face2gra[f].hashCode);
 

@@ -1,3 +1,20 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -5,7 +22,9 @@ import 'package:vector_math/vector_math.dart';
 
 import 'phonetics.dart';
 
-/// Polar coordinates is used for defining anchor points of a Gra Atom
+/// Gram - the logogram and it's graphical definition for the Grafon language.
+
+/// Polar coordinates is used for defining anchor points of a Gram
 class Polar {
   static const DEFAULT_ANCHOR_DIST = 0.5;
 
@@ -32,7 +51,7 @@ class Polar {
   }
 }
 
-/// Anchor points to construct a Gra Atom
+/// Anchor points to construct a Gram.
 /// 1 mid point + 8 directions distance of .5 from origin
 enum Anchor { E, NE, N, NW, W, SW, S, SE, O }
 
@@ -64,7 +83,7 @@ extension AnchorExtension on Anchor {
   Vector2 get vector => polar.vector;
 }
 
-/// A Gra Atom has 5 orientations: Facing Right, Up, Left, Down or Center
+/// A Gram has 5 orientations: Facing Right, Up, Left, Down or Center
 enum Face { Center, Right, Up, Left, Down }
 
 /// Map a Face to a Vowel
@@ -107,7 +126,7 @@ extension VowelExtension on Vowel {
   }
 }
 
-/// Pen Stroke Paths based on a series of anchor points
+/// Pen Stroke Paths as series of anchor points joined by dots, lines or curves
 abstract class PolyPath {
   final List<Anchor> anchors;
 
@@ -173,15 +192,15 @@ class PolySpline extends PolyPath {
   List<Anchor> get visibleAnchors => anchors.sublist(1, anchors.length - 1);
 }
 
-/// Gra is a Graphical Symbol Atom
+/// Gram is a Graphical Symbol i.e. logogram
 /// Drawn by a series of pen stroke paths of dots, lines, and curves
 /// Associated with a vowel and a starting consonant pair.
-/// If at the HEAD of a new subcluster, use Head consonant, else Base
-abstract class Gra {
+/// If at the Head of a new cluster, use Head consonant, else Base.
+abstract class Gram {
   final List<PolyPath> paths;
   final ConsPair consPair;
 
-  const Gra(this.paths, this.consPair);
+  const Gram(this.paths, this.consPair);
 
   Face get face;
 
@@ -202,7 +221,7 @@ abstract class Gra {
   bool operator ==(Object other) {
     if (other.runtimeType != this.runtimeType) return false;
 
-    Gra that = other;
+    Gram that = other;
     final eq = ListEquality<PolyPath>().equals;
 
     return this.consPair == that.consPair &&
@@ -227,18 +246,18 @@ abstract class Gra {
   }
 }
 
-/// MonoGra looks the same when rotated 90' i.e. only 1 variation hence Mono
-class MonoGra extends Gra {
+/// MonoGram looks the same when rotated 90' i.e. only 1 variation hence Mono
+class MonoGram extends Gram {
   final face = Face.Center;
 
-  const MonoGra(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
+  const MonoGram(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
 }
 
-/// QuadGra has 4 orientation, each form by rotating a base Gra by 90' or 45'
-class QuadGra extends Gra {
+/// QuadGram has 4 orientation, each form by rotating a base Gram by 90' or 45'
+class QuadGram extends Gram {
   final Face face;
 
-  const QuadGra(List<PolyPath> paths, this.face, ConsPair cons)
+  const QuadGram(List<PolyPath> paths, this.face, ConsPair cons)
       : super(paths, cons);
 }
 
@@ -351,30 +370,29 @@ List<PolyPath> hFlip(List<PolyPath> paths) {
   return flipped;
 }
 
-/// A row of Gra all sharing the same starting consonant.
-/// Consist of 4 QuadGra and 1 OmniGra facing Right, Up, Left, Down, Center.
-abstract class QuadGras {
+/// Consist of 4 Quad Grams facing Right, Up, Left, Down.
+abstract class QuadGrams {
   final ConsPair consPair;
-  final Map<Face, Gra> face2gra;
+  final Map<Face, Gram> face2gra;
 
-  QuadGras(this.consPair,
+  QuadGrams(this.consPair,
       {List<PolyPath> r, List<PolyPath> u, List<PolyPath> l, List<PolyPath> d})
       : face2gra = Map.unmodifiable({
-          Face.Right: QuadGra(r, Face.Right, consPair),
-          Face.Up: QuadGra(u, Face.Up, consPair),
-          Face.Left: QuadGra(l, Face.Left, consPair),
-          Face.Down: QuadGra(d, Face.Down, consPair)
+          Face.Right: QuadGram(r, Face.Right, consPair),
+          Face.Up: QuadGram(u, Face.Up, consPair),
+          Face.Left: QuadGram(l, Face.Left, consPair),
+          Face.Down: QuadGram(d, Face.Down, consPair)
         });
 
-  Gra operator [](Face f) => face2gra[f];
+  Gram operator [](Face f) => face2gra[f];
 
   @override
   int get hashCode =>
       consPair.hashCode ^
       Face.values.fold(
-          // use Face.values instead of face2gra.keys for fixed order
+        // use Face.values instead of face2gra.keys for fixed order
           0,
-          (prev, f) => face2gra[f] == null
+              (prev, f) => face2gra[f] == null
               ? prev
               : prev << 1 ^ f.hashCode ^ face2gra[f].hashCode);
 
@@ -382,7 +400,7 @@ abstract class QuadGras {
   bool operator ==(Object other) {
     if (other.runtimeType != this.runtimeType) return false;
 
-    QuadGras that = other;
+    QuadGrams that = other;
 
     return this.consPair == that.consPair &&
         this.face2gra[Face.Right] == that.face2gra[Face.Right] &&
@@ -393,7 +411,7 @@ abstract class QuadGras {
 }
 
 /// In RotatingRow, quads are rotated by full step of 90'
-class RotatingQuads extends QuadGras {
+class RotatingQuads extends QuadGrams {
   RotatingQuads(List<PolyPath> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
@@ -407,7 +425,7 @@ class RotatingQuads extends QuadGras {
 }
 
 /// In SemiRotatingRow, quads are rotated by semi step of 45'
-class SemiRotatingQuads extends QuadGras {
+class SemiRotatingQuads extends QuadGrams {
   SemiRotatingQuads(List<PolyPath> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
@@ -424,7 +442,7 @@ class SemiRotatingQuads extends QuadGras {
 /// Right paths are flipped horizontally to make Left Path;
 /// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically flipping Up paths.
-class FlipQuads extends QuadGras {
+class FlipQuads extends QuadGrams {
   FlipQuads(List<PolyPath> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
@@ -439,7 +457,7 @@ class FlipQuads extends QuadGras {
 /// Right paths are flipped horizontally and vertically to make Left Path;
 /// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically and horizontally flipping Up paths.
-class DoubleFlipQuads extends QuadGras {
+class DoubleFlipQuads extends QuadGrams {
   DoubleFlipQuads(List<PolyPath> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 

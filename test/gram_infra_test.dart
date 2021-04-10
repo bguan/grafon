@@ -1,9 +1,29 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grafon/gra_infra.dart';
+import 'package:grafon/gram_infra.dart';
 import 'package:grafon/phonetics.dart';
 
+/// Unit Tests for Gram Infra
+
+/// Dummy subclass of PolyPath for testing
 class PolyTester extends PolyPath {
   PolyTester(List<Anchor> anchors) : super(anchors);
 }
@@ -75,7 +95,7 @@ void main() {
     final outerAnchors = [...Anchor.values]..remove(Anchor.O);
 
     final sumOuterVectors =
-        outerAnchors.map((a) => a.vector).reduce((accum, v) => v + accum);
+    outerAnchors.map((a) => a.vector).reduce((accum, v) => v + accum);
 
     expect(sumOuterVectors.length, moreOrLessEquals(0.0, epsilon: 0.001));
   });
@@ -510,18 +530,18 @@ void main() {
     final linePaths = [
       PolyLine([Anchor.O])
     ];
-    final dotAHA = MonoGra(dotPaths, ConsPair.AHA);
+    final dotAHA = MonoGram(dotPaths, ConsPair.AHA);
     expect(dotAHA, dotAHA);
 
-    final dotAHA2 = MonoGra(dotPaths, ConsPair.AHA);
+    final dotAHA2 = MonoGram(dotPaths, ConsPair.AHA);
     expect(dotAHA, dotAHA2);
     expect(dotAHA.hashCode, dotAHA2.hashCode);
 
-    final dotSAZA = MonoGra(dotPaths, ConsPair.SAZA);
+    final dotSAZA = MonoGram(dotPaths, ConsPair.SAZA);
     expect(dotAHA, isNot(equals(dotSAZA)));
     expect(dotAHA.hashCode, isNot(equals(dotSAZA.hashCode)));
 
-    final lineAHA = MonoGra(linePaths, ConsPair.AHA);
+    final lineAHA = MonoGram(linePaths, ConsPair.AHA);
     expect(dotAHA, isNot(equals(lineAHA)));
     expect(dotAHA.hashCode, isNot(equals(lineAHA.hashCode)));
   });
@@ -531,7 +551,7 @@ void main() {
       PolyLine([Anchor.NW, Anchor.SE]),
       PolyLine([Anchor.NE, Anchor.SW])
     ];
-    final xAHA = MonoGra(xPaths, ConsPair.AHA);
+    final xAHA = MonoGram(xPaths, ConsPair.AHA);
     expect(xAHA.face, Face.Center);
     expect(xAHA.vowel, Face.Center.vowel);
     expect(xAHA.base, Consonant.nil);
@@ -543,7 +563,7 @@ void main() {
       PolyLine([Anchor.NW, Anchor.SE]),
       PolyLine([Anchor.NE, Anchor.SW])
     ];
-    final xAHA = MonoGra(xPaths, ConsPair.AHA);
+    final xAHA = MonoGram(xPaths, ConsPair.AHA);
     expect(xAHA.visualCenter.x, moreOrLessEquals(0, epsilon: 0.001));
     expect(xAHA.visualCenter.y, moreOrLessEquals(0, epsilon: 0.001));
 
@@ -558,7 +578,7 @@ void main() {
         Anchor.E,
       ])
     ];
-    final circleAHA = MonoGra(circlePaths, ConsPair.AHA);
+    final circleAHA = MonoGram(circlePaths, ConsPair.AHA);
     expect(circleAHA.visualCenter.x, moreOrLessEquals(0, epsilon: 0.001));
     expect(circleAHA.visualCenter.y, moreOrLessEquals(0, epsilon: 0.001));
   });

@@ -1,33 +1,52 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'gra_infra.dart';
+import 'gram_infra.dart';
 
-class GraView extends StatelessWidget {
-  final Gra gra;
+/// Class to provide widget rendering of Grams.
+class GramTile extends StatelessWidget {
+  final Gram gram;
   final Size size;
 
-  GraView(this.gra, this.size) : super();
+  GramTile(this.gram, this.size) : super();
 
   @override
   Widget build(BuildContext ctx) {
     return CustomPaint(
       size: size,
-      painter: GraPainter(gra, Theme.of(ctx).colorScheme),
+      painter: GramPainter(gram, Theme.of(ctx).colorScheme),
     );
   }
 }
 
-class GraPainter extends CustomPainter {
+/// The custom painter to provide canvas rendering logic
+class GramPainter extends CustomPainter {
   static const STROKE_WIDTH_SCALE = 0.1;
   static const DOMINANT_CTRL_SCALE = 0.7;
   static const STD_CTRL_SCALE = 0.4;
-  final Gra gra;
+  final Gram gram;
   final ColorScheme scheme;
 
-  GraPainter(this.gra, this.scheme);
+  GramPainter(this.gram, this.scheme);
 
   Vector2 toCanvasCoord(Vector2 v, Size size) => v.clone()
     ..multiply(Vector2(size.width, -size.height))
@@ -46,9 +65,9 @@ class GraPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final centerShift = -gra.visualCenter;
+    final centerShift = -gram.visualCenter;
 
-    for (final p in gra.paths) {
+    for (final p in gram.paths) {
       if (p is PolyDot) {
         drawPolyDot(p, centerShift, size, canvas, paint);
       } else if (p is PolyLine) {
@@ -59,13 +78,11 @@ class GraPainter extends CustomPainter {
     }
   }
 
-  void drawPolySpline(
-    PolySpline p,
-    Vector centerShift,
-    Size size,
-    Canvas canvas,
-    Paint paint,
-  ) {
+  void drawPolySpline(PolySpline p,
+      Vector centerShift,
+      Size size,
+      Canvas canvas,
+      Paint paint,) {
     var path = new Path();
     final len = p.anchors.length;
     for (var i = 2; i < len - 1; i++) {
@@ -111,13 +128,11 @@ class GraPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void drawPolyLine(
-    PolyLine p,
-    Vector2 centerShift,
-    Size size,
-    Canvas canvas,
-    Paint paint,
-  ) {
+  void drawPolyLine(PolyLine p,
+      Vector2 centerShift,
+      Size size,
+      Canvas canvas,
+      Paint paint,) {
     for (var i = 1; i < p.anchors.length; i++) {
       final from = toCanvasCoord(p.anchors[i - 1].vector + centerShift, size);
       final to = toCanvasCoord(p.anchors[i].vector + centerShift, size);
@@ -125,13 +140,11 @@ class GraPainter extends CustomPainter {
     }
   }
 
-  void drawPolyDot(
-    PolyDot p,
-    Vector2 centerShift,
-    Size size,
-    Canvas canvas,
-    Paint paint,
-  ) {
+  void drawPolyDot(PolyDot p,
+      Vector2 centerShift,
+      Size size,
+      Canvas canvas,
+      Paint paint,) {
     for (var a in p.anchors) {
       final point = toCanvasCoord(a.vector + centerShift, size);
       canvas.drawCircle(toOffset(point), paint.strokeWidth / 2, paint);
@@ -162,9 +175,9 @@ class GraPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is! GraPainter) return true;
+    if (oldDelegate is! GramPainter) return true;
 
-    GraPainter oldPainter = oldDelegate;
-    return gra != oldPainter.gra;
+    GramPainter oldPainter = oldDelegate;
+    return gram != oldPainter.gram;
   }
 }

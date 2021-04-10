@@ -1,6 +1,28 @@
-import 'gra_infra.dart';
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import 'gram_infra.dart';
 import 'phonetics.dart';
 
+/// Gram Table organizes Grams into rows and columns and useful enums.
+/// Each row has a MonoGram and a QuadGrams, shares the same ConsonantPair.
+/// Each column is associated with a Face, shares the same vowel.
+
+/// enum for each MonoGram
 enum Mono {
   Space,
   Dot,
@@ -13,10 +35,11 @@ enum Mono {
   Blob,
 }
 
+/// Map a MonoGram to each Mono enum, its QuadGrams peer, and shortname.
 extension MonoExtension on Mono {
   String get shortName => this.toString().split('.').last;
 
-  Gra get gra {
+  Gram get gram {
     const List<PolyPath> spacePaths = [];
 
     const dotPaths = [
@@ -130,30 +153,31 @@ extension MonoExtension on Mono {
 
     switch (this) {
       case Mono.Dot:
-        return const MonoGra(dotPaths, ConsPair.SAZA);
+        return const MonoGram(dotPaths, ConsPair.SAZA);
       case Mono.X:
-        return const MonoGra(xPaths, ConsPair.GAKA);
+        return const MonoGram(xPaths, ConsPair.GAKA);
       case Mono.Cross:
-        return const MonoGra(crossPaths, ConsPair.BAPA);
+        return const MonoGram(crossPaths, ConsPair.BAPA);
       case Mono.Square:
-        return const MonoGra(squarePaths, ConsPair.DATA);
+        return const MonoGram(squarePaths, ConsPair.DATA);
       case Mono.Sun:
-        return const MonoGra(sunPaths, ConsPair.JACHA);
+        return const MonoGram(sunPaths, ConsPair.JACHA);
       case Mono.Circle:
-        return const MonoGra(circlePaths, ConsPair.MANA);
+        return const MonoGram(circlePaths, ConsPair.MANA);
       case Mono.Flower:
-        return const MonoGra(flowerPaths, ConsPair.VAFA);
+        return const MonoGram(flowerPaths, ConsPair.VAFA);
       case Mono.Blob:
-        return const MonoGra(blobPaths, ConsPair.LARA);
+        return const MonoGram(blobPaths, ConsPair.LARA);
       default:
-        return const MonoGra(spacePaths, ConsPair.AHA);
+        return const MonoGram(spacePaths, ConsPair.AHA);
     }
   }
 
   Quad get quadPeer =>
-      Quad.values.firstWhere((q) => q.gras.consPair == this.gra.consPair);
+      Quad.values.firstWhere((q) => q.gras.consPair == this.gram.consPair);
 }
 
+/// enum for each of the QuadGram grouping.
 enum Quad {
   Line,
   Drip,
@@ -166,7 +190,7 @@ enum Quad {
   Swirl,
 }
 
-/// QuadHelper is a singleton to only instantiates QuadGras and Quad once
+/// QuadHelper is a singleton to only instantiates QuadGrams only once
 class _QuadHelper {
   static const dripPaths = [
     PolyDot([Anchor.NE, Anchor.SW])
@@ -224,7 +248,7 @@ class _QuadHelper {
     ])
   ];
 
-  static final Map<Quad, QuadGras> enum2quads = Map.unmodifiable({
+  static final Map<Quad, QuadGrams> enum2quads = Map.unmodifiable({
     Quad.Line: SemiRotatingQuads(linePaths, ConsPair.AHA),
     Quad.Drip: SemiRotatingQuads(dripPaths, ConsPair.SAZA),
     Quad.Angle: RotatingQuads(anglePaths, ConsPair.GAKA),
@@ -237,26 +261,27 @@ class _QuadHelper {
   });
 }
 
+/// extension to map quad enum to its QuadGrams, indexing by Face, & short name.
 extension QuadExtension on Quad {
-  QuadGras get gras => _QuadHelper.enum2quads[this];
+  QuadGrams get gras => _QuadHelper.enum2quads[this];
 
-  Gra operator [](Face f) => gras[f];
+  Gram operator [](Face f) => gras[f];
 
   Mono get monoPeer =>
-      Mono.values.firstWhere((m) => m.gra.consPair == this.gras.consPair);
+      Mono.values.firstWhere((m) => m.gram.consPair == this.gras.consPair);
 
   String get shortName => this.toString().split('.').last;
 }
 
-/// GraTable is a static helper to implement various lookup efficiently
-class GraTable {
-  static Map<ConsPair, Map<Vowel, Gra>> _graByConsPairVowel() {
-    Map<ConsPair, Map<Vowel, Gra>> c2v2g = {};
+/// GramTable is a static helper to implement various lookup efficiently
+class GramTable {
+  static Map<ConsPair, Map<Vowel, Gram>> _gramByConsPairVowel() {
+    Map<ConsPair, Map<Vowel, Gram>> c2v2g = {};
     for (var cons in ConsPair.values) {
-      final mono = Mono.values.firstWhere((m) => m.gra.consPair == cons);
+      final mono = Mono.values.firstWhere((m) => m.gram.consPair == cons);
       final quad = mono.quadPeer;
       c2v2g[cons] = Map.unmodifiable({
-        Face.Center.vowel: mono.gra,
+        Face.Center.vowel: mono.gram,
         for (var f in [Face.Right, Face.Up, Face.Left, Face.Down])
           f.vowel: quad[f]
       });
@@ -264,13 +289,13 @@ class GraTable {
     return Map.unmodifiable(c2v2g);
   }
 
-  static final Map<ConsPair, Map<Vowel, Gra>> _map = _graByConsPairVowel();
+  static final Map<ConsPair, Map<Vowel, Gram>> _map = _gramByConsPairVowel();
 
-  static Gra atConsPairVowel(ConsPair cp, Vowel v) => _map[cp][v];
+  static Gram atConsPairVowel(ConsPair cp, Vowel v) => _map[cp][v];
 
-  static Gra atConsonantVowel(Consonant c, Vowel v) => _map[c.pair][v];
+  static Gram atConsonantVowel(Consonant c, Vowel v) => _map[c.pair][v];
 
-  static Gra atMonoFace(Mono m, Face f) => _map[m.gra.consPair][f.vowel];
+  static Gram atMonoFace(Mono m, Face f) => _map[m.gram.consPair][f.vowel];
   static final numRows = Mono.values.length;
   static final numCols = Face.values.length;
 }

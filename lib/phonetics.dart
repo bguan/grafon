@@ -1,9 +1,35 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+/// Enums and utils for Phonetics related concepts for the Grafon language.
+
+/// Basic vowels for the language. Can be combined into diphthong.
 enum Vowel { E, A, I, O, U }
 
+/// Basic consonants for the language. Can be combined into cluster.
 enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
 
+/// Consonants are paired based on related vocalization.
+/// One is used as the "Base" form, the other the "Head" form.
+/// The easier (less ejective) is the Base, the harder (more ejective) is Head.
+/// Head form overrides spatial operator to indicate "head" of cluster.
 enum ConsPair { AHA, BAPA, JACHA, DATA, VAFA, GAKA, LARA, MANA, SAZA }
 
+/// Extension to map Consonant to the Pair and provide short name
 extension ConsonantExtension on Consonant {
   ConsPair get pair {
     switch (this) {
@@ -47,6 +73,7 @@ extension ConsonantExtension on Consonant {
   String get shortName => this.toString().split('.').last;
 }
 
+/// Extension to map ConsonantPair to the base and head, and provide short name.
 extension ConsPairExtension on ConsPair {
   Consonant get base {
     switch (this) {

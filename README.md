@@ -14,3 +14,6 @@ vowel to be appended to the end of the symbol.
 
 A binary operation manipulating 2 symbols (or expressions) is associated with an ending 
 consonant to be appended to the end of the first symbol (or expression).
+
+## Development Notes
+* [Test Coverage Reports](https://app.codecov.io/gh/bguan/grafon) – aim for 100%.

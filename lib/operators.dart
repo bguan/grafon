@@ -1,11 +1,32 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'gra_infra.dart';
+import 'gram_infra.dart';
 import 'phonetics.dart';
 
+/// Operators, unary and binary spatial combinations for the Grafon language.
+
+/// enum for ending consonant pair for preceding gram in a binary operation.
 enum BinaryEnding { Ng, H, DT, MN, SSh }
 
+/// extension to map base, tail ending consonant to enum, short name.
 extension BinaryEndingExtension on BinaryEnding {
   String get shortName => this.toString().split('.').last;
 
@@ -68,7 +89,7 @@ class TransformationHelper {
   static final shrinkDown = yShrink.multiplied(downShift);
 }
 
-/// Binary Operator works on a pair of Gra Expression
+/// Binary Operator works on a pair of Gram Expression
 enum Binary { Merge, Before, Over, Around, Compound }
 
 extension BinaryExtension on Binary {

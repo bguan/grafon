@@ -30,7 +30,7 @@ import 'package:vector_math/vector_math.dart';
 
 /// Unit and Widget Tests for Gram View
 
-/// Mock Canvas to verify calls to Canvas
+/// Mock to verify calls to Canvas and record params for later inspection
 class MockCanvas extends Mock implements Canvas {}
 
 /// Entry point for Tests
@@ -51,18 +51,18 @@ void main() {
     }
   });
 
-  test('test GraPainter toCanvasCoord and Offset Calculation', () {
+  test('test GramPainter toCanvasCoord and Offset Calculation', () {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
     final painter = GramPainter(Mono.Dot.gram, scheme);
 
-    final coord = painter.toCanvasCoord(Vector2(0, 0), size);
+    final coord = GramPainter.toCanvasCoord(Vector2(0, 0), size);
     expect(coord, Vector2(50, 50));
-    final offset = painter.toOffset(coord);
+    final offset = GramPainter.toOffset(coord);
     expect(offset, Offset(50, 50));
   });
 
-  test('test GraPainter on Dot based gras with mock canvas', () {
+  test('test GramPainter on Dot based grams', () {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
@@ -81,7 +81,7 @@ void main() {
     }
   });
 
-  test('test GraPainter on Line based gras with mock canvas', () {
+  test('test GramPainter on Line based grams', () {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
@@ -103,7 +103,7 @@ void main() {
     }
   });
 
-  test('test GraPainter on Spline based gras with mock canvas', () {
+  test('test GramPainter on Spline based grams', () {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
@@ -119,5 +119,70 @@ void main() {
         verifyNoMoreInteractions(canvas);
       }
     }
+  });
+
+  test('test GramPainter correctly handles visualCenter', () {
+    final size = Size(100, 100);
+    final scheme = ColorScheme.fromSwatch();
+    final gram = QuadGram([
+      PolyLine([Anchor.E, Anchor.N])
+    ], Face.Up, ConsPair.AHA);
+
+    final rad = Polar.DEFAULT_ANCHOR_DIST;
+    final avgX = (rad + 0.0) / 2; // should be .25
+    final avgY = (0.0 + rad) / 2; // should be .25
+    final canvasShiftX = -avgX * 100; // should be -25
+    final canvasShiftY = avgY * 100; // should be +25
+    final p1 = Offset(100 + canvasShiftX, 50 + canvasShiftY);
+    final p2 = Offset(50 + canvasShiftX, 0 + canvasShiftY);
+    final painter = GramPainter(gram, scheme);
+    final canvas = MockCanvas();
+    painter.paint(canvas, size);
+    verify(canvas.drawLine(p1, p2, any));
+    verifyNoMoreInteractions(canvas);
+  });
+
+  test('test GramPainter correctly handles PolySpline degenerate case', () {
+    final size = Size(100, 100);
+    final scheme = ColorScheme.fromSwatch();
+
+    final gram = QuadGram([
+      PolySpline([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
+    ], Face.Up, ConsPair.AHA);
+
+    final p1 = Offset(50, 0);
+    final p2 = Offset(50, 100);
+    final painter = GramPainter(gram, scheme);
+    final canvas = MockCanvas();
+    painter.paint(canvas, size);
+    final captured = verify(canvas.drawPath(captureAny, any)).captured;
+    verifyNoMoreInteractions(canvas);
+    expect(captured.length, 1);
+    final Path path = captured.first;
+    expect(path.contains(p1) && path.contains(p2), isTrue);
+  });
+
+  test('test GramPainter compute Spline begin & end normal control pts', () {
+    final bc = GramPainter.calcBegCtl(
+        Anchor.NW.vector, Anchor.N.vector, Anchor.S.vector);
+    final ec = GramPainter.calcEndCtl(
+        Anchor.N.vector, Anchor.S.vector, Anchor.SE.vector);
+    expect(bc.x, moreOrLessEquals(0.3, epsilon: 0.1));
+    expect(bc.y, moreOrLessEquals(0.3, epsilon: 0.1));
+    expect(ec.x, moreOrLessEquals(-0.3, epsilon: 0.1));
+    expect(ec.y, moreOrLessEquals(-0.3, epsilon: 0.1));
+  });
+
+  test('test GramPainter compute Spline begin & end dorminant control pts', () {
+    final bc = GramPainter.calcBegCtl(
+        Anchor.NW.vector, Anchor.N.vector, Anchor.S.vector,
+        isDorminant: true);
+    final ec = GramPainter.calcEndCtl(
+        Anchor.N.vector, Anchor.S.vector, Anchor.SE.vector,
+        isDorminant: true);
+    expect(bc.x, moreOrLessEquals(0.6, epsilon: 0.1));
+    expect(bc.y, moreOrLessEquals(0.1, epsilon: 0.1));
+    expect(ec.x, moreOrLessEquals(-0.6, epsilon: 0.1));
+    expect(ec.y, moreOrLessEquals(-0.1, epsilon: 0.1));
   });
 }

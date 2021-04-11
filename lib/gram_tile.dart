@@ -48,11 +48,11 @@ class GramPainter extends CustomPainter {
 
   GramPainter(this.gram, this.scheme);
 
-  Vector2 toCanvasCoord(Vector2 v, Size size) => v.clone()
+  static Vector2 toCanvasCoord(Vector2 v, Size size) => v.clone()
     ..multiply(Vector2(size.width, -size.height))
     ..add(Vector2(size.width / 2, size.height / 2));
 
-  Offset toOffset(Vector2 v) => Offset(v.x, v.y);
+  static Offset toOffset(Vector2 v) => Offset(v.x, v.y);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -85,7 +85,7 @@ class GramPainter extends CustomPainter {
     Canvas canvas,
     Paint paint,
   ) {
-    var path = new Path();
+    var path = Path();
     final len = p.anchors.length;
     for (var i = 2; i < len - 1; i++) {
       final pre = p.anchors[max(0, i - 2)].vector + centerShift;
@@ -157,7 +157,7 @@ class GramPainter extends CustomPainter {
     }
   }
 
-  Vector2 calcBegCtl(Vector2 pre, Vector2 beg, Vector2 end,
+  static Vector2 calcBegCtl(Vector2 pre, Vector2 beg, Vector2 end,
       {isDorminant = false}) {
     final preV = pre - beg;
     final postV = end - beg;
@@ -168,7 +168,7 @@ class GramPainter extends CustomPainter {
     return dir + beg;
   }
 
-  Vector2 calcEndCtl(Vector2 beg, Vector2 end, Vector2 next,
+  static Vector2 calcEndCtl(Vector2 beg, Vector2 end, Vector2 next,
       {isDorminant = false}) {
     final preV = beg - end;
     final postV = next - end;

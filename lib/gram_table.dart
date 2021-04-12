@@ -185,7 +185,7 @@ enum Quad {
   Corner,
   Gate,
   Arrow,
-  Arch,
+  Arc,
   Flow,
   Swirl,
 }
@@ -255,7 +255,7 @@ class _QuadHelper {
     Quad.Corner: RotatingQuads(cornerPaths, ConsPair.BAPA),
     Quad.Gate: RotatingQuads(gatePaths, ConsPair.DATA),
     Quad.Arrow: RotatingQuads(arrowPaths, ConsPair.JACHA),
-    Quad.Arch: RotatingQuads(arcPaths, ConsPair.MANA),
+    Quad.Arc: RotatingQuads(arcPaths, ConsPair.MANA),
     Quad.Flow: FlipQuads(flowPaths, ConsPair.VAFA),
     Quad.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LARA),
   });
@@ -296,6 +296,39 @@ abstract class GramTable {
   static Gram atConsonantVowel(Consonant c, Vowel v) => _map[c.pair]![v]!;
 
   static Gram atMonoFace(Mono m, Face f) => _map[m.gram.consPair]![f.vowel]!;
+
+  static Gram at(dynamic r, dynamic c) {
+    Map<Vowel, Gram> v2g;
+    if (r is ConsPair) {
+      final ConsPair cp = r;
+      v2g = _map[cp]!;
+    } else if (r is Consonant) {
+      final Consonant c = r;
+      v2g = _map[c.pair]!;
+    } else if (r is Mono) {
+      final Mono m = r;
+      v2g = _map[m.gram.consPair]!;
+    } else if (r is Quad) {
+      final Quad q = r;
+      v2g = _map[q.grams.consPair]!;
+    } else {
+      throw UnsupportedError("GramTable do not support lookup with $r");
+    }
+
+    Gram g;
+    if (c is Vowel) {
+      final Vowel v = c;
+      g = v2g[v]!;
+    } else if (c is Face) {
+      final Face f = c;
+      g = v2g[f.vowel]!;
+    } else {
+      throw UnsupportedError("GramTable do not support lookup with $c");
+    }
+
+    return g;
+  }
+
   static final numRows = Mono.values.length;
   static final numCols = Face.values.length;
 

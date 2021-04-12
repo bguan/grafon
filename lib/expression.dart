@@ -54,7 +54,9 @@ class SingleGram extends GramExpression {
 
   String get pronunciation =>
       (gram.consPair == ConsPair.AHA ? '' : gram.consPair.base.shortName) +
-      gram.vowel.shortName.toLowerCase();
+      (gram.consPair == ConsPair.AHA
+          ? gram.vowel.shortName
+          : gram.vowel.shortName.toLowerCase());
 
   /// Shrinks a single Gram by half maintaining its center position.
   GramExpression shrink() => _UnaryExpr(Unary.Shrink, this.gram);

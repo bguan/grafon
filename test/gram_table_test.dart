@@ -96,6 +96,54 @@ void main() {
     }
   });
 
+  test('GramTable test at dynamics', () {
+    for (final cp in ConsPair.values) {
+      for (final v in Vowel.values) {
+        final gra = GramTable.at(cp, v);
+        expect(gra.consPair, cp);
+        expect(gra.vowel, v);
+      }
+      for (final f in Face.values) {
+        final gra = GramTable.at(cp, f);
+        expect(gra.face, f);
+        expect(gra.consPair, cp);
+      }
+    }
+
+    for (final c in Consonant.values) {
+      for (final v in Vowel.values) {
+        final gra = GramTable.at(c, v);
+        expect(gra.consPair, c.pair);
+        expect(gra.vowel, v);
+      }
+      for (final f in Face.values) {
+        final gra = GramTable.at(c, f);
+        expect(gra.face, f);
+        expect(gra.consPair, c.pair);
+      }
+    }
+
+    for (final m in Mono.values) {
+      for (final f in Face.values) {
+        final gra = GramTable.at(m, f);
+        expect(gra.face, f);
+        if (f == Face.Center) {
+          expect(gra, m.gram);
+          expect(gra, isA<MonoGram>());
+        } else {
+          expect(m, m.quadPeer.monoPeer);
+          expect(gra, m.quadPeer[f]);
+          expect(gra, isA<QuadGram>());
+        }
+      }
+      for (final v in Vowel.values) {
+        final gra = GramTable.at(m, v);
+        expect(gra.consPair, m.gram.consPair);
+        expect(gra.vowel, v);
+      }
+    }
+  });
+
   test('GramTable numRows match num of Mono', () {
     expect(GramTable.numRows, Mono.values.length);
   });

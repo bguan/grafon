@@ -24,7 +24,7 @@ import 'phonetics.dart';
 /// Operators, unary and binary spatial combinations for the Grafon language.
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { Ng, H, DT, MN, SSh }
+enum BinaryEnding { Ng, H, BP, MN, SSh }
 
 /// extension to map base, tail ending consonant to enum, short name.
 extension BinaryEndingExtension on BinaryEnding {
@@ -34,8 +34,8 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return '';
-      case BinaryEnding.DT:
-        return 'd';
+      case BinaryEnding.BP:
+        return 'b';
       case BinaryEnding.MN:
         return 'm';
       case BinaryEnding.SSh:
@@ -52,8 +52,8 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return 'h';
-      case BinaryEnding.DT:
-        return 't';
+      case BinaryEnding.BP:
+        return 'p';
       case BinaryEnding.MN:
         return 'n';
       case BinaryEnding.SSh:
@@ -117,7 +117,7 @@ extension BinaryExtension on Binary {
       case Binary.Before:
         return BinaryEnding.H;
       case Binary.Over:
-        return BinaryEnding.DT;
+        return BinaryEnding.BP;
       case Binary.Around:
         return BinaryEnding.MN;
       case Binary.Merge:

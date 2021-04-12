@@ -48,17 +48,17 @@ void main() {
 
   test('Every Quad has ConsPair', () {
     for (final q in Quad.values) {
-      expect(q.gras.consPair, isNotNull);
+      expect(q.grams.consPair, isNotNull);
     }
   });
 
   test('Every ConsPair maps to a Quad', () {
     for (final cp in ConsPair.values) {
-      expect(Quad.values.firstWhere((q) => q.gras.consPair == cp), isNotNull);
+      expect(Quad.values.firstWhere((q) => q.grams.consPair == cp), isNotNull);
     }
   });
 
-  test('GraTable test atConsPairVowel', () {
+  test('GramTable test atConsPairVowel', () {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values) {
         final gra = GramTable.atConsPairVowel(cp, v);
@@ -69,7 +69,7 @@ void main() {
     }
   });
 
-  test('GraTable test atConsonantVowel', () {
+  test('GramTable test atConsonantVowel', () {
     for (final c in Consonant.values) {
       for (final v in Vowel.values) {
         final gra = GramTable.atConsonantVowel(c, v);
@@ -79,7 +79,7 @@ void main() {
     }
   });
 
-  test('GraTable test atMonoFace', () {
+  test('GramTable test atMonoFace', () {
     for (final m in Mono.values) {
       for (final f in Face.values) {
         final gra = GramTable.atMonoFace(m, f);
@@ -96,23 +96,62 @@ void main() {
     }
   });
 
-  test('GraTable numRows match num of Mono', () {
+  test('GramTable numRows match num of Mono', () {
     expect(GramTable.numRows, Mono.values.length);
   });
 
-  test('GraTable numRows match num of Quad', () {
+  test('GramTable numRows match num of Quad', () {
     expect(GramTable.numRows, Quad.values.length);
   });
 
-  test('GraTable numRows match num of ConsPair', () {
+  test('GramTable numRows match num of ConsPair', () {
     expect(GramTable.numRows, ConsPair.values.length);
   });
 
-  test('GraTable numCols match num of Vowels', () {
+  test('GramTable numCols match num of Vowels', () {
     expect(GramTable.numCols, Vowel.values.length);
   });
 
-  test('GraTable numCols match num of Faces', () {
+  test('GramTable numCols match num of Faces', () {
     expect(GramTable.numCols, Face.values.length);
+  });
+
+  test('GramTable test getEnumIfMono', () {
+    for (final m in Mono.values) {
+      Mono? mEnum = GramTable.getEnumIfMono(m.gram);
+      expect(mEnum, m);
+    }
+    for (final q in Quad.values) {
+      for (final f in FaceHelper.directionals) {
+        Mono? mEnum = GramTable.getEnumIfMono(q.grams[f]);
+        expect(mEnum, isNull);
+      }
+    }
+  });
+
+  test('GramTable test getEnumIfQuad', () {
+    for (final m in Mono.values) {
+      Quad? qEnum = GramTable.getEnumIfQuad(m.gram);
+      expect(qEnum, isNull);
+    }
+    for (final q in Quad.values) {
+      for (final f in FaceHelper.directionals) {
+        Quad? qEnum = GramTable.getEnumIfQuad(q.grams[f]);
+        expect(qEnum, q);
+      }
+    }
+  });
+
+  test('GramTable test getMonoEnum', () {
+    for (final m in Mono.values) {
+      Mono mEnum = GramTable.getMonoEnum(m.gram);
+      expect(mEnum, m);
+    }
+    for (final q in Quad.values) {
+      for (final f in FaceHelper.directionals) {
+        Mono mEnum = GramTable.getMonoEnum(q.grams[f]);
+        expect(mEnum, q.monoPeer);
+      }
+    }
   });
 }

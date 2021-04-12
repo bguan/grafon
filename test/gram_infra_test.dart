@@ -33,14 +33,14 @@ void main() {
     const p1 = Polar(angle: 0, distance: 1);
     const p2 = Polar(angle: 0, distance: 2);
 
-    expect(p1, isNot(equals(p2)));
+    expect(p1 == p2, isFalse);
   });
 
   test('Polar Coordinates test unequal angle', () {
     const p1 = Polar(angle: 1, distance: 2);
     const p2 = Polar(angle: 2, distance: 2);
 
-    expect(p1, isNot(equals(p2)));
+    expect(p1 == p2, isFalse);
   });
 
   test('Polar Coordinates test equivalent origins', () {
@@ -81,8 +81,16 @@ void main() {
     expect(Anchor.O.vector.length, 0.0);
   });
 
-  test('Outer Anchors (not Origin) should all be .5 distance from center', () {
+  test('Anchor outerPoints should have every anchor except center', () {
     final outerAnchors = [...Anchor.values]..remove(Anchor.O);
+    expect(AnchorHelper.outerPoints.contains(Anchor.O), isFalse);
+    for (final a in outerAnchors) {
+      expect(AnchorHelper.outerPoints.contains(a), isTrue);
+    }
+  });
+
+  test('Outer Anchors (not Origin) should all be .5 distance from center', () {
+    final outerAnchors = AnchorHelper.outerPoints;
 
     for (final a in outerAnchors) {
       expect(a.polar.distance, Polar.DEFAULT_ANCHOR_DIST);
@@ -92,7 +100,7 @@ void main() {
   });
 
   test('Outer Anchors (not Origin) should all sum to 0 distance', () {
-    final outerAnchors = [...Anchor.values]..remove(Anchor.O);
+    final outerAnchors = AnchorHelper.outerPoints;
 
     final sumOuterVectors =
         outerAnchors.map((a) => a.vector).reduce((accum, v) => v + accum);
@@ -101,7 +109,7 @@ void main() {
   });
 
   test('Outer Anchors (not Origin) are ordered in 45 degree steps', () {
-    final outerAnchors = [...Anchor.values]..remove(Anchor.O);
+    final outerAnchors = AnchorHelper.outerPoints;
     for (var i = 0; i < outerAnchors.length; i++) {
       final from = outerAnchors[i];
       final to = outerAnchors[(i + 1) % outerAnchors.length];
@@ -142,26 +150,34 @@ void main() {
     expect(shortNamesFromFaces.length, Face.values.length);
   });
 
+  test('Face directionals should have all faces except center', () {
+    final directions = [...Face.values]..remove(Face.Center);
+    expect(FaceHelper.directionals.contains(Face.Center), isFalse);
+    for (final f in directions) {
+      expect(FaceHelper.directionals.contains(f), isTrue);
+    }
+  });
+
   test('PolyDot equality and hashcode', () {
     for (final a1 in Anchor.values) {
       final dot1 = PolyDot([a1]);
 
       final emptyDots = PolyDot(List<Anchor>.empty());
-      expect(dot1, isNot(equals(emptyDots)));
-      expect(dot1.hashCode, isNot(equals(emptyDots.hashCode)));
+      expect(dot1 == emptyDots, isFalse);
+      expect(dot1.hashCode == emptyDots.hashCode, isFalse);
 
       // PolyDots repeated dots are redundant
       final doubleDots = PolyDot([a1, a1]);
-      expect(dot1, equals(doubleDots));
-      expect(dot1.hashCode, equals(doubleDots.hashCode));
+      expect(dot1, doubleDots);
+      expect(dot1.hashCode, doubleDots.hashCode);
 
       final line = PolyLine([a1]);
-      expect(dot1, isNot(equals(line)));
-      expect(dot1.hashCode, isNot(equals(line.hashCode)));
+      expect(dot1 is PolyLine, isFalse);
+      expect(dot1.hashCode == line.hashCode, isFalse);
 
       final spline = PolySpline([a1]);
-      expect(dot1, isNot(equals(spline)));
-      expect(dot1.hashCode, isNot(equals(spline.hashCode)));
+      expect(dot1 is PolySpline, isFalse);
+      expect(dot1.hashCode == spline.hashCode, isFalse);
 
       for (final a2 in Anchor.values) {
         final dot2 = PolyDot([a2]);
@@ -169,8 +185,8 @@ void main() {
           expect(dot1, equals(dot2));
           expect(dot1.hashCode, equals(dot2.hashCode));
         } else {
-          expect(dot1, isNot(equals(dot2)));
-          expect(dot1.hashCode, isNot(equals(dot2.hashCode)));
+          expect(dot1 == dot2, isFalse);
+          expect(dot1.hashCode == dot2.hashCode, isFalse);
         }
 
         final doubleDots1 = PolyDot([a1, a2]);
@@ -196,28 +212,28 @@ void main() {
       final line1 = PolyLine([a1]);
 
       final emptyLine = PolyDot(List<Anchor>.empty());
-      expect(line1, isNot(equals(emptyLine)));
-      expect(line1.hashCode, isNot(equals(emptyLine.hashCode)));
+      expect(line1 == emptyLine, isFalse);
+      expect(line1.hashCode == emptyLine.hashCode, isFalse);
 
       // PolyLine length is important
       final line11 = PolyLine([a1, a1]);
-      expect(line1, isNot(equals(line11)));
-      expect(line1.hashCode, isNot(equals(line11.hashCode)));
+      expect(line1.anchors == line11.anchors, isFalse);
+      expect(line1.hashCode == line11.hashCode, isFalse);
 
       final dot = PolyDot([a1]);
-      expect(line1, isNot(equals(dot)));
-      expect(line1.hashCode, isNot(equals(dot.hashCode)));
+      expect(line1 is PolyDot, isFalse);
+      expect(line1.hashCode == dot.hashCode, isFalse);
 
       final spline = PolySpline([a1]);
-      expect(line1, isNot(equals(spline)));
-      expect(line1.hashCode, isNot(equals(spline.hashCode)));
+      expect(line1 is PolySpline, isFalse);
+      expect(line1.hashCode == spline.hashCode, isFalse);
 
       for (final a2 in Anchor.values) {
         final line2 = PolyLine([a2]);
         if (a1 == a2) {
           expect(line1, equals(line2));
         } else {
-          expect(line1, isNot(equals(line2)));
+          expect(line1 == line2, isFalse);
         }
 
         final line12 = PolyLine([a1, a2]);
@@ -228,8 +244,8 @@ void main() {
         if (a1 != a2) {
           /// for PolyLines ordering matters
           final line21 = PolyLine([a2, a1]);
-          expect(line12, isNot(equals(line21)));
-          expect(line12.hashCode, isNot(equals(line21.hashCode)));
+          expect(line12 == line21, isFalse);
+          expect(line12.hashCode == line21.hashCode, isFalse);
         }
       }
     }
@@ -245,42 +261,42 @@ void main() {
       final spline1 = PolySpline([a1]);
 
       final emptySpline = PolySpline(List<Anchor>.empty());
-      expect(spline1, isNot(equals(emptySpline)));
-      expect(spline1.hashCode, isNot(equals(emptySpline.hashCode)));
+      expect(spline1 == emptySpline, isFalse);
+      expect(spline1.hashCode == emptySpline.hashCode, isFalse);
 
       // PolySpline length is important
       final spline11 = PolySpline([a1, a1]);
-      expect(spline1, isNot(equals(spline11)));
-      expect(spline1.hashCode, isNot(equals(spline11.hashCode)));
+      expect(spline1 == spline11, isFalse);
+      expect(spline1.hashCode == spline11.hashCode, isFalse);
 
       final dot = PolyDot([a1]);
-      expect(spline1, isNot(equals(dot)));
-      expect(spline1.hashCode, isNot(equals(dot.hashCode)));
+      expect(spline1 == dot, isFalse);
+      expect(spline1.hashCode == dot.hashCode, isFalse);
 
       final line = PolyLine([a1]);
-      expect(spline1, isNot(equals(line)));
-      expect(spline1.hashCode, isNot(equals(line.hashCode)));
+      expect(spline1 == line, isFalse);
+      expect(spline1.hashCode == line.hashCode, isFalse);
 
       for (final a2 in Anchor.values) {
         final spline2 = PolySpline([a2]);
         if (a1 == a2) {
-          expect(spline1, equals(spline2));
+          expect(spline1, spline2);
           expect(spline1.hashCode, equals(spline2.hashCode));
         } else {
-          expect(spline1, isNot(equals(spline2)));
-          expect(spline1.hashCode, isNot(equals(spline2.hashCode)));
+          expect(spline1 == spline2, isFalse);
+          expect(spline1.hashCode == spline2.hashCode, isFalse);
         }
 
         final spline12 = PolySpline([a1, a2]);
         final spline12B = PolySpline([a1, a2]);
-        expect(spline12, equals(spline12B));
+        expect(spline12, spline12B);
         expect(spline12.hashCode, equals(spline12B.hashCode));
 
         if (a1 != a2) {
           /// for PolySplines ordering matters
           final spline21 = PolySpline([a2, a1]);
-          expect(spline12, isNot(equals(spline21)));
-          expect(spline12.hashCode, isNot(equals(spline21.hashCode)));
+          expect(spline12 == spline21, isFalse);
+          expect(spline12.hashCode == spline21.hashCode, isFalse);
         }
       }
     }
@@ -523,7 +539,7 @@ void main() {
     expect(() => hFlip(testPaths), throwsA(isA<UnimplementedError>()));
   });
 
-  test('MonoGra equality and hashcode', () {
+  test('MonoGram equality and hashcode', () {
     final dotPaths = [
       PolyDot([Anchor.O])
     ];
@@ -538,15 +554,15 @@ void main() {
     expect(dotAHA.hashCode, dotAHA2.hashCode);
 
     final dotSAZA = MonoGram(dotPaths, ConsPair.SAZA);
-    expect(dotAHA, isNot(equals(dotSAZA)));
-    expect(dotAHA.hashCode, isNot(equals(dotSAZA.hashCode)));
+    expect(dotAHA == dotSAZA, isFalse);
+    expect(dotAHA.hashCode == dotSAZA.hashCode, isFalse);
 
     final lineAHA = MonoGram(linePaths, ConsPair.AHA);
-    expect(dotAHA, isNot(equals(lineAHA)));
-    expect(dotAHA.hashCode, isNot(equals(lineAHA.hashCode)));
+    expect(dotAHA == lineAHA, isFalse);
+    expect(dotAHA.hashCode == lineAHA.hashCode, isFalse);
   });
 
-  test('MonoGra face, vowel, base vs head consonants', () {
+  test('MonoGram face, vowel, base vs head consonants', () {
     final xPaths = [
       PolyLine([Anchor.NW, Anchor.SE]),
       PolyLine([Anchor.NE, Anchor.SW])
@@ -558,7 +574,7 @@ void main() {
     expect(xAHA.head, Consonant.H);
   });
 
-  test('MonoGra visualCenter is avg vectors of deduped visible anchors', () {
+  test('MonoGram visualCenter is avg vectors of deduped visible anchors', () {
     final xPaths = [
       PolyLine([Anchor.NW, Anchor.SE]),
       PolyLine([Anchor.NE, Anchor.SW])
@@ -591,31 +607,31 @@ void main() {
     expect(angleAHA, angleAHA);
 
     final semiAngleAHA = SemiRotatingQuads(anglePaths, ConsPair.AHA);
-    expect(angleAHA, isNot(equals(semiAngleAHA)));
-    expect(angleAHA.hashCode, isNot(equals(semiAngleAHA.hashCode)));
+    expect(angleAHA == semiAngleAHA, isFalse);
+    expect(angleAHA.hashCode == semiAngleAHA.hashCode, isFalse);
 
     final flipAngleAHA = FlipQuads(anglePaths, ConsPair.AHA);
-    expect(angleAHA, isNot(equals(flipAngleAHA)));
-    expect(angleAHA.hashCode, isNot(equals(flipAngleAHA.hashCode)));
+    expect(angleAHA == flipAngleAHA, isFalse);
+    expect(angleAHA.hashCode == flipAngleAHA.hashCode, isFalse);
 
     final doubleFlipAngleAHA = DoubleFlipQuads(anglePaths, ConsPair.AHA);
-    expect(angleAHA, isNot(equals(doubleFlipAngleAHA)));
-    expect(angleAHA.hashCode, isNot(equals(doubleFlipAngleAHA.hashCode)));
+    expect(angleAHA == doubleFlipAngleAHA, isFalse);
+    expect(angleAHA.hashCode == doubleFlipAngleAHA.hashCode, isFalse);
 
     final angleAHA2 = RotatingQuads(anglePaths, ConsPair.AHA);
     expect(angleAHA, equals(angleAHA2));
     expect(angleAHA.hashCode, angleAHA2.hashCode);
 
     final angleSAZA = RotatingQuads(anglePaths, ConsPair.SAZA);
-    expect(angleAHA, isNot(equals(angleSAZA)));
-    expect(angleAHA.hashCode, isNot(equals(angleSAZA.hashCode)));
+    expect(angleAHA == angleSAZA, isFalse);
+    expect(angleAHA.hashCode == angleSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final gateAHA = RotatingQuads(gatePaths, ConsPair.AHA);
-    expect(angleAHA, isNot(equals(gateAHA)));
-    expect(angleAHA.hashCode, isNot(equals(gateAHA.hashCode)));
+    expect(angleAHA == gateAHA, isFalse);
+    expect(angleAHA.hashCode == gateAHA.hashCode, isFalse);
   });
 
   test('RotatingQuads face, vowel, base vs head consonants, visualCenter', () {
@@ -677,31 +693,31 @@ void main() {
     expect(semiLineAHA, semiLineAHA);
 
     final lineAHA = RotatingQuads(linePaths, ConsPair.AHA);
-    expect(semiLineAHA, isNot(equals(lineAHA)));
-    expect(semiLineAHA.hashCode, isNot(equals(lineAHA.hashCode)));
+    expect(semiLineAHA == lineAHA, isFalse);
+    expect(semiLineAHA.hashCode == lineAHA.hashCode, isFalse);
 
     final flipLineAHA = FlipQuads(linePaths, ConsPair.AHA);
-    expect(semiLineAHA, isNot(equals(flipLineAHA)));
-    expect(semiLineAHA.hashCode, isNot(equals(flipLineAHA.hashCode)));
+    expect(semiLineAHA == flipLineAHA, isFalse);
+    expect(semiLineAHA.hashCode == flipLineAHA.hashCode, isFalse);
 
     final doubleFlipLineAHA = DoubleFlipQuads(linePaths, ConsPair.AHA);
-    expect(semiLineAHA, isNot(equals(doubleFlipLineAHA)));
-    expect(semiLineAHA.hashCode, isNot(equals(doubleFlipLineAHA.hashCode)));
+    expect(semiLineAHA == doubleFlipLineAHA, isFalse);
+    expect(semiLineAHA.hashCode == doubleFlipLineAHA.hashCode, isFalse);
 
     final semiLineAHA2 = SemiRotatingQuads(linePaths, ConsPair.AHA);
     expect(semiLineAHA, equals(semiLineAHA2));
     expect(semiLineAHA.hashCode, semiLineAHA2.hashCode);
 
     final semiLineSAZA = SemiRotatingQuads(linePaths, ConsPair.SAZA);
-    expect(semiLineAHA, isNot(equals(semiLineSAZA)));
-    expect(semiLineAHA.hashCode, isNot(equals(semiLineSAZA.hashCode)));
+    expect(semiLineAHA == semiLineSAZA, isFalse);
+    expect(semiLineAHA.hashCode == semiLineSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final semiGateAHA = SemiRotatingQuads(gatePaths, ConsPair.AHA);
-    expect(semiLineAHA, isNot(equals(semiGateAHA)));
-    expect(semiLineAHA.hashCode, isNot(equals(semiGateAHA.hashCode)));
+    expect(semiLineAHA == semiGateAHA, isFalse);
+    expect(semiLineAHA.hashCode == semiGateAHA.hashCode, isFalse);
   });
 
   test('SemiRotatingQuads face, vowel, base/head consonants, visualCenter', () {
@@ -768,31 +784,31 @@ void main() {
     expect(flipFlowAHA, flipFlowAHA);
 
     final rotaFlowAHA = RotatingQuads(flowPaths, ConsPair.AHA);
-    expect(flipFlowAHA, isNot(equals(rotaFlowAHA)));
-    expect(flipFlowAHA.hashCode, isNot(equals(rotaFlowAHA.hashCode)));
+    expect(flipFlowAHA == rotaFlowAHA, isFalse);
+    expect(flipFlowAHA.hashCode == rotaFlowAHA.hashCode, isFalse);
 
     final semiFlowAHA = SemiRotatingQuads(flowPaths, ConsPair.AHA);
-    expect(flipFlowAHA, isNot(equals(semiFlowAHA)));
-    expect(flipFlowAHA.hashCode, isNot(equals(semiFlowAHA.hashCode)));
+    expect(flipFlowAHA == semiFlowAHA, isFalse);
+    expect(flipFlowAHA.hashCode == semiFlowAHA.hashCode, isFalse);
 
     final doubleFlipFlowAHA = DoubleFlipQuads(flowPaths, ConsPair.AHA);
-    expect(flipFlowAHA, isNot(equals(doubleFlipFlowAHA)));
-    expect(flipFlowAHA.hashCode, isNot(equals(doubleFlipFlowAHA.hashCode)));
+    expect(flipFlowAHA == doubleFlipFlowAHA, isFalse);
+    expect(flipFlowAHA.hashCode == doubleFlipFlowAHA.hashCode, isFalse);
 
     final flipFlowAHA2 = FlipQuads(flowPaths, ConsPair.AHA);
     expect(flipFlowAHA, equals(flipFlowAHA2));
     expect(flipFlowAHA.hashCode, flipFlowAHA2.hashCode);
 
     final flipFlowSAZA = FlipQuads(flowPaths, ConsPair.SAZA);
-    expect(flipFlowAHA, isNot(equals(flipFlowSAZA)));
-    expect(flipFlowAHA.hashCode, isNot(equals(flipFlowSAZA.hashCode)));
+    expect(flipFlowAHA == flipFlowSAZA, isFalse);
+    expect(flipFlowAHA.hashCode == flipFlowSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final flipGateAHA = FlipQuads(gatePaths, ConsPair.AHA);
-    expect(flipFlowAHA, isNot(equals(flipGateAHA)));
-    expect(flipFlowAHA.hashCode, isNot(equals(flipGateAHA.hashCode)));
+    expect(flipFlowAHA == flipGateAHA, isFalse);
+    expect(flipFlowAHA.hashCode == flipGateAHA.hashCode, isFalse);
   });
 
   test('FlipQuads face, vowel, base/head consonants, visualCenter', () {
@@ -865,31 +881,31 @@ void main() {
     expect(dflipSwirlAHA, dflipSwirlAHA);
 
     final rotaSwirlAHA = RotatingQuads(swirlPaths, ConsPair.AHA);
-    expect(dflipSwirlAHA, isNot(equals(rotaSwirlAHA)));
-    expect(dflipSwirlAHA.hashCode, isNot(equals(rotaSwirlAHA.hashCode)));
+    expect(dflipSwirlAHA == rotaSwirlAHA, isFalse);
+    expect(dflipSwirlAHA.hashCode == rotaSwirlAHA.hashCode, isFalse);
 
     final semiSwirlAHA = SemiRotatingQuads(swirlPaths, ConsPair.AHA);
-    expect(dflipSwirlAHA, isNot(equals(semiSwirlAHA)));
-    expect(dflipSwirlAHA.hashCode, isNot(equals(semiSwirlAHA.hashCode)));
+    expect(dflipSwirlAHA == semiSwirlAHA, isFalse);
+    expect(dflipSwirlAHA.hashCode == semiSwirlAHA.hashCode, isFalse);
 
     final flipSwirlAHA = FlipQuads(swirlPaths, ConsPair.AHA);
-    expect(dflipSwirlAHA, isNot(equals(flipSwirlAHA)));
-    expect(dflipSwirlAHA.hashCode, isNot(equals(flipSwirlAHA.hashCode)));
+    expect(dflipSwirlAHA == flipSwirlAHA, isFalse);
+    expect(dflipSwirlAHA.hashCode == flipSwirlAHA.hashCode, isFalse);
 
     final dflipSwirlAHA2 = DoubleFlipQuads(swirlPaths, ConsPair.AHA);
     expect(dflipSwirlAHA, equals(dflipSwirlAHA2));
     expect(dflipSwirlAHA.hashCode, dflipSwirlAHA2.hashCode);
 
     final dflipSwirlSAZA = DoubleFlipQuads(swirlPaths, ConsPair.SAZA);
-    expect(dflipSwirlAHA, isNot(equals(dflipSwirlSAZA)));
-    expect(dflipSwirlAHA.hashCode, isNot(equals(dflipSwirlSAZA.hashCode)));
+    expect(dflipSwirlAHA == dflipSwirlSAZA, isFalse);
+    expect(dflipSwirlAHA.hashCode == dflipSwirlSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final dflipGateAHA = DoubleFlipQuads(gatePaths, ConsPair.AHA);
-    expect(dflipSwirlAHA, isNot(equals(dflipGateAHA)));
-    expect(dflipSwirlAHA.hashCode, isNot(equals(dflipGateAHA.hashCode)));
+    expect(dflipSwirlAHA == dflipGateAHA, isFalse);
+    expect(dflipSwirlAHA.hashCode == dflipGateAHA.hashCode, isFalse);
   });
 
   test('DoubleFlipQuads face, vowel, base/head consonants, visualCenter', () {

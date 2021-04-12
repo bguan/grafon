@@ -45,7 +45,7 @@ class GrafonApp extends StatelessWidget {
 }
 
 class GrafonHome extends StatelessWidget {
-  GrafonHome({Key key, this.title}) : super(key: key);
+  GrafonHome({Key? key, this.title: ''}) : super(key: key);
 
   final String title;
 

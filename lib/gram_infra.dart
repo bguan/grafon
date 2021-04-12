@@ -56,7 +56,18 @@ class Polar {
 enum Anchor { E, NE, N, NW, W, SW, S, SE, O }
 
 /// Extending Anchor to returns its polar coordinate
-extension AnchorExtension on Anchor {
+extension AnchorHelper on Anchor {
+  static List<Anchor> get outerPoints => const [
+        Anchor.E,
+        Anchor.NE,
+        Anchor.N,
+        Anchor.NW,
+        Anchor.W,
+        Anchor.SW,
+        Anchor.S,
+        Anchor.SE,
+      ];
+
   Polar get polar {
     switch (this) {
       case Anchor.E:
@@ -87,8 +98,15 @@ extension AnchorExtension on Anchor {
 enum Face { Center, Right, Up, Left, Down }
 
 /// Map a Face to a Vowel
-extension FaceExtension on Face {
+extension FaceHelper on Face {
   String get shortName => this.toString().split('.').last;
+
+  static List<Face> get directionals => const [
+        Face.Right,
+        Face.Up,
+        Face.Left,
+        Face.Down,
+      ];
 
   Vowel get vowel {
     switch (this) {
@@ -107,7 +125,7 @@ extension FaceExtension on Face {
 }
 
 /// Map a Vowel to a Face
-extension VowelExtension on Vowel {
+extension VowelHelper on Vowel {
   String get shortName => this.toString().split('.').last;
 
   Face get face {
@@ -146,7 +164,7 @@ abstract class PolyPath {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != this.runtimeType) return false;
+    if (other is! PolyPath) return false;
 
     PolyPath that = other;
     final leq = ListEquality<Anchor>().equals;
@@ -162,7 +180,7 @@ class PolyDot extends PolyPath {
   /// dots ordering shouldn't matter
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != this.runtimeType) return false;
+    if (other is! PolyDot) return false;
 
     PolyDot that = other;
     final seq = SetEquality<Anchor>().equals;
@@ -181,6 +199,12 @@ class PolyDot extends PolyPath {
 /// Straight Line from anchor point to anchor point
 class PolyLine extends PolyPath {
   const PolyLine(anchors) : super(anchors);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! PolyLine) return false;
+    return super == other;
+  }
 }
 
 /// Curve Line thru everypoint, making sure tangent transition is smooth at each
@@ -190,6 +214,12 @@ class PolySpline extends PolyPath {
 
   @override
   List<Anchor> get visibleAnchors => anchors.sublist(1, anchors.length - 1);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! PolySpline) return false;
+    return super == other;
+  }
 }
 
 /// Gram is a Graphical Symbol i.e. logogram
@@ -219,7 +249,7 @@ abstract class Gram {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != this.runtimeType) return false;
+    if (other is! Gram) return false;
 
     Gram that = other;
     final eq = ListEquality<PolyPath>().equals;
@@ -251,6 +281,12 @@ class MonoGram extends Gram {
   final face = Face.Center;
 
   const MonoGram(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! MonoGram) return false;
+    return super == other;
+  }
 }
 
 /// QuadGram has 4 orientation, each form by rotating a base Gram by 90' or 45'
@@ -259,6 +295,12 @@ class QuadGram extends Gram {
 
   const QuadGram(List<PolyPath> paths, this.face, ConsPair cons)
       : super(paths, cons);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! QuadGram) return false;
+    return super == other;
+  }
 }
 
 /// Turn pen paths by either full step(s) of 90' or semi step of 45'
@@ -375,16 +417,20 @@ abstract class QuadGrams {
   final ConsPair consPair;
   final Map<Face, Gram> face2gra;
 
-  QuadGrams(this.consPair,
-      {List<PolyPath> r, List<PolyPath> u, List<PolyPath> l, List<PolyPath> d})
-      : face2gra = Map.unmodifiable({
+  QuadGrams(
+    this.consPair, {
+    required List<PolyPath> r,
+    required List<PolyPath> u,
+    required List<PolyPath> l,
+    required List<PolyPath> d,
+  }) : face2gra = Map.unmodifiable({
           Face.Right: QuadGram(r, Face.Right, consPair),
           Face.Up: QuadGram(u, Face.Up, consPair),
           Face.Left: QuadGram(l, Face.Left, consPair),
           Face.Down: QuadGram(d, Face.Down, consPair)
         });
 
-  Gram operator [](Face f) => face2gra[f];
+  Gram operator [](Face f) => face2gra[f]!;
 
   @override
   int get hashCode =>
@@ -398,7 +444,7 @@ abstract class QuadGrams {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != this.runtimeType) return false;
+    if (other is! QuadGrams) return false;
 
     QuadGrams that = other;
 

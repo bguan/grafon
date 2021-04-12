@@ -80,7 +80,7 @@ class GramPainter extends CustomPainter {
 
   void drawPolySpline(
     PolySpline p,
-    Vector centerShift,
+    Vector2 centerShift,
     Size size,
     Canvas canvas,
     Paint paint,

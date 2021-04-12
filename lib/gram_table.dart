@@ -174,7 +174,7 @@ extension MonoExtension on Mono {
   }
 
   Quad get quadPeer =>
-      Quad.values.firstWhere((q) => q.gras.consPair == this.gram.consPair);
+      Quad.values.firstWhere((q) => q.grams.consPair == this.gram.consPair);
 }
 
 /// enum for each of the QuadGram grouping.
@@ -263,18 +263,18 @@ class _QuadHelper {
 
 /// extension to map quad enum to its QuadGrams, indexing by Face, & short name.
 extension QuadExtension on Quad {
-  QuadGrams get gras => _QuadHelper.enum2quads[this];
+  QuadGrams get grams => _QuadHelper.enum2quads[this]!;
 
-  Gram operator [](Face f) => gras[f];
+  Gram operator [](Face f) => grams[f];
 
   Mono get monoPeer =>
-      Mono.values.firstWhere((m) => m.gram.consPair == this.gras.consPair);
+      Mono.values.firstWhere((m) => m.gram.consPair == this.grams.consPair);
 
   String get shortName => this.toString().split('.').last;
 }
 
 /// GramTable is a static helper to implement various lookup efficiently
-class GramTable {
+abstract class GramTable {
   static Map<ConsPair, Map<Vowel, Gram>> _gramByConsPairVowel() {
     Map<ConsPair, Map<Vowel, Gram>> c2v2g = {};
     for (var cons in ConsPair.values) {
@@ -291,11 +291,31 @@ class GramTable {
 
   static final Map<ConsPair, Map<Vowel, Gram>> _map = _gramByConsPairVowel();
 
-  static Gram atConsPairVowel(ConsPair cp, Vowel v) => _map[cp][v];
+  static Gram atConsPairVowel(ConsPair cp, Vowel v) => _map[cp]![v]!;
 
-  static Gram atConsonantVowel(Consonant c, Vowel v) => _map[c.pair][v];
+  static Gram atConsonantVowel(Consonant c, Vowel v) => _map[c.pair]![v]!;
 
-  static Gram atMonoFace(Mono m, Face f) => _map[m.gram.consPair][f.vowel];
+  static Gram atMonoFace(Mono m, Face f) => _map[m.gram.consPair]![f.vowel]!;
   static final numRows = Mono.values.length;
   static final numCols = Face.values.length;
+
+  static Mono getMonoEnum(Gram g) {
+    return g is MonoGram
+        ? Mono.values.firstWhere((m) => m.gram.consPair == g.consPair)
+        : Quad.values
+            .firstWhere((q) => q.grams.consPair == g.consPair)
+            .monoPeer;
+  }
+
+  static Mono? getEnumIfMono(Gram g) {
+    return g is MonoGram
+        ? Mono.values.firstWhere((m) => m.gram.consPair == g.consPair)
+        : null;
+  }
+
+  static Quad? getEnumIfQuad(Gram g) {
+    return g is QuadGram
+        ? Quad.values.firstWhere((q) => q.grams.consPair == g.consPair)
+        : null;
+  }
 }

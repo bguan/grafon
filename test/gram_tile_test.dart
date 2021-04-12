@@ -26,12 +26,44 @@ import 'package:grafon/gram_table.dart';
 import 'package:grafon/gram_tile.dart';
 import 'package:grafon/phonetics.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
 /// Unit and Widget Tests for Gram View
 
-/// Mock to verify calls to Canvas and record params for later inspection
-class MockCanvas extends Mock implements Canvas {}
+/// Mocks to verify calls to Canvas and record params for later inspection
+class MockCanvas extends Mock implements Canvas {
+  final List<Tuple3<Offset, Offset, Paint>> drawLineArgs = [];
+  final List<Tuple3<Offset, double, Paint>> drawCircleArgs = [];
+  final List<Tuple2<Path, Paint>> drawPathArgs = [];
+
+  @override
+  void drawLine(Offset? p1, Offset? p2, Paint? paint) {
+    if (p1 != null && p2 != null && paint != null) {
+      // not in verification but in real call, record the params
+      drawLineArgs.add(Tuple3(p1, p2, paint));
+    }
+    super.noSuchMethod(Invocation.method(#drawLine, [p1, p2, paint]));
+  }
+
+  @override
+  void drawCircle(Offset? offset, double? radius, Paint? paint) {
+    if (offset != null && radius != null && paint != null) {
+      // not in verification but in real call, record the params
+      drawCircleArgs.add(Tuple3(offset, radius, paint));
+    }
+    super.noSuchMethod(Invocation.method(#drawCircle, [offset, radius, paint]));
+  }
+
+  @override
+  void drawPath(Path? path, Paint? paint) {
+    if (path != null && paint != null) {
+      // not in verification but in real call, record the params
+      drawPathArgs.add(Tuple2(path, paint));
+    }
+    super.noSuchMethod(Invocation.method(#drawPath, [path, paint]));
+  }
+}
 
 /// Entry point for Tests
 void main() {
@@ -43,8 +75,10 @@ void main() {
         await tester.pumpWidget(GramTile(gram, Size(100, 100)));
         expect(find.byType(CustomPaint), findsOneWidget);
         final custPaint = find.byType(CustomPaint).evaluate().first;
-        if (custPaint.renderObject is RenderCustomPaint) {
-          RenderCustomPaint render = custPaint.renderObject;
+        expect(custPaint.renderObject, isNotNull);
+        final renderObj = custPaint.renderObject!;
+        if (renderObj is RenderCustomPaint) {
+          RenderCustomPaint render = renderObj;
           expect(render.painter, isA<GramPainter>());
         }
       }
@@ -53,9 +87,6 @@ void main() {
 
   test('test GramPainter toCanvasCoord and Offset Calculation', () {
     final size = Size(100, 100);
-    final scheme = ColorScheme.fromSwatch();
-    final painter = GramPainter(Mono.Dot.gram, scheme);
-
     final coord = GramPainter.toCanvasCoord(Vector2(0, 0), size);
     expect(coord, Vector2(50, 50));
     final offset = GramPainter.toOffset(coord);
@@ -75,9 +106,27 @@ void main() {
 
       painter.paint(canvas, size);
       verify(canvas.drawCircle(any, penWidth / 2, any));
+
+      expect(canvas.drawCircleArgs.length, f == Face.Center ? 1 : 2);
       verifyNever(canvas.drawLine(any, any, any));
       verifyNever(canvas.drawPath(any, any));
       verifyNoMoreInteractions(canvas);
+
+      // just check the center dot for drawing accuracy and paint params
+      if (f == Face.Center) {
+        final offset = canvas.drawCircleArgs.first.item1;
+        final radius = canvas.drawCircleArgs.first.item2;
+        final paint = canvas.drawCircleArgs.first.item3;
+
+        expect(offset.dx, 50.0);
+        expect(offset.dy, 50.0);
+        expect(radius, 5.0);
+        expect(paint.strokeWidth, 10.0);
+        expect(paint.color.value, scheme.primary.value);
+        expect(paint.style, PaintingStyle.stroke);
+        expect(paint.strokeCap, StrokeCap.round);
+        expect(paint.strokeJoin, StrokeJoin.round);
+      }
     }
   });
 
@@ -155,10 +204,9 @@ void main() {
     final painter = GramPainter(gram, scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);
-    final captured = verify(canvas.drawPath(captureAny, any)).captured;
+    verify(canvas.drawPath(any, any));
     verifyNoMoreInteractions(canvas);
-    expect(captured.length, 1);
-    final Path path = captured.first;
+    final path = canvas.drawPathArgs.first.item1;
     expect(path.contains(p1) && path.contains(p2), isTrue);
   });
 

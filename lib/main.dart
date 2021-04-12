@@ -93,7 +93,7 @@ class GrafonHome extends StatelessWidget {
       for (var uTxt in [
         'Unary\nOperator',
         ...Unary.values.map((u) =>
-            '${u.shortName}\n${u.symbol}\n_${u.ending.shortName.toLowerCase()}'),
+            '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
         'Ending\nVowel'
       ])
         uTxt.length <= 0
@@ -120,7 +120,7 @@ class GrafonHome extends StatelessWidget {
         'Binary\nOperator\ndecreasing precedence',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
-            '_${b.ending.base}${b.ending.tail.length > 0 ? '  _' + b.ending.tail : ''}'),
+            '…${b.ending.base}${b.ending.tail.length > 0 ? ' …' + b.ending.tail : ''}'),
         'Ending\nConsonant\nbase, tail'
       ])
         bTxt.length <= 0

@@ -24,7 +24,7 @@ import 'phonetics.dart';
 /// Operators, unary and binary spatial combinations for the Grafon language.
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { Ng, H, BP, MN, SSh }
+enum BinaryEnding { Ng, H, LR, MN, SZ }
 
 /// extension to map base, tail ending consonant to enum, short name.
 extension BinaryEndingExtension on BinaryEnding {
@@ -34,11 +34,11 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return '';
-      case BinaryEnding.BP:
-        return 'b';
+      case BinaryEnding.LR:
+        return 'l';
       case BinaryEnding.MN:
         return 'm';
-      case BinaryEnding.SSh:
+      case BinaryEnding.SZ:
         return 's';
       case BinaryEnding.Ng:
         return 'ng';
@@ -52,12 +52,12 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return 'h';
-      case BinaryEnding.BP:
-        return 'p';
+      case BinaryEnding.LR:
+        return 'r';
       case BinaryEnding.MN:
         return 'n';
-      case BinaryEnding.SSh:
-        return 'sh';
+      case BinaryEnding.SZ:
+        return 'z';
       case BinaryEnding.Ng:
         return '';
       default:
@@ -104,7 +104,7 @@ extension BinaryExtension on Binary {
       case Binary.Around:
         return '@';
       case Binary.Merge:
-        return '~';
+        return '*';
       case Binary.Compound:
         return ':';
       default:
@@ -117,11 +117,11 @@ extension BinaryExtension on Binary {
       case Binary.Before:
         return BinaryEnding.H;
       case Binary.Over:
-        return BinaryEnding.BP;
+        return BinaryEnding.SZ;
       case Binary.Around:
         return BinaryEnding.MN;
       case Binary.Merge:
-        return BinaryEnding.SSh;
+        return BinaryEnding.LR;
       case Binary.Compound:
         return BinaryEnding.Ng;
       default:
@@ -162,15 +162,15 @@ extension UnaryExtension on Unary {
   String get symbol {
     switch (this) {
       case Unary.Shrink:
-        return '•';
+        return '~';
       case Unary.Right:
         return '>';
       case Unary.Up:
-        return '^';
+        return '+';
       case Unary.Left:
         return '<';
       case Unary.Down:
-        return 'v';
+        return '-';
       default:
         throw Exception("Unexpected Unary Enum ${this}");
     }

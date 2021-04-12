@@ -35,143 +35,137 @@ enum Mono {
   Blob,
 }
 
+/// MonoHelper is a singleton to only instantiates MonoGrams only once
+class _MonoHelper {
+  static const List<PolyPath> spacePaths = [];
+
+  static const dotPaths = [
+    PolyDot([Anchor.O])
+  ];
+
+  static const xPaths = [
+    PolyLine([Anchor.NW, Anchor.SE]),
+    PolyLine([Anchor.NE, Anchor.SW])
+  ];
+
+  static const crossPaths = [
+    PolyLine([Anchor.N, Anchor.S]),
+    PolyLine([Anchor.W, Anchor.E])
+  ];
+
+  static const squarePaths = [
+    PolyLine([
+      Anchor.NW,
+      Anchor.NE,
+      Anchor.SE,
+      Anchor.SW,
+      Anchor.NW,
+    ])
+  ];
+
+  static const sunPaths = [
+    PolyLine([Anchor.W, Anchor.E]),
+    PolyLine([Anchor.NE, Anchor.SW]),
+    PolyLine([Anchor.N, Anchor.S]),
+    PolyLine([Anchor.NW, Anchor.SE]),
+  ];
+
+  static const circlePaths = [
+    PolySpline([
+      Anchor.W,
+      Anchor.N,
+      Anchor.E,
+      Anchor.S,
+      Anchor.W,
+      Anchor.N,
+      Anchor.E,
+    ])
+  ];
+
+  static const flowerPaths = [
+    PolySpline([
+      Anchor.E,
+      Anchor.O,
+      Anchor.S,
+      Anchor.O,
+      Anchor.W,
+    ]),
+    PolySpline([
+      Anchor.S,
+      Anchor.O,
+      Anchor.W,
+      Anchor.O,
+      Anchor.N,
+    ]),
+    PolySpline([
+      Anchor.N,
+      Anchor.O,
+      Anchor.E,
+      Anchor.O,
+      Anchor.S,
+    ]),
+    PolySpline([
+      Anchor.W,
+      Anchor.O,
+      Anchor.N,
+      Anchor.O,
+      Anchor.E,
+    ]),
+  ];
+
+  static const blobPaths = [
+    PolySpline([
+      Anchor.S,
+      Anchor.NW,
+      Anchor.N,
+      Anchor.N,
+      Anchor.NE,
+      Anchor.S,
+    ]),
+    PolySpline([
+      Anchor.W,
+      Anchor.NE,
+      Anchor.E,
+      Anchor.E,
+      Anchor.SE,
+      Anchor.W,
+    ]),
+    PolySpline([
+      Anchor.N,
+      Anchor.SW,
+      Anchor.S,
+      Anchor.S,
+      Anchor.SE,
+      Anchor.N,
+    ]),
+    PolySpline([
+      Anchor.E,
+      Anchor.SW,
+      Anchor.W,
+      Anchor.W,
+      Anchor.NW,
+      Anchor.E,
+    ]),
+  ];
+
+  static final Map<Mono, MonoGram> enum2mono = Map.unmodifiable({
+    Mono.Space: MonoGram(spacePaths, ConsPair.AHA),
+    Mono.Dot: MonoGram(dotPaths, ConsPair.SAZA),
+    Mono.X: MonoGram(xPaths, ConsPair.GAKA),
+    Mono.Cross: MonoGram(crossPaths, ConsPair.BAPA),
+    Mono.Square: MonoGram(squarePaths, ConsPair.DATA),
+    Mono.Sun: MonoGram(sunPaths, ConsPair.JACHA),
+    Mono.Circle: MonoGram(circlePaths, ConsPair.MANA),
+    Mono.Flower: MonoGram(flowerPaths, ConsPair.VAFA),
+    Mono.Blob: MonoGram(blobPaths, ConsPair.LARA),
+  });
+}
+
 /// Map a MonoGram to each Mono enum, its QuadGrams peer, and shortname.
 extension MonoExtension on Mono {
   String get shortName => this.toString().split('.').last;
 
-  Gram get gram {
-    const List<PolyPath> spacePaths = [];
-
-    const dotPaths = [
-      PolyDot([Anchor.O])
-    ];
-
-    const xPaths = [
-      PolyLine([Anchor.NW, Anchor.SE]),
-      PolyLine([Anchor.NE, Anchor.SW])
-    ];
-
-    const crossPaths = [
-      PolyLine([Anchor.N, Anchor.S]),
-      PolyLine([Anchor.W, Anchor.E])
-    ];
-
-    const squarePaths = [
-      PolyLine([
-        Anchor.NW,
-        Anchor.NE,
-        Anchor.SE,
-        Anchor.SW,
-        Anchor.NW,
-      ])
-    ];
-
-    const sunPaths = [
-      PolyLine([Anchor.W, Anchor.E]),
-      PolyLine([Anchor.NE, Anchor.SW]),
-      PolyLine([Anchor.N, Anchor.S]),
-      PolyLine([Anchor.NW, Anchor.SE]),
-    ];
-
-    const circlePaths = [
-      PolySpline([
-        Anchor.W,
-        Anchor.N,
-        Anchor.E,
-        Anchor.S,
-        Anchor.W,
-        Anchor.N,
-        Anchor.E,
-      ])
-    ];
-
-    const flowerPaths = [
-      PolySpline([
-        Anchor.E,
-        Anchor.O,
-        Anchor.S,
-        Anchor.O,
-        Anchor.W,
-      ]),
-      PolySpline([
-        Anchor.S,
-        Anchor.O,
-        Anchor.W,
-        Anchor.O,
-        Anchor.N,
-      ]),
-      PolySpline([
-        Anchor.N,
-        Anchor.O,
-        Anchor.E,
-        Anchor.O,
-        Anchor.S,
-      ]),
-      PolySpline([
-        Anchor.W,
-        Anchor.O,
-        Anchor.N,
-        Anchor.O,
-        Anchor.E,
-      ]),
-    ];
-
-    const blobPaths = [
-      PolySpline([
-        Anchor.S,
-        Anchor.NW,
-        Anchor.N,
-        Anchor.N,
-        Anchor.NE,
-        Anchor.S,
-      ]),
-      PolySpline([
-        Anchor.W,
-        Anchor.NE,
-        Anchor.E,
-        Anchor.E,
-        Anchor.SE,
-        Anchor.W,
-      ]),
-      PolySpline([
-        Anchor.N,
-        Anchor.SW,
-        Anchor.S,
-        Anchor.S,
-        Anchor.SE,
-        Anchor.N,
-      ]),
-      PolySpline([
-        Anchor.E,
-        Anchor.SW,
-        Anchor.W,
-        Anchor.W,
-        Anchor.NW,
-        Anchor.E,
-      ]),
-    ];
-
-    switch (this) {
-      case Mono.Dot:
-        return const MonoGram(dotPaths, ConsPair.SAZA);
-      case Mono.X:
-        return const MonoGram(xPaths, ConsPair.GAKA);
-      case Mono.Cross:
-        return const MonoGram(crossPaths, ConsPair.BAPA);
-      case Mono.Square:
-        return const MonoGram(squarePaths, ConsPair.DATA);
-      case Mono.Sun:
-        return const MonoGram(sunPaths, ConsPair.JACHA);
-      case Mono.Circle:
-        return const MonoGram(circlePaths, ConsPair.MANA);
-      case Mono.Flower:
-        return const MonoGram(flowerPaths, ConsPair.VAFA);
-      case Mono.Blob:
-        return const MonoGram(blobPaths, ConsPair.LARA);
-      default:
-        return const MonoGram(spacePaths, ConsPair.AHA);
-    }
-  }
+  Gram get gram => _MonoHelper.enum2mono[this]!;
 
   Quad get quadPeer =>
       Quad.values.firstWhere((q) => q.grams.consPair == this.gram.consPair);
@@ -230,8 +224,8 @@ class _QuadHelper {
   static const flowPaths = [
     PolySpline([
       Anchor.NW,
-      Anchor.N,
-      Anchor.S,
+      Anchor.W,
+      Anchor.E,
       Anchor.SE,
     ])
   ];
@@ -266,6 +260,14 @@ extension QuadExtension on Quad {
   QuadGrams get grams => _QuadHelper.enum2quads[this]!;
 
   Gram operator [](Face f) => grams[f];
+
+  Gram get up => grams[Face.Up];
+
+  Gram get down => grams[Face.Down];
+
+  Gram get left => grams[Face.Left];
+
+  Gram get right => grams[Face.Right];
 
   Mono get monoPeer =>
       Mono.values.firstWhere((m) => m.gram.consPair == this.grams.consPair);

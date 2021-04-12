@@ -20,6 +20,9 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
+import 'expression.dart';
+import 'gram_table.dart';
+import 'operators.dart';
 import 'phonetics.dart';
 
 /// Gram - the logogram and it's graphical definition for the Grafon language.
@@ -29,22 +32,22 @@ class Polar {
   static const DEFAULT_ANCHOR_DIST = 0.5;
 
   final double angle; // clockwise 0' is North, 90' is East
-  final double distance; // distance from origin
+  final double length; // distance from origin
 
-  const Polar({this.angle = 0, this.distance = DEFAULT_ANCHOR_DIST});
+  const Polar({this.angle = 0, this.length = DEFAULT_ANCHOR_DIST});
 
-  Vector2 get vector => Vector2(cos(angle), sin(angle)) * distance;
+  Vector2 get vector => Vector2(cos(angle), sin(angle)) * length;
 
   @override
-  int get hashCode => angle.hashCode ^ distance.hashCode;
+  int get hashCode => angle.hashCode ^ length.hashCode;
 
   @override
   bool operator ==(Object other) {
     if (other is! Polar) return false;
 
     Polar that = other;
-    if (distance != that.distance) return false;
-    if (distance == 0.0) return true; // angle doesn't matter
+    if (length != that.length) return false;
+    if (length == 0.0) return true; // angle doesn't matter
 
     // dart's Euclidean modulus works nicely here
     return angle % (2 * pi) == that.angle % (2 * pi);
@@ -87,11 +90,19 @@ extension AnchorHelper on Anchor {
       case Anchor.SE:
         return const Polar(angle: 1.75 * pi);
       default:
-        return const Polar(distance: 0);
+        return const Polar(length: 0);
     }
   }
 
   Vector2 get vector => polar.vector;
+
+  double get angle => this.polar.angle;
+
+  double get length => this.polar.length;
+
+  double get x => this.vector.x;
+
+  double get y => this.vector.y;
 }
 
 /// A Gram has 5 orientations: Facing Right, Up, Left, Down or Center
@@ -226,11 +237,11 @@ class PolySpline extends PolyPath {
 /// Drawn by a series of pen stroke paths of dots, lines, and curves
 /// Associated with a vowel and a starting consonant pair.
 /// If at the Head of a new cluster, use Head consonant, else Base.
-abstract class Gram {
+abstract class Gram extends GramExpression {
   final List<PolyPath> paths;
   final ConsPair consPair;
 
-  const Gram(this.paths, this.consPair);
+  Gram(this.paths, this.consPair);
 
   Face get face;
 
@@ -260,6 +271,7 @@ abstract class Gram {
         eq(this.paths, that.paths);
   }
 
+  @override
   Vector2 get visualCenter {
     double x = 0, y = 0;
     int aCount = 0;
@@ -274,13 +286,38 @@ abstract class Gram {
     }
     return Vector2(x / aCount, y / aCount);
   }
+
+  String toString() => this is QuadGram
+      ? GramTable.getEnumIfQuad(this)!.shortName + '.' + face.shortName
+      : GramTable.getMonoEnum(this).shortName;
+
+  String get pronunciation =>
+      (consPair == ConsPair.AHA ? '' : consPair.base.shortName) +
+      (consPair == ConsPair.AHA
+          ? vowel.shortName
+          : vowel.shortName.toLowerCase());
+
+  /// Shrinks a single Gram by half maintaining its center position.
+  GramExpression shrink() => UnaryExpr(Unary.Shrink, this);
+
+  /// Shrinks a single Gram by half then move it to upper quadrant.
+  GramExpression up() => UnaryExpr(Unary.Up, this);
+
+  /// Shrinks a single Gram by half then move it to down quadrant.
+  GramExpression down() => UnaryExpr(Unary.Down, this);
+
+  /// Shrinks a single Gram by half then move it to left quadrant.
+  GramExpression left() => UnaryExpr(Unary.Left, this);
+
+  /// Shrinks a single Gram by half then move it to right quadrant.
+  GramExpression right() => UnaryExpr(Unary.Right, this);
 }
 
 /// MonoGram looks the same when rotated 90' i.e. only 1 variation hence Mono
 class MonoGram extends Gram {
   final face = Face.Center;
 
-  const MonoGram(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
+  MonoGram(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
 
   @override
   bool operator ==(Object other) {
@@ -293,8 +330,7 @@ class MonoGram extends Gram {
 class QuadGram extends Gram {
   final Face face;
 
-  const QuadGram(List<PolyPath> paths, this.face, ConsPair cons)
-      : super(paths, cons);
+  QuadGram(List<PolyPath> paths, this.face, ConsPair cons) : super(paths, cons);
 
   @override
   bool operator ==(Object other) {
@@ -415,7 +451,7 @@ List<PolyPath> hFlip(List<PolyPath> paths) {
 /// Consist of 4 Quad Grams facing Right, Up, Left, Down.
 abstract class QuadGrams {
   final ConsPair consPair;
-  final Map<Face, Gram> face2gra;
+  final Map<Face, Gram> f2g;
 
   QuadGrams(
     this.consPair, {
@@ -423,14 +459,14 @@ abstract class QuadGrams {
     required List<PolyPath> u,
     required List<PolyPath> l,
     required List<PolyPath> d,
-  }) : face2gra = Map.unmodifiable({
+  }) : f2g = Map.unmodifiable({
           Face.Right: QuadGram(r, Face.Right, consPair),
           Face.Up: QuadGram(u, Face.Up, consPair),
           Face.Left: QuadGram(l, Face.Left, consPair),
           Face.Down: QuadGram(d, Face.Down, consPair)
         });
 
-  Gram operator [](Face f) => face2gra[f]!;
+  Gram operator [](Face f) => f2g[f]!;
 
   @override
   int get hashCode =>
@@ -438,9 +474,8 @@ abstract class QuadGrams {
       Face.values.fold(
           // use Face.values instead of face2gra.keys for fixed order
           0,
-          (prev, f) => face2gra[f] == null
-              ? prev
-              : prev << 1 ^ f.hashCode ^ face2gra[f].hashCode);
+          (prev, f) =>
+              f2g[f] == null ? prev : prev << 1 ^ f.hashCode ^ f2g[f].hashCode);
 
   @override
   bool operator ==(Object other) {
@@ -449,10 +484,10 @@ abstract class QuadGrams {
     QuadGrams that = other;
 
     return this.consPair == that.consPair &&
-        this.face2gra[Face.Right] == that.face2gra[Face.Right] &&
-        this.face2gra[Face.Up] == that.face2gra[Face.Up] &&
-        this.face2gra[Face.Left] == that.face2gra[Face.Left] &&
-        this.face2gra[Face.Down] == that.face2gra[Face.Down];
+        this.f2g[Face.Right] == that.f2g[Face.Right] &&
+        this.f2g[Face.Up] == that.f2g[Face.Up] &&
+        this.f2g[Face.Left] == that.f2g[Face.Left] &&
+        this.f2g[Face.Down] == that.f2g[Face.Down];
   }
 }
 

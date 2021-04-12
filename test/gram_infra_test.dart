@@ -30,33 +30,33 @@ class PolyTester extends PolyPath {
 
 void main() {
   test('Polar Coordinates test unequal distance', () {
-    const p1 = Polar(angle: 0, distance: 1);
-    const p2 = Polar(angle: 0, distance: 2);
+    const p1 = Polar(angle: 0, length: 1);
+    const p2 = Polar(angle: 0, length: 2);
 
     expect(p1 == p2, isFalse);
   });
 
   test('Polar Coordinates test unequal angle', () {
-    const p1 = Polar(angle: 1, distance: 2);
-    const p2 = Polar(angle: 2, distance: 2);
+    const p1 = Polar(angle: 1, length: 2);
+    const p2 = Polar(angle: 2, length: 2);
 
     expect(p1 == p2, isFalse);
   });
 
   test('Polar Coordinates test equivalent origins', () {
-    const o = Polar(angle: 0, distance: 0);
-    const o1 = Polar(angle: 1, distance: 0);
+    const o = Polar(angle: 0, length: 0);
+    const o1 = Polar(angle: 1, length: 0);
 
     expect(o1, o);
   });
 
   test('Polar Coordinates test equivalent angles', () {
-    const p1 = Polar(angle: pi, distance: 1);
-    const p2 = Polar(angle: -pi, distance: 1);
+    const p1 = Polar(angle: pi, length: 1);
+    const p2 = Polar(angle: -pi, length: 1);
 
     expect(p1, p2);
 
-    const p3 = Polar(angle: 3 * pi, distance: 1);
+    const p3 = Polar(angle: 3 * pi, length: 1);
 
     expect(p1, p3);
   });
@@ -93,7 +93,7 @@ void main() {
     final outerAnchors = AnchorHelper.outerPoints;
 
     for (final a in outerAnchors) {
-      expect(a.polar.distance, Polar.DEFAULT_ANCHOR_DIST);
+      expect(a.polar.length, Polar.DEFAULT_ANCHOR_DIST);
       expect(a.vector.length,
           moreOrLessEquals(Polar.DEFAULT_ANCHOR_DIST, epsilon: 0.001));
     }

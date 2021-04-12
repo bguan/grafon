@@ -15,6 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import 'package:vector_math/vector_math.dart';
+
 import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'operators.dart';
@@ -27,59 +29,30 @@ abstract class GramExpression {
   String get pronunciation;
 
   /// Merge this expression with another.
-  GramExpression merge(that) => _BinaryExpr(this, Binary.Merge, that);
+  GramExpression merge(that) => BinaryExpr(this, Binary.Merge, that);
 
   /// Put this expression before that, this to left, that to right.
-  GramExpression before(that) => _BinaryExpr(this, Binary.Before, that);
+  GramExpression before(that) => BinaryExpr(this, Binary.Before, that);
 
   /// Put this expression over that, this above, that below.
-  GramExpression over(that) => _BinaryExpr(this, Binary.Over, that);
+  GramExpression over(that) => BinaryExpr(this, Binary.Over, that);
 
   /// Put this expression around that, this outside, that inside.
-  GramExpression around(that) => _BinaryExpr(this, Binary.Around, that);
+  GramExpression around(that) => BinaryExpr(this, Binary.Around, that);
 
   /// Combine this expression with that, not spatial, forming a compound word.
-  GramExpression compound(that) => _BinaryExpr(this, Binary.Compound, that);
-}
+  GramExpression compound(that) => BinaryExpr(this, Binary.Compound, that);
 
-/// the simplest Gram Expression is just the Gram itself.
-class SingleGram extends GramExpression {
-  final Gram gram;
-
-  SingleGram(this.gram);
-
-  String toString() => gram is QuadGram
-      ? GramTable.getEnumIfQuad(gram)!.shortName + '.' + gram.face.shortName
-      : GramTable.getMonoEnum(gram).shortName;
-
-  String get pronunciation =>
-      (gram.consPair == ConsPair.AHA ? '' : gram.consPair.base.shortName) +
-      (gram.consPair == ConsPair.AHA
-          ? gram.vowel.shortName
-          : gram.vowel.shortName.toLowerCase());
-
-  /// Shrinks a single Gram by half maintaining its center position.
-  GramExpression shrink() => _UnaryExpr(Unary.Shrink, this.gram);
-
-  /// Shrinks a single Gram by half then move it to upper quadrant.
-  GramExpression up() => _UnaryExpr(Unary.Up, this.gram);
-
-  /// Shrinks a single Gram by half then move it to down quadrant.
-  GramExpression down() => _UnaryExpr(Unary.Down, this.gram);
-
-  /// Shrinks a single Gram by half then move it to left quadrant.
-  GramExpression left() => _UnaryExpr(Unary.Left, this.gram);
-
-  /// Shrinks a single Gram by half then move it to right quadrant.
-  GramExpression right() => _UnaryExpr(Unary.Right, this.gram);
+  Vector2 get visualCenter;
 }
 
 /// A Unary Gram Expression applies a Unary Operation on a single Gram.
 /// Private subclass, use respective factory methods in SingleGram instead.
-class _UnaryExpr extends SingleGram {
+class UnaryExpr extends GramExpression {
   final Unary op;
+  final Gram gram;
 
-  _UnaryExpr(this.op, Gram gram) : super(gram);
+  UnaryExpr(this.op, this.gram);
 
   String toString() =>
       op.symbol +
@@ -88,28 +61,45 @@ class _UnaryExpr extends SingleGram {
           : GramTable.getMonoEnum(gram).shortName);
 
   String get pronunciation =>
-      super.pronunciation + op.ending.shortName.toLowerCase();
+      gram.pronunciation + op.ending.shortName.toLowerCase();
+
+  @override
+  Vector2 get visualCenter {
+    final gc = gram.visualCenter;
+    final v3 = op.transform * Vector3(gc.x, gc.y, 1);
+    return Vector2(v3[0], v3[1]);
+  }
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
 /// Private subclass, use respective factory methods in GramExpression instead.
-class _BinaryExpr extends GramExpression {
+class BinaryExpr extends GramExpression {
   final GramExpression expr1;
   final Binary op;
   final GramExpression expr2;
 
-  _BinaryExpr(this.expr1, this.op, this.expr2);
+  BinaryExpr(this.expr1, this.op, this.expr2);
 
   String toString() => "$expr1 ${op.symbol} $expr2";
 
   String get pronunciation =>
       expr1.pronunciation + op.ending.base + expr2.pronunciation;
+
+  @override
+  Vector2 get visualCenter {
+    Vector2 c1 = expr1.visualCenter;
+    Vector3 v1 = op.transforms.item1 * Vector3(c1.x, c1.y, 1);
+    Vector2 c2 = expr2.visualCenter;
+    Vector3 v2 = op.transforms.item2 * Vector3(c2.x, c2.y, 1);
+    Vector3 avg = (v1 + v2) / 2.0;
+    return avg.xy;
+  }
 }
 
 class Cluster extends GramExpression {
-  final SingleGram headGram;
+  final Gram headGram;
   final Binary tailOp;
-  final SingleGram tailGram;
+  final Gram tailGram;
 
   Cluster(this.headGram, this.tailOp, this.tailGram);
 
@@ -117,10 +107,20 @@ class Cluster extends GramExpression {
 
   @override
   String get pronunciation =>
-      headGram.gram.head.shortName +
-      headGram.gram.vowel.shortName.toLowerCase() +
+      headGram.head.shortName +
+      headGram.vowel.shortName.toLowerCase() +
       tailOp.ending.tail +
       tailGram.pronunciation;
+
+  @override
+  Vector2 get visualCenter {
+    Vector2 c1 = headGram.visualCenter;
+    Vector3 v1 = tailOp.transforms.item1 * Vector3(c1.x, c1.y, 1);
+    Vector2 c2 = tailGram.visualCenter;
+    Vector3 v2 = tailOp.transforms.item2 * Vector3(c2.x, c2.y, 1);
+    Vector3 avg = (v1 + v2) / 2.0;
+    return avg.xy;
+  }
 }
 
 class ExtendedCluster extends Cluster {
@@ -135,10 +135,24 @@ class ExtendedCluster extends Cluster {
 
   @override
   String get pronunciation =>
-      headGram.gram.head.shortName +
-      headGram.gram.vowel.shortName.toLowerCase() +
+      headGram.head.shortName +
+      headGram.vowel.shortName.toLowerCase() +
       headOp.ending.base +
       innerExpr.pronunciation +
       tailOp.ending.tail +
       tailGram.pronunciation;
+
+  @override
+  Vector2 get visualCenter {
+    Vector2 c1 = headGram.visualCenter;
+    Vector3 v1 = headOp.transforms.item1 * Vector3(c1.x, c1.y, 1);
+    Vector2 c2 = innerExpr.visualCenter;
+    Vector3 v2 = headOp.transforms.item2 * Vector3(c2.x, c2.y, 1);
+    Vector3 avg12 = (v1 + v2) / 2.0;
+    Vector3 v12 = tailOp.transforms.item1 * avg12;
+    Vector2 c3 = tailGram.visualCenter;
+    Vector3 v3 = tailOp.transforms.item2 * Vector3(c3.x, c3.y, 1);
+    Vector3 avg123 = (v12 + v3) / 2.0;
+    return avg123.xy;
+  }
 }

@@ -42,7 +42,10 @@ void main() {
       for (final v in Vowel.values) {
         final g = GramTable.atConsPairVowel(cp, v);
         final single = SingleGram(g);
-        expect(single.pronunciation, cp.base.shortName + v.shortName);
+        expect(
+            single.pronunciation,
+            (cp == ConsPair.AHA ? '' : cp.base.shortName) +
+                v.shortName.toLowerCase());
       }
     }
   });
@@ -67,22 +70,22 @@ void main() {
         final g = GramTable.atMonoFace(m, f);
         final sg = SingleGram(g);
         expect(sg.shrink().pronunciation,
-            sg.pronunciation + Unary.Shrink.ending.shortName);
+            sg.pronunciation + Unary.Shrink.ending.shortName.toLowerCase());
         expect(
           sg.up().pronunciation,
-          sg.pronunciation + Unary.Up.ending.shortName,
+          sg.pronunciation + Unary.Up.ending.shortName.toLowerCase(),
         );
         expect(
           sg.down().pronunciation,
-          sg.pronunciation + Unary.Down.ending.shortName,
+          sg.pronunciation + Unary.Down.ending.shortName.toLowerCase(),
         );
         expect(
           sg.left().pronunciation,
-          sg.pronunciation + Unary.Left.ending.shortName,
+          sg.pronunciation + Unary.Left.ending.shortName.toLowerCase(),
         );
         expect(
           sg.right().pronunciation,
-          sg.pronunciation + Unary.Right.ending.shortName,
+          sg.pronunciation + Unary.Right.ending.shortName.toLowerCase(),
         );
       }
     }

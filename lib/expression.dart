@@ -53,22 +53,23 @@ class SingleGram extends GramExpression {
       : GramTable.getMonoEnum(gram).shortName;
 
   String get pronunciation =>
-      gram.consPair.base.shortName + gram.vowel.shortName;
+      (gram.consPair == ConsPair.AHA ? '' : gram.consPair.base.shortName) +
+      gram.vowel.shortName.toLowerCase();
 
   /// Shrinks a single Gram by half maintaining its center position.
-  GramExpression shrink() => _UnaryExpr(Unary.Shrink, this);
+  GramExpression shrink() => _UnaryExpr(Unary.Shrink, this.gram);
 
   /// Shrinks a single Gram by half then move it to upper quadrant.
-  GramExpression up() => _UnaryExpr(Unary.Up, this);
+  GramExpression up() => _UnaryExpr(Unary.Up, this.gram);
 
   /// Shrinks a single Gram by half then move it to down quadrant.
-  GramExpression down() => _UnaryExpr(Unary.Down, this);
+  GramExpression down() => _UnaryExpr(Unary.Down, this.gram);
 
   /// Shrinks a single Gram by half then move it to left quadrant.
-  GramExpression left() => _UnaryExpr(Unary.Left, this);
+  GramExpression left() => _UnaryExpr(Unary.Left, this.gram);
 
   /// Shrinks a single Gram by half then move it to right quadrant.
-  GramExpression right() => _UnaryExpr(Unary.Right, this);
+  GramExpression right() => _UnaryExpr(Unary.Right, this.gram);
 }
 
 /// A Unary Gram Expression applies a Unary Operation on a single Gram.
@@ -76,11 +77,16 @@ class SingleGram extends GramExpression {
 class _UnaryExpr extends SingleGram {
   final Unary op;
 
-  _UnaryExpr(this.op, gram) : super(gram);
+  _UnaryExpr(this.op, Gram gram) : super(gram);
 
-  String toString() => "${op.symbol}$gram";
+  String toString() =>
+      op.symbol +
+      (gram is QuadGram
+          ? GramTable.getEnumIfQuad(gram)!.shortName + '.' + gram.face.shortName
+          : GramTable.getMonoEnum(gram).shortName);
 
-  String get pronunciation => super.pronunciation + gram.vowel.shortName;
+  String get pronunciation =>
+      super.pronunciation + op.ending.shortName.toLowerCase();
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
@@ -110,7 +116,7 @@ class Cluster extends GramExpression {
   @override
   String get pronunciation =>
       headGram.gram.head.shortName +
-      headGram.gram.vowel.shortName +
+      headGram.gram.vowel.shortName.toLowerCase() +
       tailOp.ending.tail +
       tailGram.pronunciation;
 }
@@ -128,7 +134,7 @@ class ExtendedCluster extends Cluster {
   @override
   String get pronunciation =>
       headGram.gram.head.shortName +
-      headGram.gram.vowel.shortName +
+      headGram.gram.vowel.shortName.toLowerCase() +
       headOp.ending.base +
       innerExpr.pronunciation +
       tailOp.ending.tail +

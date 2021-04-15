@@ -186,7 +186,7 @@ enum Quads {
   Angle,
   Gate,
   Triangle,
-  Step,
+  Zap,
   Arc,
   Flow,
   Swirl,
@@ -214,8 +214,8 @@ class _QuadHelper {
     PolyLine.anchors([Anchor.NW, Anchor.IE, Anchor.SW, Anchor.NW])
   ];
 
-  static final stepPaths = [
-    PolyLine.anchors([Anchor.SW, Anchor.IS, Anchor.IN, Anchor.NE])
+  static final zapPaths = [
+    PolyLine.anchors([Anchor.W, Anchor.IS, Anchor.IN, Anchor.E])
   ];
 
   static final arcPaths = [
@@ -255,7 +255,7 @@ class _QuadHelper {
     Quads.Angle: RotatingQuads(anglePaths, ConsPair.GAKA),
     Quads.Gate: RotatingQuads(gatePaths, ConsPair.DATA),
     Quads.Triangle: RotatingQuads(trianglePaths, ConsPair.JACHA),
-    Quads.Step: SemiRotatingQuads(stepPaths, ConsPair.ZASA),
+    Quads.Zap: FlipQuads(zapPaths, ConsPair.ZASA),
     Quads.Arc: RotatingQuads(arcPaths, ConsPair.NAMA),
     Quads.Flow: FlipQuads(flowPaths, ConsPair.VAFA),
     Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.RALA),

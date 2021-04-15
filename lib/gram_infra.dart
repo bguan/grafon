@@ -102,7 +102,7 @@ enum Anchor {
 /// Vector2 is used internally but always round to nearest integer.
 extension AnchorHelper on Anchor {
   static const OUTER_DIST = .5;
-  static const INNER_DIST = .25;
+  static const INNER_DIST = .35;
 
   static const List<Anchor> outerPoints = const [
     Anchor.E,

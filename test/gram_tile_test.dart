@@ -97,47 +97,48 @@ void main() {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
-    for (final f in Face.values) {
-      final gram = GramTable.atMonoFace(Mono.Dot, f);
-      final painter = GramPainter(gram, scheme);
-      final canvas = MockCanvas();
+    final dotGram = Mono.Dot.gram;
+    final painter = GramPainter(dotGram, scheme);
+    final canvas = MockCanvas();
 
-      final penWidth = 10.0; // since size is 100x100, pen width is 0.1 of that
+    final penWidth = 10.0; // since size is 100x100, pen width is 0.1 of that
 
-      painter.paint(canvas, size);
-      verify(canvas.drawCircle(any, penWidth / 2, any));
+    painter.paint(canvas, size);
+    verify(canvas.drawCircle(any, penWidth / 2, any));
 
-      expect(canvas.drawCircleArgs.length, f == Face.Center ? 1 : 2);
-      verifyNever(canvas.drawLine(any, any, any));
-      verifyNever(canvas.drawPath(any, any));
-      verifyNoMoreInteractions(canvas);
+    verifyNever(canvas.drawLine(any, any, any));
+    verifyNever(canvas.drawPath(any, any));
+    verifyNoMoreInteractions(canvas);
 
-      // just check the center dot for drawing accuracy and paint params
-      if (f == Face.Center) {
-        final offset = canvas.drawCircleArgs.first.item1;
-        final radius = canvas.drawCircleArgs.first.item2;
-        final paint = canvas.drawCircleArgs.first.item3;
+    final offset = canvas.drawCircleArgs.first.item1;
+    final radius = canvas.drawCircleArgs.first.item2;
+    final paint = canvas.drawCircleArgs.first.item3;
 
-        expect(offset.dx, 50.0);
-        expect(offset.dy, 50.0);
-        expect(radius, 5.0);
-        expect(paint.strokeWidth, 10.0);
-        expect(paint.color.value, scheme.primary.value);
-        expect(paint.style, PaintingStyle.stroke);
-        expect(paint.strokeCap, StrokeCap.round);
-        expect(paint.strokeJoin, StrokeJoin.round);
-      }
-    }
+    expect(offset.dx, 50.0);
+    expect(offset.dy, 50.0);
+    expect(radius, 5.0);
+    expect(paint.strokeWidth, 10.0);
+    expect(paint.color.value, scheme.primary.value);
+    expect(paint.style, PaintingStyle.stroke);
+    expect(paint.strokeCap, StrokeCap.round);
+    expect(paint.strokeJoin, StrokeJoin.round);
   });
 
   test('test GramPainter on Line based grams', () {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
-    for (final m in [Mono.Space, Mono.Cross, Mono.X, Mono.Square, Mono.Sun]) {
+    for (final m in [
+      Mono.Dot,
+      Mono.Cross,
+      Mono.X,
+      Mono.Square,
+      Mono.Diamond,
+      Mono.Sun
+    ]) {
       for (final f in Face.values) {
-        if (m == Mono.Space && f == Face.Center) {
-          // Space Gram has no lines, but it's quad peers are lines
+        if (m == Mono.Dot && f == Face.Center) {
+          // Dot Gram has no lines, but it's quad peers are lines
           continue;
         }
         final gram = GramTable.atMonoFace(m, f);
@@ -155,18 +156,22 @@ void main() {
   test('test GramPainter on Spline based grams', () {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
-
-    for (final m in [Mono.Circle, Mono.Flower, Mono.Blob]) {
-      for (final f in Face.values) {
-        final gram = GramTable.atMonoFace(m, f);
-        final painter = GramPainter(gram, scheme);
-        final canvas = MockCanvas();
-        painter.paint(canvas, size);
-        verify(canvas.drawPath(any, any));
-        verifyNever(canvas.drawLine(any, any, any));
-        verifyNever(canvas.drawCircle(any, any, any));
-        verifyNoMoreInteractions(canvas);
-      }
+    final splineGrams = [
+      Mono.Circle.gram,
+      ...Quads.Arc.grams.all,
+      Mono.Flower.gram,
+      ...Quads.Flow.grams.all,
+      Mono.Blob.gram,
+      ...Quads.Swirl.grams.all,
+    ];
+    for (var gram in splineGrams) {
+      final painter = GramPainter(gram, scheme);
+      final canvas = MockCanvas();
+      painter.paint(canvas, size);
+      verify(canvas.drawPath(any, any));
+      verifyNever(canvas.drawLine(any, any, any));
+      verifyNever(canvas.drawCircle(any, any, any));
+      verifyNoMoreInteractions(canvas);
     }
   });
 
@@ -174,10 +179,10 @@ void main() {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
     final gram = QuadGram([
-      PolyLine([Anchor.E, Anchor.N])
+      PolyLine.anchors([Anchor.E, Anchor.N])
     ], Face.Up, ConsPair.AHA);
 
-    final rad = Polar.DEFAULT_ANCHOR_DIST;
+    final rad = AnchorHelper.OUTER_DIST;
     final avgX = (rad + 0.0) / 2; // should be .25
     final avgY = (0.0 + rad) / 2; // should be .25
     final canvasShiftX = -avgX * 100; // should be -25
@@ -196,7 +201,7 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
 
     final gram = QuadGram([
-      PolySpline([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
+      PolySpline.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
     ], Face.Up, ConsPair.AHA);
 
     final p1 = Offset(50, 0);

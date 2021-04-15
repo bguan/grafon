@@ -2,53 +2,53 @@
 
 A graphical phonetic language.  
 
-Graphical symbols, arranged in a table, are each associated with a syllable (an optional starting 
+Logo-grams, i.e. graphical symbols, AKA Grams, arranged in a table, are each associated with a syllable (an optional starting 
 consonant and a vowel).  
 
 ![Gra Table](/assets/images/gramtable.png)
 
-The symbols can be further arranged in a handful of 2 dimensional operations to form words.
+The grams can be further arranged in a handful of 2 dimensional operations to form words.
 
-An unary operation manipulating a symbol is associated with an ending 
-vowel to be appended to the end of the symbol.
+An unary operation manipulating a gram is associated with an ending 
+vowel to be appended to the gram, forming a diphthong.
 
 A binary operation manipulating 2 symbols (or expressions) is associated with an ending 
-consonant to be appended to the end of the first symbol (or expression).
+consonant to be appended to gram as coda.
 
 ## Example in Code
 ```
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation, "Je");
+    expect(sun.pronunciation, "Za");
 
-    final house = Quad.Angle.up.over(Quad.Gate.up);
+    final house = Quads.Angle.up.over(Quads.Gate.up);
     expect(house.toString(), "Angle.Up / Gate.Up");
     expect(house.pronunciation, "GisDi");
 
-    final person = Mono.Dot.gram.over(Quad.Line.up);
+    final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line.Up");
-    expect(person.pronunciation, "SesI");
+    expect(person.pronunciation, "AsI");
 
-    final day = sun.over(Quad.Line.down);
+    final day = sun.over(Quads.Line.down);
     expect(day.toString(), "Sun / Line.Down");
-    expect(day.pronunciation, "JesU");
+    expect(day.pronunciation, "ZasU");
 
-    final rain = Quad.Flow.down.before(Quad.Flow.down);
+    final rain = Quads.Flow.down.before(Quads.Flow.down);
     expect(rain.toString(), "Flow.Down | Flow.Down");
     expect(rain.pronunciation, "VuVu");
 
-    final speech = Quad.Arc.right.around(Quad.Flow.right);
+    final speech = Quads.Arc.right.around(Quads.Flow.right);
     expect(speech.toString(), "Arc.Right @ Flow.Right");
-    expect(speech.pronunciation, "MamVa");
+    expect(speech.pronunciation, "NemVe");
 
-    final nine = Mono.Square.gram.merge(Quad.Line.up);
+    final nine = Mono.Square.gram.merge(Quads.Line.up);
     expect(nine.toString(), "Square * Line.Up");
-    expect(nine.pronunciation, "DelI");
+    expect(nine.pronunciation, "DalI");
 
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line.Up");
-    expect(starMan.pronunciation, "JengSesI");
+    expect(starMan.pronunciation, "ZangAsI");
   });
 ```
 

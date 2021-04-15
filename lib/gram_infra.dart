@@ -28,69 +28,121 @@ import 'phonetics.dart';
 /// Gram - the logogram and it's graphical definition for the Grafon language.
 
 /// Polar coordinates is used for defining anchor points of a Gram
+
+/// Rounding Base to convert Double to Integer for storage and comparison
+const int FLOAT_DECIMALS = 2;
+final double floatPrecision = pow(0.1, FLOAT_DECIMALS).toDouble();
+final int _floatBase = pow(10, FLOAT_DECIMALS).round();
+final int _floatStorageBase =
+    _floatBase * _floatBase; // store at higher precision
+
+double quantize(double x) => ((x * _floatBase).round() / _floatBase);
+
+Vector2 quantizeV2(Vector2 v) => Vector2(quantize(v.x), quantize(v.y));
+
+String quantizeString(double x) => x.toStringAsFixed(FLOAT_DECIMALS);
+
+String quantizeV2String(Vector2 v) =>
+    "(${quantizeString(v.x)}, ${quantizeString(v.y)})";
+
 class Polar {
-  static const DEFAULT_ANCHOR_DIST = 0.5;
+  final int _angleBase; // clockwise 0' is North, 90' is East
+  final int _lenBase; // distance from origin * Precision
 
-  final double angle; // clockwise 0' is North, 90' is East
-  final double length; // distance from origin
+  // Angle simplified by dart's Euclidean modulus
+  Polar({double angle = 0, double length = 0})
+      : _angleBase = ((angle % (2 * pi)) * (1.0 * _floatStorageBase)).round(),
+        _lenBase = (length * (1.0 * _floatStorageBase)).round();
 
-  const Polar({this.angle = 0, this.length = DEFAULT_ANCHOR_DIST});
+  double get angle => _angleBase / (_floatStorageBase * 1.0);
 
-  Vector2 get vector => Vector2(cos(angle), sin(angle)) * length;
+  double get length => _lenBase / (_floatStorageBase * 1.0);
+
+  Vector2 get vector => quantizeV2(Vector2(cos(angle), sin(angle)) * length);
 
   @override
-  int get hashCode => angle.hashCode ^ length.hashCode;
+  int get hashCode => _angleBase.hashCode ^ _lenBase.hashCode;
 
   @override
   bool operator ==(Object other) {
     if (other is! Polar) return false;
 
     Polar that = other;
-    if (length != that.length) return false;
-    if (length == 0.0) return true; // angle doesn't matter
+    if (quantize(length) != quantize(that.length)) return false;
+    if (_lenBase == 0) return true; // angle doesn't matter
 
-    // dart's Euclidean modulus works nicely here
-    return angle % (2 * pi) == that.angle % (2 * pi);
+    return quantize(angle) == quantize(that.angle);
   }
+
+  @override
+  String toString() =>
+      "Polar(angle: ${angle.toStringAsFixed(FLOAT_DECIMALS)}, length: ${length.toStringAsFixed(FLOAT_DECIMALS)})";
 }
 
 /// Anchor points to construct a Gram.
-/// 1 mid point + 8 directions distance of .5 from origin
-enum Anchor { E, NE, N, NW, W, SW, S, SE, O }
+/// 8 directions distance of .5 from origin, 1 center pt
+enum Anchor {
+  E,
+  NE,
+  N,
+  NW,
+  W,
+  SW,
+  S,
+  SE,
+  IE,
+  IN,
+  IW,
+  IS,
+  O,
+}
 
-/// Extending Anchor to returns its polar coordinate
+/// Extending Anchor to returns its polar coordinate.
+/// In standard grid of +/- 0.5 i.e. 1.0x1.0 square with Origin at 0,0.
+/// Vector2 is used internally but always round to nearest integer.
 extension AnchorHelper on Anchor {
-  static List<Anchor> get outerPoints => const [
-        Anchor.E,
-        Anchor.NE,
-        Anchor.N,
-        Anchor.NW,
-        Anchor.W,
-        Anchor.SW,
-        Anchor.S,
-        Anchor.SE,
-      ];
+  static const OUTER_DIST = .5;
+  static const INNER_DIST = .25;
+
+  static const List<Anchor> outerPoints = const [
+    Anchor.E,
+    Anchor.NE,
+    Anchor.N,
+    Anchor.NW,
+    Anchor.W,
+    Anchor.SW,
+    Anchor.S,
+    Anchor.SE,
+  ];
 
   Polar get polar {
     switch (this) {
       case Anchor.E:
-        return const Polar(angle: 0);
+        return Polar(angle: 0, length: OUTER_DIST);
+      case Anchor.IE:
+        return Polar(angle: 0, length: INNER_DIST);
       case Anchor.NE:
-        return const Polar(angle: .25 * pi);
+        return Polar(angle: .25 * pi, length: OUTER_DIST);
       case Anchor.N:
-        return const Polar(angle: .5 * pi);
+        return Polar(angle: .5 * pi, length: OUTER_DIST);
+      case Anchor.IN:
+        return Polar(angle: .5 * pi, length: INNER_DIST);
       case Anchor.NW:
-        return const Polar(angle: .75 * pi);
+        return Polar(angle: .75 * pi, length: OUTER_DIST);
       case Anchor.W:
-        return const Polar(angle: pi);
+        return Polar(angle: pi, length: OUTER_DIST);
+      case Anchor.IW:
+        return Polar(angle: pi, length: INNER_DIST);
       case Anchor.SW:
-        return const Polar(angle: 1.25 * pi);
+        return Polar(angle: 1.25 * pi, length: OUTER_DIST);
       case Anchor.S:
-        return const Polar(angle: 1.5 * pi);
+        return Polar(angle: 1.5 * pi, length: OUTER_DIST);
+      case Anchor.IS:
+        return Polar(angle: 1.5 * pi, length: INNER_DIST);
       case Anchor.SE:
-        return const Polar(angle: 1.75 * pi);
+        return Polar(angle: 1.75 * pi, length: OUTER_DIST);
       default:
-        return const Polar(length: 0);
+        return Polar(length: 0);
     }
   }
 
@@ -103,6 +155,14 @@ extension AnchorHelper on Anchor {
   double get x => this.vector.x;
 
   double get y => this.vector.y;
+
+  static Anchor? findAnchor(Vector2 v) {
+    final qv = quantizeV2(v);
+    for (final a in Anchor.values) {
+      if (a.vector == qv) return a;
+    }
+    return null;
+  }
 }
 
 /// A Gram has 5 orientations: Facing Right, Up, Left, Down or Center
@@ -112,17 +172,17 @@ enum Face { Center, Right, Up, Left, Down }
 extension FaceHelper on Face {
   String get shortName => this.toString().split('.').last;
 
-  static List<Face> get directionals => const [
-        Face.Right,
-        Face.Up,
-        Face.Left,
-        Face.Down,
-      ];
+  static const List<Face> directionals = const [
+    Face.Right,
+    Face.Up,
+    Face.Left,
+    Face.Down,
+  ];
 
   Vowel get vowel {
     switch (this) {
       case Face.Right:
-        return Vowel.A;
+        return Vowel.E;
       case Face.Up:
         return Vowel.I;
       case Face.Left:
@@ -130,7 +190,7 @@ extension FaceHelper on Face {
       case Face.Down:
         return Vowel.U;
       default:
-        return Vowel.E;
+        return Vowel.A;
     }
   }
 }
@@ -141,7 +201,7 @@ extension VowelHelper on Vowel {
 
   Face get face {
     switch (this) {
-      case Vowel.A:
+      case Vowel.E:
         return Face.Right;
       case Vowel.I:
         return Face.Up;
@@ -157,18 +217,27 @@ extension VowelHelper on Vowel {
 
 /// Pen Stroke Paths as series of anchor points joined by dots, lines or curves
 abstract class PolyPath {
-  final List<Anchor> anchors;
+  final List<Vector2> _baseVectors;
 
-  const PolyPath(this.anchors);
+  PolyPath(List<Vector2> vs)
+      : this._baseVectors = List.unmodifiable(
+            vs.map((v) => (v * (1.0 * _floatStorageBase))..round()));
 
-  List<Anchor> get visibleAnchors => anchors;
+  List<Vector2> get vectors => List.unmodifiable(
+      _baseVectors.map((v) => quantizeV2(v / (1.0 * _floatStorageBase))));
+
+  List<Vector2> get visiblePoints => vectors;
+
+  int get numPts => visiblePoints.length;
 
   @override
   int get hashCode {
     var hash = this.runtimeType.hashCode;
-    for (var a in anchors) {
+    for (var v in _baseVectors) {
       // order matters so hash is shifted for every anchor
-      hash = hash << 1 ^ a.hashCode;
+      hash = hash << 1 ^
+          (v.x.round() * _floatStorageBase).hashCode ^
+          v.y.round().hashCode;
     }
     return hash;
   }
@@ -178,15 +247,78 @@ abstract class PolyPath {
     if (other is! PolyPath) return false;
 
     PolyPath that = other;
-    final leq = ListEquality<Anchor>().equals;
+    final leq = ListEquality<Vector2>().equals;
 
-    return leq(this.anchors, that.anchors);
+    return leq(this.vectors, that.vectors);
+  }
+
+  @override
+  String toString() =>
+      "$runtimeType with $numPts points: ${vectors.map((v) => quantizeV2String(v))}";
+
+  /// Turn by either full step(s) of 90' or semi step of 45'
+  PolyPath turn({int steps = 1, bool isSemi = false}) {
+    List<Vector2> pts = [];
+    for (Vector2 bv in _baseVectors) {
+      Vector2 rotatedBase =
+          Matrix2.rotation(steps * pi / (isSemi ? 4 : 2)) * bv;
+      pts.add(rotatedBase / (1.0 * _floatStorageBase));
+    }
+
+    if (this is PolyLine) {
+      return PolyLine(pts);
+    } else if (this is PolySpline) {
+      return PolySpline(pts);
+    } else if (this is PolyDot) {
+      return PolyDot(pts);
+    } else {
+      throw UnimplementedError("Not expecting $this");
+    }
+  }
+
+  /// Vertically Flip upside down
+  PolyPath vFlip() {
+    List<Vector2> pts = [];
+    for (Vector2 v in vectors) {
+      // No need to quantize as only flipping signs
+      pts.add(Vector2(v.x, -v.y));
+    }
+    if (this is PolyLine) {
+      return PolyLine(pts);
+    } else if (this is PolySpline) {
+      return PolySpline(pts);
+    } else if (this is PolyDot) {
+      return PolyDot(pts);
+    } else {
+      throw UnimplementedError("Not expecting $this");
+    }
+  }
+
+  /// Horizontally Flip left to right
+  PolyPath hFlip() {
+    List<Vector2> pts = [];
+    for (Vector2 v in vectors) {
+      // No need to quantize as only flipping signs
+      pts.add(Vector2(-v.x, v.y));
+    }
+    if (this is PolyLine) {
+      return PolyLine(pts);
+    } else if (this is PolySpline) {
+      return PolySpline(pts);
+    } else if (this is PolyDot) {
+      return PolyDot(pts);
+    } else {
+      throw UnimplementedError("Not expecting $this");
+    }
   }
 }
 
 /// Dotted pen stroke paths
 class PolyDot extends PolyPath {
-  const PolyDot(anchors) : super(anchors);
+  PolyDot(List<Vector2> vs) : super(vs);
+
+  PolyDot.anchors(List<Anchor> anchors)
+      : super(List.unmodifiable(anchors.map((a) => a.vector)));
 
   /// dots ordering shouldn't matter
   @override
@@ -194,43 +326,60 @@ class PolyDot extends PolyPath {
     if (other is! PolyDot) return false;
 
     PolyDot that = other;
-    final seq = SetEquality<Anchor>().equals;
+    final seq = SetEquality<Vector2>().equals;
 
-    return seq(Set.of(this.anchors), Set.of(that.anchors));
+    return seq(Set.of(this.vectors), Set.of(that.vectors));
   }
 
   @override
   int get hashCode {
     var hash = this.runtimeType.hashCode;
-    for (var a in Set.of(anchors)) hash ^= a.hashCode;
+    var vectorSet = Set.of(_baseVectors);
+    // incorporate set size to differentiate btwn empty set and set of Origin
+    hash ^= vectorSet.length.hashCode;
+    // since order doesn't matter, hashing without shifting
+    for (var v in vectorSet)
+      hash ^= (v.x.round() * _floatStorageBase).hashCode ^ v.y.hashCode;
     return hash;
   }
 }
 
 /// Straight Line from anchor point to anchor point
 class PolyLine extends PolyPath {
-  const PolyLine(anchors) : super(anchors);
+  PolyLine(List<Vector2> vs) : super(vs);
+
+  PolyLine.anchors(List<Anchor> anchors)
+      : super(List.unmodifiable(anchors.map((a) => a.vector)));
 
   @override
   bool operator ==(Object other) {
     if (other is! PolyLine) return false;
     return super == other;
   }
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 /// Curve Line thru everypoint, making sure tangent transition is smooth at each
 /// first point and last point is for direction computation only
 class PolySpline extends PolyPath {
-  const PolySpline(anchors) : super(anchors);
+  PolySpline(List<Vector2> vs) : super(vs);
+
+  PolySpline.anchors(List<Anchor> anchors)
+      : super(List.unmodifiable(anchors.map((a) => a.vector)));
 
   @override
-  List<Anchor> get visibleAnchors => anchors.sublist(1, anchors.length - 1);
+  List<Vector2> get visiblePoints => vectors.sublist(1, vectors.length - 1);
 
   @override
   bool operator ==(Object other) {
     if (other is! PolySpline) return false;
     return super == other;
   }
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 /// Gram is a Graphical Symbol i.e. logogram
@@ -275,13 +424,13 @@ abstract class Gram extends GramExpression {
   Vector2 get visualCenter {
     double x = 0, y = 0;
     int aCount = 0;
-    final Set<Anchor> pathAnchors = Set.of([
-      for (final p in paths) ...p.visibleAnchors,
+    final Set<Vector2> pathVectors = Set.of([
+      for (final p in paths) ...p.visiblePoints,
     ]);
 
-    for (final a in pathAnchors) {
-      x += a.vector.x;
-      y += a.vector.y;
+    for (final v in pathVectors) {
+      x += v.x;
+      y += v.y;
       aCount++;
     }
     return Vector2(x / aCount, y / aCount);
@@ -324,6 +473,9 @@ class MonoGram extends Gram {
     if (other is! MonoGram) return false;
     return super == other;
   }
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 /// QuadGram has 4 orientation, each form by rotating a base Gram by 90' or 45'
@@ -337,115 +489,9 @@ class QuadGram extends Gram {
     if (other is! QuadGram) return false;
     return super == other;
   }
-}
 
-/// Turn pen paths by either full step(s) of 90' or semi step of 45'
-List<PolyPath> turn(List<PolyPath> paths,
-    {int steps = 1, bool isSemi = false}) {
-  List<PolyPath> turned = [];
-  for (PolyPath p in paths) {
-    List<Anchor> pts = [];
-    for (Anchor a in p.anchors) {
-      if (a == Anchor.O)
-        pts.add(a);
-      else
-        pts.add(Anchor.values[(a.index + steps * (isSemi ? 1 : 2)) % 8]);
-    }
-    if (p is PolyLine) {
-      turned.add(PolyLine(pts));
-    } else if (p is PolySpline) {
-      turned.add(PolySpline(pts));
-    } else if (p is PolyDot) {
-      turned.add(PolyDot(pts));
-    } else {
-      throw UnimplementedError("Not expecting $p");
-    }
-  }
-  return turned;
-}
-
-/// Vertically Flip pen paths upside down
-List<PolyPath> vFlip(List<PolyPath> paths) {
-  List<PolyPath> flipped = [];
-  for (PolyPath p in paths) {
-    List<Anchor> pts = [];
-    for (Anchor a in p.anchors) {
-      switch (a) {
-        case Anchor.N:
-          pts.add(Anchor.S);
-          break;
-        case Anchor.NE:
-          pts.add(Anchor.SE);
-          break;
-        case Anchor.SE:
-          pts.add(Anchor.NE);
-          break;
-        case Anchor.S:
-          pts.add(Anchor.N);
-          break;
-        case Anchor.SW:
-          pts.add(Anchor.NW);
-          break;
-        case Anchor.NW:
-          pts.add(Anchor.SW);
-          break;
-        default:
-          pts.add(a);
-      }
-    }
-    if (p is PolyLine) {
-      flipped.add(PolyLine(pts));
-    } else if (p is PolySpline) {
-      flipped.add(PolySpline(pts));
-    } else if (p is PolyDot) {
-      flipped.add(PolyDot(pts));
-    } else {
-      throw UnimplementedError("Not expecting $p");
-    }
-  }
-  return flipped;
-}
-
-/// Horizontally Flip pen strokes left to right
-List<PolyPath> hFlip(List<PolyPath> paths) {
-  List<PolyPath> flipped = [];
-  for (PolyPath p in paths) {
-    List<Anchor> pts = [];
-    for (Anchor a in p.anchors) {
-      switch (a) {
-        case Anchor.NE:
-          pts.add(Anchor.NW);
-          break;
-        case Anchor.E:
-          pts.add(Anchor.W);
-          break;
-        case Anchor.SE:
-          pts.add(Anchor.SW);
-          break;
-        case Anchor.SW:
-          pts.add(Anchor.SE);
-          break;
-        case Anchor.W:
-          pts.add(Anchor.E);
-          break;
-        case Anchor.NW:
-          pts.add(Anchor.NE);
-          break;
-        default:
-          pts.add(a);
-      }
-    }
-    if (p is PolyLine) {
-      flipped.add(PolyLine(pts));
-    } else if (p is PolySpline) {
-      flipped.add(PolySpline(pts));
-    } else if (p is PolyDot) {
-      flipped.add(PolyDot(pts));
-    } else {
-      throw UnimplementedError("Not expecting $p");
-    }
-  }
-  return flipped;
+  @override
+  int get hashCode => super.hashCode;
 }
 
 /// Consist of 4 Quad Grams facing Right, Up, Left, Down.
@@ -467,6 +513,8 @@ abstract class QuadGrams {
         });
 
   Gram operator [](Face f) => f2g[f]!;
+
+  List<Gram> get all => f2g.values.toList();
 
   @override
   int get hashCode =>
@@ -490,6 +538,19 @@ abstract class QuadGrams {
         this.f2g[Face.Down] == that.f2g[Face.Down];
   }
 }
+
+/// Turn pen paths by either full step(s) of 90' or semi step of 45'
+List<PolyPath> turn(List<PolyPath> paths,
+        {int steps = 1, bool isSemi = false}) =>
+    List.unmodifiable(paths.map((p) => p.turn(steps: steps, isSemi: isSemi)));
+
+/// Vertically Flip pen paths upside down
+List<PolyPath> vFlip(List<PolyPath> paths) =>
+    List.unmodifiable(paths.map((p) => p.vFlip()));
+
+/// Horizontally Flip pen paths upside down
+List<PolyPath> hFlip(List<PolyPath> paths) =>
+    List.unmodifiable(paths.map((p) => p.hFlip()));
 
 /// In RotatingRow, quads are rotated by full step of 90'
 class RotatingQuads extends QuadGrams {

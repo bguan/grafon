@@ -18,16 +18,16 @@
 /// Enums and utils for Phonetics related concepts for the Grafon language.
 
 /// Basic vowels for the language. Can be combined into diphthong.
-enum Vowel { E, A, I, O, U }
+enum Vowel { A, E, I, O, U }
 
 /// Basic consonants for the language. Can be combined into cluster.
 enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
 
 /// Consonants are paired based on related vocalization.
 /// One is used as the "Base" form, the other the "Head" form.
-/// The easier (less ejective) is the Base, the harder (more ejective) is Head.
+/// The softer (less ejective) is the Base, the louder (more ejective) is Head.
 /// Head form overrides spatial operator to indicate "head" of cluster.
-enum ConsPair { AHA, BAPA, JACHA, DATA, VAFA, GAKA, LARA, MANA, SAZA }
+enum ConsPair { AHA, BAPA, JACHA, DATA, VAFA, GAKA, RALA, NAMA, ZASA }
 
 /// Extension to map Consonant to the Pair and provide short name
 extension ConsonantExtension on Consonant {
@@ -53,17 +53,17 @@ extension ConsonantExtension on Consonant {
       case Consonant.K:
         return ConsPair.GAKA;
 
-      case Consonant.L:
       case Consonant.R:
-        return ConsPair.LARA;
+      case Consonant.L:
+        return ConsPair.RALA;
 
-      case Consonant.M:
       case Consonant.N:
-        return ConsPair.MANA;
+      case Consonant.M:
+        return ConsPair.NAMA;
 
-      case Consonant.S:
       case Consonant.Z:
-        return ConsPair.SAZA;
+      case Consonant.S:
+        return ConsPair.ZASA;
 
       default:
         return ConsPair.AHA;
@@ -87,12 +87,12 @@ extension ConsPairExtension on ConsPair {
         return Consonant.V;
       case ConsPair.GAKA:
         return Consonant.G;
-      case ConsPair.LARA:
-        return Consonant.L;
-      case ConsPair.MANA:
-        return Consonant.M;
-      case ConsPair.SAZA:
-        return Consonant.S;
+      case ConsPair.RALA:
+        return Consonant.R;
+      case ConsPair.NAMA:
+        return Consonant.N;
+      case ConsPair.ZASA:
+        return Consonant.Z;
       default:
         return Consonant.nil;
     }
@@ -110,12 +110,12 @@ extension ConsPairExtension on ConsPair {
         return Consonant.F;
       case ConsPair.GAKA:
         return Consonant.K;
-      case ConsPair.LARA:
-        return Consonant.R;
-      case ConsPair.MANA:
-        return Consonant.N;
-      case ConsPair.SAZA:
-        return Consonant.Z;
+      case ConsPair.RALA:
+        return Consonant.L;
+      case ConsPair.NAMA:
+        return Consonant.M;
+      case ConsPair.ZASA:
+        return Consonant.S;
       default:
         return Consonant.H;
     }

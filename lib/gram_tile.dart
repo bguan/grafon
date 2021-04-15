@@ -86,12 +86,12 @@ class GramPainter extends CustomPainter {
     Paint paint,
   ) {
     var path = Path();
-    final len = p.anchors.length;
+    final len = p.vectors.length;
     for (var i = 2; i < len - 1; i++) {
-      final pre = p.anchors[max(0, i - 2)].vector + centerShift;
-      final beg = p.anchors[i - 1].vector + centerShift;
-      final end = p.anchors[i].vector + centerShift;
-      final next = p.anchors[min(i + 1, len - 1)].vector + centerShift;
+      final pre = p.vectors[max(0, i - 2)] + centerShift;
+      final beg = p.vectors[i - 1] + centerShift;
+      final end = p.vectors[i] + centerShift;
+      final next = p.vectors[min(i + 1, len - 1)] + centerShift;
       if (i == 2) {
         final initCoord = toCanvasCoord(beg, size);
         path.moveTo(initCoord.x, initCoord.y);
@@ -137,9 +137,9 @@ class GramPainter extends CustomPainter {
     Canvas canvas,
     Paint paint,
   ) {
-    for (var i = 1; i < p.anchors.length; i++) {
-      final from = toCanvasCoord(p.anchors[i - 1].vector + centerShift, size);
-      final to = toCanvasCoord(p.anchors[i].vector + centerShift, size);
+    for (var i = 1; i < p.numPts; i++) {
+      final from = toCanvasCoord(p.vectors[i - 1] + centerShift, size);
+      final to = toCanvasCoord(p.vectors[i] + centerShift, size);
       canvas.drawLine(toOffset(from), toOffset(to), paint);
     }
   }
@@ -151,8 +151,8 @@ class GramPainter extends CustomPainter {
     Canvas canvas,
     Paint paint,
   ) {
-    for (var a in p.anchors) {
-      final point = toCanvasCoord(a.vector + centerShift, size);
+    for (var v in p.vectors) {
+      final point = toCanvasCoord(v + centerShift, size);
       canvas.drawCircle(toOffset(point), paint.strokeWidth / 2, paint);
     }
   }

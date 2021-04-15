@@ -41,20 +41,20 @@ void main() {
   });
 
   test('Every Quad has shortName', () {
-    for (final q in Quad.values) {
+    for (final q in Quads.values) {
       expect(q.shortName, isNotEmpty);
     }
   });
 
   test('Every Quad has ConsPair', () {
-    for (final q in Quad.values) {
+    for (final q in Quads.values) {
       expect(q.grams.consPair, isNotNull);
     }
   });
 
   test('Every ConsPair maps to a Quad', () {
     for (final cp in ConsPair.values) {
-      expect(Quad.values.firstWhere((q) => q.grams.consPair == cp), isNotNull);
+      expect(Quads.values.firstWhere((q) => q.grams.consPair == cp), isNotNull);
     }
   });
 
@@ -149,7 +149,7 @@ void main() {
   });
 
   test('GramTable numRows match num of Quad', () {
-    expect(GramTable.numRows, Quad.values.length);
+    expect(GramTable.numRows, Quads.values.length);
   });
 
   test('GramTable numRows match num of ConsPair', () {
@@ -169,7 +169,7 @@ void main() {
       Mono? mEnum = GramTable.getEnumIfMono(m.gram);
       expect(mEnum, m);
     }
-    for (final q in Quad.values) {
+    for (final q in Quads.values) {
       for (final f in FaceHelper.directionals) {
         Mono? mEnum = GramTable.getEnumIfMono(q.grams[f]);
         expect(mEnum, isNull);
@@ -179,12 +179,12 @@ void main() {
 
   test('GramTable test getEnumIfQuad', () {
     for (final m in Mono.values) {
-      Quad? qEnum = GramTable.getEnumIfQuad(m.gram);
+      Quads? qEnum = GramTable.getEnumIfQuad(m.gram);
       expect(qEnum, isNull);
     }
-    for (final q in Quad.values) {
+    for (final q in Quads.values) {
       for (final f in FaceHelper.directionals) {
-        Quad? qEnum = GramTable.getEnumIfQuad(q.grams[f]);
+        Quads? qEnum = GramTable.getEnumIfQuad(q.grams[f]);
         expect(qEnum, q);
       }
     }
@@ -195,7 +195,7 @@ void main() {
       Mono mEnum = GramTable.getMonoEnum(m.gram);
       expect(mEnum, m);
     }
-    for (final q in Quad.values) {
+    for (final q in Quads.values) {
       for (final f in FaceHelper.directionals) {
         Mono mEnum = GramTable.getMonoEnum(q.grams[f]);
         expect(mEnum, q.monoPeer);

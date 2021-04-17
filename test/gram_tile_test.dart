@@ -128,14 +128,7 @@ void main() {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
-    for (final m in [
-      Mono.Dot,
-      Mono.Cross,
-      Mono.X,
-      Mono.Square,
-      Mono.Light,
-      Mono.Sun
-    ]) {
+    for (final m in [Mono.Dot, Mono.Cross, Mono.X, Mono.Square, Mono.Sun]) {
       for (final f in Face.values) {
         if (m == Mono.Dot && f == Face.Center) {
           // Dot Gram has no lines, but it's quad peers are lines

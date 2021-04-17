@@ -28,7 +28,6 @@ enum Mono {
   Cross,
   Square,
   X,
-  Light,
   Sun,
   Circle,
   Flower,
@@ -139,8 +138,7 @@ class _MonoHelper {
     Mono.Cross: MonoGram(crossPaths, ConsPair.BAPA),
     Mono.X: MonoGram(xPaths, ConsPair.GAKA),
     Mono.Square: MonoGram(squarePaths, ConsPair.DATA),
-    Mono.Light: MonoGram(lightPaths, ConsPair.ZASA),
-    Mono.Sun: MonoGram(sunPaths, ConsPair.JACHA),
+    Mono.Sun: MonoGram(sunPaths, ConsPair.ZASA),
     Mono.Circle: MonoGram(circlePaths, ConsPair.NAMA),
     Mono.Flower: MonoGram(flowerPaths, ConsPair.VAFA),
     Mono.Blob: MonoGram(blobPaths, ConsPair.RALA),
@@ -163,7 +161,6 @@ enum Quads {
   Corner,
   Angle,
   Gate,
-  Step,
   Zap,
   Arc,
   Flow,
@@ -185,11 +182,7 @@ class _QuadHelper {
   ];
 
   static final gatePaths = [
-    PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
-  ];
-
-  static final stepPaths = [
-    PolyLine.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
+    PolyLine.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW])
   ];
 
   static final zapPaths = [
@@ -232,8 +225,7 @@ class _QuadHelper {
     Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BAPA),
     Quads.Angle: RotatingQuads(anglePaths, ConsPair.GAKA),
     Quads.Gate: RotatingQuads(gatePaths, ConsPair.DATA),
-    Quads.Step: FlipQuads(stepPaths, ConsPair.ZASA),
-    Quads.Zap: FlipQuads(zapPaths, ConsPair.JACHA),
+    Quads.Zap: FlipQuads(zapPaths, ConsPair.ZASA),
     Quads.Arc: RotatingQuads(arcPaths, ConsPair.NAMA),
     Quads.Flow: FlipQuads(flowPaths, ConsPair.VAFA),
     Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.RALA),

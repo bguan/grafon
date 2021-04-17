@@ -88,7 +88,7 @@ void main() {
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation, "Ja");
+    expect(sun.pronunciation, "Za");
 
     final house = Quads.Angle.up.over(Quads.Gate.up);
     expect(house.toString(), "Angle.Up / Gate.Up");
@@ -100,7 +100,7 @@ void main() {
 
     final day = sun.over(Quads.Line.down);
     expect(day.toString(), "Sun / Line.Down");
-    expect(day.pronunciation, "JasU");
+    expect(day.pronunciation, "ZasU");
 
     final rain = Quads.Flow.down.before(Quads.Flow.down);
     expect(rain.toString(), "Flow.Down | Flow.Down");
@@ -116,6 +116,6 @@ void main() {
 
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line.Up");
-    expect(starMan.pronunciation, "JangAsI");
+    expect(starMan.pronunciation, "ZangAsI");
   });
 }

@@ -21,13 +21,13 @@
 enum Vowel { A, E, I, O, U }
 
 /// Basic consonants for the language. Can be combined into cluster.
-enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
+enum Consonant { nil, H, B, P, D, T, V, F, G, K, L, R, M, N, S, Z }
 
 /// Consonants are paired based on related vocalization.
 /// One is used as the "Base" form, the other the "Head" form.
 /// The softer (less ejective) is the Base, the louder (more ejective) is Head.
 /// Head form overrides spatial operator to indicate "head" of cluster.
-enum ConsPair { AHA, BAPA, JACHA, DATA, VAFA, GAKA, RALA, NAMA, ZASA }
+enum ConsPair { AHA, BAPA, DATA, VAFA, GAKA, RALA, NAMA, ZASA }
 
 /// Extension to map Consonant to the Pair and provide short name
 extension ConsonantExtension on Consonant {
@@ -36,10 +36,6 @@ extension ConsonantExtension on Consonant {
       case Consonant.B:
       case Consonant.P:
         return ConsPair.BAPA;
-
-      case Consonant.J:
-      case Consonant.Ch:
-        return ConsPair.JACHA;
 
       case Consonant.D:
       case Consonant.T:
@@ -79,8 +75,6 @@ extension ConsPairExtension on ConsPair {
     switch (this) {
       case ConsPair.BAPA:
         return Consonant.B;
-      case ConsPair.JACHA:
-        return Consonant.J;
       case ConsPair.DATA:
         return Consonant.D;
       case ConsPair.VAFA:
@@ -102,8 +96,6 @@ extension ConsPairExtension on ConsPair {
     switch (this) {
       case ConsPair.BAPA:
         return Consonant.P;
-      case ConsPair.JACHA:
-        return Consonant.Ch;
       case ConsPair.DATA:
         return Consonant.T;
       case ConsPair.VAFA:

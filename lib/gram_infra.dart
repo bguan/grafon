@@ -228,7 +228,7 @@ abstract class PolyPath {
 
   List<Vector2> get visiblePoints => vectors;
 
-  int get numPts => visiblePoints.length;
+  int get numPts => _baseVectors.length;
 
   @override
   int get hashCode {
@@ -269,8 +269,6 @@ abstract class PolyPath {
       return PolyLine(pts);
     } else if (this is PolySpline) {
       return PolySpline(pts);
-    } else if (this is PolyDot) {
-      return PolyDot(pts);
     } else {
       throw UnimplementedError("Not expecting $this");
     }
@@ -287,8 +285,6 @@ abstract class PolyPath {
       return PolyLine(pts);
     } else if (this is PolySpline) {
       return PolySpline(pts);
-    } else if (this is PolyDot) {
-      return PolyDot(pts);
     } else {
       throw UnimplementedError("Not expecting $this");
     }
@@ -305,42 +301,9 @@ abstract class PolyPath {
       return PolyLine(pts);
     } else if (this is PolySpline) {
       return PolySpline(pts);
-    } else if (this is PolyDot) {
-      return PolyDot(pts);
     } else {
       throw UnimplementedError("Not expecting $this");
     }
-  }
-}
-
-/// Dotted pen stroke paths
-class PolyDot extends PolyPath {
-  PolyDot(List<Vector2> vs) : super(vs);
-
-  PolyDot.anchors(List<Anchor> anchors)
-      : super(List.unmodifiable(anchors.map((a) => a.vector)));
-
-  /// dots ordering shouldn't matter
-  @override
-  bool operator ==(Object other) {
-    if (other is! PolyDot) return false;
-
-    PolyDot that = other;
-    final seq = SetEquality<Vector2>().equals;
-
-    return seq(Set.of(this.vectors), Set.of(that.vectors));
-  }
-
-  @override
-  int get hashCode {
-    var hash = this.runtimeType.hashCode;
-    var vectorSet = Set.of(_baseVectors);
-    // incorporate set size to differentiate btwn empty set and set of Origin
-    hash ^= vectorSet.length.hashCode;
-    // since order doesn't matter, hashing without shifting
-    for (var v in vectorSet)
-      hash ^= (v.x.round() * _floatStorageBase).hashCode ^ v.y.hashCode;
-    return hash;
   }
 }
 

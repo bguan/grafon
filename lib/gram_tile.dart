@@ -68,9 +68,7 @@ class GramPainter extends CustomPainter {
     final centerShift = -gram.visualCenter;
 
     for (final p in gram.paths) {
-      if (p is PolyDot) {
-        drawPolyDot(p, centerShift, size, canvas, paint);
-      } else if (p is PolyLine) {
+      if (p is PolyLine) {
         drawPolyLine(p, centerShift, size, canvas, paint);
       } else if (p is PolySpline) {
         drawPolySpline(p, centerShift, size, canvas, paint);
@@ -86,13 +84,13 @@ class GramPainter extends CustomPainter {
     Paint paint,
   ) {
     var path = Path();
-    final len = p.vectors.length;
-    for (var i = 2; i < len - 1; i++) {
-      final pre = p.vectors[max(0, i - 2)] + centerShift;
-      final beg = p.vectors[i - 1] + centerShift;
-      final end = p.vectors[i] + centerShift;
-      final next = p.vectors[min(i + 1, len - 1)] + centerShift;
-      if (i == 2) {
+    final len = p.numPts;
+    for (var i = 1; i < len - 2; i++) {
+      final pre = p.vectors[max(0, i - 1)] + centerShift;
+      final beg = p.vectors[max(1, i)] + centerShift;
+      final end = p.vectors[min(i + 1, len - 1)] + centerShift;
+      final next = p.vectors[min(i + 2, len - 1)] + centerShift;
+      if (i == 1) {
         final initCoord = toCanvasCoord(beg, size);
         path.moveTo(initCoord.x, initCoord.y);
       }
@@ -137,23 +135,13 @@ class GramPainter extends CustomPainter {
     Canvas canvas,
     Paint paint,
   ) {
-    for (var i = 1; i < p.numPts; i++) {
-      final from = toCanvasCoord(p.vectors[i - 1] + centerShift, size);
-      final to = toCanvasCoord(p.vectors[i] + centerShift, size);
+    final len = p.numPts;
+    // enter loop once even if len is 1 to draw dots as line of same point
+    for (var i = 0; i < max(1, len - 1); i++) {
+      final from = toCanvasCoord(p.vectors[i] + centerShift, size);
+      final to =
+          toCanvasCoord(p.vectors[min(i + 1, len - 1)] + centerShift, size);
       canvas.drawLine(toOffset(from), toOffset(to), paint);
-    }
-  }
-
-  void drawPolyDot(
-    PolyDot p,
-    Vector2 centerShift,
-    Size size,
-    Canvas canvas,
-    Paint paint,
-  ) {
-    for (var v in p.vectors) {
-      final point = toCanvasCoord(v + centerShift, size);
-      canvas.drawCircle(toOffset(point), paint.strokeWidth / 2, paint);
     }
   }
 

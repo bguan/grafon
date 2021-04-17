@@ -34,7 +34,6 @@ import 'package:vector_math/vector_math.dart';
 /// Mocks to verify calls to Canvas and record params for later inspection
 class MockCanvas extends Mock implements Canvas {
   final List<Tuple3<Offset, Offset, Paint>> drawLineArgs = [];
-  final List<Tuple3<Offset, double, Paint>> drawCircleArgs = [];
   final List<Tuple2<Path, Paint>> drawPathArgs = [];
 
   @override
@@ -44,15 +43,6 @@ class MockCanvas extends Mock implements Canvas {
       drawLineArgs.add(Tuple3(p1, p2, paint));
     }
     super.noSuchMethod(Invocation.method(#drawLine, [p1, p2, paint]));
-  }
-
-  @override
-  void drawCircle(Offset? offset, double? radius, Paint? paint) {
-    if (offset != null && radius != null && paint != null) {
-      // not in verification but in real call, record the params
-      drawCircleArgs.add(Tuple3(offset, radius, paint));
-    }
-    super.noSuchMethod(Invocation.method(#drawCircle, [offset, radius, paint]));
   }
 
   @override
@@ -101,22 +91,19 @@ void main() {
     final painter = GramPainter(dotGram, scheme);
     final canvas = MockCanvas();
 
-    final penWidth = 10.0; // since size is 100x100, pen width is 0.1 of that
-
     painter.paint(canvas, size);
-    verify(canvas.drawCircle(any, penWidth / 2, any));
+    verify(canvas.drawLine(any, any, any));
 
-    verifyNever(canvas.drawLine(any, any, any));
     verifyNever(canvas.drawPath(any, any));
     verifyNoMoreInteractions(canvas);
 
-    final offset = canvas.drawCircleArgs.first.item1;
-    final radius = canvas.drawCircleArgs.first.item2;
-    final paint = canvas.drawCircleArgs.first.item3;
+    final p1 = canvas.drawLineArgs.first.item1;
+    final p2 = canvas.drawLineArgs.first.item2;
+    final paint = canvas.drawLineArgs.first.item3;
 
-    expect(offset.dx, 50.0);
-    expect(offset.dy, 50.0);
-    expect(radius, 5.0);
+    expect(p1.dx, 50.0);
+    expect(p1.dy, 50.0);
+    expect(p1, p2);
     expect(paint.strokeWidth, 10.0);
     expect(paint.color.value, scheme.primary.value);
     expect(paint.style, PaintingStyle.stroke);
@@ -128,21 +115,25 @@ void main() {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
 
-    for (final m in [Mono.Dot, Mono.Cross, Mono.X, Mono.Square, Mono.Sun]) {
-      for (final f in Face.values) {
-        if (m == Mono.Dot && f == Face.Center) {
-          // Dot Gram has no lines, but it's quad peers are lines
-          continue;
-        }
-        final gram = GramTable.atMonoFace(m, f);
-        final painter = GramPainter(gram, scheme);
-        final canvas = MockCanvas();
-        painter.paint(canvas, size);
-        verify(canvas.drawLine(any, any, any));
-        verifyNever(canvas.drawCircle(any, any, any));
-        verifyNever(canvas.drawPath(any, any));
-        verifyNoMoreInteractions(canvas);
-      }
+    for (Gram g in [
+      Mono.Dot.gram,
+      ...Quads.Line.grams.all,
+      Mono.Cross.gram,
+      ...Quads.Corner.grams.all,
+      Mono.X.gram,
+      ...Quads.Angle.grams.all,
+      Mono.Square.gram,
+      ...Quads.Gate.grams.all,
+      Mono.Sun.gram,
+      Mono.Light.gram,
+      ...Quads.Zap.grams.all,
+    ]) {
+      final painter = GramPainter(g, scheme);
+      final canvas = MockCanvas();
+      painter.paint(canvas, size);
+      verify(canvas.drawLine(any, any, any));
+      verifyNever(canvas.drawPath(any, any));
+      verifyNoMoreInteractions(canvas);
     }
   });
 
@@ -154,7 +145,6 @@ void main() {
       ...Quads.Arc.grams.all,
       Mono.Flower.gram,
       ...Quads.Flow.grams.all,
-      Mono.Blob.gram,
       ...Quads.Swirl.grams.all,
     ];
     for (var gram in splineGrams) {
@@ -163,7 +153,6 @@ void main() {
       painter.paint(canvas, size);
       verify(canvas.drawPath(any, any));
       verifyNever(canvas.drawLine(any, any, any));
-      verifyNever(canvas.drawCircle(any, any, any));
       verifyNoMoreInteractions(canvas);
     }
   });
@@ -180,8 +169,8 @@ void main() {
     final avgY = (0.0 + rad) / 2; // should be .25
     final canvasShiftX = -avgX * 100; // should be -25
     final canvasShiftY = avgY * 100; // should be +25
-    final p1 = Offset(100 + canvasShiftX, 50 + canvasShiftY);
-    final p2 = Offset(50 + canvasShiftX, 0 + canvasShiftY);
+    final p1 = Offset(100 + canvasShiftX, 50 + canvasShiftY); // (75, 75)
+    final p2 = Offset(50 + canvasShiftX, 0 + canvasShiftY); // (25, 25)
     final painter = GramPainter(gram, scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);

@@ -28,16 +28,16 @@ enum Mono {
   Cross,
   Square,
   X,
-  Sun,
+  Light,
   Circle,
   Flower,
-  Blob,
+  Sun,
 }
 
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
 class _MonoHelper {
   static final dotPaths = [
-    PolyDot.anchors([Anchor.O])
+    PolyLine.anchors([Anchor.O])
   ];
 
   static final crossPaths = [
@@ -117,31 +117,15 @@ class _MonoHelper {
     ]),
   ];
 
-  static final blobPaths = [
-    PolySpline.anchors([
-      Anchor.SW,
-      Anchor.IW,
-      Anchor.NW,
-      Anchor.IN,
-      Anchor.NE,
-      Anchor.IE,
-      Anchor.SE,
-      Anchor.IS,
-      Anchor.SW,
-      Anchor.IW,
-      Anchor.NW,
-    ]),
-  ];
-
   static final Map<Mono, MonoGram> enum2mono = Map.unmodifiable({
     Mono.Dot: MonoGram(dotPaths, ConsPair.AHA),
     Mono.Cross: MonoGram(crossPaths, ConsPair.BAPA),
     Mono.X: MonoGram(xPaths, ConsPair.GAKA),
     Mono.Square: MonoGram(squarePaths, ConsPair.DATA),
-    Mono.Sun: MonoGram(sunPaths, ConsPair.ZASA),
+    Mono.Light: MonoGram(lightPaths, ConsPair.ZASA),
     Mono.Circle: MonoGram(circlePaths, ConsPair.NAMA),
     Mono.Flower: MonoGram(flowerPaths, ConsPair.VAFA),
-    Mono.Blob: MonoGram(blobPaths, ConsPair.RALA),
+    Mono.Sun: MonoGram(sunPaths, ConsPair.RALA),
   });
 }
 

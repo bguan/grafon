@@ -1,9 +1,9 @@
 # Grafon
 
-A graphical phonetic language.  
+A graphical phonetic constructed script and language, i.e. Conlang & Conscript.
 
-Logo-grams, i.e. graphical symbols, AKA Grams, arranged in a table, are each associated with a syllable (an optional starting 
-consonant and a vowel).  
+Logo-grams, i.e. graphical symbols, AKA Grams, arranged in a table, are each associated with a 
+syllable (an optional starting consonant and a mandatory vowel).  
 
 ![Gra Table](/assets/images/gramtable.png)
 
@@ -20,7 +20,7 @@ consonant to be appended to gram as coda.
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation, "Za");
+    expect(sun.pronunciation, "Ra");
 
     final house = Quads.Angle.up.over(Quads.Gate.up);
     expect(house.toString(), "Angle.Up / Gate.Up");
@@ -32,7 +32,7 @@ consonant to be appended to gram as coda.
 
     final day = sun.over(Quads.Line.down);
     expect(day.toString(), "Sun / Line.Down");
-    expect(day.pronunciation, "ZasU");
+    expect(day.pronunciation, "RasU");
 
     final rain = Quads.Flow.down.before(Quads.Flow.down);
     expect(rain.toString(), "Flow.Down | Flow.Down");
@@ -48,7 +48,7 @@ consonant to be appended to gram as coda.
 
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line.Up");
-    expect(starMan.pronunciation, "ZangAsI");
+    expect(starMan.pronunciation, "RangAsI");
   });
 ```
 

@@ -122,25 +122,25 @@ extension AnchorHelper on Anchor {
       case Anchor.IE:
         return Polar(angle: 0, length: INNER_DIST);
       case Anchor.NE:
-        return Polar(angle: .25 * pi, length: OUTER_DIST);
+        return Polar(angle: (1 / 4) * pi, length: OUTER_DIST);
       case Anchor.N:
-        return Polar(angle: .5 * pi, length: OUTER_DIST);
+        return Polar(angle: (1 / 2) * pi, length: OUTER_DIST);
       case Anchor.IN:
-        return Polar(angle: .5 * pi, length: INNER_DIST);
+        return Polar(angle: (1 / 2) * pi, length: INNER_DIST);
       case Anchor.NW:
-        return Polar(angle: .75 * pi, length: OUTER_DIST);
+        return Polar(angle: (3 / 4) * pi, length: OUTER_DIST);
       case Anchor.W:
         return Polar(angle: pi, length: OUTER_DIST);
       case Anchor.IW:
         return Polar(angle: pi, length: INNER_DIST);
       case Anchor.SW:
-        return Polar(angle: 1.25 * pi, length: OUTER_DIST);
+        return Polar(angle: (5 / 4) * pi, length: OUTER_DIST);
       case Anchor.S:
-        return Polar(angle: 1.5 * pi, length: OUTER_DIST);
+        return Polar(angle: (3 / 2) * pi, length: OUTER_DIST);
       case Anchor.IS:
-        return Polar(angle: 1.5 * pi, length: INNER_DIST);
+        return Polar(angle: (3 / 2) * pi, length: INNER_DIST);
       case Anchor.SE:
-        return Polar(angle: 1.75 * pi, length: OUTER_DIST);
+        return Polar(angle: (7 / 4) * pi, length: OUTER_DIST);
       default:
         return Polar(length: 0);
     }

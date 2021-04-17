@@ -133,7 +133,7 @@ void main() {
       Mono.Cross,
       Mono.X,
       Mono.Square,
-      Mono.Diamond,
+      Mono.Light,
       Mono.Sun
     ]) {
       for (final f in Face.values) {

@@ -58,7 +58,7 @@ class GrafonHome extends StatelessWidget {
     final vpad = widthHeightRatio * 10.0;
     final hpad = widthHeightRatio * 10.0;
     final space = 5.0;
-    final inset = widthHeightRatio * 10.0;
+    final inset = widthHeightRatio * 12.0;
     final dim = min((width - 2 * hpad) / (GramTable.numCols + 2),
         (0.8 * height - 2 * vpad) / (GramTable.numRows + 3));
     final gridSize = Size(dim - 2 * inset - space, dim - 2 * inset - space);

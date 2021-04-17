@@ -28,7 +28,7 @@ enum Mono {
   Cross,
   Square,
   X,
-  Diamond,
+  Light,
   Sun,
   Circle,
   Flower,
@@ -61,16 +61,6 @@ class _MonoHelper {
     ])
   ];
 
-  static final diamondPaths = [
-    PolyLine.anchors([
-      Anchor.N,
-      Anchor.W,
-      Anchor.S,
-      Anchor.E,
-      Anchor.N,
-    ])
-  ];
-
   static final sunPaths = [
     PolyLine.anchors([Anchor.W, Anchor.E]),
     PolyLine.anchors([Anchor.NE, Anchor.SW]),
@@ -88,6 +78,13 @@ class _MonoHelper {
       Anchor.N,
       Anchor.E,
     ])
+  ];
+
+  static final lightPaths = [
+    PolyLine.anchors([Anchor.E, Anchor.IE]),
+    PolyLine.anchors([Anchor.N, Anchor.IN]),
+    PolyLine.anchors([Anchor.W, Anchor.IW]),
+    PolyLine.anchors([Anchor.S, Anchor.IS]),
   ];
 
   static final flowerPaths = [
@@ -142,8 +139,8 @@ class _MonoHelper {
     Mono.Cross: MonoGram(crossPaths, ConsPair.BAPA),
     Mono.X: MonoGram(xPaths, ConsPair.GAKA),
     Mono.Square: MonoGram(squarePaths, ConsPair.DATA),
-    Mono.Diamond: MonoGram(diamondPaths, ConsPair.JACHA),
-    Mono.Sun: MonoGram(sunPaths, ConsPair.ZASA),
+    Mono.Light: MonoGram(lightPaths, ConsPair.ZASA),
+    Mono.Sun: MonoGram(sunPaths, ConsPair.JACHA),
     Mono.Circle: MonoGram(circlePaths, ConsPair.NAMA),
     Mono.Flower: MonoGram(flowerPaths, ConsPair.VAFA),
     Mono.Blob: MonoGram(blobPaths, ConsPair.RALA),
@@ -166,7 +163,7 @@ enum Quads {
   Corner,
   Angle,
   Gate,
-  Triangle,
+  Step,
   Zap,
   Arc,
   Flow,
@@ -191,20 +188,20 @@ class _QuadHelper {
     PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
   ];
 
-  static final trianglePaths = [
-    PolyLine.anchors([Anchor.NW, Anchor.IE, Anchor.SW, Anchor.NW])
+  static final stepPaths = [
+    PolyLine.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
   ];
 
   static final zapPaths = [
-    PolyLine.anchors([Anchor.W, Anchor.IS, Anchor.IN, Anchor.E])
+    PolyLine.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E])
   ];
 
   static final arcPaths = [
     PolySpline.anchors([
       Anchor.W,
-      Anchor.N,
-      Anchor.E,
       Anchor.S,
+      Anchor.E,
+      Anchor.N,
       Anchor.W,
     ]),
   ];
@@ -220,13 +217,13 @@ class _QuadHelper {
 
   static final swirlPaths = [
     PolySpline.anchors([
-      Anchor.NW,
+      Anchor.N,
       Anchor.W,
       Anchor.S,
       Anchor.E,
       Anchor.IN,
       Anchor.O,
-      Anchor.IE,
+      Anchor.NE,
     ])
   ];
 
@@ -235,8 +232,8 @@ class _QuadHelper {
     Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BAPA),
     Quads.Angle: RotatingQuads(anglePaths, ConsPair.GAKA),
     Quads.Gate: RotatingQuads(gatePaths, ConsPair.DATA),
-    Quads.Triangle: RotatingQuads(trianglePaths, ConsPair.JACHA),
-    Quads.Zap: FlipQuads(zapPaths, ConsPair.ZASA),
+    Quads.Step: FlipQuads(stepPaths, ConsPair.ZASA),
+    Quads.Zap: FlipQuads(zapPaths, ConsPair.JACHA),
     Quads.Arc: RotatingQuads(arcPaths, ConsPair.NAMA),
     Quads.Flow: FlipQuads(flowPaths, ConsPair.VAFA),
     Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.RALA),

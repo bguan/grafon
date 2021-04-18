@@ -22,9 +22,9 @@ consonant to be appended to gram as coda.
     expect(sun.toString(), "Sun");
     expect(sun.pronunciation, "Ra");
 
-    final house = Quads.Angle.up.over(Quads.Gate.up);
-    expect(house.toString(), "Angle.Up / Gate.Up");
-    expect(house.pronunciation, "GisDi");
+    final house = Quads.Angle.up.over(Quads.Gate.down);
+    expect(house.toString(), "Angle.Up / Gate.Down");
+    expect(house.pronunciation, "GisDu");
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line.Up");
@@ -49,6 +49,11 @@ consonant to be appended to gram as coda.
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line.Up");
     expect(starMan.pronunciation, "RangAsI");
+
+    // Red is the light from a Flower
+    final red = Mono.Light.gram.around(Mono.Flower.gram);
+    expect(red.toString(), "Light @ Flower");
+    expect(red.pronunciation, "ZamVa");
   });
 ```
 

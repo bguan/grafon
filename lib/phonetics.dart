@@ -63,7 +63,7 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.Z:
       case Consonant.S:
-      return ConsPair.ZaSa;
+        return ConsPair.ZaSa;
 
       default:
         return ConsPair.aHa;

@@ -402,8 +402,7 @@ abstract class Gram extends GramExpression {
     return Vector2(x / aCount, y / aCount);
   }
 
-  String toString() =>
-      this is QuadGram
+  String toString() => this is QuadGram
       ? GramTable.getEnumIfQuad(this)!.shortName +
           ' ' +
           face.shortName.toLowerCase()

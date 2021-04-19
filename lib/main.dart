@@ -57,7 +57,8 @@ class GrafonApp extends StatelessWidget {
           "Hundred(s), ten to the power of 2.",
       Mono.Circle.gram.before(Quads.Gate.right.up()):
           "Thousand(s), ten to the power of 3.",
-      Mono.Sun.gram.compound(Mono.Dot.gram.over(Quads.Line.up)): "Alien, God.",
+      Mono.Sun.gram.compound(Mono.Dot.gram.over(Quads.Line.up)):
+          "Star being, alien, god?",
     };
 
     final wordViews = [

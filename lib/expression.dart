@@ -44,6 +44,8 @@ abstract class GramExpression {
   GramExpression compound(that) => BinaryExpr(this, Binary.Compound, that);
 
   Vector2 get visualCenter;
+
+  Iterable<PolyPath> get paths;
 }
 
 /// A Unary Gram Expression applies a Unary Operation on a single Gram.
@@ -57,7 +59,9 @@ class UnaryExpr extends GramExpression {
   String toString() =>
       op.symbol +
       (gram is QuadGram
-          ? GramTable.getEnumIfQuad(gram)!.shortName + '.' + gram.face.shortName
+          ? GramTable.getEnumIfQuad(gram)!.shortName +
+              ' ' +
+              gram.face.shortName.toLowerCase()
           : GramTable.getMonoEnum(gram).shortName);
 
   String get pronunciation =>
@@ -66,8 +70,13 @@ class UnaryExpr extends GramExpression {
   @override
   Vector2 get visualCenter {
     final gc = gram.visualCenter;
-    final v3 = op.transform * Vector3(gc.x, gc.y, 1);
+    final v3 = op.matrix * Vector3(gc.x, gc.y, 1);
     return Vector2(v3[0], v3[1]);
+  }
+
+  @override
+  Iterable<PolyPath> get paths {
+    return gram.paths.map((p) => op.transform(p));
   }
 }
 
@@ -88,11 +97,18 @@ class BinaryExpr extends GramExpression {
   @override
   Vector2 get visualCenter {
     Vector2 c1 = expr1.visualCenter;
-    Vector3 v1 = op.transforms.item1 * Vector3(c1.x, c1.y, 1);
+    Vector3 v1 = op.matrices.item1 * Vector3(c1.x, c1.y, 1);
     Vector2 c2 = expr2.visualCenter;
-    Vector3 v2 = op.transforms.item2 * Vector3(c2.x, c2.y, 1);
+    Vector3 v2 = op.matrices.item2 * Vector3(c2.x, c2.y, 1);
     Vector3 avg = (v1 + v2) / 2.0;
     return avg.xy;
+  }
+
+  @override
+  Iterable<PolyPath> get paths {
+    final newPaths1 = expr1.paths.map(op.transform1);
+    final newPaths2 = expr2.paths.map(op.transform2);
+    return [...newPaths1, ...newPaths2];
   }
 }
 
@@ -115,11 +131,18 @@ class Cluster extends GramExpression {
   @override
   Vector2 get visualCenter {
     Vector2 c1 = headGram.visualCenter;
-    Vector3 v1 = tailOp.transforms.item1 * Vector3(c1.x, c1.y, 1);
+    Vector3 v1 = tailOp.matrices.item1 * Vector3(c1.x, c1.y, 1);
     Vector2 c2 = tailGram.visualCenter;
-    Vector3 v2 = tailOp.transforms.item2 * Vector3(c2.x, c2.y, 1);
+    Vector3 v2 = tailOp.matrices.item2 * Vector3(c2.x, c2.y, 1);
     Vector3 avg = (v1 + v2) / 2.0;
     return avg.xy;
+  }
+
+  @override
+  Iterable<PolyPath> get paths {
+    final newPaths1 = headGram.paths.map(tailOp.transform1);
+    final newPaths2 = tailGram.paths.map(tailOp.transform2);
+    return [...newPaths1, ...newPaths2];
   }
 }
 
@@ -145,14 +168,23 @@ class ExtendedCluster extends Cluster {
   @override
   Vector2 get visualCenter {
     Vector2 c1 = headGram.visualCenter;
-    Vector3 v1 = headOp.transforms.item1 * Vector3(c1.x, c1.y, 1);
+    Vector3 v1 = headOp.matrices.item1 * Vector3(c1.x, c1.y, 1);
     Vector2 c2 = innerExpr.visualCenter;
-    Vector3 v2 = headOp.transforms.item2 * Vector3(c2.x, c2.y, 1);
+    Vector3 v2 = headOp.matrices.item2 * Vector3(c2.x, c2.y, 1);
     Vector3 avg12 = (v1 + v2) / 2.0;
-    Vector3 v12 = tailOp.transforms.item1 * avg12;
+    Vector3 v12 = tailOp.matrices.item1 * avg12;
     Vector2 c3 = tailGram.visualCenter;
-    Vector3 v3 = tailOp.transforms.item2 * Vector3(c3.x, c3.y, 1);
+    Vector3 v3 = tailOp.matrices.item2 * Vector3(c3.x, c3.y, 1);
     Vector3 avg123 = (v12 + v3) / 2.0;
     return avg123.xy;
+  }
+
+  @override
+  Iterable<PolyPath> get paths {
+    final newPaths1 = headGram.paths.map(headOp.transform1);
+    final newPaths2 = innerExpr.paths.map(headOp.transform2);
+    final newPaths3 = [...newPaths1, ...newPaths2].map(tailOp.transform1);
+    final newPaths4 = tailGram.paths.map(tailOp.transform2);
+    return [...newPaths3, ...newPaths4];
   }
 }

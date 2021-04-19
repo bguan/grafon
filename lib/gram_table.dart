@@ -175,11 +175,10 @@ class _QuadHelper {
 
   static final arcPaths = [
     PolySpline.anchors([
-      Anchor.W,
+      Anchor.SW,
       Anchor.S,
-      Anchor.E,
       Anchor.N,
-      Anchor.W,
+      Anchor.NW,
     ]),
   ];
 

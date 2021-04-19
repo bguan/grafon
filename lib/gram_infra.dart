@@ -219,7 +219,7 @@ extension VowelHelper on Vowel {
 abstract class PolyPath {
   final List<Vector2> _baseVectors;
 
-  PolyPath(List<Vector2> vs)
+  PolyPath(Iterable<Vector2> vs)
       : this._baseVectors = List.unmodifiable(
             vs.map((v) => (v * (1.0 * _floatStorageBase))..round()));
 
@@ -309,7 +309,7 @@ abstract class PolyPath {
 
 /// Straight Line from anchor point to anchor point
 class PolyLine extends PolyPath {
-  PolyLine(List<Vector2> vs) : super(vs);
+  PolyLine(Iterable<Vector2> vs) : super(vs);
 
   PolyLine.anchors(List<Anchor> anchors)
       : super(List.unmodifiable(anchors.map((a) => a.vector)));
@@ -327,7 +327,7 @@ class PolyLine extends PolyPath {
 /// Curve Line thru everypoint, making sure tangent transition is smooth at each
 /// first point and last point is for direction computation only
 class PolySpline extends PolyPath {
-  PolySpline(List<Vector2> vs) : super(vs);
+  PolySpline(Iterable<Vector2> vs) : super(vs);
 
   PolySpline.anchors(List<Anchor> anchors)
       : super(List.unmodifiable(anchors.map((a) => a.vector)));
@@ -350,10 +350,13 @@ class PolySpline extends PolyPath {
 /// Associated with a vowel and a starting consonant pair.
 /// If at the Head of a new cluster, use Head consonant, else Base.
 abstract class Gram extends GramExpression {
-  final List<PolyPath> paths;
+  final Iterable<PolyPath> _paths;
   final ConsPair consPair;
 
-  Gram(this.paths, this.consPair);
+  Gram(paths, this.consPair) : _paths = List.unmodifiable(paths);
+
+  @override
+  Iterable<PolyPath> get paths => _paths;
 
   Face get face;
 
@@ -375,7 +378,7 @@ abstract class Gram extends GramExpression {
     if (other is! Gram) return false;
 
     Gram that = other;
-    final eq = ListEquality<PolyPath>().equals;
+    final eq = IterableEquality<PolyPath>().equals;
 
     return this.consPair == that.consPair &&
         this.face == that.face &&
@@ -399,8 +402,11 @@ abstract class Gram extends GramExpression {
     return Vector2(x / aCount, y / aCount);
   }
 
-  String toString() => this is QuadGram
-      ? GramTable.getEnumIfQuad(this)!.shortName + '.' + face.shortName
+  String toString() =>
+      this is QuadGram
+      ? GramTable.getEnumIfQuad(this)!.shortName +
+          ' ' +
+          face.shortName.toLowerCase()
       : GramTable.getMonoEnum(this).shortName;
 
   String get pronunciation =>
@@ -429,7 +435,7 @@ abstract class Gram extends GramExpression {
 class MonoGram extends Gram {
   final face = Face.Center;
 
-  MonoGram(List<PolyPath> paths, ConsPair cons) : super(paths, cons);
+  MonoGram(Iterable<PolyPath> paths, ConsPair cons) : super(paths, cons);
 
   @override
   bool operator ==(Object other) {
@@ -445,7 +451,8 @@ class MonoGram extends Gram {
 class QuadGram extends Gram {
   final Face face;
 
-  QuadGram(List<PolyPath> paths, this.face, ConsPair cons) : super(paths, cons);
+  QuadGram(Iterable<PolyPath> paths, this.face, ConsPair cons)
+      : super(paths, cons);
 
   @override
   bool operator ==(Object other) {

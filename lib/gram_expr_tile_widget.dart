@@ -20,33 +20,35 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart';
 
+import 'expression.dart';
 import 'gram_infra.dart';
 
-/// Class to provide widget rendering of Grams.
-class GramTile extends StatelessWidget {
-  final Gram gram;
-  final Size size;
+/// Class to provide widget rendering of Gram expressions.
+class GramExprTile extends StatelessWidget {
+  final GramExpression gram;
+  final Size? size;
 
-  GramTile(this.gram, this.size) : super();
+  GramExprTile(this.gram, {this.size}) : super();
 
   @override
   Widget build(BuildContext ctx) {
+    final useSize = size ?? MediaQuery.of(ctx).size;
     return CustomPaint(
-      size: size,
-      painter: GramPainter(gram, Theme.of(ctx).colorScheme),
+      size: useSize,
+      painter: GramExprPainter(gram, Theme.of(ctx).colorScheme),
     );
   }
 }
 
 /// The custom painter to provide canvas rendering logic
-class GramPainter extends CustomPainter {
+class GramExprPainter extends CustomPainter {
   static const STROKE_WIDTH_SCALE = 0.1;
   static const DOMINANT_CTRL_SCALE = 0.7;
   static const STD_CTRL_SCALE = 0.4;
-  final Gram gram;
+  final GramExpression gram;
   final ColorScheme scheme;
 
-  GramPainter(this.gram, this.scheme);
+  GramExprPainter(this.gram, this.scheme);
 
   static Vector2 toCanvasCoord(Vector2 v, Size size) => v.clone()
     ..multiply(Vector2(size.width, -size.height))
@@ -141,7 +143,13 @@ class GramPainter extends CustomPainter {
       final from = toCanvasCoord(p.vectors[i] + centerShift, size);
       final to =
           toCanvasCoord(p.vectors[min(i + 1, len - 1)] + centerShift, size);
+
+      final origStrokeWidth = paint.strokeWidth;
+
+      // in degenerate case of from == to i.e. a Point, double stroke width
+      if (from == to) paint.strokeWidth = 2 * origStrokeWidth;
       canvas.drawLine(toOffset(from), toOffset(to), paint);
+      paint.strokeWidth = origStrokeWidth;
     }
   }
 
@@ -169,9 +177,9 @@ class GramPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is! GramPainter) return true;
+    if (oldDelegate is! GramExprPainter) return true;
 
-    GramPainter oldPainter = oldDelegate;
+    GramExprPainter oldPainter = oldDelegate;
     return gram != oldPainter.gram;
   }
 }

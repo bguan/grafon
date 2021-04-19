@@ -29,7 +29,8 @@ void main() {
       expect(mg.toString(), m.shortName);
       for (final f in FaceHelper.directionals) {
         final qg = GramTable.atMonoFace(m, f);
-        expect(qg.toString(), "${m.quadPeer.shortName}.${f.shortName}");
+        expect(qg.toString(),
+            "${m.quadPeer.shortName} ${f.shortName.toLowerCase()}");
       }
     }
   });
@@ -91,31 +92,31 @@ void main() {
     expect(sun.pronunciation, "Ra");
 
     final house = Quads.Angle.up.over(Quads.Gate.down);
-    expect(house.toString(), "Angle.Up / Gate.Down");
+    expect(house.toString(), "Angle up / Gate down");
     expect(house.pronunciation, "GisDu");
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
-    expect(person.toString(), "Dot / Line.Up");
+    expect(person.toString(), "Dot / Line up");
     expect(person.pronunciation, "AsI");
 
     final day = sun.over(Quads.Line.down);
-    expect(day.toString(), "Sun / Line.Down");
+    expect(day.toString(), "Sun / Line down");
     expect(day.pronunciation, "RasU");
 
     final rain = Quads.Flow.down.before(Quads.Flow.down);
-    expect(rain.toString(), "Flow.Down | Flow.Down");
+    expect(rain.toString(), "Flow down | Flow down");
     expect(rain.pronunciation, "VuVu");
 
-    final speech = Quads.Arc.right.around(Quads.Flow.right);
-    expect(speech.toString(), "Arc.Right @ Flow.Right");
-    expect(speech.pronunciation, "NemVe");
+    final speech = Quads.Arc.left.before(Quads.Flow.right);
+    expect(speech.toString(), "Arc left | Flow right");
+    expect(speech.pronunciation, "NoVe");
 
     final nine = Mono.Square.gram.merge(Quads.Line.up);
-    expect(nine.toString(), "Square * Line.Up");
+    expect(nine.toString(), "Square * Line up");
     expect(nine.pronunciation, "DalI");
 
     final starMan = sun.compound(person); // God? Alien?
-    expect(starMan.toString(), "Sun : Dot / Line.Up");
+    expect(starMan.toString(), "Sun : Dot / Line up");
     expect(starMan.pronunciation, "RangAsI");
 
     // Red is the light from a Flower

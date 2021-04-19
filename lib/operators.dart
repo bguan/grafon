@@ -23,70 +23,26 @@ import 'phonetics.dart';
 
 /// Operators, unary and binary spatial combinations for the Grafon language.
 
-/// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { Ng, H, LR, MN, SZ }
-
-/// extension to map base, tail ending consonant to enum, short name.
-extension BinaryEndingExtension on BinaryEnding {
-  String get shortName => this.toString().split('.').last;
-
-  String get base {
-    switch (this) {
-      case BinaryEnding.H:
-        return '';
-      case BinaryEnding.LR:
-        return 'l';
-      case BinaryEnding.MN:
-        return 'm';
-      case BinaryEnding.SZ:
-        return 's';
-      case BinaryEnding.Ng:
-        return 'ng';
-      default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
-    }
-  }
-
-  // use tail when it is the last operator in a cluster group
-  String get tail {
-    switch (this) {
-      case BinaryEnding.H:
-        return 'h';
-      case BinaryEnding.LR:
-        return 'r';
-      case BinaryEnding.MN:
-        return 'n';
-      case BinaryEnding.SZ:
-        return 'z';
-      case BinaryEnding.Ng:
-        return '';
-      default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
-    }
-  }
-}
-
 /// TransformationHelper to make sure only 1 instance of needed
 /// transformation matrix instance is created.
 class TransformationHelper {
   /// https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
   static final Matrix3 xShrink = Matrix3(.5, 0, 0, 0, 1, 0, 0, 0, 1);
   static final Matrix3 yShrink = Matrix3(1, 0, 0, 0, .5, 0, 0, 0, 1);
-  static final Matrix3 shrinkIn = Matrix3(.7, 0, 0, 0, .7, 0, 0, 0, 1);
-  static final Matrix3 rightShift = Matrix3(1, 0, .25, 0, 1, 0, 0, 0, 1);
-  static final Matrix3 leftShift = Matrix3(1, 0, -.25, 0, 1, 0, 0, 0, 1);
-  static final Matrix3 upShift = Matrix3(1, 0, 0, 0, 1, .25, 0, 0, 1);
-  static final Matrix3 downShift = Matrix3(1, 0, 0, 0, 1, -.25, 0, 0, 1);
+  static final Matrix3 rightShift = Matrix3(1, 0, 0, 0, 1, 0, 0.25, 0, 1);
+  static final Matrix3 leftShift = Matrix3(1, 0, 0, 0, 1, 0, -.25, 0, 1);
+  static final Matrix3 upShift = Matrix3(1, 0, 0, 0, 1, 0, 0, 0.25, 1);
+  static final Matrix3 downShift = Matrix3(1, 0, 0, 0, 1, 0, 0, -.25, 1);
 
   /// Take Big Step to the Right, only for Binary
-  static final Matrix3 stepRight = Matrix3(1, 0, 1, 0, 1, 0, 0, 0, 1);
+  static final Matrix3 stepRight = Matrix3(1, 0, 0, 0, 1, 0, 1, 0, 1);
 
   static final noTransform = Matrix3.identity();
   static final shrinkCenter = xShrink.multiplied(yShrink);
-  static final shrinkRight = xShrink.multiplied(rightShift);
-  static final shrinkUp = yShrink.multiplied(upShift);
-  static final shrinkLeft = xShrink.multiplied(leftShift);
-  static final shrinkDown = yShrink.multiplied(downShift);
+  static final shrinkRight = rightShift.multiplied(xShrink);
+  static final shrinkUp = upShift.multiplied(yShrink);
+  static final shrinkLeft = leftShift.multiplied(xShrink);
+  static final shrinkDown = downShift.multiplied(yShrink);
 }
 
 /// Binary Operator works on a pair of Gram Expression
@@ -129,7 +85,7 @@ extension BinaryExtension on Binary {
     }
   }
 
-  Tuple2<Matrix3, Matrix3> get transforms {
+  Tuple2<Matrix3, Matrix3> get matrices {
     switch (this) {
       case Binary.Before:
         return Tuple2(
@@ -138,8 +94,8 @@ extension BinaryExtension on Binary {
         return Tuple2(
             TransformationHelper.shrinkUp, TransformationHelper.shrinkDown);
       case Binary.Around:
-        return Tuple2(
-            TransformationHelper.noTransform, TransformationHelper.shrinkIn);
+        return Tuple2(TransformationHelper.noTransform,
+            TransformationHelper.shrinkCenter);
       case Binary.Merge:
         return Tuple2(
             TransformationHelper.noTransform, TransformationHelper.noTransform);
@@ -149,6 +105,20 @@ extension BinaryExtension on Binary {
       default:
         throw Exception("Unexpected Binary Enum ${this}");
     }
+  }
+
+  PolyPath transform1(PolyPath p) {
+    Vector2 apply(Vector2 v) =>
+        quantizeV2((matrices.item1 * Vector3(v.x, v.y, 1)).xy);
+    final newPts = p.vectors.map(apply);
+    return (p is PolyLine ? PolyLine(newPts) : PolySpline(newPts));
+  }
+
+  PolyPath transform2(PolyPath p) {
+    Vector2 apply(Vector2 v) =>
+        quantizeV2((matrices.item2 * Vector3(v.x, v.y, 1)).xy);
+    final newPts = p.vectors.map(apply);
+    return (p is PolyLine ? PolyLine(newPts) : PolySpline(newPts));
   }
 }
 
@@ -193,7 +163,7 @@ extension UnaryExtension on Unary {
     }
   }
 
-  Matrix3 get transform {
+  Matrix3 get matrix {
     switch (this) {
       case Unary.Shrink:
         return TransformationHelper.shrinkCenter;
@@ -208,5 +178,11 @@ extension UnaryExtension on Unary {
       default:
         throw Exception("Unexpected Unary Enum ${this}");
     }
+  }
+
+  PolyPath transform(PolyPath p) {
+    Vector2 apply(Vector2 v) => quantizeV2((matrix * Vector3(v.x, v.y, 1)).xy);
+    final newPoints = p.vectors.map(apply);
+    return (p is PolyLine ? PolyLine(newPoints) : PolySpline(newPoints));
   }
 }

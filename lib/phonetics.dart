@@ -115,3 +115,46 @@ extension ConsPairExtension on ConsPair {
 
   String get shortName => this.toString().split('.').last;
 }
+
+/// enum for ending consonant pair for preceding gram in a binary operation.
+enum BinaryEnding { Ng, H, LR, MN, SZ }
+
+/// extension to map base, tail ending consonant to enum, short name.
+extension BinaryEndingExtension on BinaryEnding {
+  String get shortName => this.toString().split('.').last;
+
+  String get base {
+    switch (this) {
+      case BinaryEnding.H:
+        return '';
+      case BinaryEnding.LR:
+        return 'l';
+      case BinaryEnding.MN:
+        return 'm';
+      case BinaryEnding.SZ:
+        return 's';
+      case BinaryEnding.Ng:
+        return 'ng';
+      default:
+        throw Exception("Unexpected BinaryEnding Enum ${this}");
+    }
+  }
+
+  // use tail when it is the last operator in a cluster group
+  String get tail {
+    switch (this) {
+      case BinaryEnding.H:
+        return 'h';
+      case BinaryEnding.LR:
+        return 'r';
+      case BinaryEnding.MN:
+        return 'n';
+      case BinaryEnding.SZ:
+        return 'z';
+      case BinaryEnding.Ng:
+        return '';
+      default:
+        throw Exception("Unexpected BinaryEnding Enum ${this}");
+    }
+  }
+}

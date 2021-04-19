@@ -15,15 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:grafon/gram_infra.dart';
-import 'package:grafon/gram_tile.dart';
 
+import 'gram_expr_tile_widget.dart';
 import 'gram_table.dart';
-import 'operators.dart';
-import 'phonetics.dart';
+import 'gram_table_widget.dart';
 
 /// Main Starting Point of the App.
 void main() {
@@ -34,172 +30,108 @@ class GrafonApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext ctx) {
+    final scheme = Theme.of(ctx).colorScheme;
+    final controller = PageController(initialPage: 0);
+
+    final gramSize = Size(150, 150);
+    final expressions = {
+      Mono.Sun.gram: "Sun, star.",
+      Quads.Swirl.up: "Swirling upward, spinning upward.",
+      Quads.Angle.up.over(Quads.Gate.down): "House, dwelling, building.",
+      Mono.Dot.gram.over(Quads.Line.up): "Human.",
+      Mono.Sun.gram.over(Quads.Line.down): "Day time, day.",
+      Quads.Flow.down.before(Quads.Flow.down): "Rain.",
+      Quads.Arc.left.before(Quads.Flow.right): "Talk, speech.",
+      Mono.Square.gram.shrink().merge(Quads.Line.down): "Nine.",
+      Quads.Gate.down.merge(Mono.X.gram): "Seven.",
+      Quads.Gate.down.merge(Quads.Angle.down): "Six.",
+      Mono.Light.gram.around(Quads.Zap.down): "White, light from lightning.",
+      Mono.Light.gram.around(Mono.Flower.gram): "Red, light from flower.",
+      Mono.Light.gram.around(Quads.Arc.left.merge(Quads.Arc.right)):
+          "Green, light from leaf.",
+      Mono.Light.gram.around(Quads.Flow.right): "Blue, light from water.",
+      Mono.Square.gram.around(Mono.Light.gram): "Black, trapped light.",
+      Mono.Circle.gram.before(Quads.Line.up.up()):
+          "Ten(s), ten to the power of 1.",
+      Mono.Circle.gram.before(Quads.Corner.right.up()):
+          "Hundred(s), ten to the power of 2.",
+      Mono.Circle.gram.before(Quads.Gate.right.up()):
+          "Thousand(s), ten to the power of 3.",
+      Mono.Sun.gram.compound(Mono.Dot.gram.over(Quads.Line.up)): "Alien, God.",
+    };
+
+    final wordViews = [
+      for (var expr in expressions.keys)
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Spacer(flex: 2),
+            Container(
+              alignment: Alignment.center,
+              width: gramSize.width,
+              height: gramSize.height,
+              child: Center(child: GramExprTile(expr, size: gramSize)),
+            ),
+            Spacer(),
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: Text(
+                expr.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontStyle: FontStyle.italic,
+                  height: 1.5,
+                  color: scheme.primaryVariant,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: Text(
+                '"${expr.pronunciation}"',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    height: 1.5,
+                    color: scheme.primaryVariant,
+                    fontSize: 30,
+                    fontFamily: "Courier"),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: Text(
+                expressions[expr] ?? '?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  height: 1.5,
+                  color: scheme.primaryVariant,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            Spacer(flex: 2),
+          ],
+        ),
+    ];
+
     return MaterialApp(
       title: 'Grafon',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: GrafonHome(title: 'Grafon Home'),
-    );
-  }
-}
-
-class GrafonHome extends StatelessWidget {
-  GrafonHome({Key? key, this.title: ''}) : super(key: key);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext ctx) {
-    final scheme = Theme.of(ctx).colorScheme;
-    final width = MediaQuery.of(ctx).size.width.clamp(500.0, 1000.0);
-    final height = MediaQuery.of(ctx).size.height.clamp(500.0, 1000.0);
-    final widthHeightRatio = (width / height).clamp(.75, 1.75);
-    final vpad = widthHeightRatio * 10.0;
-    final hpad = widthHeightRatio * 10.0;
-    final space = 5.0;
-    final inset = widthHeightRatio * 12.0;
-    final dim = min((width - 2 * hpad) / (GramTable.numCols + 2),
-        (0.8 * height - 2 * vpad) / (GramTable.numRows + 3));
-    final gridSize = Size(dim - 2 * inset - space, dim - 2 * inset - space);
-
-    final headerRow = [
-      for (var fTxt in [
-        'Face vowel - \nConsonant\nbase, head',
-        ...Face.values
-            .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
-        'Symbol\nName'
-      ])
-        fTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$fTxt',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.3,
-                      color: Colors.white,
-                      fontSize: widthHeightRatio * 12,
-                    ),
-                  ),
-                ),
-                color: scheme.secondaryVariant,
-              ),
-    ];
-
-    final unaryOpRow = [
-      for (var uTxt in [
-        'Unary\nOperator',
-        ...Unary.values.map((u) =>
-            '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
-        'Ending\nVowel'
-      ])
-        uTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$uTxt',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.5,
-                      color: scheme.surface,
-                      fontSize: widthHeightRatio * 12,
-                    ),
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
-    ];
-
-    final binaryOpRow = [
-      for (var bTxt in [
-        'Binary\nOperator\ndecreasing precedence',
-        ...Binary.values.map((b) =>
-            '${b.shortName}\n${b.symbol}\n' +
-            '…${b.ending.base}${b.ending.tail.length > 0 ? ' …' + b.ending.tail : ''}'),
-        'Ending\nConsonant\nbase, tail'
-      ])
-        bTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$bTxt',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                      color: scheme.surface,
-                      fontSize: widthHeightRatio * 12,
-                    ),
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
-    ];
-
-    final gramTable = [
-      for (var m in Mono.values) ...[
-        Container(
-          child: Center(
-            child: Text(
-              '${m.gram.consPair.base.shortName}, ${m.gram.consPair.head.shortName}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: widthHeightRatio * 15,
-              ),
-            ),
-          ),
-          color: scheme.background,
-        ),
-        for (var f in Face.values)
-          Container(
-            padding: EdgeInsets.all(inset),
-            child: GramTile(GramTable.atMonoFace(m, f), gridSize),
-            color: scheme.surface,
-          ),
-        Container(
-          child: Center(
-            child: Text(
-              '${m.shortName}\n${m.quadPeer.shortName}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                height: 1.5,
-                color: scheme.surface,
-                fontSize: widthHeightRatio * 15,
-              ),
-            ),
-          ),
-          color: scheme.background,
-        ),
-      ],
-    ];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(vertical: vpad, horizontal: hpad),
-        child: Center(
-          child: GridView.count(
-            crossAxisCount: GramTable.numCols + 2,
-            crossAxisSpacing: space,
-            mainAxisSpacing: space,
-            children: [
-              ...headerRow,
-              ...gramTable,
-              ...unaryOpRow,
-              ...binaryOpRow
-            ],
-          ),
+      home: Scaffold(
+        appBar: AppBar(title: Text('Grafon Home')),
+        body: PageView(
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          children: [
+            GramTableView(),
+            ...wordViews,
+          ],
         ),
       ),
     );

@@ -49,12 +49,13 @@ consonant to be appended to gram as coda.
   });
 ```
 
-![House](/assets/images/house.png)
-![Human](/assets/images/human.png)
-![Rain](/assets/images/rain.png)
-![Speech](/assets/images/speech.png)
-![Red](/assets/images/red.png)
-![Star-being](/assets/images/star-being.png)
+<img src="https://github.com/bguan/grafon/blob/main/assets/images/house.png?raw=true" width="100" height="100" alt="House"/><span>House, </span>
+<img src="https://github.com/bguan/grafon/blob/main/assets/images/human.png?raw=true" width="60" height="100" alt="Human"/><span>Human, </span>
+<img src="https://github.com/bguan/grafon/blob/main/assets/images/rain.png?raw=true" width="100" height="100" alt="Human"/><span>Rain, </span>
+<img src="https://github.com/bguan/grafon/blob/main/assets/images/speech.png?raw=true" width="100" height="100" alt="Human"/><span>Speech, </span>
+<img src="https://github.com/bguan/grafon/blob/main/assets/images/red.png?raw=true" width="100" height="100" alt="Human"/><span>Red, </span>
+<img src="https://github.com/bguan/grafon/blob/main/assets/images/star-being.png?raw=true" width="150" height="100" alt="Human"/><span>Star-Being!</span>
+
 
 ## Development Notes
 * [Test Coverage Reports](https://app.codecov.io/gh/bguan/grafon) – aim for 100%.

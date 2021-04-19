@@ -29,19 +29,24 @@ abstract class GramExpression {
   String get pronunciation;
 
   /// Merge this expression with another.
-  GramExpression merge(that) => BinaryExpr(this, Binary.Merge, that);
+  GramExpression merge(GramExpression that) =>
+      BinaryExpr(this, Binary.Merge, that);
 
   /// Put this expression before that, this to left, that to right.
-  GramExpression before(that) => BinaryExpr(this, Binary.Before, that);
+  GramExpression before(GramExpression that) =>
+      BinaryExpr(this, Binary.Before, that);
 
   /// Put this expression over that, this above, that below.
-  GramExpression over(that) => BinaryExpr(this, Binary.Over, that);
+  GramExpression over(GramExpression that) =>
+      BinaryExpr(this, Binary.Over, that);
 
   /// Put this expression around that, this outside, that inside.
-  GramExpression around(that) => BinaryExpr(this, Binary.Around, that);
+  GramExpression around(GramExpression that) =>
+      BinaryExpr(this, Binary.Around, that);
 
   /// Combine this expression with that, not spatial, forming a compound word.
-  GramExpression compound(that) => BinaryExpr(this, Binary.Compound, that);
+  GramExpression compound(GramExpression that) =>
+      BinaryExpr(this, Binary.Compound, that);
 
   Vector2 get visualCenter;
 

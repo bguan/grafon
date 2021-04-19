@@ -21,7 +21,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grafon/gram_expr_tile_widget.dart';
+import 'package:grafon/gram_expr_widget.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
@@ -162,7 +162,7 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
     final gram = QuadGram([
       PolyLine.anchors([Anchor.E, Anchor.N])
-    ], Face.Up, ConsPair.AHA);
+    ], Face.Up, ConsPair.aHa);
 
     final rad = AnchorHelper.OUTER_DIST;
     final avgX = (rad + 0.0) / 2; // should be .25
@@ -184,7 +184,7 @@ void main() {
 
     final gram = QuadGram([
       PolySpline.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
-    ], Face.Up, ConsPair.AHA);
+    ], Face.Up, ConsPair.aHa);
 
     final p1 = Offset(50, 0);
     final p2 = Offset(50, 100);

@@ -18,44 +18,43 @@ consonant to be appended to gram as coda.
 ## Example in Code
 ```
   test('BinaryExpr toString and pronunciation is correct', () {
-    final sun = Mono.Sun.gram; // or star
+    final sun = Mono.Sun.gram; 
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation, "Ra");
+    expect(sun.pronunciation, "Za");
 
-    final house = Quads.Angle.up.over(Quads.Gate.down);
-    expect(house.toString(), "Angle up / Gate down");
-    expect(house.pronunciation, "GisDu");
+    final house = Quads.Angle.up.merge(Quads.Gate.down);
+    expect(house.toString(), "Angle up * Gate down");
+    expect(house.pronunciation, "GiDu");
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line up");
-    expect(person.pronunciation, "AsI");
-
-    final day = sun.over(Quads.Line.down);
-    expect(day.toString(), "Sun / Line down");
-    expect(day.pronunciation, "RasU");
+    expect(person.pronunciation, "ArI");
 
     final rain = Quads.Flow.down.before(Quads.Flow.down);
     expect(rain.toString(), "Flow down | Flow down");
-    expect(rain.pronunciation, "VuVu");
+    expect(rain.pronunciation, "VuzVu");
 
-    final speech = Quads.Arc.left.before(Quads.Flow.right);
-    expect(speech.toString(), "Arc left | Flow right");
-    expect(speech.pronunciation, "NoVe");
-
-    final nine = Mono.Square.gram.merge(Quads.Line.up);
-    expect(nine.toString(), "Square * Line up");
-    expect(nine.pronunciation, "DalI");
+    final speech = Quads.Gate.left.around(Quads.Flow.right);
+    expect(speech.toString(), "Gate left @ Flow right");
+    expect(speech.pronunciation, "DonVe");
 
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line up");
-    expect(starMan.pronunciation, "RangAsI");
+    expect(starMan.pronunciation, "ZangArI");
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.around(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
-    expect(red.pronunciation, "ZamVa");
+    expect(red.pronunciation, "JanVa");
   });
 ```
+
+![House](/assets/images/house.png)
+![Human](/assets/images/human.png)
+![Rain](/assets/images/rain.png)
+![Speech](/assets/images/speech.png)
+![Red](/assets/images/red.png)
+![Star-being](/assets/images/star-being.png)
 
 ## Development Notes
 * [Test Coverage Reports](https://app.codecov.io/gh/bguan/grafon) – aim for 100%.

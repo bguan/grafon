@@ -15,6 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import 'package:grafon/expression.dart';
+
 import 'gram_infra.dart';
 import 'phonetics.dart';
 
@@ -29,9 +31,10 @@ enum Mono {
   Square,
   X,
   Light,
+  Sun,
   Circle,
   Flower,
-  Sun,
+  Blob,
 }
 
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
@@ -79,6 +82,22 @@ class _MonoHelper {
     ])
   ];
 
+  static final blobPaths = [
+    PolySpline.anchors([
+      Anchor.IW,
+      Anchor.NW,
+      Anchor.IN,
+      Anchor.NE,
+      Anchor.IE,
+      Anchor.SE,
+      Anchor.IS,
+      Anchor.SW,
+      Anchor.IW,
+      Anchor.NW,
+      Anchor.IN,
+    ])
+  ];
+
   static final lightPaths = [
     PolyLine.anchors([Anchor.E, Anchor.IE]),
     PolyLine.anchors([Anchor.N, Anchor.IN]),
@@ -118,14 +137,15 @@ class _MonoHelper {
   ];
 
   static final Map<Mono, MonoGram> enum2mono = Map.unmodifiable({
-    Mono.Dot: MonoGram(dotPaths, ConsPair.AHA),
-    Mono.Cross: MonoGram(crossPaths, ConsPair.BAPA),
-    Mono.X: MonoGram(xPaths, ConsPair.GAKA),
-    Mono.Square: MonoGram(squarePaths, ConsPair.DATA),
-    Mono.Light: MonoGram(lightPaths, ConsPair.ZASA),
-    Mono.Circle: MonoGram(circlePaths, ConsPair.NAMA),
-    Mono.Flower: MonoGram(flowerPaths, ConsPair.VAFA),
-    Mono.Sun: MonoGram(sunPaths, ConsPair.RALA),
+    Mono.Dot: MonoGram(dotPaths, ConsPair.aHa),
+    Mono.Cross: MonoGram(crossPaths, ConsPair.BaPa),
+    Mono.X: MonoGram(xPaths, ConsPair.GaKa),
+    Mono.Square: MonoGram(squarePaths, ConsPair.DaTa),
+    Mono.Light: MonoGram(lightPaths, ConsPair.JaCha),
+    Mono.Sun: MonoGram(sunPaths, ConsPair.ZaSa),
+    Mono.Circle: MonoGram(circlePaths, ConsPair.NaMa),
+    Mono.Flower: MonoGram(flowerPaths, ConsPair.VaFa),
+    Mono.Blob: MonoGram(blobPaths, ConsPair.RaLa),
   });
 }
 
@@ -137,6 +157,16 @@ extension MonoExtension on Mono {
 
   Quads get quadPeer =>
       Quads.values.firstWhere((q) => q.grams.consPair == this.gram.consPair);
+
+  GramExpression shrink() => gram.shrink();
+
+  GramExpression up() => gram.up();
+
+  GramExpression down() => gram.down();
+
+  GramExpression left() => gram.left();
+
+  GramExpression right() => gram.right();
 }
 
 /// enum for each of the QuadGram grouping.
@@ -145,6 +175,7 @@ enum Quads {
   Corner,
   Angle,
   Gate,
+  Step,
   Zap,
   Arc,
   Flow,
@@ -162,11 +193,15 @@ class _QuadHelper {
   ];
 
   static final anglePaths = [
-    PolyLine.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
+    PolyLine.anchors([Anchor.N, Anchor.E, Anchor.S]),
   ];
 
   static final gatePaths = [
-    PolyLine.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW])
+    PolyLine.anchors([Anchor.IN, Anchor.NE, Anchor.SE, Anchor.IS])
+  ];
+
+  static final stepPaths = [
+    PolyLine.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
   ];
 
   static final zapPaths = [
@@ -175,10 +210,11 @@ class _QuadHelper {
 
   static final arcPaths = [
     PolySpline.anchors([
-      Anchor.SW,
-      Anchor.S,
       Anchor.N,
-      Anchor.NW,
+      Anchor.N,
+      Anchor.IE,
+      Anchor.S,
+      Anchor.S,
     ]),
   ];
 
@@ -204,14 +240,15 @@ class _QuadHelper {
   ];
 
   static final Map<Quads, QuadGrams> enum2quads = Map.unmodifiable({
-    Quads.Line: SemiRotatingQuads(linePaths, ConsPair.AHA),
-    Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BAPA),
-    Quads.Angle: RotatingQuads(anglePaths, ConsPair.GAKA),
-    Quads.Gate: RotatingQuads(gatePaths, ConsPair.DATA),
-    Quads.Zap: FlipQuads(zapPaths, ConsPair.ZASA),
-    Quads.Arc: RotatingQuads(arcPaths, ConsPair.NAMA),
-    Quads.Flow: FlipQuads(flowPaths, ConsPair.VAFA),
-    Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.RALA),
+    Quads.Line: SemiRotatingQuads(linePaths, ConsPair.aHa),
+    Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BaPa),
+    Quads.Angle: RotatingQuads(anglePaths, ConsPair.GaKa),
+    Quads.Gate: RotatingQuads(gatePaths, ConsPair.DaTa),
+    Quads.Step: FlipQuads(stepPaths, ConsPair.JaCha),
+    Quads.Zap: FlipQuads(zapPaths, ConsPair.ZaSa),
+    Quads.Arc: RotatingQuads(arcPaths, ConsPair.NaMa),
+    Quads.Flow: FlipQuads(flowPaths, ConsPair.VaFa),
+    Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.RaLa),
   });
 }
 

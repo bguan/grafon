@@ -18,7 +18,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grafon/gram_expr_tile_widget.dart';
+import 'package:grafon/gram_expr_widget.dart';
 import 'package:grafon/gram_infra.dart';
 
 import 'gram_table.dart';

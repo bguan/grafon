@@ -43,7 +43,7 @@ class GramExprTile extends StatelessWidget {
 /// The custom painter to provide canvas rendering logic
 class GramExprPainter extends CustomPainter {
   static const STROKE_WIDTH_SCALE = 0.1;
-  static const DOMINANT_CTRL_SCALE = 0.7;
+  static const DOMINANT_CTRL_SCALE = 0.6;
   static const STD_CTRL_SCALE = 0.4;
   final GramExpression gram;
   final ColorScheme scheme;

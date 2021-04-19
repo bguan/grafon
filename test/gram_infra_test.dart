@@ -481,18 +481,18 @@ void main() {
     final paths2 = [
       PolyLine.anchors([Anchor.O])
     ];
-    final m = MonoGram(paths1, ConsPair.AHA);
+    final m = MonoGram(paths1, ConsPair.aHa);
     expect(m, m);
 
-    final m1 = MonoGram(paths1, ConsPair.AHA);
+    final m1 = MonoGram(paths1, ConsPair.aHa);
     expect(m, m1);
     expect(m.hashCode, m1.hashCode);
 
-    final m1SAZA = MonoGram(paths1, ConsPair.ZASA);
+    final m1SAZA = MonoGram(paths1, ConsPair.ZaSa);
     expect(m == m1SAZA, isFalse);
     expect(m.hashCode == m1SAZA.hashCode, isFalse);
 
-    final m2 = MonoGram(paths2, ConsPair.AHA);
+    final m2 = MonoGram(paths2, ConsPair.aHa);
     expect(m == m2, isFalse);
     expect(m.hashCode == m2.hashCode, isFalse);
   });
@@ -502,7 +502,7 @@ void main() {
       PolyLine.anchors([Anchor.NW, Anchor.SE]),
       PolyLine.anchors([Anchor.NE, Anchor.SW])
     ];
-    final xAHA = MonoGram(xPaths, ConsPair.AHA);
+    final xAHA = MonoGram(xPaths, ConsPair.aHa);
     expect(xAHA.face, Face.Center);
     expect(xAHA.vowel, Face.Center.vowel);
     expect(xAHA.base, Consonant.nil);
@@ -514,7 +514,7 @@ void main() {
       PolyLine.anchors([Anchor.NW, Anchor.SE]),
       PolyLine.anchors([Anchor.NE, Anchor.SW])
     ];
-    final xAHA = MonoGram(xPaths, ConsPair.AHA);
+    final xAHA = MonoGram(xPaths, ConsPair.aHa);
     expect(xAHA.visualCenter.x, moreOrLessEquals(0, epsilon: floatPrecision));
     expect(xAHA.visualCenter.y, moreOrLessEquals(0, epsilon: floatPrecision));
 
@@ -529,7 +529,7 @@ void main() {
         Anchor.E,
       ])
     ];
-    final circleAHA = MonoGram(circlePaths, ConsPair.AHA);
+    final circleAHA = MonoGram(circlePaths, ConsPair.aHa);
     expect(
         circleAHA.visualCenter.x, moreOrLessEquals(0, epsilon: floatPrecision));
     expect(
@@ -540,33 +540,33 @@ void main() {
     final anglePaths = [
       PolyLine.anchors([Anchor.N, Anchor.E, Anchor.S])
     ];
-    final angleAHA = RotatingQuads(anglePaths, ConsPair.AHA);
+    final angleAHA = RotatingQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA, angleAHA);
 
-    final semiAngleAHA = SemiRotatingQuads(anglePaths, ConsPair.AHA);
+    final semiAngleAHA = SemiRotatingQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA == semiAngleAHA, isFalse);
     expect(angleAHA.hashCode == semiAngleAHA.hashCode, isFalse);
 
-    final flipAngleAHA = FlipQuads(anglePaths, ConsPair.AHA);
+    final flipAngleAHA = FlipQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA == flipAngleAHA, isFalse);
     expect(angleAHA.hashCode == flipAngleAHA.hashCode, isFalse);
 
-    final doubleFlipAngleAHA = DoubleFlipQuads(anglePaths, ConsPair.AHA);
+    final doubleFlipAngleAHA = DoubleFlipQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA == doubleFlipAngleAHA, isFalse);
     expect(angleAHA.hashCode == doubleFlipAngleAHA.hashCode, isFalse);
 
-    final angleAHA2 = RotatingQuads(anglePaths, ConsPair.AHA);
+    final angleAHA2 = RotatingQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA, equals(angleAHA2));
     expect(angleAHA.hashCode, angleAHA2.hashCode);
 
-    final angleSAZA = RotatingQuads(anglePaths, ConsPair.ZASA);
+    final angleSAZA = RotatingQuads(anglePaths, ConsPair.ZaSa);
     expect(angleAHA == angleSAZA, isFalse);
     expect(angleAHA.hashCode == angleSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
-    final gateAHA = RotatingQuads(gatePaths, ConsPair.AHA);
+    final gateAHA = RotatingQuads(gatePaths, ConsPair.aHa);
     expect(angleAHA == gateAHA, isFalse);
     expect(angleAHA.hashCode == gateAHA.hashCode, isFalse);
   });
@@ -575,7 +575,7 @@ void main() {
     final anglePaths = [
       PolyLine.anchors([Anchor.N, Anchor.E, Anchor.S])
     ];
-    final angleAHA = RotatingQuads(anglePaths, ConsPair.AHA);
+    final angleAHA = RotatingQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA.consPair.base, Consonant.nil);
     expect(angleAHA.consPair.head, Consonant.H);
 
@@ -626,33 +626,33 @@ void main() {
     final linePaths = [
       PolyLine.anchors([Anchor.SW, Anchor.NE])
     ];
-    final semiLineAHA = SemiRotatingQuads(linePaths, ConsPair.AHA);
+    final semiLineAHA = SemiRotatingQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA, semiLineAHA);
 
-    final lineAHA = RotatingQuads(linePaths, ConsPair.AHA);
+    final lineAHA = RotatingQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA == lineAHA, isFalse);
     expect(semiLineAHA.hashCode == lineAHA.hashCode, isFalse);
 
-    final flipLineAHA = FlipQuads(linePaths, ConsPair.AHA);
+    final flipLineAHA = FlipQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA == flipLineAHA, isFalse);
     expect(semiLineAHA.hashCode == flipLineAHA.hashCode, isFalse);
 
-    final doubleFlipLineAHA = DoubleFlipQuads(linePaths, ConsPair.AHA);
+    final doubleFlipLineAHA = DoubleFlipQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA == doubleFlipLineAHA, isFalse);
     expect(semiLineAHA.hashCode == doubleFlipLineAHA.hashCode, isFalse);
 
-    final semiLineAHA2 = SemiRotatingQuads(linePaths, ConsPair.AHA);
+    final semiLineAHA2 = SemiRotatingQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA, equals(semiLineAHA2));
     expect(semiLineAHA.hashCode, semiLineAHA2.hashCode);
 
-    final semiLineSAZA = SemiRotatingQuads(linePaths, ConsPair.ZASA);
+    final semiLineSAZA = SemiRotatingQuads(linePaths, ConsPair.ZaSa);
     expect(semiLineAHA == semiLineSAZA, isFalse);
     expect(semiLineAHA.hashCode == semiLineSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
-    final semiGateAHA = SemiRotatingQuads(gatePaths, ConsPair.AHA);
+    final semiGateAHA = SemiRotatingQuads(gatePaths, ConsPair.aHa);
     expect(semiLineAHA == semiGateAHA, isFalse);
     expect(semiLineAHA.hashCode == semiGateAHA.hashCode, isFalse);
   });
@@ -661,7 +661,7 @@ void main() {
     final linePaths = [
       PolyLine.anchors([Anchor.SW, Anchor.NE])
     ];
-    final semiLineAHA = SemiRotatingQuads(linePaths, ConsPair.AHA);
+    final semiLineAHA = SemiRotatingQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA.consPair.base, Consonant.nil);
     expect(semiLineAHA.consPair.head, Consonant.H);
 
@@ -717,33 +717,33 @@ void main() {
         Anchor.SE,
       ])
     ];
-    final flipFlowAHA = FlipQuads(flowPaths, ConsPair.AHA);
+    final flipFlowAHA = FlipQuads(flowPaths, ConsPair.aHa);
     expect(flipFlowAHA, flipFlowAHA);
 
-    final rotaFlowAHA = RotatingQuads(flowPaths, ConsPair.AHA);
+    final rotaFlowAHA = RotatingQuads(flowPaths, ConsPair.aHa);
     expect(flipFlowAHA == rotaFlowAHA, isFalse);
     expect(flipFlowAHA.hashCode == rotaFlowAHA.hashCode, isFalse);
 
-    final semiFlowAHA = SemiRotatingQuads(flowPaths, ConsPair.AHA);
+    final semiFlowAHA = SemiRotatingQuads(flowPaths, ConsPair.aHa);
     expect(flipFlowAHA == semiFlowAHA, isFalse);
     expect(flipFlowAHA.hashCode == semiFlowAHA.hashCode, isFalse);
 
-    final doubleFlipFlowAHA = DoubleFlipQuads(flowPaths, ConsPair.AHA);
+    final doubleFlipFlowAHA = DoubleFlipQuads(flowPaths, ConsPair.aHa);
     expect(flipFlowAHA == doubleFlipFlowAHA, isFalse);
     expect(flipFlowAHA.hashCode == doubleFlipFlowAHA.hashCode, isFalse);
 
-    final flipFlowAHA2 = FlipQuads(flowPaths, ConsPair.AHA);
+    final flipFlowAHA2 = FlipQuads(flowPaths, ConsPair.aHa);
     expect(flipFlowAHA, equals(flipFlowAHA2));
     expect(flipFlowAHA.hashCode, flipFlowAHA2.hashCode);
 
-    final flipFlowSAZA = FlipQuads(flowPaths, ConsPair.ZASA);
+    final flipFlowSAZA = FlipQuads(flowPaths, ConsPair.ZaSa);
     expect(flipFlowAHA == flipFlowSAZA, isFalse);
     expect(flipFlowAHA.hashCode == flipFlowSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
-    final flipGateAHA = FlipQuads(gatePaths, ConsPair.AHA);
+    final flipGateAHA = FlipQuads(gatePaths, ConsPair.aHa);
     expect(flipFlowAHA == flipGateAHA, isFalse);
     expect(flipFlowAHA.hashCode == flipGateAHA.hashCode, isFalse);
   });
@@ -757,7 +757,7 @@ void main() {
         Anchor.SE,
       ])
     ];
-    final flipFlowAHA = FlipQuads(flowPaths, ConsPair.AHA);
+    final flipFlowAHA = FlipQuads(flowPaths, ConsPair.aHa);
     expect(flipFlowAHA.consPair.base, Consonant.nil);
     expect(flipFlowAHA.consPair.head, Consonant.H);
 
@@ -814,33 +814,33 @@ void main() {
         Anchor.E,
       ])
     ];
-    final dflipSwirlAHA = DoubleFlipQuads(swirlPaths, ConsPair.AHA);
+    final dflipSwirlAHA = DoubleFlipQuads(swirlPaths, ConsPair.aHa);
     expect(dflipSwirlAHA, dflipSwirlAHA);
 
-    final rotaSwirlAHA = RotatingQuads(swirlPaths, ConsPair.AHA);
+    final rotaSwirlAHA = RotatingQuads(swirlPaths, ConsPair.aHa);
     expect(dflipSwirlAHA == rotaSwirlAHA, isFalse);
     expect(dflipSwirlAHA.hashCode == rotaSwirlAHA.hashCode, isFalse);
 
-    final semiSwirlAHA = SemiRotatingQuads(swirlPaths, ConsPair.AHA);
+    final semiSwirlAHA = SemiRotatingQuads(swirlPaths, ConsPair.aHa);
     expect(dflipSwirlAHA == semiSwirlAHA, isFalse);
     expect(dflipSwirlAHA.hashCode == semiSwirlAHA.hashCode, isFalse);
 
-    final flipSwirlAHA = FlipQuads(swirlPaths, ConsPair.AHA);
+    final flipSwirlAHA = FlipQuads(swirlPaths, ConsPair.aHa);
     expect(dflipSwirlAHA == flipSwirlAHA, isFalse);
     expect(dflipSwirlAHA.hashCode == flipSwirlAHA.hashCode, isFalse);
 
-    final dflipSwirlAHA2 = DoubleFlipQuads(swirlPaths, ConsPair.AHA);
+    final dflipSwirlAHA2 = DoubleFlipQuads(swirlPaths, ConsPair.aHa);
     expect(dflipSwirlAHA, equals(dflipSwirlAHA2));
     expect(dflipSwirlAHA.hashCode, dflipSwirlAHA2.hashCode);
 
-    final dflipSwirlSAZA = DoubleFlipQuads(swirlPaths, ConsPair.ZASA);
+    final dflipSwirlSAZA = DoubleFlipQuads(swirlPaths, ConsPair.ZaSa);
     expect(dflipSwirlAHA == dflipSwirlSAZA, isFalse);
     expect(dflipSwirlAHA.hashCode == dflipSwirlSAZA.hashCode, isFalse);
 
     final gatePaths = [
       PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
-    final dflipGateAHA = DoubleFlipQuads(gatePaths, ConsPair.AHA);
+    final dflipGateAHA = DoubleFlipQuads(gatePaths, ConsPair.aHa);
     expect(dflipSwirlAHA == dflipGateAHA, isFalse);
     expect(dflipSwirlAHA.hashCode == dflipGateAHA.hashCode, isFalse);
   });
@@ -857,7 +857,7 @@ void main() {
         Anchor.E,
       ])
     ];
-    final dflipSwirlAHA = DoubleFlipQuads(swirlPaths, ConsPair.AHA);
+    final dflipSwirlAHA = DoubleFlipQuads(swirlPaths, ConsPair.aHa);
     expect(dflipSwirlAHA.consPair.base, Consonant.nil);
     expect(dflipSwirlAHA.consPair.head, Consonant.H);
 

@@ -27,22 +27,24 @@ import 'phonetics.dart';
 /// transformation matrix instance is created.
 class TransformationHelper {
   /// https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
+  static final Matrix3 shrink = Matrix3(.5, 0, 0, 0, .5, 0, 0, 0, 1);
   static final Matrix3 xShrink = Matrix3(.5, 0, 0, 0, 1, 0, 0, 0, 1);
   static final Matrix3 yShrink = Matrix3(1, 0, 0, 0, .5, 0, 0, 0, 1);
-  static final Matrix3 rightShift = Matrix3(1, 0, 0, 0, 1, 0, 0.25, 0, 1);
-  static final Matrix3 leftShift = Matrix3(1, 0, 0, 0, 1, 0, -.25, 0, 1);
-  static final Matrix3 upShift = Matrix3(1, 0, 0, 0, 1, 0, 0, 0.25, 1);
-  static final Matrix3 downShift = Matrix3(1, 0, 0, 0, 1, 0, 0, -.25, 1);
+  static final Matrix3 rightShift = Matrix3(1, 0, 0, 0, 1, 0, 0.5, 0, 1);
+  static final Matrix3 leftShift = Matrix3(1, 0, 0, 0, 1, 0, -.5, 0, 1);
+  static final Matrix3 upShift = Matrix3(1, 0, 0, 0, 1, 0, 0, 0.5, 1);
+  static final Matrix3 downShift = Matrix3(1, 0, 0, 0, 1, 0, 0, -.5, 1);
 
   /// Take Big Step to the Right, only for Binary
   static final Matrix3 stepRight = Matrix3(1, 0, 0, 0, 1, 0, 1, 0, 1);
+  static final Matrix3 stepUp = Matrix3(1, 0, 0, 0, 1, 0, 0, 1, 1);
 
   static final noTransform = Matrix3.identity();
-  static final shrinkCenter = xShrink.multiplied(yShrink);
-  static final shrinkRight = rightShift.multiplied(xShrink);
-  static final shrinkUp = upShift.multiplied(yShrink);
-  static final shrinkLeft = leftShift.multiplied(xShrink);
-  static final shrinkDown = downShift.multiplied(yShrink);
+  static final shrinkCenter = shrink;
+  static final shrinkRight = xShrink.multiplied(rightShift);
+  static final shrinkUp = yShrink.multiplied(upShift);
+  static final shrinkLeft = xShrink.multiplied(leftShift);
+  static final shrinkDown = yShrink.multiplied(downShift);
 }
 
 /// Binary Operator works on a pair of Gram Expression
@@ -70,14 +72,14 @@ extension BinaryExtension on Binary {
 
   BinaryEnding get ending {
     switch (this) {
-      case Binary.Before:
-        return BinaryEnding.H;
-      case Binary.Over:
-        return BinaryEnding.SZ;
-      case Binary.Around:
-        return BinaryEnding.MN;
       case Binary.Merge:
-        return BinaryEnding.LR;
+        return BinaryEnding.H;
+      case Binary.Before:
+        return BinaryEnding.ZS;
+      case Binary.Over:
+        return BinaryEnding.RL;
+      case Binary.Around:
+        return BinaryEnding.NM;
       case Binary.Compound:
         return BinaryEnding.Ng;
       default:

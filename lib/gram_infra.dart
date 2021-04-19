@@ -409,8 +409,8 @@ abstract class Gram extends GramExpression {
       : GramTable.getMonoEnum(this).shortName;
 
   String get pronunciation =>
-      (consPair == ConsPair.AHA ? '' : consPair.base.shortName) +
-      (consPair == ConsPair.AHA
+      (consPair == ConsPair.aHa ? '' : consPair.base.shortName) +
+      (consPair == ConsPair.aHa
           ? vowel.shortName
           : vowel.shortName.toLowerCase());
 

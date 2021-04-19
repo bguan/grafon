@@ -17,7 +17,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'gram_expr_tile_widget.dart';
+import 'gram_expr_widget.dart';
 import 'gram_table.dart';
 import 'gram_table_widget.dart';
 
@@ -37,28 +37,42 @@ class GrafonApp extends StatelessWidget {
     final expressions = {
       Mono.Sun.gram: "Sun, star.",
       Quads.Swirl.up: "Swirling upward, spinning upward.",
-      Quads.Angle.up.over(Quads.Gate.down): "House, dwelling, building.",
+      Quads.Angle.up.merge(Quads.Gate.down): "House, dwelling, building.",
       Mono.Dot.gram.over(Quads.Line.up): "Human.",
-      Mono.Sun.gram.over(Quads.Line.down): "Day time, day.",
+      Quads.Arc.down.around(Mono.Sun.gram): "Day time, day.",
+      Mono.Blob.up().before(Quads.Angle.up.merge(Quads.Arc.down)):
+          "Life Drip, blood?",
       Quads.Flow.down.before(Quads.Flow.down): "Rain.",
-      Quads.Arc.left.before(Quads.Flow.right): "Talk, speech.",
-      Mono.Square.gram.shrink().merge(Quads.Line.down): "Nine.",
-      Quads.Gate.down.merge(Mono.X.gram): "Seven.",
-      Quads.Gate.down.merge(Quads.Angle.down): "Six.",
-      Mono.Light.gram.around(Quads.Zap.down): "White, light from lightning.",
-      Mono.Light.gram.around(Mono.Flower.gram): "Red, light from flower.",
-      Mono.Light.gram.around(Quads.Arc.left.merge(Quads.Arc.right)):
-          "Green, light from leaf.",
-      Mono.Light.gram.around(Quads.Flow.right): "Blue, light from water.",
-      Mono.Square.gram.around(Mono.Light.gram): "Black, trapped light.",
+      Quads.Gate.left.around(Quads.Flow.right): "Talk, speech.",
+      Quads.Step.up: "Step up, count, number.",
+      Mono.Circle.gram: "Zero, Moon, Circle.",
+      Quads.Line.up: "One, ground, floor.",
+      Quads.Corner.up: "Two, corner.",
+      Quads.Gate.up: "Three, open gate.",
+      Mono.Square.gram: "Four.",
+      Quads.Line.right.merge(Mono.Square.gram): "Number Five.",
+      Quads.Line.down.merge(Mono.X.gram): "Number Six.",
+      Quads.Line.left.merge(Mono.Square.shrink()): "Number Seven.",
+      Mono.X.gram.merge(Mono.Square.gram): "Eight.",
+      Quads.Line.up.merge(Mono.Square.shrink()): "Nine.",
       Mono.Circle.gram.before(Quads.Line.up.up()):
           "Ten(s), ten to the power of 1.",
-      Mono.Circle.gram.before(Quads.Corner.right.up()):
+      Mono.Circle.gram.before(Quads.Corner.up.up()):
           "Hundred(s), ten to the power of 2.",
-      Mono.Circle.gram.before(Quads.Gate.right.up()):
+      Mono.Circle.gram.before(Quads.Gate.up.up()):
           "Thousand(s), ten to the power of 3.",
+      Mono.Light.gram.around(Quads.Zap.down): "White, light from lightning.",
+      Mono.Light.gram.around(Mono.Flower.gram): "Red, light from flower.",
+      Mono.Light.gram.around(Quads.Arc.up.merge(Quads.Arc.down)):
+          "Green, light from leaf.",
+      Mono.Light.gram.around(Quads.Flow.right): "Blue, light from water.",
+      Mono.Light.gram.around(Mono.X.gram): "Black, no light.",
       Mono.Sun.gram.compound(Mono.Dot.gram.over(Quads.Line.up)):
           "Star being, alien, god?",
+      Quads.Arc.up
+              .around(Mono.Dot.gram)
+              .compound(Quads.Gate.left.around(Quads.Flow.right)):
+          '"Eye Talk", the Grafon language in Grafon.',
     };
 
     final wordViews = [

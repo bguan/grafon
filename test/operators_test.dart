@@ -158,7 +158,7 @@ void main() {
 
     final tfm1 = Binary.Over.transform1(hLine);
     final tfm2 = Binary.Over.transform2(vLine);
-    expect(tfm1, Unary.Up.transform(hLine));
+    expect(tfm1, PolyLine([Vector2(-0.50, 0.25), Vector2(0.50, 0.25)]));
     expect(tfm2, Unary.Down.transform(vLine));
   });
 

@@ -38,7 +38,7 @@ class GramTableView extends StatelessWidget {
     final width = useSize.width.clamp(500.0, 2000.0);
     final height = useSize.height.clamp(500.0, 2000.0);
     final widthHeightRatio = (width / height).clamp(.5, 2);
-    final fontScale = height / 1000;
+    final fontScale = widthHeightRatio * height / 1000;
     final vpad = widthHeightRatio * 10.0;
     final hpad = widthHeightRatio * 20.0;
     final space = 5.0;
@@ -65,7 +65,7 @@ class GramTableView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       height: 1.3,
                       color: Colors.white,
-                      fontSize: (fontScale * 14).clamp(8, 40),
+                      fontSize: (fontScale * 20).clamp(8, 60),
                     ),
                   ),
                 ),
@@ -91,7 +91,7 @@ class GramTableView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       height: 1.5,
                       color: scheme.surface,
-                      fontSize: (fontScale * 14).clamp(8, 40),
+                      fontSize: (fontScale * 25).clamp(8, 60),
                     ),
                   ),
                 ),
@@ -101,7 +101,7 @@ class GramTableView extends StatelessWidget {
 
     final binaryOpRow = [
       for (var bTxt in [
-        'Binary\nOperator\ndecreasing precedence',
+        'Binary\nOperator\ndecreasing\nprecedence',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
             '…${b.ending.base}${b.ending.tail.length > 0 ? ' …' + b.ending.tail : ''}'),
@@ -118,7 +118,7 @@ class GramTableView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       height: 1.4,
                       color: scheme.surface,
-                      fontSize: (fontScale * 12).clamp(8, 40),
+                      fontSize: (fontScale * 20).clamp(8, 60),
                     ),
                   ),
                 ),
@@ -136,7 +136,7 @@ class GramTableView extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontSize: (fontScale * 20).clamp(8, 40),
+                fontSize: (fontScale * 30).clamp(8, 60),
               ),
             ),
           ),
@@ -157,7 +157,7 @@ class GramTableView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 height: 1.5,
                 color: scheme.surface,
-                fontSize: (fontScale * 20).clamp(8, 40),
+                fontSize: (fontScale * 30).clamp(8, 60),
               ),
             ),
           ),

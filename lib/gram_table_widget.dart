@@ -54,15 +54,15 @@ class GramTableView extends StatelessWidget {
           color: Colors.white,
           fontSize: fontSizing(fontSize),
         );
-    final headerStyle = textStyle(25);
-    final unaryFooterStyle = textStyle(25, 1.5);
-    final binaryFooterStyle = textStyle(22);
-    final rowHeadTextStyle = textStyle(35);
-    final rowTailTextStyle = textStyle(30, 1.5);
+    final headerStyle = textStyle(19);
+    final unaryFooterStyle = textStyle(20, 1.5);
+    final binaryFooterStyle = textStyle(18);
+    final rowHeadTextStyle = textStyle(30);
+    final rowTailTextStyle = textStyle(25, 1.5);
 
     final headerRow = [
       for (var fTxt in [
-        'Face vowel - \nConsonant\nbase, head',
+        'Face vowel \\\nConsonant\nbase, head',
         ...Face.values
             .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
         'Symbol\nName'

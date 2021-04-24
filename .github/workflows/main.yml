@@ -22,7 +22,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v1.4.0
         with:
-          flutter-version: '2.0.4'
+          flutter-version: '2.0.5'
 
       - name: Pull dependencies
         run: flutter pub get
@@ -36,11 +36,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/lcov.info
 
-      - name: Make ghpages root directory
-        run: mkdir -p build/ghpages
-
       - name: Publish Flutter Web App
         uses: erickzanardo/flutter-gh-pages@v3
         with:
-          workingDir: build/ghpages
+          workingDir: web
           webRenderer: canvaskit

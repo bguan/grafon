@@ -1,6 +1,8 @@
 # Grafon
 
-A graphical phonetic constructed script and language, i.e. Conlang & Conscript.
+An app to develop my graphical phonetic constructed script and language, i.e. Conlang & Conscript.
+
+A live site built with flutter web is hosted on [grafon.org](https://grafon.org/).
 
 Logo-grams, i.e. graphical symbols, AKA Grams, arranged in a table, are each associated with a 
 syllable (an optional starting consonant and a mandatory vowel).  

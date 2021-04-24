@@ -167,6 +167,16 @@ extension MonoExtension on Mono {
   GramExpression left() => gram.left();
 
   GramExpression right() => gram.right();
+
+  GramExpression merge(GramExpression that) => gram.merge(that);
+
+  GramExpression before(GramExpression that) => gram.before(that);
+
+  GramExpression over(GramExpression that) => gram.over(that);
+
+  GramExpression around(GramExpression that) => gram.around(that);
+
+  GramExpression compound(GramExpression that) => gram.compound(that);
 }
 
 /// enum for each of the QuadGram grouping.

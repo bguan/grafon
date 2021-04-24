@@ -1,4 +1,5 @@
-# based on https://poetryincode.dev/testing-dart-packages-with-github-actions
+# based on https://poetryincode.dev/testing-dart-packages-with-github-actions and
+# https://github.com/marketplace/actions/deploy-flutter-web-app-to-github-pages
 name: Test And Publish
 
 on:
@@ -37,6 +38,6 @@ jobs:
           file: coverage/lcov.info
 
       - name: Publish Flutter Web App
-        uses: erickzanardo/flutter-gh-pages@v3
+        uses: erickzanardo/flutter-gh-pages@v2
         with:
-          webRenderer: html
+          webRenderer: canvaskit

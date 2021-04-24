@@ -77,7 +77,7 @@ extension BinaryExtension on Binary {
       case Binary.Before:
         return BinaryEnding.ZS;
       case Binary.Over:
-        return BinaryEnding.RL;
+        return BinaryEnding.GK;
       case Binary.Around:
         return BinaryEnding.NM;
       case Binary.Compound:

@@ -97,7 +97,7 @@ void main() {
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line up");
-    expect(person.pronunciation, "ArI");
+    expect(person.pronunciation, "AgI");
 
     final rain = Quads.Flow.down.before(Quads.Flow.down);
     expect(rain.toString(), "Flow down | Flow down");
@@ -109,7 +109,7 @@ void main() {
 
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line up");
-    expect(starMan.pronunciation, "ZangArI");
+    expect(starMan.pronunciation, "ZangAgI");
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.around(Mono.Flower.gram);

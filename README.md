@@ -18,7 +18,7 @@ consonant to be appended to gram as coda.
 ## Example in Code
 ```
   test('BinaryExpr toString and pronunciation is correct', () {
-    final sun = Mono.Sun.gram; 
+    final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
     expect(sun.pronunciation, "Za");
 
@@ -28,7 +28,7 @@ consonant to be appended to gram as coda.
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line up");
-    expect(person.pronunciation, "ArI");
+    expect(person.pronunciation, "AgI");
 
     final rain = Quads.Flow.down.before(Quads.Flow.down);
     expect(rain.toString(), "Flow down | Flow down");
@@ -40,7 +40,7 @@ consonant to be appended to gram as coda.
 
     final starMan = sun.compound(person); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line up");
-    expect(starMan.pronunciation, "ZangArI");
+    expect(starMan.pronunciation, "ZangAgI");
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.around(Mono.Flower.gram);
@@ -49,12 +49,14 @@ consonant to be appended to gram as coda.
   });
 ```
 
-<img src="https://github.com/bguan/grafon/blob/main/assets/images/house.png?raw=true" width="100" height="100" alt="House"/><span>House, </span>
-<img src="https://github.com/bguan/grafon/blob/main/assets/images/human.png?raw=true" width="60" height="100" alt="Human"/><span>Human, </span>
-<img src="https://github.com/bguan/grafon/blob/main/assets/images/rain.png?raw=true" width="100" height="100" alt="Human"/><span>Rain, </span>
-<img src="https://github.com/bguan/grafon/blob/main/assets/images/speech.png?raw=true" width="100" height="100" alt="Human"/><span>Speech, </span>
-<img src="https://github.com/bguan/grafon/blob/main/assets/images/red.png?raw=true" width="100" height="100" alt="Human"/><span>Red, </span>
-<img src="https://github.com/bguan/grafon/blob/main/assets/images/star-being.png?raw=true" width="150" height="100" alt="Human"/><span>Star-Being!</span>
+| Gram Expression | Meaning |
+| --:             | :--     |
+| <img src="https://github.com/bguan/grafon/blob/main/assets/images/house.png?raw=true" width="100" height="100" alt="House"/> | House |
+| <img src="https://github.com/bguan/grafon/blob/main/assets/images/human.png?raw=true" width="75" height="100" alt="Human"/> | Human |
+| <img src="https://github.com/bguan/grafon/blob/main/assets/images/rain.png?raw=true" width="100" height="100" alt="Human"/> | Rain |
+| <img src="https://github.com/bguan/grafon/blob/main/assets/images/speech.png?raw=true" width="100" height="100" alt="Human"/> | Speech |
+| <img src="https://github.com/bguan/grafon/blob/main/assets/images/red.png?raw=true" width="100" height="100" alt="Human"/> | Red |
+| <img src="https://github.com/bguan/grafon/blob/main/assets/images/star-being.png?raw=true" width="150" height="100" alt="Human"/> | Star-Being! |
 
 
 ## Development Notes

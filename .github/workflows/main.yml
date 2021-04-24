@@ -36,8 +36,11 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/lcov.info
 
-      # Generate flutter web app
-      - uses: erickzanardo/flutter-gh-pages@v3
+      - name: Make ghpages root directory
+        run: mkdir -p build/ghpages
+
+      - name: Publish Flutter Web App
+        uses: erickzanardo/flutter-gh-pages@v3
         with:
           workingDir: build/ghpages
           webRenderer: canvaskit

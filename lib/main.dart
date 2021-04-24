@@ -66,7 +66,7 @@ class GrafonApp extends StatelessWidget {
           "Thousand(s), ten to the power of 3.",
       Mono.Light.around(Quads.Zap.down): "White, light from lightning.",
       Mono.Light.around(Mono.Flower.gram): "Red, light from flower.",
-      Mono.Light.around(Quads.Arc.up.merge(Quads.Arc.down)):
+      Mono.Light.around(Quads.Arc.left.merge(Quads.Arc.right)):
           "Green, light from leaf.",
       Mono.Light.around(Quads.Flow.right): "Blue, light from water.",
       Mono.Light.around(Mono.X.gram): "Black, no light.",

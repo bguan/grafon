@@ -16,6 +16,7 @@
 // under the License.
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'gram_expr_widget.dart';
 import 'gram_table.dart';
@@ -26,8 +27,21 @@ void main() {
   runApp(GrafonApp());
 }
 
+/// This widget is the root of Grafon application.
 class GrafonApp extends StatelessWidget {
-  // This widget is the root of your application.
+  Future<void> _launchInBrowser(String url) async {
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceSafariVC: false,
+        forceWebView: false,
+        headers: <String, String>{'my_header_key': 'my_header_value'},
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext ctx) {
     final scheme = Theme.of(ctx).colorScheme;
@@ -149,7 +163,14 @@ class GrafonApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        appBar: AppBar(title: Text('Grafon Home')),
+        appBar: AppBar(
+          title: Text('Grafon Home'),
+          leading: IconButton(
+            icon: Icon(Icons.help_outline_rounded),
+            onPressed: () =>
+                _launchInBrowser('https://github.com/bguan/grafon'),
+          ),
+        ),
         body: PageView(
           scrollDirection: Axis.horizontal,
           controller: controller,

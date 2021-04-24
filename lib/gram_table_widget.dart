@@ -34,18 +34,31 @@ class GramTableView extends StatelessWidget {
   @override
   Widget build(BuildContext ctx) {
     final scheme = Theme.of(ctx).colorScheme;
-    final useSize = (size ?? MediaQuery.of(ctx).size);
-    final width = useSize.width.clamp(500.0, 2000.0);
-    final height = useSize.height.clamp(500.0, 2000.0);
+    final mediaSize = (size ?? MediaQuery.of(ctx).size);
+    final width = mediaSize.width.clamp(500.0, 2000.0);
+    final height = mediaSize.height.clamp(500.0, 2000.0) - 100;
     final widthHeightRatio = (width / height).clamp(.5, 2);
-    final fontScale = widthHeightRatio * height / 1000;
     final vpad = widthHeightRatio * 10.0;
     final hpad = widthHeightRatio * 20.0;
     final space = 5.0;
     final inset = widthHeightRatio * 12.0;
     final dim = min((width - 2 * hpad) / (GramTable.numCols + 2),
         (0.8 * height - 2 * vpad) / (GramTable.numRows + 3));
-    final gridSize = Size(dim - 2 * inset - space, dim - 2 * inset - space);
+    final gridSize = Size(dim, dim);
+
+    final fontScale = width / 1000;
+    final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
+    final textStyle = (fontSize, [lineHeight = 1.3]) => TextStyle(
+          fontWeight: FontWeight.bold,
+          height: lineHeight,
+          color: Colors.white,
+          fontSize: fontSizing(fontSize),
+        );
+    final headerStyle = textStyle(25);
+    final unaryFooterStyle = textStyle(25, 1.5);
+    final binaryFooterStyle = textStyle(22);
+    final rowHeadTextStyle = textStyle(35);
+    final rowTailTextStyle = textStyle(30, 1.5);
 
     final headerRow = [
       for (var fTxt in [
@@ -61,12 +74,7 @@ class GramTableView extends StatelessWidget {
                   child: Text(
                     '$fTxt',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.3,
-                      color: Colors.white,
-                      fontSize: (fontScale * 20).clamp(8, 60),
-                    ),
+                    style: headerStyle,
                   ),
                 ),
                 color: scheme.secondaryVariant,
@@ -87,12 +95,7 @@ class GramTableView extends StatelessWidget {
                   child: Text(
                     '$uTxt',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.5,
-                      color: scheme.surface,
-                      fontSize: (fontScale * 25).clamp(8, 60),
-                    ),
+                    style: unaryFooterStyle,
                   ),
                 ),
                 color: scheme.primaryVariant,
@@ -114,12 +117,7 @@ class GramTableView extends StatelessWidget {
                   child: Text(
                     '$bTxt',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                      color: scheme.surface,
-                      fontSize: (fontScale * 20).clamp(8, 60),
-                    ),
+                    style: binaryFooterStyle,
                   ),
                 ),
                 color: scheme.primaryVariant,
@@ -133,11 +131,7 @@ class GramTableView extends StatelessWidget {
             child: Text(
               '${m.gram.consPair.base.shortName}, ${m.gram.consPair.head.shortName}',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: (fontScale * 30).clamp(8, 60),
-              ),
+              style: rowHeadTextStyle,
             ),
           ),
           color: scheme.background,
@@ -153,12 +147,7 @@ class GramTableView extends StatelessWidget {
             child: Text(
               '${m.shortName}\n${m.quadPeer.shortName}',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                height: 1.5,
-                color: scheme.surface,
-                fontSize: (fontScale * 30).clamp(8, 60),
-              ),
+              style: rowTailTextStyle,
             ),
           ),
           color: scheme.background,

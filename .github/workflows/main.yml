@@ -1,5 +1,5 @@
 # based on https://poetryincode.dev/testing-dart-packages-with-github-actions
-name: Test
+name: Test And Publish
 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
@@ -12,10 +12,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    # using macos to maximize misc plugin support
-    runs-on: macos-latest
-    
+  test_pub:
+    runs-on: ubuntu-latest # was macos-latest to maximize misc plugin support
+
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
@@ -28,12 +27,17 @@ jobs:
       - name: Pull dependencies
         run: flutter pub get
 
-      - name: Test app 
+      - name: Test app
         run: flutter test --coverage
-        
-      - name: Upload coverage to Codecov 
-        uses: codecov/codecov-action@v1 
-        with: 
-          token: ${{ secrets.CODECOV_TOKEN }} 
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/lcov.info
 
+      # Generate flutter web app
+      - uses: erickzanardo/flutter-gh-pages@v3
+        with:
+          workingDir: build/ghpages
+          webRenderer: canvaskit

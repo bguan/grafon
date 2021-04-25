@@ -38,10 +38,10 @@ class GramTableView extends StatelessWidget {
     final width = mediaSize.width.clamp(500.0, 2000.0);
     final height = mediaSize.height.clamp(500.0, 2000.0) - 100;
     final widthHeightRatio = (width / height).clamp(.5, 2);
-    final vpad = widthHeightRatio * 10.0;
-    final hpad = widthHeightRatio * 20.0;
-    final space = 5.0;
-    final inset = widthHeightRatio * 12.0;
+    final vpad = widthHeightRatio * 8.0;
+    final hpad = widthHeightRatio * 40.0;
+    final space = 4.0;
+    final inset = widthHeightRatio * 4.0;
     final dim = min((width - 2 * hpad) / (GramTable.numCols + 2),
         (0.8 * height - 2 * vpad) / (GramTable.numRows + 3));
     final gridSize = Size(dim, dim);
@@ -54,9 +54,9 @@ class GramTableView extends StatelessWidget {
           color: Colors.white,
           fontSize: fontSizing(fontSize),
         );
-    final headerStyle = textStyle(19);
-    final unaryFooterStyle = textStyle(19, 1.4);
-    final binaryFooterStyle = textStyle(17);
+    final headerStyle = textStyle(17);
+    final unaryFooterStyle = textStyle(18, 1.4);
+    final binaryFooterStyle = textStyle(16);
     final rowHeadTextStyle = textStyle(30);
     final rowTailTextStyle = textStyle(25, 1.5);
 

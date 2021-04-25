@@ -54,9 +54,9 @@ class GramTableView extends StatelessWidget {
           color: Colors.white,
           fontSize: fontSizing(fontSize),
         );
-    final headerStyle = textStyle(17);
-    final unaryFooterStyle = textStyle(18, 1.4);
-    final binaryFooterStyle = textStyle(16);
+    final headerStyle = textStyle(15);
+    final unaryFooterStyle = textStyle(16, 1.4);
+    final binaryFooterStyle = textStyle(15);
     final rowHeadTextStyle = textStyle(30);
     final rowTailTextStyle = textStyle(25, 1.5);
 

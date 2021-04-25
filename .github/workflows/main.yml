@@ -40,4 +40,4 @@ jobs:
       - name: Publish Flutter Web App
         uses: erickzanardo/flutter-gh-pages@v3
         with:
-          webRenderer: canvaskit
+          webRenderer: html

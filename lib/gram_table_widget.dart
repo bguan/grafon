@@ -41,7 +41,7 @@ class GramTableView extends StatelessWidget {
     final vpad = widthHeightRatio * 8.0;
     final hpad = widthHeightRatio * 40.0;
     final space = 4.0;
-    final inset = widthHeightRatio * 4.0;
+    final inset = widthHeightRatio * 15.0;
     final dim = min((width - 2 * hpad) / (GramTable.numCols + 2),
         (0.8 * height - 2 * vpad) / (GramTable.numRows + 3));
     final gridSize = Size(dim, dim);

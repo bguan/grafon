@@ -59,11 +59,11 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.N:
       case Consonant.M:
-      return ConsPair.MaNa;
+        return ConsPair.MaNa;
 
       case Consonant.Z:
       case Consonant.S:
-      return ConsPair.SaZa;
+        return ConsPair.SaZa;
 
       default:
         return ConsPair.aHa;

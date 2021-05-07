@@ -493,7 +493,7 @@ void main() {
     expect(m, m1);
     expect(m.hashCode, m1.hashCode);
 
-    final m1SAZA = MonoGram(paths1, ConsPair.ZaSa);
+    final m1SAZA = MonoGram(paths1, ConsPair.SaZa);
     expect(m == m1SAZA, isFalse);
     expect(m.hashCode == m1SAZA.hashCode, isFalse);
 
@@ -562,7 +562,7 @@ void main() {
     expect(angleAHA, equals(angleAHA2));
     expect(angleAHA.hashCode, angleAHA2.hashCode);
 
-    final angleSAZA = RotatingQuads(anglePaths, ConsPair.ZaSa);
+    final angleSAZA = RotatingQuads(anglePaths, ConsPair.SaZa);
     expect(angleAHA == angleSAZA, isFalse);
     expect(angleAHA.hashCode == angleSAZA.hashCode, isFalse);
 
@@ -648,7 +648,7 @@ void main() {
     expect(semiLineAHA, equals(semiLineAHA2));
     expect(semiLineAHA.hashCode, semiLineAHA2.hashCode);
 
-    final semiLineSAZA = SemiRotatingQuads(linePaths, ConsPair.ZaSa);
+    final semiLineSAZA = SemiRotatingQuads(linePaths, ConsPair.SaZa);
     expect(semiLineAHA == semiLineSAZA, isFalse);
     expect(semiLineAHA.hashCode == semiLineSAZA.hashCode, isFalse);
 
@@ -739,7 +739,7 @@ void main() {
     expect(flipFlowAHA, equals(flipFlowAHA2));
     expect(flipFlowAHA.hashCode, flipFlowAHA2.hashCode);
 
-    final flipFlowSAZA = FlipQuads(flowPaths, ConsPair.ZaSa);
+    final flipFlowSAZA = FlipQuads(flowPaths, ConsPair.SaZa);
     expect(flipFlowAHA == flipFlowSAZA, isFalse);
     expect(flipFlowAHA.hashCode == flipFlowSAZA.hashCode, isFalse);
 
@@ -836,7 +836,7 @@ void main() {
     expect(dflipSwirlAHA, equals(dflipSwirlAHA2));
     expect(dflipSwirlAHA.hashCode, dflipSwirlAHA2.hashCode);
 
-    final dflipSwirlSAZA = DoubleFlipQuads(swirlPaths, ConsPair.ZaSa);
+    final dflipSwirlSAZA = DoubleFlipQuads(swirlPaths, ConsPair.SaZa);
     expect(dflipSwirlAHA == dflipSwirlSAZA, isFalse);
     expect(dflipSwirlAHA.hashCode == dflipSwirlSAZA.hashCode, isFalse);
 
@@ -869,30 +869,18 @@ void main() {
     expect(dflipSwirlAHA[Face.Right].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Right].head, Consonant.H);
     expect(dflipSwirlAHA[Face.Right].lines, swirlPaths);
-    expect(dflipSwirlAHA[Face.Right].center.y,
-        moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Right].center.x,
-        moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(dflipSwirlAHA[Face.Up].face, Face.Up);
     expect(dflipSwirlAHA[Face.Up].vowel, Face.Up.vowel);
     expect(dflipSwirlAHA[Face.Up].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Up].head, Consonant.H);
     expect(dflipSwirlAHA[Face.Up].lines, hFlip(turn(swirlPaths)));
-    expect(dflipSwirlAHA[Face.Up].center.x,
-        moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Up].center.y,
-        moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(dflipSwirlAHA[Face.Left].face, Face.Left);
     expect(dflipSwirlAHA[Face.Left].vowel, Face.Left.vowel);
     expect(dflipSwirlAHA[Face.Left].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Left].head, Consonant.H);
     expect(dflipSwirlAHA[Face.Left].lines, vFlip(hFlip(swirlPaths)));
-    expect(dflipSwirlAHA[Face.Left].center.y,
-        moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Left].center.x,
-        moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(dflipSwirlAHA[Face.Down].face, Face.Down);
     expect(dflipSwirlAHA[Face.Down].vowel, Face.Down.vowel);
@@ -900,10 +888,6 @@ void main() {
     expect(dflipSwirlAHA[Face.Down].head, Consonant.H);
     expect(
         dflipSwirlAHA[Face.Down].lines, hFlip(vFlip(hFlip(turn(swirlPaths)))));
-    expect(dflipSwirlAHA[Face.Down].center.x,
-        moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Down].center.y,
-        moreOrLessEquals(0, epsilon: floatPrecision));
   });
 
   test('test PolyCurve compute Spline begin & end normal control pts', () {

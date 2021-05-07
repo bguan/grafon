@@ -93,15 +93,6 @@ class RenderPlan {
             }
           }
         }
-      } else if (l is PolyDot) {
-        // use 2 pts as bounding box for each PolyDot anchor to approximate dots
-        isCurve = true;
-        final len = l.numPts;
-        for (var i = 0; i < len; i++) {
-          final v = l.vectors[i];
-          curvePts.add(Vector2(v.x - MIN_WIDTH / 4, v.y - MIN_HEIGHT / 4));
-          curvePts.add(Vector2(v.x + MIN_WIDTH / 4, v.y + MIN_HEIGHT / 4));
-        }
       } else {
         isCurve = false;
       }
@@ -135,6 +126,45 @@ class RenderPlan {
     this.mass = quantize(max(mass, MIN_MASS));
     this.center =
         quantizeV2(calcCenter(this.xMin, this.yMin, this.xMax, this.yMax));
+  }
+
+  @override
+  int get hashCode {
+    var hash = center.hashCode ^
+        width.hashCode ^
+        height.hashCode ^
+        xMin.hashCode ^
+        yMin.hashCode ^
+        xMax.hashCode ^
+        yMax.hashCode ^
+        ratioWH.hashCode ^
+        mass.hashCode;
+
+    return lines.fold(hash, (h, l) => h ^ l.hashCode);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! RenderPlan) return false;
+    RenderPlan that = other;
+    bool check = center == that.center &&
+        width == that.width &&
+        height == that.height &&
+        xMin == that.xMin &&
+        yMin == that.yMin &&
+        xMax == that.xMax &&
+        yMax == that.yMax &&
+        ratioWH == that.ratioWH;
+
+    if (!check) return false;
+    if (lines == that.lines) return true;
+    final l1 = lines.toList();
+    final l2 = that.lines.toList();
+    if (l1.length != l2.length) return false;
+    for (int i = 0; i < l1.length; i++) {
+      if (l1[i] != l2[i]) return false;
+    }
+    return true;
   }
 
   double get area => width * height;

@@ -21,9 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'expression.dart';
+import 'grafon_widget.dart';
 import 'gram_table.dart';
 import 'gram_table_widget.dart';
-import 'gram_widget.dart';
 
 /// Main Starting Point of the App.
 void main() {
@@ -54,7 +54,7 @@ class GrafonApp extends StatelessWidget {
     Map<Word, String> word2desc = {
       Mono.Circle.wrap(Mono.Dot.gram)
               .next(Quads.Arc.left.next(Quads.Flow.right)):
-          '"Talk to Eye", the Grafon language in Grafon.',
+          '"Eye Talk", the Grafon language in Grafon.',
       Mono.Sun.gram: "Sun, star.",
       Quads.Swirl.up: "Swirling upward, spinning upward.",
       Quads.Angle.up.over(Quads.Gate.down): "House, dwelling, building.",

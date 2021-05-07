@@ -127,28 +127,28 @@ void main() {
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation, "Za");
+    expect(sun.pronunciation, "Sa");
 
     final house = Quads.Angle.up.merge(Quads.Gate.down);
     expect(house.toString(), "Angle up * Gate down");
-    expect(house.pronunciation, "GiDu");
+    expect(house.pronunciation, "GirDu");
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line up");
-    expect(person.pronunciation, "AgI");
+    expect(person.pronunciation, "AsI");
 
     final rain = Quads.Flow.down.next(Quads.Flow.down);
     expect(rain.toString(), "Flow down | Flow down");
-    expect(rain.pronunciation, "VuzVu");
+    expect(rain.pronunciation, "FuFu");
 
     final speech = Quads.Gate.left.wrap(Quads.Flow.right);
     expect(speech.toString(), "Gate left @ Flow right");
-    expect(speech.pronunciation, "DonVe");
+    expect(speech.pronunciation, "DomFe");
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
-    expect(red.pronunciation, "JanVa");
+    expect(red.pronunciation, "ChamFa");
   });
 
   test("CompoundWord pronunciation link is different from all BinaryEnding",
@@ -170,7 +170,7 @@ void main() {
 
     final starMan = CompoundWord([sun, person]); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line up");
-    expect(starMan.pronunciation, "ZangAgI");
+    expect(starMan.pronunciation, "Sa-AsI");
   });
 
   test("GramMetrics has correct widthRatio", () {

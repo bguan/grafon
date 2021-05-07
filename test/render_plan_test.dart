@@ -19,13 +19,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/operators.dart';
 import 'package:grafon/render_plan.dart';
+import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for RenderPlan
 void main() {
   test('Unary Shrink operator works', () {
-    final empty = RenderPlan([PolyStraight.anchors([])]);
+    final empty = RenderPlan([]);
     final shrinkEmpty = empty.byUnary(Unary.Shrink);
-    expect(shrinkEmpty, empty);
+    expect(
+        shrinkEmpty,
+        RenderPlan([
+          InvisiDot([
+            Vector2(0, -0.3),
+            Vector2(0, 0.3),
+            Vector2(-0.3, 0),
+            Vector2(0.3, 0)
+          ])
+        ]));
   });
   // TODO: impl tests by migrating old operator tests
   // test('Unary Shrink operator works', () {

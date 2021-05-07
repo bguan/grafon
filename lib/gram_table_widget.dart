@@ -19,8 +19,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:grafon/expression.dart';
+import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
-import 'package:grafon/gram_widget.dart';
 
 import 'gram_table.dart';
 import 'operators.dart';

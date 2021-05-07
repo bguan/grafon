@@ -26,9 +26,8 @@ enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
 
 /// Consonants are paired based on related vocalization.
 /// One is used as the "Base" form, the other the "Head" form.
-/// The softer (less ejective) is the Base, the louder (more ejective) is Head.
 /// Head form overrides spatial operator to indicate "head" of cluster.
-enum ConsPair { aHa, BaPa, JaCha, DaTa, VaFa, GaKa, RaLa, NaMa, ZaSa }
+enum ConsPair { aHa, BaPa, ChaJa, DaTa, FaVa, GaKa, LaRa, MaNa, SaZa }
 
 /// Extension to map Consonant to the Pair and provide short name
 extension ConsonantExtension on Consonant {
@@ -40,7 +39,7 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.Ch:
       case Consonant.J:
-        return ConsPair.JaCha;
+      return ConsPair.ChaJa;
 
       case Consonant.D:
       case Consonant.T:
@@ -48,7 +47,7 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.V:
       case Consonant.F:
-        return ConsPair.VaFa;
+      return ConsPair.FaVa;
 
       case Consonant.G:
       case Consonant.K:
@@ -56,15 +55,15 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.R:
       case Consonant.L:
-        return ConsPair.RaLa;
+      return ConsPair.LaRa;
 
       case Consonant.N:
       case Consonant.M:
-        return ConsPair.NaMa;
+      return ConsPair.MaNa;
 
       case Consonant.Z:
       case Consonant.S:
-        return ConsPair.ZaSa;
+      return ConsPair.SaZa;
 
       default:
         return ConsPair.aHa;
@@ -80,20 +79,20 @@ extension ConsPairExtension on ConsPair {
     switch (this) {
       case ConsPair.BaPa:
         return Consonant.B;
-      case ConsPair.JaCha:
-        return Consonant.J;
+      case ConsPair.ChaJa:
+        return Consonant.Ch;
       case ConsPair.DaTa:
         return Consonant.D;
-      case ConsPair.VaFa:
-        return Consonant.V;
+      case ConsPair.FaVa:
+        return Consonant.F;
       case ConsPair.GaKa:
         return Consonant.G;
-      case ConsPair.RaLa:
-        return Consonant.R;
-      case ConsPair.NaMa:
-        return Consonant.N;
-      case ConsPair.ZaSa:
-        return Consonant.Z;
+      case ConsPair.LaRa:
+        return Consonant.L;
+      case ConsPair.MaNa:
+        return Consonant.M;
+      case ConsPair.SaZa:
+        return Consonant.S;
       default:
         return Consonant.nil;
     }
@@ -103,20 +102,20 @@ extension ConsPairExtension on ConsPair {
     switch (this) {
       case ConsPair.BaPa:
         return Consonant.P;
-      case ConsPair.JaCha:
-        return Consonant.Ch;
+      case ConsPair.ChaJa:
+        return Consonant.J;
       case ConsPair.DaTa:
         return Consonant.T;
-      case ConsPair.VaFa:
-        return Consonant.F;
+      case ConsPair.FaVa:
+        return Consonant.V;
       case ConsPair.GaKa:
         return Consonant.K;
-      case ConsPair.RaLa:
-        return Consonant.L;
-      case ConsPair.NaMa:
-        return Consonant.M;
-      case ConsPair.ZaSa:
-        return Consonant.S;
+      case ConsPair.LaRa:
+        return Consonant.R;
+      case ConsPair.MaNa:
+        return Consonant.N;
+      case ConsPair.SaZa:
+        return Consonant.Z;
       default:
         return Consonant.H;
     }
@@ -126,7 +125,7 @@ extension ConsPairExtension on ConsPair {
 }
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { H, LR, MN, SZ }
+enum BinaryEnding { H, RL, MN, SZ }
 
 /// extension to map base, tail ending consonant to enum, short name.
 extension BinaryEndingExtension on BinaryEnding {
@@ -136,8 +135,8 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return '';
-      case BinaryEnding.LR:
-        return 'l';
+      case BinaryEnding.RL:
+        return 'r';
       case BinaryEnding.MN:
         return 'm';
       case BinaryEnding.SZ:
@@ -152,8 +151,8 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return 'h';
-      case BinaryEnding.LR:
-        return 'r';
+      case BinaryEnding.RL:
+        return 'l';
       case BinaryEnding.MN:
         return 'n';
       case BinaryEnding.SZ:

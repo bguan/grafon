@@ -21,9 +21,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
-import 'package:grafon/gram_widget.dart';
 import 'package:grafon/phonetics.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tuple/tuple.dart';
@@ -33,8 +33,18 @@ import 'package:vector_math/vector_math.dart';
 
 /// Mocks to verify calls to Canvas and record params for later inspection
 class MockCanvas extends Mock implements Canvas {
+  final List<Tuple3<Offset, double, Paint>> drawCircleArgs = [];
   final List<Tuple3<Offset, Offset, Paint>> drawLineArgs = [];
   final List<Tuple2<Path, Paint>> drawPathArgs = [];
+
+  @override
+  void drawCircle(Offset? c, double? r, Paint? paint) {
+    if (c != null && r != null && paint != null) {
+      // not in verification but in real call, record the params
+      drawCircleArgs.add(Tuple3(c, r, paint));
+    }
+    super.noSuchMethod(Invocation.method(#drawCircle, [c, r, paint]));
+  }
 
   @override
   void drawLine(Offset? p1, Offset? p2, Paint? paint) {
@@ -92,19 +102,19 @@ void main() {
     final canvas = MockCanvas();
 
     painter.paint(canvas, size);
-    verify(canvas.drawLine(any, any, any));
+    verify(canvas.drawCircle(any, any, any));
 
     verifyNever(canvas.drawPath(any, any));
+    verifyNever(canvas.drawLine(any, any, any));
     verifyNoMoreInteractions(canvas);
 
-    final p1 = canvas.drawLineArgs.first.item1;
-    final p2 = canvas.drawLineArgs.first.item2;
-    final paint = canvas.drawLineArgs.first.item3;
+    final c = canvas.drawCircleArgs.first.item1;
+    final r = canvas.drawCircleArgs.first.item2;
+    final paint = canvas.drawCircleArgs.first.item3;
 
-    expect(p1.dx, 50.0);
-    expect(p1.dy, 50.0);
-    expect(p1, p2);
-    expect(paint.strokeWidth, 10.0);
+    expect(c.dx, 50.0);
+    expect(c.dy, 50.0);
+    expect(paint.strokeWidth, 5.0);
     expect(paint.color.value, scheme.primary.value);
     expect(paint.style, PaintingStyle.stroke);
     expect(paint.strokeCap, StrokeCap.round);
@@ -116,7 +126,6 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
 
     for (Gram g in [
-      Mono.Dot.gram,
       ...Quads.Line.grams.all,
       Mono.Cross.gram,
       ...Quads.Corner.grams.all,

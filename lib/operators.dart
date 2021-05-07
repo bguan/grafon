@@ -45,7 +45,7 @@ extension BinaryExtension on Binary {
   BinaryEnding get ending {
     switch (this) {
       case Binary.Merge:
-        return BinaryEnding.LR;
+        return BinaryEnding.RL;
       case Binary.Next:
         return BinaryEnding.H;
       case Binary.Over:

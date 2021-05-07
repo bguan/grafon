@@ -142,11 +142,11 @@ class _MonoHelper {
     Mono.Cross: MonoGram(crossPaths, ConsPair.BaPa),
     Mono.X: MonoGram(xPaths, ConsPair.GaKa),
     Mono.Square: MonoGram(squarePaths, ConsPair.DaTa),
-    Mono.Light: MonoGram(lightPaths, ConsPair.JaCha),
-    Mono.Sun: MonoGram(sunPaths, ConsPair.ZaSa),
-    Mono.Circle: MonoGram(circlePaths, ConsPair.NaMa),
-    Mono.Flower: MonoGram(flowerPaths, ConsPair.VaFa),
-    Mono.Blob: MonoGram(blobPaths, ConsPair.RaLa),
+    Mono.Light: MonoGram(lightPaths, ConsPair.ChaJa),
+    Mono.Sun: MonoGram(sunPaths, ConsPair.SaZa),
+    Mono.Circle: MonoGram(circlePaths, ConsPair.MaNa),
+    Mono.Flower: MonoGram(flowerPaths, ConsPair.FaVa),
+    Mono.Blob: MonoGram(blobPaths, ConsPair.LaRa),
   });
 }
 
@@ -253,11 +253,11 @@ class _QuadHelper {
     Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BaPa),
     Quads.Angle: RotatingQuads(anglePaths, ConsPair.GaKa),
     Quads.Gate: RotatingQuads(gatePaths, ConsPair.DaTa),
-    Quads.Step: FlipQuads(stepPaths, ConsPair.JaCha),
-    Quads.Zap: FlipQuads(zapPaths, ConsPair.ZaSa),
-    Quads.Arc: RotatingQuads(arcPaths, ConsPair.NaMa),
-    Quads.Flow: FlipQuads(flowPaths, ConsPair.VaFa),
-    Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.RaLa),
+    Quads.Step: FlipQuads(stepPaths, ConsPair.ChaJa),
+    Quads.Zap: FlipQuads(zapPaths, ConsPair.SaZa),
+    Quads.Arc: RotatingQuads(arcPaths, ConsPair.MaNa),
+    Quads.Flow: FlipQuads(flowPaths, ConsPair.FaVa),
+    Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LaRa),
   });
 }
 

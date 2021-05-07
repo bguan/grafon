@@ -25,11 +25,16 @@ import 'package:vector_math/vector_math.dart';
 /// Unit Tests for Gram Infra
 
 /// Dummy subclass of PolyPath for testing
-class PolyTester extends PolyPath {
+class PolyTester extends PolyLine {
   PolyTester(List<Vector2> vectors) : super(vectors);
 
   PolyTester.anchors(List<Anchor> anchors)
       : super(List.unmodifiable(anchors.map((a) => a.vector)));
+
+  @override
+  PolyLine diffPoints(Iterable<Vector2> vs) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {
@@ -166,37 +171,37 @@ void main() {
 
   test('PolyLine equality and hashcode', () {
     for (final a1 in Anchor.values) {
-      final line1 = PolyLine.anchors([a1]);
+      final line1 = PolyStraight.anchors([a1]);
 
-      final emptyLine = PolyLine.anchors(List<Anchor>.empty());
+      final emptyLine = PolyStraight.anchors(List<Anchor>.empty());
       expect(line1 == emptyLine, isFalse);
       expect(line1.hashCode == emptyLine.hashCode, isFalse);
 
       // PolyLine length is important
-      final line11 = PolyLine.anchors([a1, a1]);
+      final line11 = PolyStraight.anchors([a1, a1]);
       expect(line1.vectors == line11.vectors, isFalse);
       expect(line1.hashCode == line11.hashCode, isFalse);
 
-      final spline = PolySpline.anchors([a1]);
-      expect(line1 is PolySpline, isFalse);
+      final spline = PolyCurve.anchors([a1, a1]);
+      expect(line1 is PolyCurve, isFalse);
       expect(line1.hashCode == spline.hashCode, isFalse);
 
       for (final a2 in Anchor.values) {
-        final line2 = PolyLine.anchors([a2]);
+        final line2 = PolyStraight.anchors([a2]);
         if (a1 == a2) {
           expect(line1, equals(line2));
         } else {
           expect(line1 == line2, isFalse);
         }
 
-        final line12 = PolyLine.anchors([a1, a2]);
-        final line12B = PolyLine.anchors([a1, a2]);
+        final line12 = PolyStraight.anchors([a1, a2]);
+        final line12B = PolyStraight.anchors([a1, a2]);
         expect(line12, equals(line12B));
         expect(line12.hashCode, equals(line12B.hashCode));
 
         if (a1 != a2) {
           /// for PolyLines ordering matters
-          final line21 = PolyLine.anchors([a2, a1]);
+          final line21 = PolyStraight.anchors([a2, a1]);
           expect(line12 == line21, isFalse);
           expect(line12.hashCode == line21.hashCode, isFalse);
         }
@@ -206,29 +211,29 @@ void main() {
 
   test('PolyLine visiblePoints are same as all anchors', () {
     final nsew = [Anchor.N, Anchor.S, Anchor.E, Anchor.W];
-    final lines = PolyLine.anchors(nsew);
+    final lines = PolyStraight.anchors(nsew);
     expect(lines.visiblePoints, nsew.map((a) => a.vector));
   });
 
   test('PolySpline equality and hashcode', () {
     for (final a1 in Anchor.values) {
-      final spline1 = PolySpline.anchors([a1]);
+      final spline1 = PolyCurve.anchors([a1]);
 
-      final emptySpline = PolySpline.anchors(List<Anchor>.empty());
+      final emptySpline = PolyCurve.anchors(List<Anchor>.empty());
       expect(spline1 == emptySpline, isFalse);
       expect(spline1.hashCode == emptySpline.hashCode, isFalse);
 
       // PolySpline length is important
-      final spline11 = PolySpline.anchors([a1, a1]);
+      final spline11 = PolyCurve.anchors([a1, a1]);
       expect(spline1 == spline11, isFalse);
       expect(spline1.hashCode == spline11.hashCode, isFalse);
 
-      final line = PolyLine.anchors([a1]);
+      final line = PolyStraight.anchors([a1]);
       expect(spline1 == line, isFalse);
       expect(spline1.hashCode == line.hashCode, isFalse);
 
       for (final a2 in Anchor.values) {
-        final spline2 = PolySpline.anchors([a2]);
+        final spline2 = PolyCurve.anchors([a2]);
         if (a1 == a2) {
           expect(spline1, spline2);
           expect(spline1.hashCode, equals(spline2.hashCode));
@@ -237,14 +242,14 @@ void main() {
           expect(spline1.hashCode == spline2.hashCode, isFalse);
         }
 
-        final spline12 = PolySpline.anchors([a1, a2]);
-        final spline12B = PolySpline.anchors([a1, a2]);
+        final spline12 = PolyCurve.anchors([a1, a2]);
+        final spline12B = PolyCurve.anchors([a1, a2]);
         expect(spline12, spline12B);
         expect(spline12.hashCode, equals(spline12B.hashCode));
 
         if (a1 != a2) {
           /// for PolySplines ordering matters
-          final spline21 = PolySpline.anchors([a2, a1]);
+          final spline21 = PolyCurve.anchors([a2, a1]);
           expect(spline12 == spline21, isFalse);
           expect(spline12.hashCode == spline21.hashCode, isFalse);
         }
@@ -253,27 +258,27 @@ void main() {
   });
 
   test('PolySpline visiblePoints are all visible except first and last', () {
-    final spline = PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W]);
+    final spline = PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W]);
     expect(spline.visiblePoints, [Anchor.S.vector, Anchor.E.vector]);
   });
 
   test('turn by default of 90° except at Origin', () {
     final paths = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
     ];
 
     final turned = turn(paths);
 
     final expected = [
-      PolyLine.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
-      PolyLine.anchors([Anchor.NW, Anchor.NE, Anchor.SW, Anchor.SE, Anchor.O]),
-      PolySpline.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NW, Anchor.NE, Anchor.SW, Anchor.SE, Anchor.O]),
+      PolyCurve.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
+      PolyCurve.anchors([Anchor.NW, Anchor.NE, Anchor.SW, Anchor.SE, Anchor.O]),
     ];
 
     expect(turned, equals(expected));
@@ -281,19 +286,19 @@ void main() {
 
   test('turn by +/- 0,1,2,3,4 steps of 90° except at Origin', () {
     final paths = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
     ];
 
     final expected1 = [
-      PolyLine.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
-      PolyLine.anchors([Anchor.NW, Anchor.NE, Anchor.SW, Anchor.SE, Anchor.O]),
-      PolySpline.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NW, Anchor.NE, Anchor.SW, Anchor.SE, Anchor.O]),
+      PolyCurve.anchors([Anchor.W, Anchor.E, Anchor.N, Anchor.S, Anchor.O]),
+      PolyCurve.anchors([Anchor.NW, Anchor.NE, Anchor.SW, Anchor.SE, Anchor.O]),
     ];
 
     final turned0 = turn(paths, steps: 0);
@@ -324,21 +329,21 @@ void main() {
 
   test('turn by default of 45° i.e. semi-step, except at Origin', () {
     final paths = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
     ];
 
     final semiTurned = turn(paths, isSemi: true);
 
     final expected = [
-      PolyLine.anchors([Anchor.NW, Anchor.SE, Anchor.NE, Anchor.SW, Anchor.O]),
-      PolyLine.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors(
           [Anchor.NW, Anchor.SE, Anchor.NE, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
+      PolyStraight.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
+      PolyCurve.anchors([Anchor.NW, Anchor.SE, Anchor.NE, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
     ];
 
     expect(semiTurned, expected);
@@ -346,19 +351,19 @@ void main() {
 
   test('turn by +/- 0...8 steps of 45° i.e. semi-step, except at Origin', () {
     final paths = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
     ];
 
     final expected1 = [
-      PolyLine.anchors([Anchor.NW, Anchor.SE, Anchor.NE, Anchor.SW, Anchor.O]),
-      PolyLine.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors(
           [Anchor.NW, Anchor.SE, Anchor.NE, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
+      PolyStraight.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
+      PolyCurve.anchors([Anchor.NW, Anchor.SE, Anchor.NE, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.E, Anchor.W, Anchor.S, Anchor.O]),
     ];
 
     final turned0 = turn(paths, steps: 0, isSemi: true);
@@ -416,21 +421,21 @@ void main() {
 
   test('vFlip all anchors except at Origin', () {
     final paths = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
     ];
 
     final flipped = vFlip(paths);
 
     final expected = [
-      PolyLine.anchors([Anchor.S, Anchor.N, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.SE, Anchor.NE, Anchor.SW, Anchor.NW, Anchor.O]),
-      PolySpline.anchors([Anchor.S, Anchor.N, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.S, Anchor.N, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.SE, Anchor.NE, Anchor.SW, Anchor.NW, Anchor.O]),
+      PolyCurve.anchors([Anchor.S, Anchor.N, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.SE, Anchor.NE, Anchor.SW, Anchor.NW, Anchor.O]),
     ];
 
     expect(flipped, equals(expected));
@@ -446,21 +451,21 @@ void main() {
 
   test('hFlip all anchors except at Origin', () {
     final paths = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolyLine.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W, Anchor.O]),
+      PolyCurve.anchors([Anchor.NE, Anchor.SE, Anchor.NW, Anchor.SW, Anchor.O]),
     ];
 
     final flipped = hFlip(paths);
 
     final expected = [
-      PolyLine.anchors([Anchor.N, Anchor.S, Anchor.W, Anchor.E, Anchor.O]),
-      PolyLine.anchors([Anchor.NW, Anchor.SW, Anchor.NE, Anchor.SE, Anchor.O]),
-      PolySpline.anchors([Anchor.N, Anchor.S, Anchor.W, Anchor.E, Anchor.O]),
-      PolySpline.anchors(
+      PolyStraight.anchors([Anchor.N, Anchor.S, Anchor.W, Anchor.E, Anchor.O]),
+      PolyStraight.anchors(
           [Anchor.NW, Anchor.SW, Anchor.NE, Anchor.SE, Anchor.O]),
+      PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.W, Anchor.E, Anchor.O]),
+      PolyCurve.anchors([Anchor.NW, Anchor.SW, Anchor.NE, Anchor.SE, Anchor.O]),
     ];
 
     expect(flipped, equals(expected));
@@ -476,10 +481,10 @@ void main() {
 
   test('MonoGram equality and hashcode', () {
     final paths1 = [
-      PolySpline.anchors([Anchor.O])
+      PolyCurve.anchors([Anchor.O])
     ];
     final paths2 = [
-      PolyLine.anchors([Anchor.O])
+      PolyStraight.anchors([Anchor.O])
     ];
     final m = MonoGram(paths1, ConsPair.aHa);
     expect(m, m);
@@ -499,8 +504,8 @@ void main() {
 
   test('MonoGram face, vowel, base vs head consonants', () {
     final xPaths = [
-      PolyLine.anchors([Anchor.NW, Anchor.SE]),
-      PolyLine.anchors([Anchor.NE, Anchor.SW])
+      PolyStraight.anchors([Anchor.NW, Anchor.SE]),
+      PolyStraight.anchors([Anchor.NE, Anchor.SW])
     ];
     final xAHA = MonoGram(xPaths, ConsPair.aHa);
     expect(xAHA.face, Face.Center);
@@ -511,15 +516,15 @@ void main() {
 
   test('MonoGram visualCenter is avg vectors of deduped visible anchors', () {
     final xPaths = [
-      PolyLine.anchors([Anchor.NW, Anchor.SE]),
-      PolyLine.anchors([Anchor.NE, Anchor.SW])
+      PolyStraight.anchors([Anchor.NW, Anchor.SE]),
+      PolyStraight.anchors([Anchor.NE, Anchor.SW])
     ];
     final xAHA = MonoGram(xPaths, ConsPair.aHa);
-    expect(xAHA.visualCenter.x, moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(xAHA.visualCenter.y, moreOrLessEquals(0, epsilon: floatPrecision));
+    expect(xAHA.center.x, moreOrLessEquals(0, epsilon: floatPrecision));
+    expect(xAHA.center.y, moreOrLessEquals(0, epsilon: floatPrecision));
 
     final circlePaths = [
-      PolySpline.anchors([
+      PolyCurve.anchors([
         Anchor.W,
         Anchor.N,
         Anchor.E,
@@ -530,15 +535,13 @@ void main() {
       ])
     ];
     final circleAHA = MonoGram(circlePaths, ConsPair.aHa);
-    expect(
-        circleAHA.visualCenter.x, moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(
-        circleAHA.visualCenter.y, moreOrLessEquals(0, epsilon: floatPrecision));
+    expect(circleAHA.center.x, moreOrLessEquals(0, epsilon: floatPrecision));
+    expect(circleAHA.center.y, moreOrLessEquals(0, epsilon: floatPrecision));
   });
 
   test('RotatingQuads equality and hashcode', () {
     final anglePaths = [
-      PolyLine.anchors([Anchor.N, Anchor.E, Anchor.S])
+      PolyStraight.anchors([Anchor.N, Anchor.E, Anchor.S])
     ];
     final angleAHA = RotatingQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA, angleAHA);
@@ -564,7 +567,7 @@ void main() {
     expect(angleAHA.hashCode == angleSAZA.hashCode, isFalse);
 
     final gatePaths = [
-      PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
+      PolyStraight.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final gateAHA = RotatingQuads(gatePaths, ConsPair.aHa);
     expect(angleAHA == gateAHA, isFalse);
@@ -573,7 +576,7 @@ void main() {
 
   test('RotatingQuads face, vowel, base vs head consonants, visualCenter', () {
     final anglePaths = [
-      PolyLine.anchors([Anchor.N, Anchor.E, Anchor.S])
+      PolyStraight.anchors([Anchor.N, Anchor.E, Anchor.S])
     ];
     final angleAHA = RotatingQuads(anglePaths, ConsPair.aHa);
     expect(angleAHA.consPair.base, Consonant.nil);
@@ -583,48 +586,48 @@ void main() {
     expect(angleAHA[Face.Right].vowel, Face.Right.vowel);
     expect(angleAHA[Face.Right].base, Consonant.nil);
     expect(angleAHA[Face.Right].head, Consonant.H);
-    expect(angleAHA[Face.Right].paths, anglePaths);
-    expect(angleAHA[Face.Right].visualCenter.y,
+    expect(angleAHA[Face.Right].lines, anglePaths);
+    expect(angleAHA[Face.Right].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(angleAHA[Face.Right].visualCenter.x,
-        moreOrLessEquals(0.1667, epsilon: floatPrecision));
+    expect(angleAHA[Face.Right].center.x,
+        moreOrLessEquals(0.25, epsilon: floatPrecision));
 
     expect(angleAHA[Face.Up].face, Face.Up);
     expect(angleAHA[Face.Up].vowel, Face.Up.vowel);
     expect(angleAHA[Face.Up].base, Consonant.nil);
     expect(angleAHA[Face.Up].head, Consonant.H);
-    expect(angleAHA[Face.Up].paths, turn(anglePaths, steps: 1, isSemi: false));
-    expect(angleAHA[Face.Up].visualCenter.x,
+    expect(angleAHA[Face.Up].lines, turn(anglePaths, steps: 1, isSemi: false));
+    expect(angleAHA[Face.Up].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(angleAHA[Face.Up].visualCenter.y,
-        moreOrLessEquals(0.1667, epsilon: floatPrecision));
+    expect(angleAHA[Face.Up].center.y,
+        moreOrLessEquals(0.25, epsilon: floatPrecision));
 
     expect(angleAHA[Face.Left].face, Face.Left);
     expect(angleAHA[Face.Left].vowel, Face.Left.vowel);
     expect(angleAHA[Face.Left].base, Consonant.nil);
     expect(angleAHA[Face.Left].head, Consonant.H);
     expect(
-        angleAHA[Face.Left].paths, turn(anglePaths, steps: 2, isSemi: false));
-    expect(angleAHA[Face.Left].visualCenter.y,
+        angleAHA[Face.Left].lines, turn(anglePaths, steps: 2, isSemi: false));
+    expect(angleAHA[Face.Left].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(angleAHA[Face.Left].visualCenter.x,
-        moreOrLessEquals(-0.1667, epsilon: floatPrecision));
+    expect(angleAHA[Face.Left].center.x,
+        moreOrLessEquals(-0.25, epsilon: floatPrecision));
 
     expect(angleAHA[Face.Down].face, Face.Down);
     expect(angleAHA[Face.Down].vowel, Face.Down.vowel);
     expect(angleAHA[Face.Down].base, Consonant.nil);
     expect(angleAHA[Face.Down].head, Consonant.H);
     expect(
-        angleAHA[Face.Down].paths, turn(anglePaths, steps: -1, isSemi: false));
-    expect(angleAHA[Face.Down].visualCenter.x,
+        angleAHA[Face.Down].lines, turn(anglePaths, steps: -1, isSemi: false));
+    expect(angleAHA[Face.Down].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(angleAHA[Face.Down].visualCenter.y,
-        moreOrLessEquals(-0.1667, epsilon: floatPrecision));
+    expect(angleAHA[Face.Down].center.y,
+        moreOrLessEquals(-0.25, epsilon: floatPrecision));
   });
 
   test('SemiRotatingQuads equality and hashcode', () {
     final linePaths = [
-      PolyLine.anchors([Anchor.SW, Anchor.NE])
+      PolyStraight.anchors([Anchor.SW, Anchor.NE])
     ];
     final semiLineAHA = SemiRotatingQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA, semiLineAHA);
@@ -650,7 +653,7 @@ void main() {
     expect(semiLineAHA.hashCode == semiLineSAZA.hashCode, isFalse);
 
     final gatePaths = [
-      PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
+      PolyStraight.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final semiGateAHA = SemiRotatingQuads(gatePaths, ConsPair.aHa);
     expect(semiLineAHA == semiGateAHA, isFalse);
@@ -659,7 +662,7 @@ void main() {
 
   test('SemiRotatingQuads face, vowel, base/head consonants, visualCenter', () {
     final linePaths = [
-      PolyLine.anchors([Anchor.SW, Anchor.NE])
+      PolyStraight.anchors([Anchor.SW, Anchor.NE])
     ];
     final semiLineAHA = SemiRotatingQuads(linePaths, ConsPair.aHa);
     expect(semiLineAHA.consPair.base, Consonant.nil);
@@ -669,20 +672,20 @@ void main() {
     expect(semiLineAHA[Face.Right].vowel, Face.Right.vowel);
     expect(semiLineAHA[Face.Right].base, Consonant.nil);
     expect(semiLineAHA[Face.Right].head, Consonant.H);
-    expect(semiLineAHA[Face.Right].paths, linePaths);
-    expect(semiLineAHA[Face.Right].visualCenter.y,
+    expect(semiLineAHA[Face.Right].lines, linePaths);
+    expect(semiLineAHA[Face.Right].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(semiLineAHA[Face.Right].visualCenter.x,
+    expect(semiLineAHA[Face.Right].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(semiLineAHA[Face.Up].face, Face.Up);
     expect(semiLineAHA[Face.Up].vowel, Face.Up.vowel);
     expect(semiLineAHA[Face.Up].base, Consonant.nil);
     expect(semiLineAHA[Face.Up].head, Consonant.H);
-    expect(semiLineAHA[Face.Up].paths, turn(linePaths, steps: 1, isSemi: true));
-    expect(semiLineAHA[Face.Up].visualCenter.x,
+    expect(semiLineAHA[Face.Up].lines, turn(linePaths, steps: 1, isSemi: true));
+    expect(semiLineAHA[Face.Up].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(semiLineAHA[Face.Up].visualCenter.y,
+    expect(semiLineAHA[Face.Up].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(semiLineAHA[Face.Left].face, Face.Left);
@@ -690,10 +693,10 @@ void main() {
     expect(semiLineAHA[Face.Left].base, Consonant.nil);
     expect(semiLineAHA[Face.Left].head, Consonant.H);
     expect(
-        semiLineAHA[Face.Left].paths, turn(linePaths, steps: 2, isSemi: true));
-    expect(semiLineAHA[Face.Left].visualCenter.y,
+        semiLineAHA[Face.Left].lines, turn(linePaths, steps: 2, isSemi: true));
+    expect(semiLineAHA[Face.Left].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(semiLineAHA[Face.Left].visualCenter.x,
+    expect(semiLineAHA[Face.Left].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(semiLineAHA[Face.Down].face, Face.Down);
@@ -701,16 +704,16 @@ void main() {
     expect(semiLineAHA[Face.Down].base, Consonant.nil);
     expect(semiLineAHA[Face.Down].head, Consonant.H);
     expect(
-        semiLineAHA[Face.Down].paths, turn(linePaths, steps: 3, isSemi: true));
-    expect(semiLineAHA[Face.Down].visualCenter.x,
+        semiLineAHA[Face.Down].lines, turn(linePaths, steps: 3, isSemi: true));
+    expect(semiLineAHA[Face.Down].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(semiLineAHA[Face.Down].visualCenter.y,
+    expect(semiLineAHA[Face.Down].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
   });
 
   test('FlipQuads equality and hashcode', () {
     final flowPaths = [
-      PolySpline.anchors([
+      PolyCurve.anchors([
         Anchor.NW,
         Anchor.N,
         Anchor.S,
@@ -741,7 +744,7 @@ void main() {
     expect(flipFlowAHA.hashCode == flipFlowSAZA.hashCode, isFalse);
 
     final gatePaths = [
-      PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
+      PolyStraight.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final flipGateAHA = FlipQuads(gatePaths, ConsPair.aHa);
     expect(flipFlowAHA == flipGateAHA, isFalse);
@@ -750,7 +753,7 @@ void main() {
 
   test('FlipQuads face, vowel, base/head consonants, visualCenter', () {
     final flowPaths = [
-      PolySpline.anchors([
+      PolyCurve.anchors([
         Anchor.NW,
         Anchor.N,
         Anchor.S,
@@ -765,46 +768,46 @@ void main() {
     expect(flipFlowAHA[Face.Right].vowel, Face.Right.vowel);
     expect(flipFlowAHA[Face.Right].base, Consonant.nil);
     expect(flipFlowAHA[Face.Right].head, Consonant.H);
-    expect(flipFlowAHA[Face.Right].paths, flowPaths);
-    expect(flipFlowAHA[Face.Right].visualCenter.y,
+    expect(flipFlowAHA[Face.Right].lines, flowPaths);
+    expect(flipFlowAHA[Face.Right].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(flipFlowAHA[Face.Right].visualCenter.x,
+    expect(flipFlowAHA[Face.Right].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(flipFlowAHA[Face.Up].face, Face.Up);
     expect(flipFlowAHA[Face.Up].vowel, Face.Up.vowel);
     expect(flipFlowAHA[Face.Up].base, Consonant.nil);
     expect(flipFlowAHA[Face.Up].head, Consonant.H);
-    expect(flipFlowAHA[Face.Up].paths, turn(flowPaths));
-    expect(flipFlowAHA[Face.Up].visualCenter.x,
+    expect(flipFlowAHA[Face.Up].lines, turn(flowPaths));
+    expect(flipFlowAHA[Face.Up].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(flipFlowAHA[Face.Up].visualCenter.y,
+    expect(flipFlowAHA[Face.Up].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(flipFlowAHA[Face.Left].face, Face.Left);
     expect(flipFlowAHA[Face.Left].vowel, Face.Left.vowel);
     expect(flipFlowAHA[Face.Left].base, Consonant.nil);
     expect(flipFlowAHA[Face.Left].head, Consonant.H);
-    expect(flipFlowAHA[Face.Left].paths, hFlip(flowPaths));
-    expect(flipFlowAHA[Face.Left].visualCenter.y,
+    expect(flipFlowAHA[Face.Left].lines, hFlip(flowPaths));
+    expect(flipFlowAHA[Face.Left].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(flipFlowAHA[Face.Left].visualCenter.x,
+    expect(flipFlowAHA[Face.Left].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(flipFlowAHA[Face.Down].face, Face.Down);
     expect(flipFlowAHA[Face.Down].vowel, Face.Down.vowel);
     expect(flipFlowAHA[Face.Down].base, Consonant.nil);
     expect(flipFlowAHA[Face.Down].head, Consonant.H);
-    expect(flipFlowAHA[Face.Down].paths, vFlip(turn(flowPaths)));
-    expect(flipFlowAHA[Face.Down].visualCenter.x,
+    expect(flipFlowAHA[Face.Down].lines, vFlip(turn(flowPaths)));
+    expect(flipFlowAHA[Face.Down].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(flipFlowAHA[Face.Down].visualCenter.y,
+    expect(flipFlowAHA[Face.Down].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
   });
 
   test('DoubleFlipQuads equality and hashcode', () {
     final swirlPaths = [
-      PolySpline.anchors([
+      PolyCurve.anchors([
         Anchor.N,
         Anchor.NW,
         Anchor.SW,
@@ -838,7 +841,7 @@ void main() {
     expect(dflipSwirlAHA.hashCode == dflipSwirlSAZA.hashCode, isFalse);
 
     final gatePaths = [
-      PolyLine.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
+      PolyStraight.anchors([Anchor.NE, Anchor.NW, Anchor.SW, Anchor.SE])
     ];
     final dflipGateAHA = DoubleFlipQuads(gatePaths, ConsPair.aHa);
     expect(dflipSwirlAHA == dflipGateAHA, isFalse);
@@ -847,7 +850,7 @@ void main() {
 
   test('DoubleFlipQuads face, vowel, base/head consonants, visualCenter', () {
     final swirlPaths = [
-      PolySpline.anchors([
+      PolyCurve.anchors([
         Anchor.N,
         Anchor.NW,
         Anchor.SW,
@@ -865,30 +868,30 @@ void main() {
     expect(dflipSwirlAHA[Face.Right].vowel, Face.Right.vowel);
     expect(dflipSwirlAHA[Face.Right].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Right].head, Consonant.H);
-    expect(dflipSwirlAHA[Face.Right].paths, swirlPaths);
-    expect(dflipSwirlAHA[Face.Right].visualCenter.y,
+    expect(dflipSwirlAHA[Face.Right].lines, swirlPaths);
+    expect(dflipSwirlAHA[Face.Right].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Right].visualCenter.x,
+    expect(dflipSwirlAHA[Face.Right].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(dflipSwirlAHA[Face.Up].face, Face.Up);
     expect(dflipSwirlAHA[Face.Up].vowel, Face.Up.vowel);
     expect(dflipSwirlAHA[Face.Up].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Up].head, Consonant.H);
-    expect(dflipSwirlAHA[Face.Up].paths, hFlip(turn(swirlPaths)));
-    expect(dflipSwirlAHA[Face.Up].visualCenter.x,
+    expect(dflipSwirlAHA[Face.Up].lines, hFlip(turn(swirlPaths)));
+    expect(dflipSwirlAHA[Face.Up].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Up].visualCenter.y,
+    expect(dflipSwirlAHA[Face.Up].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(dflipSwirlAHA[Face.Left].face, Face.Left);
     expect(dflipSwirlAHA[Face.Left].vowel, Face.Left.vowel);
     expect(dflipSwirlAHA[Face.Left].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Left].head, Consonant.H);
-    expect(dflipSwirlAHA[Face.Left].paths, vFlip(hFlip(swirlPaths)));
-    expect(dflipSwirlAHA[Face.Left].visualCenter.y,
+    expect(dflipSwirlAHA[Face.Left].lines, vFlip(hFlip(swirlPaths)));
+    expect(dflipSwirlAHA[Face.Left].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Left].visualCenter.x,
+    expect(dflipSwirlAHA[Face.Left].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
 
     expect(dflipSwirlAHA[Face.Down].face, Face.Down);
@@ -896,10 +899,40 @@ void main() {
     expect(dflipSwirlAHA[Face.Down].base, Consonant.nil);
     expect(dflipSwirlAHA[Face.Down].head, Consonant.H);
     expect(
-        dflipSwirlAHA[Face.Down].paths, hFlip(vFlip(hFlip(turn(swirlPaths)))));
-    expect(dflipSwirlAHA[Face.Down].visualCenter.x,
+        dflipSwirlAHA[Face.Down].lines, hFlip(vFlip(hFlip(turn(swirlPaths)))));
+    expect(dflipSwirlAHA[Face.Down].center.x,
         moreOrLessEquals(0, epsilon: floatPrecision));
-    expect(dflipSwirlAHA[Face.Down].visualCenter.y,
+    expect(dflipSwirlAHA[Face.Down].center.y,
         moreOrLessEquals(0, epsilon: floatPrecision));
+  });
+
+  test('test PolyCurve compute Spline begin & end normal control pts', () {
+    final bc = PolyCurve.calcBegCtl(
+        Anchor.NW.vector, Anchor.N.vector, Anchor.S.vector);
+    final ec = PolyCurve.calcEndCtl(
+        Anchor.N.vector, Anchor.S.vector, Anchor.SE.vector);
+    expect(bc.x, moreOrLessEquals(0.3, epsilon: 0.1));
+    expect(bc.y, moreOrLessEquals(0.3, epsilon: 0.1));
+    expect(ec.x, moreOrLessEquals(-0.3, epsilon: 0.1));
+    expect(ec.y, moreOrLessEquals(-0.3, epsilon: 0.1));
+  });
+
+  test('test PolyCurve compute Spline begin & end dorminant control pts', () {
+    final bc = PolyCurve.calcBegCtl(
+      Anchor.NW.vector,
+      Anchor.N.vector,
+      Anchor.S.vector,
+      controlType: SplineControlType.Dorminant,
+    );
+    final ec = PolyCurve.calcEndCtl(
+      Anchor.N.vector,
+      Anchor.S.vector,
+      Anchor.SE.vector,
+      controlType: SplineControlType.Dorminant,
+    );
+    expect(bc.x, moreOrLessEquals(0.6, epsilon: 0.1));
+    expect(bc.y, moreOrLessEquals(0.1, epsilon: 0.1));
+    expect(ec.x, moreOrLessEquals(-0.6, epsilon: 0.1));
+    expect(ec.y, moreOrLessEquals(-0.1, epsilon: 0.1));
   });
 }

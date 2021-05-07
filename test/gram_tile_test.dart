@@ -21,9 +21,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grafon/gram_expr_widget.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
+import 'package:grafon/gram_widget.dart';
 import 'package:grafon/phonetics.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tuple/tuple.dart';
@@ -62,24 +62,24 @@ void main() {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values) {
         final gram = GramTable.atConsPairVowel(cp, v);
-        await tester.pumpWidget(GramExprTile(gram, size: Size(100, 100)));
+        await tester.pumpWidget(GrafonTile(gram, height: 100));
         expect(find.byType(CustomPaint), findsOneWidget);
         final custPaint = find.byType(CustomPaint).evaluate().first;
         expect(custPaint.renderObject, isNotNull);
         final renderObj = custPaint.renderObject!;
         if (renderObj is RenderCustomPaint) {
           RenderCustomPaint render = renderObj;
-          expect(render.painter, isA<GramExprPainter>());
+          expect(render.painter, isA<GrafonPainter>());
         }
       }
     }
   });
 
   test('test GramPainter toCanvasCoord and Offset Calculation', () {
-    final size = Size(100, 100);
-    final coord = GramExprPainter.toCanvasCoord(Vector2(0, 0), size);
+    final coord =
+        GrafonPainter.toCanvasCoord(Vector2(0, 0), Size(100, 100), Size(1, 1));
     expect(coord, Vector2(50, 50));
-    final offset = GramExprPainter.toOffset(coord);
+    final offset = GrafonPainter.toOffset(coord);
     expect(offset, Offset(50, 50));
   });
 
@@ -88,7 +88,7 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
 
     final dotGram = Mono.Dot.gram;
-    final painter = GramExprPainter(dotGram, scheme);
+    final painter = GrafonPainter(dotGram, scheme: scheme);
     final canvas = MockCanvas();
 
     painter.paint(canvas, size);
@@ -128,7 +128,7 @@ void main() {
       Mono.Light.gram,
       ...Quads.Zap.grams.all,
     ]) {
-      final painter = GramExprPainter(g, scheme);
+      final painter = GrafonPainter(g, scheme: scheme);
       final canvas = MockCanvas();
       painter.paint(canvas, size);
       verify(canvas.drawLine(any, any, any));
@@ -148,7 +148,7 @@ void main() {
       ...Quads.Swirl.grams.all,
     ];
     for (var gram in splineGrams) {
-      final painter = GramExprPainter(gram, scheme);
+      final painter = GrafonPainter(gram, scheme: scheme);
       final canvas = MockCanvas();
       painter.paint(canvas, size);
       verify(canvas.drawPath(any, any));
@@ -161,7 +161,7 @@ void main() {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
     final gram = QuadGram([
-      PolyLine.anchors([Anchor.E, Anchor.N])
+      PolyStraight.anchors([Anchor.E, Anchor.N])
     ], Face.Up, ConsPair.aHa);
 
     final rad = AnchorHelper.OUTER_DIST;
@@ -171,7 +171,7 @@ void main() {
     final canvasShiftY = avgY * 100; // should be +25
     final p1 = Offset(100 + canvasShiftX, 50 + canvasShiftY); // (75, 75)
     final p2 = Offset(50 + canvasShiftX, 0 + canvasShiftY); // (25, 25)
-    final painter = GramExprPainter(gram, scheme);
+    final painter = GrafonPainter(gram, scheme: scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);
     verify(canvas.drawLine(p1, p2, any));
@@ -183,41 +183,17 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
 
     final gram = QuadGram([
-      PolySpline.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
+      PolyCurve.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
     ], Face.Up, ConsPair.aHa);
 
     final p1 = Offset(50, 0);
     final p2 = Offset(50, 100);
-    final painter = GramExprPainter(gram, scheme);
+    final painter = GrafonPainter(gram, scheme: scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);
     verify(canvas.drawPath(any, any));
     verifyNoMoreInteractions(canvas);
     final path = canvas.drawPathArgs.first.item1;
     expect(path.contains(p1) && path.contains(p2), isTrue);
-  });
-
-  test('test GramPainter compute Spline begin & end normal control pts', () {
-    final bc = GramExprPainter.calcBegCtl(
-        Anchor.NW.vector, Anchor.N.vector, Anchor.S.vector);
-    final ec = GramExprPainter.calcEndCtl(
-        Anchor.N.vector, Anchor.S.vector, Anchor.SE.vector);
-    expect(bc.x, moreOrLessEquals(0.3, epsilon: 0.1));
-    expect(bc.y, moreOrLessEquals(0.3, epsilon: 0.1));
-    expect(ec.x, moreOrLessEquals(-0.3, epsilon: 0.1));
-    expect(ec.y, moreOrLessEquals(-0.3, epsilon: 0.1));
-  });
-
-  test('test GramPainter compute Spline begin & end dorminant control pts', () {
-    final bc = GramExprPainter.calcBegCtl(
-        Anchor.NW.vector, Anchor.N.vector, Anchor.S.vector,
-        isDorminant: true);
-    final ec = GramExprPainter.calcEndCtl(
-        Anchor.N.vector, Anchor.S.vector, Anchor.SE.vector,
-        isDorminant: true);
-    expect(bc.x, moreOrLessEquals(0.6, epsilon: 0.1));
-    expect(bc.y, moreOrLessEquals(0.1, epsilon: 0.1));
-    expect(ec.x, moreOrLessEquals(-0.6, epsilon: 0.1));
-    expect(ec.y, moreOrLessEquals(-0.1, epsilon: 0.1));
   });
 }

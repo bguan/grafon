@@ -15,14 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/// Gram Table organizes Grams into rows and columns and useful enums.
+/// Each row has a MonoGram and a QuadGrams, shares the same ConsonantPair.
+/// Each column is associated with a Face, shares the same vowel.
+library gram_table;
+
 import 'package:grafon/expression.dart';
 
 import 'gram_infra.dart';
 import 'phonetics.dart';
-
-/// Gram Table organizes Grams into rows and columns and useful enums.
-/// Each row has a MonoGram and a QuadGrams, shares the same ConsonantPair.
-/// Each column is associated with a Face, shares the same vowel.
 
 /// enum for each MonoGram
 enum Mono {
@@ -40,38 +41,38 @@ enum Mono {
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
 class _MonoHelper {
   static final dotPaths = [
-    PolyLine.anchors([Anchor.O])
+    PolyDot.anchors([Anchor.O], isFixedAspect: true)
   ];
 
   static final crossPaths = [
-    PolyLine.anchors([Anchor.N, Anchor.S]),
-    PolyLine.anchors([Anchor.W, Anchor.E])
+    PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true)
   ];
 
   static final xPaths = [
-    PolyLine.anchors([Anchor.NW, Anchor.SE]),
-    PolyLine.anchors([Anchor.NE, Anchor.SW])
+    PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true)
   ];
 
   static final squarePaths = [
-    PolyLine.anchors([
+    PolyStraight.anchors([
       Anchor.NW,
       Anchor.NE,
       Anchor.SE,
       Anchor.SW,
       Anchor.NW,
-    ])
+    ], isFixedAspect: true)
   ];
 
   static final sunPaths = [
-    PolyLine.anchors([Anchor.W, Anchor.E]),
-    PolyLine.anchors([Anchor.NE, Anchor.SW]),
-    PolyLine.anchors([Anchor.N, Anchor.S]),
-    PolyLine.anchors([Anchor.NW, Anchor.SE]),
+    PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
   ];
 
   static final circlePaths = [
-    PolySpline.anchors([
+    PolyCurve.anchors([
       Anchor.W,
       Anchor.N,
       Anchor.E,
@@ -79,11 +80,11 @@ class _MonoHelper {
       Anchor.W,
       Anchor.N,
       Anchor.E,
-    ])
+    ], isFixedAspect: true)
   ];
 
   static final blobPaths = [
-    PolySpline.anchors([
+    PolyCurve.anchors([
       Anchor.IW,
       Anchor.NW,
       Anchor.IN,
@@ -95,45 +96,45 @@ class _MonoHelper {
       Anchor.IW,
       Anchor.NW,
       Anchor.IN,
-    ])
+    ], isFixedAspect: true)
   ];
 
   static final lightPaths = [
-    PolyLine.anchors([Anchor.E, Anchor.IE]),
-    PolyLine.anchors([Anchor.N, Anchor.IN]),
-    PolyLine.anchors([Anchor.W, Anchor.IW]),
-    PolyLine.anchors([Anchor.S, Anchor.IS]),
+    PolyStraight.anchors([Anchor.E, Anchor.IE], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.N, Anchor.IN], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.W, Anchor.IW], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.S, Anchor.IS], isFixedAspect: true),
   ];
 
   static final flowerPaths = [
-    PolySpline.anchors([
+    PolyCurve.anchors([
       Anchor.NE,
       Anchor.O,
       Anchor.SE,
       Anchor.O,
       Anchor.SW,
-    ]),
-    PolySpline.anchors([
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
       Anchor.SE,
       Anchor.O,
       Anchor.SW,
       Anchor.O,
       Anchor.NW,
-    ]),
-    PolySpline.anchors([
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
       Anchor.NW,
       Anchor.O,
       Anchor.NE,
       Anchor.O,
       Anchor.SE,
-    ]),
-    PolySpline.anchors([
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
       Anchor.SW,
       Anchor.O,
       Anchor.NW,
       Anchor.O,
       Anchor.NE,
-    ]),
+    ], isFixedAspect: true),
   ];
 
   static final Map<Mono, MonoGram> enum2mono = Map.unmodifiable({
@@ -170,13 +171,11 @@ extension MonoExtension on Mono {
 
   GramExpression merge(GramExpression that) => gram.merge(that);
 
-  GramExpression before(GramExpression that) => gram.before(that);
+  GramExpression next(GramExpression that) => gram.next(that);
 
   GramExpression over(GramExpression that) => gram.over(that);
 
-  GramExpression around(GramExpression that) => gram.around(that);
-
-  GramExpression compound(GramExpression that) => gram.compound(that);
+  GramExpression wrap(GramExpression that) => gram.wrap(that);
 }
 
 /// enum for each of the QuadGram grouping.
@@ -195,31 +194,31 @@ enum Quads {
 /// QuadHelper is a singleton to only instantiates QuadGrams only once
 class _QuadHelper {
   static final cornerPaths = [
-    PolyLine.anchors([Anchor.SE, Anchor.NE, Anchor.NW])
+    PolyStraight.anchors([Anchor.SE, Anchor.NE, Anchor.NW])
   ];
 
   static final linePaths = [
-    PolyLine.anchors([Anchor.NE, Anchor.SW])
+    PolyStraight.anchors([Anchor.NE, Anchor.SW])
   ];
 
   static final anglePaths = [
-    PolyLine.anchors([Anchor.N, Anchor.E, Anchor.S]),
+    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
   ];
 
   static final gatePaths = [
-    PolyLine.anchors([Anchor.IN, Anchor.NE, Anchor.SE, Anchor.IS])
+    PolyStraight.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW])
   ];
 
   static final stepPaths = [
-    PolyLine.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
+    PolyStraight.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
   ];
 
   static final zapPaths = [
-    PolyLine.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E])
+    PolyStraight.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E])
   ];
 
   static final arcPaths = [
-    PolySpline.anchors([
+    PolyCurve.anchors([
       Anchor.N,
       Anchor.N,
       Anchor.IE,
@@ -229,7 +228,7 @@ class _QuadHelper {
   ];
 
   static final flowPaths = [
-    PolySpline.anchors([
+    PolyCurve.anchors([
       Anchor.SW,
       Anchor.W,
       Anchor.E,
@@ -238,7 +237,7 @@ class _QuadHelper {
   ];
 
   static final swirlPaths = [
-    PolySpline.anchors([
+    PolyCurve.anchors([
       Anchor.N,
       Anchor.W,
       Anchor.S,

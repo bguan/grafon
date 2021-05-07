@@ -16,6 +16,7 @@
 // under the License.
 
 /// Enums and utils for Phonetics related concepts for the Grafon language.
+library phonetics;
 
 /// Basic vowels for the language. Can be combined into diphthong.
 enum Vowel { A, E, I, O, U }
@@ -125,7 +126,7 @@ extension ConsPairExtension on ConsPair {
 }
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { Ng, H, GK, NM, ZS }
+enum BinaryEnding { H, LR, MN, SZ }
 
 /// extension to map base, tail ending consonant to enum, short name.
 extension BinaryEndingExtension on BinaryEnding {
@@ -135,14 +136,12 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return '';
-      case BinaryEnding.GK:
-        return 'g';
-      case BinaryEnding.NM:
-        return 'n';
-      case BinaryEnding.ZS:
-        return 'z';
-      case BinaryEnding.Ng:
-        return 'ng';
+      case BinaryEnding.LR:
+        return 'l';
+      case BinaryEnding.MN:
+        return 'm';
+      case BinaryEnding.SZ:
+        return 's';
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -153,14 +152,12 @@ extension BinaryEndingExtension on BinaryEnding {
     switch (this) {
       case BinaryEnding.H:
         return 'h';
-      case BinaryEnding.GK:
-        return 'k';
-      case BinaryEnding.NM:
-        return 'm';
-      case BinaryEnding.ZS:
-        return 's';
-      case BinaryEnding.Ng:
-        return '';
+      case BinaryEnding.LR:
+        return 'r';
+      case BinaryEnding.MN:
+        return 'n';
+      case BinaryEnding.SZ:
+        return 'z';
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }

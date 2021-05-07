@@ -18,8 +18,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grafon/gram_expr_widget.dart';
+import 'package:grafon/expression.dart';
 import 'package:grafon/gram_infra.dart';
+import 'package:grafon/gram_widget.dart';
 
 import 'gram_table.dart';
 import 'operators.dart';
@@ -35,18 +36,17 @@ class GramTableView extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (size ?? MediaQuery.of(ctx).size);
-    final width = mediaSize.width.clamp(500.0, 2000.0);
-    final height = mediaSize.height.clamp(500.0, 2000.0) - 100;
-    final widthHeightRatio = (width / height).clamp(.5, 2);
+    final screenWidth = mediaSize.width.clamp(500.0, 2000.0);
+    final screenHeight = mediaSize.height.clamp(500.0, 2000.0) - 100;
+    final widthHeightRatio = (screenWidth / screenHeight).clamp(.5, 2);
     final vpad = widthHeightRatio * 8.0;
     final hpad = widthHeightRatio * 40.0;
     final space = 4.0;
     final inset = widthHeightRatio * 12.0;
-    final dim = min((width - 2 * hpad) / (GramTable.numCols + 2),
-        (0.8 * height - 2 * vpad) / (GramTable.numRows + 3));
-    final gridSize = Size(dim, dim);
+    final dim = min((screenWidth - 2 * hpad) / (GramTable.numCols + 2),
+        (0.8 * screenHeight - 2 * vpad) / (GramTable.numRows + 3));
 
-    final fontScale = width / 1000;
+    final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
     final textStyle = (fontSize, [lineHeight = 1.25]) => TextStyle(
           fontWeight: FontWeight.bold,
@@ -54,15 +54,15 @@ class GramTableView extends StatelessWidget {
           color: Colors.white,
           fontSize: fontSizing(fontSize),
         );
-    final headerStyle = textStyle(15);
+    final headerStyle = textStyle(16);
     final unaryFooterStyle = textStyle(16, 1.4);
-    final binaryFooterStyle = textStyle(15);
+    final binaryFooterStyle = textStyle(16);
     final rowHeadTextStyle = textStyle(30);
     final rowTailTextStyle = textStyle(25, 1.5);
 
     final headerRow = [
       for (var fTxt in [
-        'Face vowel -\nConsonant\nbase, head',
+        'Face vowel -\nbase, head\nconsonant',
         ...Face.values
             .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
         'Symbol\nName'
@@ -104,11 +104,12 @@ class GramTableView extends StatelessWidget {
 
     final binaryOpRow = [
       for (var bTxt in [
-        'Binary\nOperator\ndecreasing\nprecedence',
+        'Binary\nOperator & Compounding',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
             '…${b.ending.base}${b.ending.tail.length > 0 ? ' …' + b.ending.tail : ''}'),
-        'Ending\nConsonant\nbase, tail'
+        'Compounding\n${CompoundWord.SEPARATOR_SYMBOL}\n…${CompoundWord.PRONUNCIATION_LINK}…',
+        'Ending\nConsonant\nbase, tail, compound'
       ])
         bTxt.length <= 0
             ? SizedBox()
@@ -139,7 +140,11 @@ class GramTableView extends StatelessWidget {
         for (var f in Face.values)
           Container(
             padding: EdgeInsets.all(inset),
-            child: GramExprTile(GramTable.atMonoFace(m, f), size: gridSize),
+            child: GrafonTile(
+              GramTable.atMonoFace(m, f),
+              height: dim,
+              flexFit: false,
+            ),
             color: scheme.surface,
           ),
         Container(

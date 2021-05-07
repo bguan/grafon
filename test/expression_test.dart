@@ -16,13 +16,51 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/expression.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/operators.dart';
 import 'package:grafon/phonetics.dart';
+import 'package:grafon/render_plan.dart';
+import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for Expressions
 void main() {
+  test('GramMetrics computation', () {
+    final dot = PolyStraight.anchors([Anchor.O, Anchor.O]);
+    expect(dot.vectors, [Vector2(0, 0), Vector2(0, 0)]);
+
+    final metricsDot = RenderPlan([dot]);
+    expect(metricsDot.width, RenderPlan.MIN_WIDTH);
+    expect(metricsDot.center, Vector2(0, 0));
+    expect(metricsDot.yMin, -RenderPlan.MIN_HEIGHT / 2);
+    expect(metricsDot.yMax, RenderPlan.MIN_HEIGHT / 2);
+    expect(metricsDot.xMin, -RenderPlan.MIN_WIDTH / 2);
+    expect(metricsDot.xMax, RenderPlan.MIN_WIDTH / 2);
+
+    final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
+    expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
+
+    final metricsVL = RenderPlan([vLine]);
+    expect(metricsVL.width, RenderPlan.MIN_WIDTH);
+    expect(metricsVL.center, Vector2(0, 0));
+    expect(metricsVL.xMin, -RenderPlan.MIN_WIDTH / 2);
+    expect(metricsVL.xMax, RenderPlan.MIN_WIDTH / 2);
+    expect(metricsVL.yMin, -0.5);
+    expect(metricsVL.yMax, 0.5);
+
+    final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
+    expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
+
+    final metricsHL = RenderPlan([hLine]);
+    expect(metricsHL.width, 1);
+    expect(metricsHL.center, Vector2(0, 0));
+    expect(metricsHL.yMin, -RenderPlan.MIN_HEIGHT / 2);
+    expect(metricsHL.yMax, RenderPlan.MIN_HEIGHT / 2);
+    expect(metricsHL.xMin, -0.5);
+    expect(metricsHL.xMax, 0.5);
+  });
+
   test('SingleGram to String matches gram equivalent', () {
     for (final m in Mono.values) {
       final mg = GramTable.atMonoFace(m, Face.Center);
@@ -99,21 +137,44 @@ void main() {
     expect(person.toString(), "Dot / Line up");
     expect(person.pronunciation, "AgI");
 
-    final rain = Quads.Flow.down.before(Quads.Flow.down);
+    final rain = Quads.Flow.down.next(Quads.Flow.down);
     expect(rain.toString(), "Flow down | Flow down");
     expect(rain.pronunciation, "VuzVu");
 
-    final speech = Quads.Gate.left.around(Quads.Flow.right);
+    final speech = Quads.Gate.left.wrap(Quads.Flow.right);
     expect(speech.toString(), "Gate left @ Flow right");
     expect(speech.pronunciation, "DonVe");
 
-    final starMan = sun.compound(person); // God? Alien?
-    expect(starMan.toString(), "Sun : Dot / Line up");
-    expect(starMan.pronunciation, "ZangAgI");
-
     // Red is the light from a Flower
-    final red = Mono.Light.gram.around(Mono.Flower.gram);
+    final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
     expect(red.pronunciation, "JanVa");
+  });
+
+  test("CompoundWord pronunciation link is different from all BinaryEnding",
+      () {
+    final endings =
+        BinaryEnding.values.map((ending) => ending.shortName.toLowerCase());
+    expect(endings.contains(CompoundWord.PRONUNCIATION_LINK.toLowerCase()),
+        isFalse);
+  });
+
+  test("CompoundWord symbol is different from all Binary operator symbols", () {
+    final symbols = Binary.values.map((bin) => bin.symbol);
+    expect(symbols.contains(CompoundWord.SEPARATOR_SYMBOL), isFalse);
+  });
+
+  test("CompoundWord pronunciation", () {
+    final sun = Mono.Sun.gram; // or star
+    final person = Mono.Dot.gram.over(Quads.Line.up);
+
+    final starMan = CompoundWord([sun, person]); // God? Alien?
+    expect(starMan.toString(), "Sun : Dot / Line up");
+    expect(starMan.pronunciation, "ZangAgI");
+  });
+
+  test("GramMetrics has correct widthRatio", () {
+    final sun = Mono.Sun.gram; // or star
+    expect(sun.renderPlan.width, 1.0);
   });
 }

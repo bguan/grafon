@@ -15,6 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/// Infrastructure for the logogram and it's graphical definition for the
+/// Grafon language. Polar coordinates is used for defining anchor points.
+library gram_infra;
+
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -24,10 +28,7 @@ import 'expression.dart';
 import 'gram_table.dart';
 import 'operators.dart';
 import 'phonetics.dart';
-
-/// Gram - the logogram and it's graphical definition for the Grafon language.
-
-/// Polar coordinates is used for defining anchor points of a Gram
+import 'render_plan.dart';
 
 /// Rounding Base to convert Double to Integer for storage and comparison
 const int FLOAT_DECIMALS = 2;
@@ -40,10 +41,9 @@ double quantize(double x) => ((x * _floatBase).round() / _floatBase);
 
 Vector2 quantizeV2(Vector2 v) => Vector2(quantize(v.x), quantize(v.y));
 
-String quantizeString(double x) => x.toStringAsFixed(FLOAT_DECIMALS);
+String quantStr(double x) => x.toStringAsFixed(FLOAT_DECIMALS);
 
-String quantizeV2String(Vector2 v) =>
-    "(${quantizeString(v.x)}, ${quantizeString(v.y)})";
+String quantV2Str(Vector2 v) => "(${quantStr(v.x)}, ${quantStr(v.y)})";
 
 class Polar {
   final int _angleBase; // clockwise 0' is North, 90' is East
@@ -76,7 +76,7 @@ class Polar {
 
   @override
   String toString() =>
-      "Polar(angle: ${angle.toStringAsFixed(FLOAT_DECIMALS)}, length: ${length.toStringAsFixed(FLOAT_DECIMALS)})";
+      "Polar(angle: ${quantStr(angle)}, length: ${quantStr(length)})";
 }
 
 /// Anchor points to construct a Gram.
@@ -101,8 +101,8 @@ enum Anchor {
 /// In standard grid of +/- 0.5 i.e. 1.0x1.0 square with Origin at 0,0.
 /// Vector2 is used internally but always round to nearest integer.
 extension AnchorHelper on Anchor {
-  static const OUTER_DIST = .5;
-  static const INNER_DIST = .35;
+  static const OUTER_DIST = RenderPlan.STD_DIM / 2;
+  static const INNER_DIST = .7 * RenderPlan.STD_DIM / 2;
 
   static const List<Anchor> outerPoints = const [
     Anchor.E,
@@ -215,11 +215,12 @@ extension VowelHelper on Vowel {
   }
 }
 
-/// Pen Stroke Paths as series of anchor points joined by dots, lines or curves
-abstract class PolyPath {
+/// Pen Stroke lines as series of anchor points joined by straight lines or curves
+abstract class PolyLine {
   final List<Vector2> _baseVectors;
+  final bool isFixedAspect;
 
-  PolyPath(Iterable<Vector2> vs)
+  PolyLine(Iterable<Vector2> vs, {this.isFixedAspect = false})
       : this._baseVectors = List.unmodifiable(
             vs.map((v) => (v * (1.0 * _floatStorageBase))..round()));
 
@@ -229,6 +230,8 @@ abstract class PolyPath {
   List<Vector2> get visiblePoints => vectors;
 
   int get numPts => _baseVectors.length;
+
+  PolyLine diffPoints(Iterable<Vector2> vs);
 
   @override
   int get hashCode {
@@ -244,9 +247,10 @@ abstract class PolyPath {
 
   @override
   bool operator ==(Object other) {
-    if (other is! PolyPath) return false;
+    if (other is! PolyLine || other.runtimeType != this.runtimeType)
+      return false;
 
-    PolyPath that = other;
+    PolyLine that = other;
     final leq = ListEquality<Vector2>().equals;
 
     return leq(this.vectors, that.vectors);
@@ -254,95 +258,147 @@ abstract class PolyPath {
 
   @override
   String toString() =>
-      "$runtimeType with $numPts points: ${vectors.map((v) => quantizeV2String(v))}";
+      "$runtimeType with $numPts points: ${vectors.map((v) => quantV2Str(v))}";
 
   /// Turn by either full step(s) of 90' or semi step of 45'
-  PolyPath turn({int steps = 1, bool isSemi = false}) {
+  PolyLine turn({int steps = 1, bool isSemi = false}) {
     List<Vector2> pts = [];
     for (Vector2 bv in _baseVectors) {
       Vector2 rotatedBase =
           Matrix2.rotation(steps * pi / (isSemi ? 4 : 2)) * bv;
       pts.add(rotatedBase / (1.0 * _floatStorageBase));
     }
-
-    if (this is PolyLine) {
-      return PolyLine(pts);
-    } else if (this is PolySpline) {
-      return PolySpline(pts);
-    } else {
-      throw UnimplementedError("Not expecting $this");
-    }
+    return this.diffPoints(pts);
   }
 
   /// Vertically Flip upside down
-  PolyPath vFlip() {
+  PolyLine vFlip() {
     List<Vector2> pts = [];
     for (Vector2 v in vectors) {
       // No need to quantize as only flipping signs
       pts.add(Vector2(v.x, -v.y));
     }
-    if (this is PolyLine) {
-      return PolyLine(pts);
-    } else if (this is PolySpline) {
-      return PolySpline(pts);
-    } else {
-      throw UnimplementedError("Not expecting $this");
-    }
+    return this.diffPoints(pts);
   }
 
   /// Horizontally Flip left to right
-  PolyPath hFlip() {
+  PolyLine hFlip() {
     List<Vector2> pts = [];
     for (Vector2 v in vectors) {
       // No need to quantize as only flipping signs
       pts.add(Vector2(-v.x, v.y));
     }
-    if (this is PolyLine) {
-      return PolyLine(pts);
-    } else if (this is PolySpline) {
-      return PolySpline(pts);
-    } else {
-      throw UnimplementedError("Not expecting $this");
-    }
+    return this.diffPoints(pts);
+  }
+}
+
+/// Dot(s), different from Lines of 0 length as it has different metrics
+class PolyDot extends PolyLine {
+  PolyDot(Iterable<Vector2> vs, {isFixedAspect = false})
+      : super(vs, isFixedAspect: isFixedAspect);
+
+  PolyDot.anchors(List<Anchor> anchors, {isFixedAspect = false})
+      : super(List.unmodifiable(anchors.map((a) => a.vector)),
+            isFixedAspect: isFixedAspect);
+
+  @override
+  PolyDot diffPoints(Iterable<Vector2> vs) {
+    return PolyDot(vs, isFixedAspect: this.isFixedAspect);
+  }
+}
+
+/// Invisible Dots to aid in maintaining Metrics for placement control
+class InvisiDot extends PolyLine {
+  InvisiDot(Iterable<Vector2> vs, {isFixedAspect = false})
+      : super(vs, isFixedAspect: isFixedAspect);
+
+  InvisiDot.anchors(List<Anchor> anchors, {isFixedAspect = false})
+      : super(List.unmodifiable(anchors.map((a) => a.vector)),
+            isFixedAspect: isFixedAspect);
+
+  @override
+  InvisiDot diffPoints(Iterable<Vector2> vs) {
+    return InvisiDot(vs);
   }
 }
 
 /// Straight Line from anchor point to anchor point
-class PolyLine extends PolyPath {
-  PolyLine(Iterable<Vector2> vs) : super(vs);
+class PolyStraight extends PolyLine {
+  PolyStraight(Iterable<Vector2> vs, {isFixedAspect = false})
+      : super(vs, isFixedAspect: isFixedAspect);
 
-  PolyLine.anchors(List<Anchor> anchors)
-      : super(List.unmodifiable(anchors.map((a) => a.vector)));
+  PolyStraight.anchors(List<Anchor> anchors, {isFixedAspect = false})
+      : super(List.unmodifiable(anchors.map((a) => a.vector)),
+            isFixedAspect: isFixedAspect);
 
   @override
-  bool operator ==(Object other) {
-    if (other is! PolyLine) return false;
-    return super == other;
+  PolyStraight diffPoints(Iterable<Vector2> vs) {
+    return PolyStraight(vs, isFixedAspect: this.isFixedAspect);
   }
+}
 
-  @override
-  int get hashCode => super.hashCode;
+enum SplineControlType { Dorminant, Standard, StraightApproximate }
+
+extension SplineControlTypeHelper on SplineControlType {
+  double get scale {
+    switch (this) {
+      case SplineControlType.Dorminant:
+        return PolyCurve.DOMINANT_CTRL_SCALE;
+      case SplineControlType.StraightApproximate:
+        return PolyCurve.APPROX_STRAIGHT_SCALE;
+      default:
+        return PolyCurve.STD_CTRL_SCALE;
+    }
+  }
 }
 
 /// Curve Line thru everypoint, making sure tangent transition is smooth at each
-/// first point and last point is for direction computation only
-class PolySpline extends PolyPath {
-  PolySpline(Iterable<Vector2> vs) : super(vs);
+/// first point and last point is for direction computation only.
+/// Note: minimum number of anchor points is 4!
+class PolyCurve extends PolyLine {
+  static const DOMINANT_CTRL_SCALE = 0.6;
+  static const STD_CTRL_SCALE = 0.4;
+  static const APPROX_STRAIGHT_SCALE = 0.2;
 
-  PolySpline.anchors(List<Anchor> anchors)
-      : super(List.unmodifiable(anchors.map((a) => a.vector)));
+  PolyCurve(Iterable<Vector2> vs, {isFixedAspect = false})
+      : super(vs, isFixedAspect: isFixedAspect);
+
+  PolyCurve.anchors(List<Anchor> anchors, {isFixedAspect = false})
+      : super(List.unmodifiable(anchors.map((a) => a.vector)),
+            isFixedAspect: isFixedAspect);
 
   @override
-  List<Vector2> get visiblePoints => vectors.sublist(1, vectors.length - 1);
+  List<Vector2> get visiblePoints =>
+      vectors.length < 3 ? [] : vectors.sublist(1, vectors.length - 1);
 
   @override
-  bool operator ==(Object other) {
-    if (other is! PolySpline) return false;
-    return super == other;
+  PolyCurve diffPoints(Iterable<Vector2> vs) {
+    return PolyCurve(vs, isFixedAspect: this.isFixedAspect);
   }
 
-  @override
-  int get hashCode => super.hashCode;
+  /// utility function to calc Spline beginning control point
+  static Vector2 calcBegCtl(Vector2 pre, Vector2 beg, Vector2 end,
+      {SplineControlType controlType = SplineControlType.Standard}) {
+    final preV = pre - beg;
+    final postV = end - beg;
+    final bisect = preV.angleToSigned(postV) / 2;
+    final dir =
+        Matrix2.rotation(bisect > 0 ? pi / 2 - bisect : -(pi / 2 + bisect)) *
+            postV.scaled(controlType.scale);
+    return dir + beg;
+  }
+
+  /// utility function to calc Spline ending control point
+  static Vector2 calcEndCtl(Vector2 beg, Vector2 end, Vector2 next,
+      {SplineControlType controlType = SplineControlType.Standard}) {
+    final preV = beg - end;
+    final postV = next - end;
+    final bisect = preV.angleToSigned(postV) / 2;
+    final dir =
+        Matrix2.rotation(bisect > 0 ? -(pi / 2 - bisect) : pi / 2 + bisect) *
+            preV.scaled(controlType.scale);
+    return dir + end;
+  }
 }
 
 /// Gram is a Graphical Symbol i.e. logogram
@@ -350,13 +406,16 @@ class PolySpline extends PolyPath {
 /// Associated with a vowel and a starting consonant pair.
 /// If at the Head of a new cluster, use Head consonant, else Base.
 abstract class Gram extends GramExpression {
-  final Iterable<PolyPath> _paths;
+  final Iterable<PolyLine> _lines;
   final ConsPair consPair;
+  final RenderPlan renderPlan;
 
-  Gram(paths, this.consPair) : _paths = List.unmodifiable(paths);
+  Gram(paths, this.consPair)
+      : _lines = List.unmodifiable(paths),
+        renderPlan = RenderPlan(paths);
 
   @override
-  Iterable<PolyPath> get paths => _paths;
+  Iterable<PolyLine> get lines => _lines;
 
   Face get face;
 
@@ -371,35 +430,19 @@ abstract class Gram extends GramExpression {
       consPair.hashCode ^
       vowel.hashCode ^
       face.hashCode ^
-      paths.fold(0, (int h, PolyPath p) => h ^ p.hashCode);
+      lines.fold(0, (int h, PolyLine p) => h ^ p.hashCode);
 
   @override
   bool operator ==(Object other) {
     if (other is! Gram) return false;
 
     Gram that = other;
-    final eq = IterableEquality<PolyPath>().equals;
+    final eq = IterableEquality<PolyLine>().equals;
 
     return this.consPair == that.consPair &&
         this.face == that.face &&
         this.vowel == that.vowel &&
-        eq(this.paths, that.paths);
-  }
-
-  @override
-  Vector2 get visualCenter {
-    double x = 0, y = 0;
-    int aCount = 0;
-    final Set<Vector2> pathVectors = Set.of([
-      for (final p in paths) ...p.visiblePoints,
-    ]);
-
-    for (final v in pathVectors) {
-      x += v.x;
-      y += v.y;
-      aCount++;
-    }
-    return Vector2(x / aCount, y / aCount);
+        eq(this.lines, that.lines);
   }
 
   String toString() => this is QuadGram
@@ -434,7 +477,7 @@ abstract class Gram extends GramExpression {
 class MonoGram extends Gram {
   final face = Face.Center;
 
-  MonoGram(Iterable<PolyPath> paths, ConsPair cons) : super(paths, cons);
+  MonoGram(Iterable<PolyLine> paths, ConsPair cons) : super(paths, cons);
 
   @override
   bool operator ==(Object other) {
@@ -450,7 +493,7 @@ class MonoGram extends Gram {
 class QuadGram extends Gram {
   final Face face;
 
-  QuadGram(Iterable<PolyPath> paths, this.face, ConsPair cons)
+  QuadGram(Iterable<PolyLine> paths, this.face, ConsPair cons)
       : super(paths, cons);
 
   @override
@@ -470,10 +513,10 @@ abstract class QuadGrams {
 
   QuadGrams(
     this.consPair, {
-    required List<PolyPath> r,
-    required List<PolyPath> u,
-    required List<PolyPath> l,
-    required List<PolyPath> d,
+    required List<PolyLine> r,
+    required List<PolyLine> u,
+    required List<PolyLine> l,
+    required List<PolyLine> d,
   }) : f2g = Map.unmodifiable({
           Face.Right: QuadGram(r, Face.Right, consPair),
           Face.Up: QuadGram(u, Face.Up, consPair),
@@ -509,43 +552,43 @@ abstract class QuadGrams {
 }
 
 /// Turn pen paths by either full step(s) of 90' or semi step of 45'
-List<PolyPath> turn(List<PolyPath> paths,
+List<PolyLine> turn(List<PolyLine> paths,
         {int steps = 1, bool isSemi = false}) =>
     List.unmodifiable(paths.map((p) => p.turn(steps: steps, isSemi: isSemi)));
 
 /// Vertically Flip pen paths upside down
-List<PolyPath> vFlip(List<PolyPath> paths) =>
+List<PolyLine> vFlip(List<PolyLine> paths) =>
     List.unmodifiable(paths.map((p) => p.vFlip()));
 
 /// Horizontally Flip pen paths upside down
-List<PolyPath> hFlip(List<PolyPath> paths) =>
+List<PolyLine> hFlip(List<PolyLine> paths) =>
     List.unmodifiable(paths.map((p) => p.hFlip()));
 
 /// In RotatingRow, quads are rotated by full step of 90'
 class RotatingQuads extends QuadGrams {
-  RotatingQuads(List<PolyPath> r, ConsPair cons)
+  RotatingQuads(List<PolyLine> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
-  static List<PolyPath> r2u(List<PolyPath> rightPaths) => turn(rightPaths);
+  static List<PolyLine> r2u(List<PolyLine> rightPaths) => turn(rightPaths);
 
-  static List<PolyPath> r2l(List<PolyPath> rightPaths) =>
+  static List<PolyLine> r2l(List<PolyLine> rightPaths) =>
       turn(rightPaths, steps: 2);
 
-  static List<PolyPath> r2d(List<PolyPath> rightPaths) =>
+  static List<PolyLine> r2d(List<PolyLine> rightPaths) =>
       turn(rightPaths, steps: 3);
 }
 
 /// In SemiRotatingRow, quads are rotated by semi step of 45'
 class SemiRotatingQuads extends QuadGrams {
-  SemiRotatingQuads(List<PolyPath> r, ConsPair cons)
+  SemiRotatingQuads(List<PolyLine> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
-  static List<PolyPath> r2u(List<PolyPath> r) => turn(r, isSemi: true);
+  static List<PolyLine> r2u(List<PolyLine> r) => turn(r, isSemi: true);
 
-  static List<PolyPath> r2l(List<PolyPath> r) =>
+  static List<PolyLine> r2l(List<PolyLine> r) =>
       turn(r, steps: 2, isSemi: true);
 
-  static List<PolyPath> r2d(List<PolyPath> r) =>
+  static List<PolyLine> r2d(List<PolyLine> r) =>
       turn(r, steps: 3, isSemi: true);
 }
 
@@ -554,14 +597,14 @@ class SemiRotatingQuads extends QuadGrams {
 /// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically flipping Up paths.
 class FlipQuads extends QuadGrams {
-  FlipQuads(List<PolyPath> r, ConsPair cons)
+  FlipQuads(List<PolyLine> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
-  static List<PolyPath> r2u(List<PolyPath> r) => turn(r);
+  static List<PolyLine> r2u(List<PolyLine> r) => turn(r);
 
-  static List<PolyPath> r2l(List<PolyPath> r) => hFlip(r);
+  static List<PolyLine> r2l(List<PolyLine> r) => hFlip(r);
 
-  static List<PolyPath> r2d(List<PolyPath> r) => vFlip(r2u(r));
+  static List<PolyLine> r2d(List<PolyLine> r) => vFlip(r2u(r));
 }
 
 /// In DoubleFlipRow:
@@ -569,12 +612,12 @@ class FlipQuads extends QuadGrams {
 /// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically and horizontally flipping Up paths.
 class DoubleFlipQuads extends QuadGrams {
-  DoubleFlipQuads(List<PolyPath> r, ConsPair cons)
+  DoubleFlipQuads(List<PolyLine> r, ConsPair cons)
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
 
-  static List<PolyPath> r2u(List<PolyPath> r) => hFlip(turn(r));
+  static List<PolyLine> r2u(List<PolyLine> r) => hFlip(turn(r));
 
-  static List<PolyPath> r2l(List<PolyPath> r) => vFlip(hFlip(r));
+  static List<PolyLine> r2l(List<PolyLine> r) => vFlip(hFlip(r));
 
-  static List<PolyPath> r2d(List<PolyPath> r) => hFlip(vFlip(r2u(r)));
+  static List<PolyLine> r2d(List<PolyLine> r) => hFlip(vFlip(r2u(r)));
 }

@@ -15,51 +15,65 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/// Classes and utils for Words and Expressions.
+
+/// library for expression
+library expression;
+
 import 'package:vector_math/vector_math.dart';
 
 import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'operators.dart';
 import 'phonetics.dart';
+import 'render_plan.dart';
 
-/// Classes and utils for Words and Expressions.
-
-/// abstract base class for all Gram Expression.
-abstract class GramExpression {
+/// Word is the abstract base class for all Gram Expression and Compound Word
+abstract class Word {
   String get pronunciation;
 
+  RenderPlan get renderPlan;
+
+  Iterable<PolyLine> get lines => renderPlan.lines;
+
+  Vector2 get center => renderPlan.center;
+
+  double get width => renderPlan.width;
+
+  double get height => renderPlan.height;
+
+  double get ratioWH => renderPlan.ratioWH;
+}
+
+/// abstract base class for all Gram Expression.
+abstract class GramExpression extends Word {
   /// Merge this expression with another.
   GramExpression merge(GramExpression that) =>
       BinaryExpr(this, Binary.Merge, that);
 
   /// Put this expression before that, this to left, that to right.
-  GramExpression before(GramExpression that) =>
-      BinaryExpr(this, Binary.Before, that);
+  GramExpression next(GramExpression that) =>
+      BinaryExpr(this, Binary.Next, that);
 
   /// Put this expression over that, this above, that below.
   GramExpression over(GramExpression that) =>
       BinaryExpr(this, Binary.Over, that);
 
   /// Put this expression around that, this outside, that inside.
-  GramExpression around(GramExpression that) =>
-      BinaryExpr(this, Binary.Around, that);
-
-  /// Combine this expression with that, not spatial, forming a compound word.
-  GramExpression compound(GramExpression that) =>
-      BinaryExpr(this, Binary.Compound, that);
-
-  Vector2 get visualCenter;
-
-  Iterable<PolyPath> get paths;
+  GramExpression wrap(GramExpression that) =>
+      BinaryExpr(this, Binary.Wrap, that);
 }
 
 /// A Unary Gram Expression applies a Unary Operation on a single Gram.
-/// Private subclass, use respective factory methods in SingleGram instead.
+/// Use factory methods in Gram instead of calling this constructor directly.
 class UnaryExpr extends GramExpression {
   final Unary op;
   final Gram gram;
+  late final renderPlan;
 
-  UnaryExpr(this.op, this.gram);
+  UnaryExpr(this.op, this.gram) {
+    renderPlan = gram.renderPlan.byUnary(op);
+  }
 
   String toString() =>
       op.symbol +
@@ -71,18 +85,6 @@ class UnaryExpr extends GramExpression {
 
   String get pronunciation =>
       gram.pronunciation + op.ending.shortName.toLowerCase();
-
-  @override
-  Vector2 get visualCenter {
-    final gc = gram.visualCenter;
-    final v3 = op.matrix * Vector3(gc.x, gc.y, 1);
-    return Vector2(v3[0], v3[1]);
-  }
-
-  @override
-  Iterable<PolyPath> get paths {
-    return gram.paths.map((p) => op.transform(p));
-  }
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
@@ -91,38 +93,28 @@ class BinaryExpr extends GramExpression {
   final GramExpression expr1;
   final Binary op;
   final GramExpression expr2;
+  late final renderPlan;
 
-  BinaryExpr(this.expr1, this.op, this.expr2);
+  BinaryExpr(this.expr1, this.op, this.expr2) {
+    renderPlan = expr1.renderPlan.byBinary(op, expr2.renderPlan);
+  }
 
   String toString() => "$expr1 ${op.symbol} $expr2";
 
   String get pronunciation =>
       expr1.pronunciation + op.ending.base + expr2.pronunciation;
-
-  @override
-  Vector2 get visualCenter {
-    Vector2 c1 = expr1.visualCenter;
-    Vector3 v1 = op.matrices.item1 * Vector3(c1.x, c1.y, 1);
-    Vector2 c2 = expr2.visualCenter;
-    Vector3 v2 = op.matrices.item2 * Vector3(c2.x, c2.y, 1);
-    Vector3 avg = (v1 + v2) / 2.0;
-    return avg.xy;
-  }
-
-  @override
-  Iterable<PolyPath> get paths {
-    final newPaths1 = expr1.paths.map(op.transform1);
-    final newPaths2 = expr2.paths.map(op.transform2);
-    return [...newPaths1, ...newPaths2];
-  }
 }
 
 class Cluster extends GramExpression {
   final Gram headGram;
   final Binary tailOp;
   final Gram tailGram;
+  late final renderPlan;
+  late final lines;
 
-  Cluster(this.headGram, this.tailOp, this.tailGram);
+  Cluster(this.headGram, this.tailOp, this.tailGram) {
+    renderPlan = headGram.renderPlan.byBinary(tailOp, tailGram.renderPlan);
+  }
 
   String toString() => "($headGram ${tailOp.symbol} $tailGram)";
 
@@ -132,31 +124,19 @@ class Cluster extends GramExpression {
       headGram.vowel.shortName.toLowerCase() +
       tailOp.ending.tail +
       tailGram.pronunciation;
-
-  @override
-  Vector2 get visualCenter {
-    Vector2 c1 = headGram.visualCenter;
-    Vector3 v1 = tailOp.matrices.item1 * Vector3(c1.x, c1.y, 1);
-    Vector2 c2 = tailGram.visualCenter;
-    Vector3 v2 = tailOp.matrices.item2 * Vector3(c2.x, c2.y, 1);
-    Vector3 avg = (v1 + v2) / 2.0;
-    return avg.xy;
-  }
-
-  @override
-  Iterable<PolyPath> get paths {
-    final newPaths1 = headGram.paths.map(tailOp.transform1);
-    final newPaths2 = tailGram.paths.map(tailOp.transform2);
-    return [...newPaths1, ...newPaths2];
-  }
 }
 
 class ExtendedCluster extends Cluster {
   final Binary headOp;
   final GramExpression innerExpr;
+  late final renderPlan;
+  late final lines;
 
   ExtendedCluster(headGram, this.headOp, this.innerExpr, tailOp, tailGram)
-      : super(headGram, tailOp, tailGram);
+      : super(headGram, tailOp, tailGram) {
+    final render1 = headGram.renderPlan.byBinary(headOp, innerExpr.renderPlan);
+    renderPlan = render1.byBinary(tailOp, tailGram.renderPlan);
+  }
 
   String toString() =>
       "($headGram ${headOp.symbol} $innerExpr ${tailOp.symbol} $tailGram)";
@@ -169,27 +149,33 @@ class ExtendedCluster extends Cluster {
       innerExpr.pronunciation +
       tailOp.ending.tail +
       tailGram.pronunciation;
+}
 
-  @override
-  Vector2 get visualCenter {
-    Vector2 c1 = headGram.visualCenter;
-    Vector3 v1 = headOp.matrices.item1 * Vector3(c1.x, c1.y, 1);
-    Vector2 c2 = innerExpr.visualCenter;
-    Vector3 v2 = headOp.matrices.item2 * Vector3(c2.x, c2.y, 1);
-    Vector3 avg12 = (v1 + v2) / 2.0;
-    Vector3 v12 = tailOp.matrices.item1 * avg12;
-    Vector2 c3 = tailGram.visualCenter;
-    Vector3 v3 = tailOp.matrices.item2 * Vector3(c3.x, c3.y, 1);
-    Vector3 avg123 = (v12 + v3) / 2.0;
-    return avg123.xy;
+class CompoundWord extends Word {
+  static const SEPARATOR_SYMBOL = ':';
+  static const PRONUNCIATION_LINK = '-';
+
+  final Iterable<GramExpression> exprs;
+  late final Iterable<PolyLine> lines;
+  late final RenderPlan renderPlan;
+
+  CompoundWord(this.exprs) {
+    if (exprs.length < 2)
+      throw ArgumentError('Minimum words is 2; only ${exprs.length} given.');
+
+    GramExpression? combo;
+    for (final expr in exprs) {
+      combo = (combo == null ? expr : combo.next(expr));
+    }
+    lines = combo!.lines;
+    renderPlan = combo.renderPlan;
   }
 
   @override
-  Iterable<PolyPath> get paths {
-    final newPaths1 = headGram.paths.map(headOp.transform1);
-    final newPaths2 = innerExpr.paths.map(headOp.transform2);
-    final newPaths3 = [...newPaths1, ...newPaths2].map(tailOp.transform1);
-    final newPaths4 = tailGram.paths.map(tailOp.transform2);
-    return [...newPaths3, ...newPaths4];
-  }
+  String toString() =>
+      exprs.map((w) => w.toString()).join(" $SEPARATOR_SYMBOL ");
+
+  @override
+  String get pronunciation =>
+      exprs.map((w) => w.pronunciation).join(PRONUNCIATION_LINK);
 }

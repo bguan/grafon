@@ -47,7 +47,7 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.V:
       case Consonant.F:
-      return ConsPair.FaVa;
+        return ConsPair.FaVa;
 
       case Consonant.G:
       case Consonant.K:

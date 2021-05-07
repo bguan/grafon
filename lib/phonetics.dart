@@ -55,7 +55,7 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.R:
       case Consonant.L:
-      return ConsPair.LaRa;
+        return ConsPair.LaRa;
 
       case Consonant.N:
       case Consonant.M:

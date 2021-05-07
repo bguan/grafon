@@ -39,7 +39,7 @@ extension ConsonantExtension on Consonant {
 
       case Consonant.Ch:
       case Consonant.J:
-      return ConsPair.ChaJa;
+        return ConsPair.ChaJa;
 
       case Consonant.D:
       case Consonant.T:

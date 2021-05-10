@@ -19,7 +19,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:grafon/render_plan.dart';
-import 'package:vector_math/vector_math.dart';
+import 'package:vector_math/vector_math.dart' as vm;
 
 import 'expression.dart';
 import 'gram_infra.dart';
@@ -56,39 +56,39 @@ class GrafonPainter extends CustomPainter {
 
   GrafonPainter(this.word, {this.flexFit = false, required this.scheme});
 
-  static Vector2 toCanvasCoord(Vector2 v, Size canvasSize, Size wordSize) {
-    final hScale = canvasSize.height / wordSize.height;
-    final wScale = canvasSize.width / wordSize.width;
-    return Vector2(
-      (v.x + wordSize.width / 2) * wScale,
-      canvasSize.height - (v.y + wordSize.height / 2) * hScale,
-    );
-  }
-
-  static Offset toOffset(Vector2 v) => Offset(v.x, v.y);
+  static Offset toOffset(vm.Vector2 v) => Offset(v.x, v.y);
 
   @override
   void paint(Canvas canvas, Size size) {
     final penWidth = max(size.height * RenderPlan.PEN_WTH_SCALE, MIN_PEN_WIDTH);
 
-    final paint = Paint()
+    final linePaint = Paint()
       ..color = scheme.primary
       ..strokeWidth = penWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final render = word.renderPlan.shiftWith(-word.center.x, -word.center.y);
+    final dotPaint = Paint()
+      ..color = scheme.primary
+      ..strokeWidth = penWidth
+      ..style = PaintingStyle.fill
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final render = word.renderPlan
+        .shift(-word.center.x, -word.center.y)
+        .toDevice(size.height, size.width, flexFit);
 
     final wordSize = flexFit ? Size(word.width, word.height) : Size(1, 1);
 
     for (var l in render.lines) {
       if (l is PolyDot) {
-        drawPolyDot(l, size, wordSize, canvas, paint);
+        drawPolyDot(l, size, wordSize, canvas, dotPaint);
       } else if (l is PolyStraight) {
-        drawPolyLine(l, size, wordSize, canvas, paint);
+        drawPolyLine(l, size, wordSize, canvas, linePaint);
       } else if (l is PolyCurve) {
-        drawPolySpline(l, size, wordSize, canvas, paint);
+        drawPolySpline(l, size, wordSize, canvas, linePaint);
       }
     }
   }
@@ -104,8 +104,7 @@ class GrafonPainter extends CustomPainter {
     final len = l.numPts;
     for (var i = 0; i < len; i++) {
       final v = l.vectors[i];
-      final pt = toCanvasCoord(v, canvasSize, wordSize);
-      canvas.drawCircle(toOffset(pt), paint.strokeWidth / 2, paint);
+      canvas.drawCircle(toOffset(v), paint.strokeWidth, paint);
     }
   }
 
@@ -122,11 +121,8 @@ class GrafonPainter extends CustomPainter {
     for (var i = 0; i < max(1, len - 1); i++) {
       final pt = l.vectors[i];
       final nextPt = l.vectors[min(i + 1, len - 1)];
-      final from = toCanvasCoord(pt, canvasSize, wordSize);
-      final to = toCanvasCoord(nextPt, canvasSize, wordSize);
-
       // in degenerate case of from == to i.e. a Point
-      canvas.drawLine(toOffset(from), toOffset(to), paint);
+      canvas.drawLine(toOffset(pt), toOffset(nextPt), paint);
     }
   }
 
@@ -146,13 +142,11 @@ class GrafonPainter extends CustomPainter {
       final end = l.vectors[min(i + 1, len - 1)];
       final next = l.vectors[min(i + 2, len - 1)];
       if (i == 1) {
-        final initCoord = toCanvasCoord(beg, canvasSize, wordSize);
-        path.moveTo(initCoord.x, initCoord.y);
+        path.moveTo(beg.x, beg.y);
       }
-      final toCoord = toCanvasCoord(end, canvasSize, wordSize);
       if (pre == beg && end == next) {
         // degenerate case, just a straight line
-        path.lineTo(toCoord.x, toCoord.y);
+        path.lineTo(end.x, end.y);
       } else {
         if (pre == beg) {
           // use a dominant endCtl as bezier Ctl
@@ -162,8 +156,7 @@ class GrafonPainter extends CustomPainter {
             next,
             controlType: SplineControlType.Dorminant,
           );
-          final ctlCoord = toCanvasCoord(ctl, canvasSize, wordSize);
-          path.quadraticBezierTo(ctlCoord.x, ctlCoord.y, toCoord.x, toCoord.y);
+          path.quadraticBezierTo(ctl.x, ctl.y, ctl.x, ctl.y);
         } else if (end == next) {
           // use a dominant begCtl as bezier Ctl
           final ctl = PolyCurve.calcBegCtl(
@@ -172,21 +165,11 @@ class GrafonPainter extends CustomPainter {
             end,
             controlType: SplineControlType.Dorminant,
           );
-          final ctlCoord = toCanvasCoord(ctl, canvasSize, wordSize);
-          path.quadraticBezierTo(ctlCoord.x, ctlCoord.y, toCoord.x, toCoord.y);
+          path.quadraticBezierTo(ctl.x, ctl.y, ctl.x, ctl.y);
         } else {
           final begCtl = PolyCurve.calcBegCtl(pre, beg, end);
           final endCtl = PolyCurve.calcEndCtl(beg, end, next);
-          final begCtlCoord = toCanvasCoord(begCtl, canvasSize, wordSize);
-          final endCtlCoord = toCanvasCoord(endCtl, canvasSize, wordSize);
-          path.cubicTo(
-            begCtlCoord.x,
-            begCtlCoord.y,
-            endCtlCoord.x,
-            endCtlCoord.y,
-            toCoord.x,
-            toCoord.y,
-          );
+          path.cubicTo(begCtl.x, begCtl.y, endCtl.x, endCtl.y, end.x, end.y);
         }
       }
     }

@@ -61,7 +61,7 @@ void main() {
   test('GramTable test atConsPairVowel', () {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values) {
-        final gra = GramTable.atConsPairVowel(cp, v);
+        final gra = GramTable().atConsPairVowel(cp, v);
 
         expect(gra.consPair, cp);
         expect(gra.vowel, v);
@@ -72,7 +72,7 @@ void main() {
   test('GramTable test atConsonantVowel', () {
     for (final c in Consonant.values) {
       for (final v in Vowel.values) {
-        final gra = GramTable.atConsonantVowel(c, v);
+        final gra = GramTable().atConsonantVowel(c, v);
         expect(gra.consPair, c.pair);
         expect(gra.vowel, v);
       }
@@ -82,7 +82,7 @@ void main() {
   test('GramTable test atMonoFace', () {
     for (final m in Mono.values) {
       for (final f in Face.values) {
-        final gra = GramTable.atMonoFace(m, f);
+        final gra = GramTable().atMonoFace(m, f);
         expect(gra.face, f);
         if (f == Face.Center) {
           expect(gra, m.gram);
@@ -99,12 +99,12 @@ void main() {
   test('GramTable test at dynamics', () {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values) {
-        final gra = GramTable.at(cp, v);
+        final gra = GramTable().at(cp, v);
         expect(gra.consPair, cp);
         expect(gra.vowel, v);
       }
       for (final f in Face.values) {
-        final gra = GramTable.at(cp, f);
+        final gra = GramTable().at(cp, f);
         expect(gra.face, f);
         expect(gra.consPair, cp);
       }
@@ -112,12 +112,12 @@ void main() {
 
     for (final c in Consonant.values) {
       for (final v in Vowel.values) {
-        final gra = GramTable.at(c, v);
+        final gra = GramTable().at(c, v);
         expect(gra.consPair, c.pair);
         expect(gra.vowel, v);
       }
       for (final f in Face.values) {
-        final gra = GramTable.at(c, f);
+        final gra = GramTable().at(c, f);
         expect(gra.face, f);
         expect(gra.consPair, c.pair);
       }
@@ -125,7 +125,7 @@ void main() {
 
     for (final m in Mono.values) {
       for (final f in Face.values) {
-        final gra = GramTable.at(m, f);
+        final gra = GramTable().at(m, f);
         expect(gra.face, f);
         if (f == Face.Center) {
           expect(gra, m.gram);
@@ -137,7 +137,7 @@ void main() {
         }
       }
       for (final v in Vowel.values) {
-        final gra = GramTable.at(m, v);
+        final gra = GramTable().at(m, v);
         expect(gra.consPair, m.gram.consPair);
         expect(gra.vowel, v);
       }
@@ -145,33 +145,33 @@ void main() {
   });
 
   test('GramTable numRows match num of Mono', () {
-    expect(GramTable.numRows, Mono.values.length);
+    expect(GramTable().numRows, Mono.values.length);
   });
 
   test('GramTable numRows match num of Quad', () {
-    expect(GramTable.numRows, Quads.values.length);
+    expect(GramTable().numRows, Quads.values.length);
   });
 
   test('GramTable numRows match num of ConsPair', () {
-    expect(GramTable.numRows, ConsPair.values.length);
+    expect(GramTable().numRows, ConsPair.values.length);
   });
 
   test('GramTable numCols match num of Vowels', () {
-    expect(GramTable.numCols, Vowel.values.length);
+    expect(GramTable().numCols, Vowel.values.length);
   });
 
   test('GramTable numCols match num of Faces', () {
-    expect(GramTable.numCols, Face.values.length);
+    expect(GramTable().numCols, Face.values.length);
   });
 
   test('GramTable test getEnumIfMono', () {
     for (final m in Mono.values) {
-      Mono? mEnum = GramTable.getEnumIfMono(m.gram);
+      Mono? mEnum = GramTable().getEnumIfMono(m.gram);
       expect(mEnum, m);
     }
     for (final q in Quads.values) {
       for (final f in FaceHelper.directionals) {
-        Mono? mEnum = GramTable.getEnumIfMono(q.grams[f]);
+        Mono? mEnum = GramTable().getEnumIfMono(q.grams[f]);
         expect(mEnum, isNull);
       }
     }
@@ -179,12 +179,12 @@ void main() {
 
   test('GramTable test getEnumIfQuad', () {
     for (final m in Mono.values) {
-      Quads? qEnum = GramTable.getEnumIfQuad(m.gram);
+      Quads? qEnum = GramTable().getEnumIfQuad(m.gram);
       expect(qEnum, isNull);
     }
     for (final q in Quads.values) {
       for (final f in FaceHelper.directionals) {
-        Quads? qEnum = GramTable.getEnumIfQuad(q.grams[f]);
+        Quads? qEnum = GramTable().getEnumIfQuad(q.grams[f]);
         expect(qEnum, q);
       }
     }
@@ -192,12 +192,12 @@ void main() {
 
   test('GramTable test getMonoEnum', () {
     for (final m in Mono.values) {
-      Mono mEnum = GramTable.getMonoEnum(m.gram);
+      Mono mEnum = GramTable().getMonoEnum(m.gram);
       expect(mEnum, m);
     }
     for (final q in Quads.values) {
       for (final f in FaceHelper.directionals) {
-        Mono mEnum = GramTable.getMonoEnum(q.grams[f]);
+        Mono mEnum = GramTable().getMonoEnum(q.grams[f]);
         expect(mEnum, q.monoPeer);
       }
     }

@@ -51,7 +51,7 @@ extension BinaryExtension on Binary {
       case Binary.Over:
         return BinaryEnding.SZ;
       case Binary.Wrap:
-        return BinaryEnding.MN;
+        return BinaryEnding.NM;
       default:
         throw Exception("Unexpected Binary Enum ${this}");
     }

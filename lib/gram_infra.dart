@@ -446,10 +446,10 @@ abstract class Gram extends GramExpression {
   }
 
   String toString() => this is QuadGram
-      ? GramTable.getEnumIfQuad(this)!.shortName +
+      ? GramTable().getEnumIfQuad(this)!.shortName +
           ' ' +
           face.shortName.toLowerCase()
-      : GramTable.getMonoEnum(this).shortName;
+      : GramTable().getMonoEnum(this).shortName;
 
   String get pronunciation =>
       (consPair == ConsPair.aHa ? '' : consPair.base.shortName) +

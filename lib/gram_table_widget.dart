@@ -29,8 +29,11 @@ import 'phonetics.dart';
 /// Widget that display a GramTable
 class GramTableView extends StatelessWidget {
   final Size? size;
+  final GramTable table;
 
-  GramTableView({Key? key, this.size}) : super(key: key);
+  GramTableView({Key? key, this.size})
+      : table = GramTable(),
+        super(key: key);
 
   @override
   Widget build(BuildContext ctx) {
@@ -43,8 +46,8 @@ class GramTableView extends StatelessWidget {
     final hpad = widthHeightRatio * 40.0;
     final space = 4.0;
     final inset = widthHeightRatio * 12.0;
-    final dim = min((screenWidth - 2 * hpad) / (GramTable.numCols + 2),
-        (0.8 * screenHeight - 2 * vpad) / (GramTable.numRows + 3));
+    final dim = min((screenWidth - 2 * hpad) / (table.numCols + 2),
+        (0.8 * screenHeight - 2 * vpad) / (table.numRows + 3));
 
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
@@ -141,7 +144,7 @@ class GramTableView extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(inset),
             child: GrafonTile(
-              GramTable.atMonoFace(m, f),
+              table.atMonoFace(m, f),
               height: dim,
               flexFit: false,
             ),
@@ -164,7 +167,7 @@ class GramTableView extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: vpad, horizontal: hpad),
       child: Center(
         child: GridView.count(
-          crossAxisCount: GramTable.numCols + 2,
+          crossAxisCount: table.numCols + 2,
           crossAxisSpacing: space,
           mainAxisSpacing: space,
           children: [...headerRow, ...gramTable, ...unaryOpRow, ...binaryOpRow],

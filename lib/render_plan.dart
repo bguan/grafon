@@ -116,16 +116,15 @@ class RenderPlan {
     final width = xMax - xMin;
     final height = yMax - yMin;
 
-    this.xMin = quantize(width < MIN_WIDTH ? -MIN_WIDTH / 2 : xMin);
-    this.xMax = quantize(width < MIN_WIDTH ? MIN_WIDTH / 2 : xMax);
-    this.yMin = quantize(height < MIN_HEIGHT ? -MIN_HEIGHT / 2 : yMin);
-    this.yMax = quantize(height < MIN_HEIGHT ? MIN_HEIGHT / 2 : yMax);
+    this.xMin = quantize(xMin);
+    this.xMax = quantize(xMax);
+    this.yMin = quantize(yMin);
+    this.yMax = quantize(yMax);
     this.width = quantize(max(width, MIN_WIDTH));
     this.height = quantize(max(height, MIN_HEIGHT));
     this.ratioWH = quantize(this.width / this.height);
     this.mass = quantize(max(mass, MIN_MASS));
-    this.center =
-        quantizeV2(calcCenter(this.xMin, this.yMin, this.xMax, this.yMax));
+    this.center = quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
   }
 
   @override
@@ -169,6 +168,10 @@ class RenderPlan {
 
   double get area => width * height;
 
+  bool get hasSideGap => width > (xMax - xMin);
+
+  bool get hasVertGap => height > (yMax - yMin);
+
   @override
   String toString() {
     final x1 = quantStr(xMin);
@@ -180,7 +183,7 @@ class RenderPlan {
     final r = quantStr(ratioWH);
     final c = quantV2Str(center);
 
-    return "Metrics(x: $x1 to $x2, y: $y1 to $y2, w: $w, h: $h, r: $r, c: $c)\n" +
+    return "Metrics(x: $x1 to $x2, y: $y1 to $y2, w: $w, h: $h, r: $r, c: $c) " +
         lines.toString();
   }
 
@@ -188,38 +191,33 @@ class RenderPlan {
   static Vector2 calcCenter(xMin, yMin, xMax, yMax) =>
       Vector2(xMin, yMin) + Vector2(xMax - xMin, yMax - yMin) / 2;
 
-  /// Take a RenderPlan and shift all points by (dx, dy) i.e. Translation.
-  static RenderPlan shift(RenderPlan r, num dx, num dy) {
-    final newL = r.lines.map(
+  /// Shift all points by (dx, dy).
+  RenderPlan shift(num dx, num dy) {
+    final newL = lines.map(
         (l) => l.diffPoints(l.vectors.map((v) => Vector2(v.x + dx, v.y + dy))));
     return RenderPlan(newL);
   }
 
-  /// Shift all points by (dx, dy).
-  RenderPlan shiftWith(num dx, num dy) {
-    return shift(this, dx, dy);
-  }
-
-  /// Merge 2 render plans to make a new one.
-  static RenderPlan merge(RenderPlan r1, RenderPlan r2) =>
-      RenderPlan([...r1.lines, ...r2.lines]);
-
   /// Merge this with another Render Plan.
-  RenderPlan mergeWith(RenderPlan that) {
-    return merge(this, that);
+  RenderPlan merge(RenderPlan that) {
+    return RenderPlan([
+      ...lines,
+      ...that.lines,
+    ]);
   }
 
   /// Scale height of a RenderPlan to hNew, enforce by InvisiDots if needed.
   RenderPlan scaleHeight(double hNew) {
     final hScale = hNew / this.height;
-    final cx = center.x;
-    final cy = center.y;
-    var newR = map((isF, v) => isF ? v * hScale : Vector2(v.x, v.y * hScale));
+    var newR = remap((isF, v) => isF ? v * hScale : Vector2(v.x, v.y * hScale));
 
-    // corner case if newR is unchanged from oldR, e.g. Mono.Dot, add InvisiDots
-    if (newR.height == this.height) {
+    // corner case if newR is not hNew, e.g. unchanged from oldR as Mono.Dot
+    if ((newR.height - hNew).abs() > 0.1) {
+      // add InvisiDots to stretch out the height
+      final cx = newR.center.x;
+      final cy = newR.center.y;
       newR = RenderPlan([
-        ...newR.lines,
+        ...newR.lines.where((l) => l is! InvisiDot),
         InvisiDot([Vector2(cx, cy - hNew / 2), Vector2(cx, cy + hNew / 2)]),
       ]);
     }
@@ -230,14 +228,15 @@ class RenderPlan {
   /// Scale width of a RenderPlan to wNew, enforce by InvisiDots if needed.
   RenderPlan scaleWidth(double wNew) {
     final wScale = wNew / this.width;
-    var newR = map((isF, v) => isF ? v * wScale : Vector2(v.x * wScale, v.y));
+    var newR = remap((isF, v) => isF ? v * wScale : Vector2(v.x * wScale, v.y));
 
-    // corner case if newR is unchanged from oldR, e.g. Mono.Dot, add InvisiDots
-    if (newR.width == this.width) {
+    // corner case if newR is not wNew, e.g. unchanged from oldR as Mono.Dot
+    if ((newR.width - wNew).abs() > 0.1) {
+      // add InvisiDots to stretch out the width
       final cx = newR.center.x;
       final cy = newR.center.y;
       newR = RenderPlan([
-        ...newR.lines,
+        ...newR.lines.where((l) => l is! InvisiDot),
         InvisiDot([Vector2(cx - wNew / 2, cy), Vector2(cx + wNew / 2, cy)])
       ]);
     }
@@ -245,52 +244,45 @@ class RenderPlan {
     return newR;
   }
 
-  /// Arrange a render plan by unary operation to generate a new render.
-  static RenderPlan renderUnary(Unary op, RenderPlan r) {
-    // center the renderPlan if needed
-    if (r.center != Vector2(0, 0)) r = r.shiftWith(-r.center.x, -r.center.y);
+  /// Transform this render plan by unary operation to generate a new render.
+  RenderPlan byUnary(Unary op) {
+    // assume box is bound by min max X Y of -.5 to .5
 
-    // normalize the height to 1 if needed
-    if (r.height < 1) r = r.map((isFixed, v) => v * 1 / r.height);
-
-    final w = r.width;
-    final h = r.height;
-    final y1 = r.yMin;
-    final y2 = r.yMax;
-    final x1 = r.xMin;
-    final x2 = r.xMax;
-    final cx = r.center.x;
-    final cy = r.center.y;
+    // reduce to 1/3 size
+    final shrunk = remap((isFixed, v) => v / 3);
     switch (op) {
-      case Unary.Up: // extend the height down by adding InvisiDot
+      case Unary.Up:
+        // shift r's top to align with box top
+        // extend the height down w InvisiDot at box bottom, maintain width
         return RenderPlan([
-          ...r.lines,
-          InvisiDot([Vector2(cx, y1 - 2 * h)])
+          ...shrunk.shift(0, .5 - shrunk.yMax).lines,
+          InvisiDot([Vector2(-.25, -.5), Vector2(.25, -.5)])
         ]);
-      case Unary.Down: // extend the height up by adding InvisiDot
+      case Unary.Down:
+        // shift r's bottom to align with box bottom
+        // extend the height up w InvisiDot at box top, maintain width
         return RenderPlan([
-          ...r.lines,
-          InvisiDot([Vector2(cx, y2 + 2 * h)])
+          ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
+          InvisiDot([Vector2(-.25, .5), Vector2(.25, .5)])
         ]);
-      case Unary.Left: // extend the width by adding InvisiDot at former maxX
+      case Unary.Left:
+        // shift r's left to align with box left
+        // extend the width w InvisiDot at box right, maintain min height
         return RenderPlan([
-          ...r.lines,
-          InvisiDot([Vector2(x2 + 2 * w, cy)])
+          ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
+          InvisiDot([Vector2(.5, -.25), Vector2(.5, .25)])
         ]);
-      case Unary.Right: // extend the width by adding InvisiDot at former minX
+      case Unary.Right:
+        // shift r's left to align with box left
+        // extend the width w InvisiDot at box left, maintain min height
         return RenderPlan([
-          ...r.lines,
-          InvisiDot([Vector2(x1 - 2 * w, cy)])
+          ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
+          InvisiDot([Vector2(-.5, -.25), Vector2(-.5, .25)])
         ]);
       case Unary.Shrink: // extending all sides to former min max
         return RenderPlan([
-          ...r.lines,
-          InvisiDot([
-            Vector2(cx, cy - 1.5 * h),
-            Vector2(cx, cy + 1.5 * h),
-            Vector2(cx - 1.5 * w, cy),
-            Vector2(cx + 1.5 * w, cy),
-          ])
+          ...shrunk.lines,
+          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)])
         ]);
       default:
         throw UnsupportedError('Unary operation $op not supported.');
@@ -298,14 +290,12 @@ class RenderPlan {
   }
 
   /// Transform this render plan by unary operation to generate a new render.
-  RenderPlan byUnary(Unary op) {
-    return renderUnary(op, this);
-  }
+  RenderPlan byBinary(Binary op, RenderPlan that) {
+    var r1 = this;
+    var r2 = that;
 
-  /// Arrange 2 render plans by binary operation to generate a new render.
-  static RenderPlan renderBinary(Binary op, RenderPlan r1, RenderPlan r2) {
-    if (r1.center != Vector2(0, 0)) r1 = shift(r1, -r1.center.x, -r1.center.y);
-    if (r2.center != Vector2(0, 0)) r2 = shift(r2, -r2.center.x, -r2.center.y);
+    if (r1.center != Vector2(0, 0)) r1 = r1.shift(-r1.center.x, -r1.center.y);
+    if (r2.center != Vector2(0, 0)) r2 = r2.shift(-r2.center.x, -r2.center.y);
     // both operands are centered, no need to trim surrounding whitespace
     switch (op) {
       case Binary.Next:
@@ -315,13 +305,10 @@ class RenderPlan {
         } else if (r2.height > r1.height) {
           r1 = r1.scaleHeight(r2.height);
         }
-        // adjust r1 & r2 width by mass ratio
-        // final w1Scale = r1.mass / (r1.mass + r2.mass);
-        // final w2Scale = r2.mass / (r1.mass + r2.mass);
-        // r1 = r1.scaleWidth(w1Scale * r1.width);
-        // r2 = r2.scaleWidth(w2Scale * r2.width);
         // move 2nd operand to right of 1st
-        return merge(r1, shift(r2, .5 * r1.width + .05 + .5 * r2.width, 0));
+        final gap =
+            r1.hasSideGap || r2.hasSideGap ? 0 : .05 * (r2.width + r1.width);
+        return r1.merge(r2.shift(.5 * r1.width + gap + .5 * r2.width, 0));
       case Binary.Over:
         // align the widths of r1 or r2 to the wider width
         if (r1.width > r2.width) {
@@ -329,47 +316,53 @@ class RenderPlan {
         } else if (r2.width > r1.width) {
           r1 = r1.scaleWidth(r2.width);
         }
-        // adjust r1 and r2 height by mass ratio
-        // final h1Scale = r1.mass / (r1.mass + r2.mass);
-        // final h2Scale = r2.mass / (r1.mass + r2.mass);
-        // r1 = r1.scaleHeight(h1Scale * r1.height);
-        // r2 = r2.scaleHeight(h2Scale * r2.height);
-        return merge(r1, shift(r2, 0, -.5 * r1.height - .05 - .5 * r2.height));
+        final gap =
+            r1.hasVertGap || r2.hasVertGap ? 0 : .05 * (r1.height + r2.height);
+        return r1.merge(r2.shift(0, -.5 * r1.height - gap - .5 * r2.height));
       case Binary.Wrap:
         // scale 2nd operand to 1/2 height of 1st
         var scale = .5 * r1.height / r2.height;
-        // if r2 height after scaling is more than 1/2 or r1 height, scale more
+        // if r2 width after scaling is more than 1/2 of r1 width, scale more
         if (scale * r2.width > .5 * r1.width) {
           scale *= .5 * r1.width / (scale * r2.width);
         }
-        return merge(r1, scale == 1 ? r2 : r2.map((isFixed, v) => v * scale));
+        return r1.merge(scale == 1 ? r2 : r2.remap((isFixed, v) => v * scale));
       case Binary.Merge:
-        // align the heights of both r1 to r2 to the taller height
-        if (r1.height > r2.height) {
-          r2 = r2.scaleHeight(r1.height);
-        } else if (r2.height > r1.height) {
-          r1 = r1.scaleHeight(r2.height);
-        }
-        return merge(r1, r2);
+        final hScale = r1.height / r2.height;
+        final wScale = r1.width / r2.width;
+        final scale = min(hScale, wScale);
+        r2 = ((scale - 1).abs() < 0.1
+            ? r2
+            : r2.remap((isFixed, v) => v * scale));
+        return r1.merge(r2);
       default:
         throw UnsupportedError('Binary Operation $op not supported!');
     }
   }
 
-  /// Transform this render plan by unary operation to generate a new render.
-  RenderPlan byBinary(Binary op, RenderPlan that) {
-    return renderBinary(op, this, that);
-  }
-
   /// Transform this render plan by a function that remap points
-  RenderPlan map(Vector2 f(bool isFixed, Vector2 v)) => RenderPlan(lines
+  /// But InvisiDots are skipped to avoid distortion
+  RenderPlan remap(Vector2 f(bool isFixed, Vector2 v)) => RenderPlan(lines
+      .where((l) => l is! InvisiDot)
       .map((l) => l.diffPoints(l.vectors.map((v) => f(l.isFixedAspect, v)))));
 
-// TODO: impl a working toDevice to replace toCanvasCoord
-// /// Change to device coordinates. Assume (0,0) is upper left corner.
-// RenderPlan toDevice(double width, double height) {
-//   return scaleWidth(width).scaleHeight(height).map(
-//         (isF, v) => Vector2(v.x + width / 2, height - (v.y + height / 2)),
-//       );
-// }
+  /// Change to device coordinates. Assume (0,0) is upper left corner.
+  RenderPlan toDevice(double devHt, double devWth, [bool isFlexFit = true]) {
+    final hScale = devHt / height;
+    final wScale = devWth / width;
+    final scale = isFlexFit ? hScale : min(hScale, wScale);
+    var scaled =
+        ((scale - 1).abs() < 0.1 ? this : remap((isFixed, v) => v * scale));
+
+    if (isFlexFit && devWth - scaled.width > 0.1) {
+      final wScale2 = devWth / scaled.width;
+      scaled = scaled
+          .remap((isFixed, v) => isFixed ? v : Vector2(v.x * wScale2, v.y));
+    }
+
+    final dx = max(devWth, scaled.width) / 2;
+    // flip Y and recenter origin to devWth/2. devHt/2)
+    return scaled
+        .remap((isF, v) => Vector2(v.x + dx, devHt - (v.y + devHt / 2)));
+  }
 }

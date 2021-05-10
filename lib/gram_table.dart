@@ -38,23 +38,42 @@ enum Mono {
   Blob,
 }
 
+/// enum for each of the QuadGram grouping.
+enum Quads {
+  Line,
+  Corner,
+  Angle,
+  Gate,
+  Step,
+  Zap,
+  Arc,
+  Flow,
+  Swirl,
+}
+
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
 class _MonoHelper {
-  static final dotPaths = [
+  static final _MonoHelper _singleton = _MonoHelper._internal();
+
+  factory _MonoHelper() {
+    return _singleton;
+  }
+
+  final dotPaths = [
     PolyDot.anchors([Anchor.O], isFixedAspect: true)
   ];
 
-  static final crossPaths = [
+  final crossPaths = [
     PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
     PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true)
   ];
 
-  static final xPaths = [
+  final xPaths = [
     PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
     PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true)
   ];
 
-  static final squarePaths = [
+  final squarePaths = [
     PolyStraight.anchors([
       Anchor.NW,
       Anchor.NE,
@@ -64,14 +83,14 @@ class _MonoHelper {
     ], isFixedAspect: true)
   ];
 
-  static final sunPaths = [
+  final sunPaths = [
     PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
     PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true),
     PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
     PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
   ];
 
-  static final circlePaths = [
+  final circlePaths = [
     PolyCurve.anchors([
       Anchor.W,
       Anchor.N,
@@ -83,7 +102,7 @@ class _MonoHelper {
     ], isFixedAspect: true)
   ];
 
-  static final blobPaths = [
+  final blobPaths = [
     PolyCurve.anchors([
       Anchor.IW,
       Anchor.NW,
@@ -99,62 +118,131 @@ class _MonoHelper {
     ], isFixedAspect: true)
   ];
 
-  static final lightPaths = [
+  final lightPaths = [
     PolyStraight.anchors([Anchor.E, Anchor.IE], isFixedAspect: true),
     PolyStraight.anchors([Anchor.N, Anchor.IN], isFixedAspect: true),
     PolyStraight.anchors([Anchor.W, Anchor.IW], isFixedAspect: true),
     PolyStraight.anchors([Anchor.S, Anchor.IS], isFixedAspect: true),
   ];
 
-  static final flowerPaths = [
-    PolyCurve.anchors([
-      Anchor.NE,
-      Anchor.O,
-      Anchor.SE,
-      Anchor.O,
-      Anchor.SW,
-    ], isFixedAspect: true),
-    PolyCurve.anchors([
-      Anchor.SE,
-      Anchor.O,
-      Anchor.SW,
-      Anchor.O,
-      Anchor.NW,
-    ], isFixedAspect: true),
-    PolyCurve.anchors([
-      Anchor.NW,
-      Anchor.O,
-      Anchor.NE,
-      Anchor.O,
-      Anchor.SE,
-    ], isFixedAspect: true),
+  final flowerPaths = [
     PolyCurve.anchors([
       Anchor.SW,
       Anchor.O,
-      Anchor.NW,
+      Anchor.SE,
       Anchor.O,
       Anchor.NE,
+      Anchor.O,
+      Anchor.NW,
+      Anchor.O,
+      Anchor.SW,
+      Anchor.O,
+      Anchor.SE,
     ], isFixedAspect: true),
   ];
 
-  static final Map<Mono, MonoGram> enum2mono = Map.unmodifiable({
-    Mono.Dot: MonoGram(dotPaths, ConsPair.aHa),
-    Mono.Cross: MonoGram(crossPaths, ConsPair.BaPa),
-    Mono.X: MonoGram(xPaths, ConsPair.GaKa),
-    Mono.Square: MonoGram(squarePaths, ConsPair.DaTa),
-    Mono.Light: MonoGram(lightPaths, ConsPair.ChaJa),
-    Mono.Sun: MonoGram(sunPaths, ConsPair.SaZa),
-    Mono.Circle: MonoGram(circlePaths, ConsPair.MaNa),
-    Mono.Flower: MonoGram(flowerPaths, ConsPair.FaVa),
-    Mono.Blob: MonoGram(blobPaths, ConsPair.LaRa),
-  });
+  late final Map<Mono, MonoGram> enum2mono;
+
+  _MonoHelper._internal() {
+    enum2mono = Map.unmodifiable({
+      Mono.Dot: MonoGram(dotPaths, ConsPair.aHa),
+      Mono.Cross: MonoGram(crossPaths, ConsPair.BaPa),
+      Mono.X: MonoGram(xPaths, ConsPair.GaKa),
+      Mono.Square: MonoGram(squarePaths, ConsPair.DaTa),
+      Mono.Light: MonoGram(lightPaths, ConsPair.ChaJa),
+      Mono.Sun: MonoGram(sunPaths, ConsPair.SaZa),
+      Mono.Circle: MonoGram(circlePaths, ConsPair.MaNa),
+      Mono.Flower: MonoGram(flowerPaths, ConsPair.FaVa),
+      Mono.Blob: MonoGram(blobPaths, ConsPair.LaRa),
+    });
+  }
+}
+
+/// QuadHelper is a singleton to only instantiates QuadGrams only once
+class _QuadHelper {
+  static final _QuadHelper _singleton = _QuadHelper._internal();
+
+  factory _QuadHelper() {
+    return _singleton;
+  }
+
+  final cornerPaths = [
+    PolyStraight.anchors([Anchor.SE, Anchor.NE, Anchor.NW])
+  ];
+
+  final linePaths = [
+    PolyStraight.anchors([Anchor.NE, Anchor.SW])
+  ];
+
+  final anglePaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
+  ];
+
+  final gatePaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW])
+  ];
+
+  final stepPaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
+  ];
+
+  final zapPaths = [
+    PolyStraight.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E])
+  ];
+
+  final arcPaths = [
+    PolyCurve.anchors([
+      Anchor.NW,
+      Anchor.N,
+      Anchor.IE,
+      Anchor.S,
+      Anchor.SW,
+    ]),
+  ];
+
+  final flowPaths = [
+    PolyCurve.anchors([
+      Anchor.SW,
+      Anchor.W,
+      Anchor.E,
+      Anchor.NE,
+    ])
+  ];
+
+  final swirlPaths = [
+    PolyCurve.anchors([
+      Anchor.N,
+      Anchor.W,
+      Anchor.S,
+      Anchor.E,
+      Anchor.IN,
+      Anchor.O,
+      Anchor.NE,
+    ])
+  ];
+
+  late final Map<Quads, QuadGrams> enum2quads;
+
+  _QuadHelper._internal() {
+    enum2quads = Map.unmodifiable({
+      Quads.Line: SemiRotatingQuads(linePaths, ConsPair.aHa),
+      Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BaPa),
+      Quads.Angle: RotatingQuads(anglePaths, ConsPair.GaKa),
+      Quads.Gate: RotatingQuads(gatePaths, ConsPair.DaTa),
+      Quads.Step: FlipQuads(stepPaths, ConsPair.ChaJa),
+      Quads.Zap: FlipQuads(zapPaths, ConsPair.SaZa),
+      Quads.Arc: RotatingQuads(arcPaths, ConsPair.MaNa),
+      Quads.Flow: FlipQuads(flowPaths, ConsPair.FaVa),
+      Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LaRa),
+    });
+  }
 }
 
 /// Map a MonoGram to each Mono enum, its QuadGrams peer, and shortname.
 extension MonoExtension on Mono {
   String get shortName => this.toString().split('.').last;
 
-  Gram get gram => _MonoHelper.enum2mono[this]!;
+  Gram get gram => _MonoHelper().enum2mono[this]!;
 
   Quads get quadPeer =>
       Quads.values.firstWhere((q) => q.grams.consPair == this.gram.consPair);
@@ -178,92 +266,9 @@ extension MonoExtension on Mono {
   GramExpression wrap(GramExpression that) => gram.wrap(that);
 }
 
-/// enum for each of the QuadGram grouping.
-enum Quads {
-  Line,
-  Corner,
-  Angle,
-  Gate,
-  Step,
-  Zap,
-  Arc,
-  Flow,
-  Swirl,
-}
-
-/// QuadHelper is a singleton to only instantiates QuadGrams only once
-class _QuadHelper {
-  static final cornerPaths = [
-    PolyStraight.anchors([Anchor.SE, Anchor.NE, Anchor.NW])
-  ];
-
-  static final linePaths = [
-    PolyStraight.anchors([Anchor.NE, Anchor.SW])
-  ];
-
-  static final anglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
-  ];
-
-  static final gatePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW])
-  ];
-
-  static final stepPaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
-  ];
-
-  static final zapPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E])
-  ];
-
-  static final arcPaths = [
-    PolyCurve.anchors([
-      Anchor.N,
-      Anchor.N,
-      Anchor.IE,
-      Anchor.S,
-      Anchor.S,
-    ]),
-  ];
-
-  static final flowPaths = [
-    PolyCurve.anchors([
-      Anchor.SW,
-      Anchor.W,
-      Anchor.E,
-      Anchor.NE,
-    ])
-  ];
-
-  static final swirlPaths = [
-    PolyCurve.anchors([
-      Anchor.N,
-      Anchor.W,
-      Anchor.S,
-      Anchor.E,
-      Anchor.IN,
-      Anchor.O,
-      Anchor.NE,
-    ])
-  ];
-
-  static final Map<Quads, QuadGrams> enum2quads = Map.unmodifiable({
-    Quads.Line: SemiRotatingQuads(linePaths, ConsPair.aHa),
-    Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BaPa),
-    Quads.Angle: RotatingQuads(anglePaths, ConsPair.GaKa),
-    Quads.Gate: RotatingQuads(gatePaths, ConsPair.DaTa),
-    Quads.Step: FlipQuads(stepPaths, ConsPair.ChaJa),
-    Quads.Zap: FlipQuads(zapPaths, ConsPair.SaZa),
-    Quads.Arc: RotatingQuads(arcPaths, ConsPair.MaNa),
-    Quads.Flow: FlipQuads(flowPaths, ConsPair.FaVa),
-    Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LaRa),
-  });
-}
-
 /// extension to map quad enum to its QuadGrams, indexing by Face, & short name.
 extension QuadExtension on Quads {
-  QuadGrams get grams => _QuadHelper.enum2quads[this]!;
+  QuadGrams get grams => _QuadHelper().enum2quads[this]!;
 
   Gram operator [](Face f) => grams[f];
 
@@ -281,44 +286,50 @@ extension QuadExtension on Quads {
   String get shortName => this.toString().split('.').last;
 }
 
-/// GramTable is a static helper to implement various lookup efficiently
-abstract class GramTable {
-  static Map<ConsPair, Map<Vowel, Gram>> _gramByConsPairVowel() {
-    Map<ConsPair, Map<Vowel, Gram>> c2v2g = {};
+/// GramTable is a Singleton to implement various Gram lookup efficiently
+class GramTable {
+  final Map<ConsPair, Map<Vowel, Gram>> _gramByConsPairVowel = {};
+
+  static final GramTable _singleton = GramTable._internal();
+
+  factory GramTable() {
+    return _singleton;
+  }
+
+  GramTable._internal() {
     for (var cons in ConsPair.values) {
       final mono = Mono.values.firstWhere((m) => m.gram.consPair == cons);
       final quad = mono.quadPeer;
-      c2v2g[cons] = Map.unmodifiable({
+      _gramByConsPairVowel[cons] = Map.unmodifiable({
         Face.Center.vowel: mono.gram,
         for (var f in [Face.Right, Face.Up, Face.Left, Face.Down])
           f.vowel: quad[f]
       });
     }
-    return Map.unmodifiable(c2v2g);
   }
 
-  static final Map<ConsPair, Map<Vowel, Gram>> _map = _gramByConsPairVowel();
+  Gram atConsPairVowel(ConsPair cp, Vowel v) => _gramByConsPairVowel[cp]![v]!;
 
-  static Gram atConsPairVowel(ConsPair cp, Vowel v) => _map[cp]![v]!;
+  Gram atConsonantVowel(Consonant c, Vowel v) =>
+      _gramByConsPairVowel[c.pair]![v]!;
 
-  static Gram atConsonantVowel(Consonant c, Vowel v) => _map[c.pair]![v]!;
+  Gram atMonoFace(Mono m, Face f) =>
+      _gramByConsPairVowel[m.gram.consPair]![f.vowel]!;
 
-  static Gram atMonoFace(Mono m, Face f) => _map[m.gram.consPair]![f.vowel]!;
-
-  static Gram at(dynamic r, dynamic c) {
+  Gram at(dynamic r, dynamic c) {
     Map<Vowel, Gram> v2g;
     if (r is ConsPair) {
       final ConsPair cp = r;
-      v2g = _map[cp]!;
+      v2g = _gramByConsPairVowel[cp]!;
     } else if (r is Consonant) {
       final Consonant c = r;
-      v2g = _map[c.pair]!;
+      v2g = _gramByConsPairVowel[c.pair]!;
     } else if (r is Mono) {
       final Mono m = r;
-      v2g = _map[m.gram.consPair]!;
+      v2g = _gramByConsPairVowel[m.gram.consPair]!;
     } else if (r is Quads) {
       final Quads q = r;
-      v2g = _map[q.grams.consPair]!;
+      v2g = _gramByConsPairVowel[q.grams.consPair]!;
     } else {
       throw UnsupportedError("GramTable do not support lookup with $r");
     }
@@ -337,10 +348,10 @@ abstract class GramTable {
     return g;
   }
 
-  static final numRows = Mono.values.length;
-  static final numCols = Face.values.length;
+  final numRows = Mono.values.length;
+  final numCols = Face.values.length;
 
-  static Mono getMonoEnum(Gram g) {
+  Mono getMonoEnum(Gram g) {
     return g is MonoGram
         ? Mono.values.firstWhere((m) => m.gram.consPair == g.consPair)
         : Quads.values
@@ -348,13 +359,13 @@ abstract class GramTable {
             .monoPeer;
   }
 
-  static Mono? getEnumIfMono(Gram g) {
+  Mono? getEnumIfMono(Gram g) {
     return g is MonoGram
         ? Mono.values.firstWhere((m) => m.gram.consPair == g.consPair)
         : null;
   }
 
-  static Quads? getEnumIfQuad(Gram g) {
+  Quads? getEnumIfQuad(Gram g) {
     return g is QuadGram
         ? Quads.values.firstWhere((q) => q.grams.consPair == g.consPair)
         : null;

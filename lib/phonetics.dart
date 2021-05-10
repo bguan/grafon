@@ -125,7 +125,7 @@ extension ConsPairExtension on ConsPair {
 }
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { H, RL, MN, SZ }
+enum BinaryEnding { H, RL, NM, SZ }
 
 /// extension to map base, tail ending consonant to enum, short name.
 extension BinaryEndingExtension on BinaryEnding {
@@ -137,8 +137,8 @@ extension BinaryEndingExtension on BinaryEnding {
         return '';
       case BinaryEnding.RL:
         return 'r';
-      case BinaryEnding.MN:
-        return 'm';
+      case BinaryEnding.NM:
+        return 'n';
       case BinaryEnding.SZ:
         return 's';
       default:
@@ -153,8 +153,8 @@ extension BinaryEndingExtension on BinaryEnding {
         return 'h';
       case BinaryEnding.RL:
         return 'l';
-      case BinaryEnding.MN:
-        return 'n';
+      case BinaryEnding.NM:
+        return 'm';
       case BinaryEnding.SZ:
         return 'z';
       default:

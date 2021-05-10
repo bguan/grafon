@@ -78,10 +78,10 @@ class UnaryExpr extends GramExpression {
   String toString() =>
       op.symbol +
       (gram is QuadGram
-          ? GramTable.getEnumIfQuad(gram)!.shortName +
+          ? GramTable().getEnumIfQuad(gram)!.shortName +
               ' ' +
               gram.face.shortName.toLowerCase()
-          : GramTable.getMonoEnum(gram).shortName);
+          : GramTable().getMonoEnum(gram).shortName);
 
   String get pronunciation =>
       gram.pronunciation + op.ending.shortName.toLowerCase();

@@ -25,6 +25,7 @@ import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
+import 'package:grafon/render_plan.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
@@ -71,7 +72,7 @@ void main() {
       (WidgetTester tester) async {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values) {
-        final gram = GramTable.atConsPairVowel(cp, v);
+        final gram = GramTable().atConsPairVowel(cp, v);
         await tester.pumpWidget(GrafonTile(gram, height: 100));
         expect(find.byType(CustomPaint), findsOneWidget);
         final custPaint = find.byType(CustomPaint).evaluate().first;
@@ -86,8 +87,11 @@ void main() {
   });
 
   test('test GramPainter toCanvasCoord and Offset Calculation', () {
-    final coord =
-        GrafonPainter.toCanvasCoord(Vector2(0, 0), Size(100, 100), Size(1, 1));
+    final render = RenderPlan([
+      PolyDot([Vector2(0, 0)])
+    ]);
+    final deviceRender = render.toDevice(100, 100);
+    final coord = deviceRender.lines.first.vectors.first;
     expect(coord, Vector2(50, 50));
     final offset = GrafonPainter.toOffset(coord);
     expect(offset, Offset(50, 50));
@@ -116,7 +120,7 @@ void main() {
     expect(c.dy, 50.0);
     expect(paint.strokeWidth, 5.0);
     expect(paint.color.value, scheme.primary.value);
-    expect(paint.style, PaintingStyle.stroke);
+    expect(paint.style, PaintingStyle.fill);
     expect(paint.strokeCap, StrokeCap.round);
     expect(paint.strokeJoin, StrokeJoin.round);
   });
@@ -173,13 +177,8 @@ void main() {
       PolyStraight.anchors([Anchor.E, Anchor.N])
     ], Face.Up, ConsPair.aHa);
 
-    final rad = AnchorHelper.OUTER_DIST;
-    final avgX = (rad + 0.0) / 2; // should be .25
-    final avgY = (0.0 + rad) / 2; // should be .25
-    final canvasShiftX = -avgX * 100; // should be -25
-    final canvasShiftY = avgY * 100; // should be +25
-    final p1 = Offset(100 + canvasShiftX, 50 + canvasShiftY); // (75, 75)
-    final p2 = Offset(50 + canvasShiftX, 0 + canvasShiftY); // (25, 25)
+    final p1 = Offset(100.0, 100.0); // (100, 100)
+    final p2 = Offset(0.0, 0.0); // (0, 0)
     final painter = GrafonPainter(gram, scheme: scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);

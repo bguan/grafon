@@ -33,10 +33,10 @@ void main() {
     final metricsDot = RenderPlan([dot]);
     expect(metricsDot.width, RenderPlan.MIN_WIDTH);
     expect(metricsDot.center, Vector2(0, 0));
-    expect(metricsDot.yMin, -RenderPlan.MIN_HEIGHT / 2);
-    expect(metricsDot.yMax, RenderPlan.MIN_HEIGHT / 2);
-    expect(metricsDot.xMin, -RenderPlan.MIN_WIDTH / 2);
-    expect(metricsDot.xMax, RenderPlan.MIN_WIDTH / 2);
+    expect(metricsDot.yMin, 0.0);
+    expect(metricsDot.yMax, 0.0);
+    expect(metricsDot.xMin, 0.0);
+    expect(metricsDot.xMax, 0.0);
 
     final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
     expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
@@ -44,8 +44,8 @@ void main() {
     final metricsVL = RenderPlan([vLine]);
     expect(metricsVL.width, RenderPlan.MIN_WIDTH);
     expect(metricsVL.center, Vector2(0, 0));
-    expect(metricsVL.xMin, -RenderPlan.MIN_WIDTH / 2);
-    expect(metricsVL.xMax, RenderPlan.MIN_WIDTH / 2);
+    expect(metricsVL.xMin, 0.0);
+    expect(metricsVL.xMax, 0.0);
     expect(metricsVL.yMin, -0.5);
     expect(metricsVL.yMax, 0.5);
 
@@ -55,18 +55,18 @@ void main() {
     final metricsHL = RenderPlan([hLine]);
     expect(metricsHL.width, 1);
     expect(metricsHL.center, Vector2(0, 0));
-    expect(metricsHL.yMin, -RenderPlan.MIN_HEIGHT / 2);
-    expect(metricsHL.yMax, RenderPlan.MIN_HEIGHT / 2);
+    expect(metricsHL.yMin, 0.0);
+    expect(metricsHL.yMax, 0.0);
     expect(metricsHL.xMin, -0.5);
     expect(metricsHL.xMax, 0.5);
   });
 
   test('SingleGram to String matches gram equivalent', () {
     for (final m in Mono.values) {
-      final mg = GramTable.atMonoFace(m, Face.Center);
+      final mg = GramTable().atMonoFace(m, Face.Center);
       expect(mg.toString(), m.shortName);
       for (final f in FaceHelper.directionals) {
-        final qg = GramTable.atMonoFace(m, f);
+        final qg = GramTable().atMonoFace(m, f);
         expect(qg.toString(),
             "${m.quadPeer.shortName} ${f.shortName.toLowerCase()}");
       }
@@ -76,7 +76,7 @@ void main() {
   test('SingleGram pronunciation matches gram equivalent', () {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values) {
-        final g = GramTable.atConsPairVowel(cp, v);
+        final g = GramTable().atConsPairVowel(cp, v);
         expect(
             g.pronunciation,
             (cp == ConsPair.aHa ? '' : cp.base.shortName) +
@@ -88,7 +88,7 @@ void main() {
   test('UnaryExpr to String is correct', () {
     for (final m in Mono.values) {
       for (final f in Face.values) {
-        final g = GramTable.atMonoFace(m, f);
+        final g = GramTable().atMonoFace(m, f);
         expect(g.shrink().toString(), Unary.Shrink.symbol + g.toString());
         expect(g.up().toString(), Unary.Up.symbol + g.toString());
         expect(g.down().toString(), Unary.Down.symbol + g.toString());
@@ -101,7 +101,7 @@ void main() {
   test('UnaryExpr pronunciation is correct', () {
     for (final m in Mono.values) {
       for (final f in Face.values) {
-        final g = GramTable.atMonoFace(m, f);
+        final g = GramTable().atMonoFace(m, f);
         expect(g.shrink().pronunciation,
             g.pronunciation + Unary.Shrink.ending.shortName.toLowerCase());
         expect(
@@ -143,12 +143,12 @@ void main() {
 
     final speech = Quads.Gate.left.wrap(Quads.Flow.right);
     expect(speech.toString(), "Gate left @ Flow right");
-    expect(speech.pronunciation, "DomFe");
+    expect(speech.pronunciation, "DonFe");
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
-    expect(red.pronunciation, "ChamFa");
+    expect(red.pronunciation, "ChanFa");
   });
 
   test("CompoundWord pronunciation link is different from all BinaryEnding",

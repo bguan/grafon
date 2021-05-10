@@ -52,13 +52,32 @@ class GrafonApp extends StatelessWidget {
 
     final tileHeight = 100.0;
     Map<Word, String> word2desc = {
+      Quads.Angle.up.shrink(): "Test",
+      Mono.Circle.next(Quads.Angle.up): "Test",
+      Mono.Circle.over(Quads.Angle.up): "Test",
+      Mono.Circle.wrap(Quads.Angle.up): "Test",
+      Mono.Circle.merge(Quads.Angle.up): "Test",
+      Mono.Circle.merge(Quads.Angle.up.shrink()): "Test",
+      Mono.Circle.merge(Quads.Angle.up.up()): "Test",
+      Mono.Circle.merge(Quads.Angle.up.down()): "Test",
+      Mono.Circle.merge(Quads.Angle.up.left()): "Test",
+      Mono.Circle.merge(Quads.Angle.up.right()): "Test",
+      Mono.Circle.wrap(Quads.Angle.up.up()): "Test",
+      Mono.Circle.wrap(Quads.Angle.up.down()): "Test",
+      Mono.Circle.wrap(Quads.Angle.up.left()): "Test",
+      Mono.Circle.wrap(Quads.Angle.up.right()): "Test",
+      Mono.Circle.wrap(Quads.Angle.up.shrink()): "Test",
+      Quads.Step.right.merge(Mono.Circle.up()): "I, first person pronoun.",
+      Mono.Dot.left().over(Quads.Corner.up): "You, second person pronoun.",
+      Mono.Dot.right().over(Quads.Corner.right):
+          "He/She/It, third person pronoun.",
       Mono.Circle.wrap(Mono.Dot.gram)
               .next(Quads.Arc.left.next(Quads.Flow.right)):
           '"Eye Talk", the Grafon language in Grafon.',
       Mono.Sun.gram: "Sun, star.",
       Quads.Swirl.up: "Swirling upward, spinning upward.",
       Quads.Angle.up.over(Quads.Gate.down): "House, dwelling, building.",
-      Mono.Dot.gram.over(Quads.Line.up): "Human.",
+      Mono.Circle.over(Quads.Line.up): "Human.",
       Mono.Sun.gram.over(Quads.Line.down): "Day time, day.",
       Quads.Flow.down: "Flow down.",
       Quads.Flow.down.next(Quads.Flow.down): "Rain.",
@@ -75,11 +94,10 @@ class GrafonApp extends StatelessWidget {
       Mono.Square.merge(Quads.Line.up): "Number Seven.",
       Mono.Square.merge(Mono.X.gram): "Eight.",
       Mono.Square.merge(Quads.Zap.down): "Nine.",
-      Quads.Line.up.up().next(Mono.Circle.gram):
-          "Ten(s), ten to the power of 1.",
-      Quads.Angle.down.up().next(Mono.Circle.gram):
+      Mono.Circle.next(Quads.Line.up.up()): "Ten(s), ten to the power of 1.",
+      Mono.Circle.next(Quads.Angle.down.up()):
           "Hundred(s), ten to the power of 2.",
-      Quads.Zap.down.up().next(Mono.Circle.gram):
+      Mono.Circle.next(Quads.Zap.down.up()):
           "Thousand(s), ten to the power of 3.",
       Quads.Angle.up.over(Quads.Arc.down): "Drip.",
       Mono.Light.wrap(Quads.Zap.down): "White, light from lightning.",
@@ -88,12 +106,9 @@ class GrafonApp extends StatelessWidget {
           "Green, light from leaf.",
       Mono.Light.wrap(Quads.Flow.right): "Blue, light from water.",
       Mono.Light.wrap(Mono.X.gram): "Black, no light.",
-      CompoundWord([Mono.Sun.gram, Mono.Dot.over(Quads.Line.up)]):
+      CompoundWord([Mono.Sun.gram, Mono.Circle.over(Quads.Line.up)]):
           "Star being, alien, god?",
-      Mono.Circle.wrap(Mono.Dot.gram): "Eye.",
-      Mono.Dot.up().merge(Quads.Step.left): "I, first person pronoun.",
-      Mono.Dot.left().over(Quads.Corner.up): "You, second person pronoun.",
-      Mono.Dot.right().over(Quads.Corner.right): "You, second person pronoun.",
+      Quads.Arc.up.over(Mono.Dot.gram): "Eye.",
     };
 
     final pad = tileHeight * .2;

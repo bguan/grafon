@@ -29,12 +29,7 @@ void main() {
     expect(
         shrinkEmpty,
         RenderPlan([
-          InvisiDot([
-            Vector2(0, -0.3),
-            Vector2(0, 0.3),
-            Vector2(-0.3, 0),
-            Vector2(0.3, 0)
-          ])
+          InvisiDot([Vector2(-0.5, -0.5), Vector2(0.5, 0.5)])
         ]));
   });
   // TODO: impl tests by migrating old operator tests

@@ -142,7 +142,7 @@ void main() {
       ...Face.values.map((f) => f.vowel),
     ]);
 
-    expect(vowelsFromFaces, Set.of(Vowel.values));
+    expect(vowelsFromFaces, Set.of(Vowel.values.where((e) => e != Vowel.nil)));
   });
 
   test('Vowels short names should all be unique', () {

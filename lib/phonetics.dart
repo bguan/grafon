@@ -19,7 +19,12 @@
 library phonetics;
 
 /// Basic vowels for the language. Can be combined into diphthong.
-enum Vowel { A, E, I, O, U }
+enum Vowel { nil, A, E, I, O, U }
+
+extension VowelHelper on Vowel {
+  String get phoneme =>
+      this == Vowel.nil ? '' : this.toString().split('.').last.toLowerCase();
+}
 
 /// Basic consonants for the language. Can be combined into cluster.
 enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
@@ -30,7 +35,7 @@ enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
 enum ConsPair { aHa, BaPa, ChaJa, DaTa, FaVa, GaKa, LaRa, MaNa, SaZa }
 
 /// Extension to map Consonant to the Pair and provide short name
-extension ConsonantExtension on Consonant {
+extension ConsonantHelper on Consonant {
   ConsPair get pair {
     switch (this) {
       case Consonant.B:
@@ -70,11 +75,12 @@ extension ConsonantExtension on Consonant {
     }
   }
 
-  String get shortName => this.toString().split('.').last;
+  String get phoneme =>
+      this == Consonant.nil ? '' : this.toString().split('.').last;
 }
 
 /// Extension to map ConsonantPair to the base and head, and provide short name.
-extension ConsPairExtension on ConsPair {
+extension ConsPairHelper on ConsPair {
   Consonant get base {
     switch (this) {
       case ConsPair.BaPa:
@@ -125,40 +131,134 @@ extension ConsPairExtension on ConsPair {
 }
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum BinaryEnding { H, RL, NM, SZ }
+enum EndConsPair { H, RL, NM, SZ }
 
 /// extension to map base, tail ending consonant to enum, short name.
-extension BinaryEndingExtension on BinaryEnding {
-  String get shortName => this.toString().split('.').last;
-
-  String get base {
+extension EndingConsPairHelper on EndConsPair {
+  EndConsonant get base {
     switch (this) {
-      case BinaryEnding.H:
-        return '';
-      case BinaryEnding.RL:
-        return 'r';
-      case BinaryEnding.NM:
-        return 'n';
-      case BinaryEnding.SZ:
-        return 's';
+      case EndConsPair.H:
+        return EndConsonant.nil;
+      case EndConsPair.RL:
+        return EndConsonant.R;
+      case EndConsPair.NM:
+        return EndConsonant.N;
+      case EndConsPair.SZ:
+        return EndConsonant.S;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
   }
 
   // use tail when it is the last operator in a cluster group
-  String get tail {
+  EndConsonant get tail {
     switch (this) {
-      case BinaryEnding.H:
-        return 'h';
-      case BinaryEnding.RL:
-        return 'l';
-      case BinaryEnding.NM:
-        return 'm';
-      case BinaryEnding.SZ:
-        return 'z';
+      case EndConsPair.H:
+        return EndConsonant.H;
+      case EndConsPair.RL:
+        return EndConsonant.L;
+      case EndConsPair.NM:
+        return EndConsonant.M;
+      case EndConsPair.SZ:
+        return EndConsonant.Z;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
   }
+
+  String get shortName => this.toString().split('.').last;
+}
+
+enum EndConsonant { nil, H, R, L, N, M, S, Z, ng }
+
+extension EndConsonantHelper on EndConsonant {
+  EndConsPair get pair {
+    switch (this) {
+      case EndConsonant.nil:
+      case EndConsonant.H:
+        return EndConsPair.H;
+
+      case EndConsonant.R:
+      case EndConsonant.L:
+        return EndConsPair.RL;
+
+      case EndConsonant.N:
+      case EndConsonant.M:
+        return EndConsPair.NM;
+
+      case EndConsonant.S:
+      case EndConsonant.Z:
+        return EndConsPair.SZ;
+
+      default:
+        throw UnsupportedError('$this does not belong to a Consonant Pair');
+    }
+  }
+
+  String get phoneme => this == EndConsonant.nil
+      ? ''
+      : this.toString().split('.').last.toLowerCase();
+}
+
+/// Class to handle Syllable and its manipulation
+class Syllable {
+  final Consonant consonant;
+  final Vowel vowel;
+  final Vowel endVowel;
+  final EndConsonant endConsonant;
+
+  Syllable(this.consonant, this.vowel,
+      [this.endVowel = Vowel.nil, this.endConsonant = EndConsonant.nil]);
+
+  Syllable.v(this.vowel)
+      : consonant = Consonant.nil,
+        endVowel = Vowel.nil,
+        endConsonant = EndConsonant.nil;
+
+  Syllable.vc(this.vowel, this.endConsonant)
+      : consonant = Consonant.nil,
+        endVowel = Vowel.nil;
+
+  Syllable.vv(this.vowel, this.endVowel)
+      : consonant = Consonant.nil,
+        endConsonant = EndConsonant.nil;
+
+  Syllable.vvc(this.vowel, this.endVowel, this.endConsonant)
+      : consonant = Consonant.nil;
+
+  Syllable.cvc(this.consonant, this.vowel, this.endConsonant)
+      : endVowel = Vowel.nil;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Syllable) return false;
+
+    Syllable that = other;
+
+    return this.consonant == that.consonant &&
+        this.vowel == that.vowel &&
+        this.endVowel == that.endVowel &&
+        this.endConsonant == that.endConsonant;
+  }
+
+  Syllable get headForm =>
+      Syllable(consonant.pair.head, vowel, endVowel, endConsonant);
+
+  Syllable get tailOpForm =>
+      Syllable(consonant, vowel, endVowel, endConsonant.pair.tail);
+
+  @override
+  String toString() =>
+      consonant.phoneme +
+      vowel.phoneme +
+      endVowel.phoneme +
+      endConsonant.phoneme;
+
+  Syllable diffConsonant(Consonant c) =>
+      Syllable(c, vowel, endVowel, endConsonant);
+
+  Syllable diffSecondVowel(Vowel v2) =>
+      Syllable(consonant, vowel, v2, endConsonant);
+
+  Syllable diffEnd(EndConsonant e) => Syllable(consonant, vowel, endVowel, e);
 }

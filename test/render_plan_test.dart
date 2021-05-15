@@ -16,8 +16,8 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/expression.dart';
 import 'package:grafon/gram_infra.dart';
-import 'package:grafon/operators.dart';
 import 'package:grafon/render_plan.dart';
 import 'package:vector_math/vector_math.dart';
 

@@ -39,7 +39,7 @@ void main() {
 
   test('Consonants short names should all be unique', () {
     final shortNamesFromCons = Set.of([
-      ...Consonant.values.map((c) => c.shortName),
+      ...Consonant.values.map((c) => c.phoneme),
     ]);
 
     expect(shortNamesFromCons.length, Consonant.values.length);

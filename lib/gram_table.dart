@@ -247,23 +247,38 @@ extension MonoExtension on Mono {
   Quads get quadPeer =>
       Quads.values.firstWhere((q) => q.grams.consPair == this.gram.consPair);
 
-  GramExpression shrink() => gram.shrink();
+  UnaryOpExpr shrink() => gram.shrink();
 
-  GramExpression up() => gram.up();
+  UnaryOpExpr up() => gram.up();
 
-  GramExpression down() => gram.down();
+  UnaryOpExpr down() => gram.down();
 
-  GramExpression left() => gram.left();
+  UnaryOpExpr left() => gram.left();
 
-  GramExpression right() => gram.right();
+  UnaryOpExpr right() => gram.right();
 
-  GramExpression merge(GramExpression that) => gram.merge(that);
+  MultiGramExpression merge(SingleGramExpression single) => gram.merge(single);
 
-  GramExpression next(GramExpression that) => gram.next(that);
+  MultiGramExpression next(SingleGramExpression single) => gram.next(single);
 
-  GramExpression over(GramExpression that) => gram.over(that);
+  /// Put this expression over a single, this above, the single below.
+  MultiGramExpression over(SingleGramExpression single) => gram.over(single);
 
-  GramExpression wrap(GramExpression that) => gram.wrap(that);
+  /// Put this expression around a single, this outside, the single inside.
+  MultiGramExpression wrap(SingleGramExpression single) => gram.wrap(single);
+
+  /// Merge this expression with a ClusterExpression.
+  MultiGramExpression mergeCluster(BinaryOpExpr expr) =>
+      gram.mergeCluster(expr);
+
+  /// Put this expression before a cluster, this to left, the cluster to right.
+  MultiGramExpression nextCluster(BinaryOpExpr expr) => gram.nextCluster(expr);
+
+  /// Put this expression over that, this above, the cluster below.
+  MultiGramExpression overCluster(BinaryOpExpr expr) => gram.overCluster(expr);
+
+  /// Put this expression around that, this outside, the cluster inside.
+  MultiGramExpression wrapCluster(BinaryOpExpr expr) => gram.wrapCluster(expr);
 }
 
 /// extension to map quad enum to its QuadGrams, indexing by Face, & short name.

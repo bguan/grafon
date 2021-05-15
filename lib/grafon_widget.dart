@@ -27,7 +27,7 @@ import 'gram_infra.dart';
 /// Class to provide widget rendering of Gram expressions.
 class GrafonTile extends StatelessWidget {
   static const HEIGHT_SCREEN_RATIO = 0.25;
-  late final Word word;
+  late final GramExpression word;
   final double? height;
   final bool flexFit;
 
@@ -37,7 +37,7 @@ class GrafonTile extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final ht = height ?? MediaQuery.of(ctx).size.height * HEIGHT_SCREEN_RATIO;
     return CustomPaint(
-      size: Size((flexFit ? max(word.ratioWH, 1) : 1) * ht, ht),
+      size: Size(flexFit ? word.flexRenderWidth(ht) : ht, ht),
       painter: GrafonPainter(
         word,
         flexFit: flexFit,
@@ -51,7 +51,7 @@ class GrafonTile extends StatelessWidget {
 class GrafonPainter extends CustomPainter {
   static const MIN_PEN_WIDTH = 1.0;
   final bool flexFit;
-  final Word word;
+  final GramExpression word;
   final ColorScheme scheme;
 
   GrafonPainter(this.word, {this.flexFit = false, required this.scheme});

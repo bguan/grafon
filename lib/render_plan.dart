@@ -15,15 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-/// Classes and utils for RenderPlan.
+/// Classes and utils for render planning in device independent coordinates.
 library render_planning;
 
 import 'dart:math';
 
 import 'package:vector_math/vector_math.dart';
 
+import 'expression.dart';
 import 'gram_infra.dart';
-import 'operators.dart';
 
 /// GramMetrics is a value class of rendering metrics for each gram expression.
 /// Height is normalized to always be 1.0, width is adjusted for visual balance.
@@ -34,13 +34,20 @@ class RenderPlan {
   static const MIN_HEIGHT = 0.2;
   static const MIN_MASS = 0.2;
   static const STRAIGHT_TO_CURVE_EST = 0.7; // .5*sqrt(2)
-  static const PEN_WTH_SCALE = 0.05;
+  static const PEN_WTH_SCALE = 0.075;
   final Iterable<PolyLine> lines;
-  late final double width, height, xMin, yMin, xMax, yMax, ratioWH, mass;
+  late final double width, height, xMin, yMin, xMax, yMax;
+  late final double mass, vmass, hmass;
   late final Vector2 center;
 
   RenderPlan(this.lines) {
-    double xMin = 0, yMin = 0, xMax = 0, yMax = 0, mass = 0;
+    double xMin = 0,
+        yMin = 0,
+        xMax = 0,
+        yMax = 0,
+        mass = 0,
+        vmass = 0,
+        hmass = 0;
     for (final l in lines) {
       late final bool isCurve;
       List<Vector2> curvePts = [];
@@ -109,6 +116,8 @@ class RenderPlan {
         yMax = max(yMax, p.y);
         if (p != prev) {
           mass += prev.distanceTo(p) * PEN_WTH_SCALE;
+          vmass += p.y - prev.y;
+          hmass += p.x - prev.x;
         }
       }
     }
@@ -122,8 +131,9 @@ class RenderPlan {
     this.yMax = quantize(yMax);
     this.width = quantize(max(width, MIN_WIDTH));
     this.height = quantize(max(height, MIN_HEIGHT));
-    this.ratioWH = quantize(this.width / this.height);
     this.mass = quantize(max(mass, MIN_MASS));
+    this.hmass = quantize(max(hmass, MIN_MASS));
+    this.vmass = quantize(max(vmass, MIN_MASS));
     this.center = quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
   }
 
@@ -136,8 +146,9 @@ class RenderPlan {
         yMin.hashCode ^
         xMax.hashCode ^
         yMax.hashCode ^
-        ratioWH.hashCode ^
-        mass.hashCode;
+        mass.hashCode ^
+        hmass.hashCode ^
+        vmass.hashCode;
 
     return lines.fold(hash, (h, l) => h ^ l.hashCode);
   }
@@ -153,7 +164,9 @@ class RenderPlan {
         yMin == that.yMin &&
         xMax == that.xMax &&
         yMax == that.yMax &&
-        ratioWH == that.ratioWH;
+        mass == that.mass &&
+        hmass == that.hmass &&
+        vmass == that.vmass;
 
     if (!check) return false;
     if (lines == that.lines) return true;
@@ -180,10 +193,12 @@ class RenderPlan {
     final y2 = quantStr(yMax);
     final w = quantStr(width);
     final h = quantStr(height);
-    final r = quantStr(ratioWH);
+    final m = quantStr(mass);
+    final hm = quantStr(hmass);
+    final vm = quantStr(vmass);
     final c = quantV2Str(center);
 
-    return "Metrics(x: $x1 to $x2, y: $y1 to $y2, w: $w, h: $h, r: $r, c: $c) " +
+    return "(x: $x1 to $x2, y: $y1 to $y2, w: $w, h: $h, m: $m ($hm, $vm), c: $c) " +
         lines.toString();
   }
 
@@ -340,6 +355,13 @@ class RenderPlan {
     }
   }
 
+  /// compute flex rendering width by adjusting raw width
+  double flexRenderWidth(double devHeight) {
+    final hScale = devHeight / height;
+    final rawWidth = hScale * width;
+    return max(.75 * devHeight, rawWidth);
+  }
+
   /// Transform this render plan by a function that remap points
   /// But InvisiDots are skipped to avoid distortion
   RenderPlan remap(Vector2 f(bool isFixed, Vector2 v)) => RenderPlan(lines
@@ -349,12 +371,11 @@ class RenderPlan {
   /// Change to device coordinates. Assume (0,0) is upper left corner.
   RenderPlan toDevice(double devHt, double devWth, [bool isFlexFit = true]) {
     final hScale = devHt / height;
-    final wScale = devWth / width;
-    final scale = isFlexFit ? hScale : min(hScale, wScale);
+    final scale = isFlexFit ? hScale : devHt;
     var scaled =
         ((scale - 1).abs() < 0.1 ? this : remap((isFixed, v) => v * scale));
 
-    if (isFlexFit && devWth - scaled.width > 0.1) {
+    if (isFlexFit && (devWth - scaled.width).abs() > 0.1) {
       final wScale2 = devWth / scaled.width;
       scaled = scaled
           .remap((isFixed, v) => isFixed ? v : Vector2(v.x * wScale2, v.y));

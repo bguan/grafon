@@ -19,13 +19,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grafon/expression.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
-import 'package:grafon/operators.dart';
 import 'package:grafon/phonetics.dart';
 import 'package:grafon/render_plan.dart';
 import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for Expressions
 void main() {
+  test('Unary symbol should all be unique', () {
+    final symbolsFromUnary = Set.of([
+      ...Unary.values.map((u) => u.symbol),
+    ]);
+    expect(symbolsFromUnary.length, Unary.values.length);
+  });
+
+  test('Binary symbol should all be unique', () {
+    final symbolsFromBinary = Set.of([
+      ...Binary.values.map((b) => b.symbol),
+    ]);
+    expect(symbolsFromBinary.length, Binary.values.length);
+  });
+
+  test('Unary ending should all be unique', () {
+    final endingsFromUnary = Set.of([
+      ...Unary.values.map((u) => u.ending),
+    ]);
+    expect(endingsFromUnary.length, Unary.values.length);
+  });
+
+  test('Binary ending should all be unique', () {
+    final endingsFromBinary = Set.of([
+      ...Binary.values.map((b) => b.ending),
+    ]);
+    expect(endingsFromBinary.length, Binary.values.length);
+  });
+
   test('GramMetrics computation', () {
     final dot = PolyStraight.anchors([Anchor.O, Anchor.O]);
     expect(dot.vectors, [Vector2(0, 0), Vector2(0, 0)]);
@@ -75,12 +102,12 @@ void main() {
 
   test('SingleGram pronunciation matches gram equivalent', () {
     for (final cp in ConsPair.values) {
-      for (final v in Vowel.values) {
+      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
         final g = GramTable().atConsPairVowel(cp, v);
         expect(
-            g.pronunciation,
-            (cp == ConsPair.aHa ? '' : cp.base.shortName) +
-                (cp == ConsPair.aHa ? v.shortName : v.shortName.toLowerCase()));
+          g.pronunciation.first,
+          Syllable(cp.base, v, Vowel.nil, EndConsonant.nil),
+        );
       }
     }
   });
@@ -102,23 +129,25 @@ void main() {
     for (final m in Mono.values) {
       for (final f in Face.values) {
         final g = GramTable().atMonoFace(m, f);
-        expect(g.shrink().pronunciation,
-            g.pronunciation + Unary.Shrink.ending.shortName.toLowerCase());
         expect(
-          g.up().pronunciation,
-          g.pronunciation + Unary.Up.ending.shortName.toLowerCase(),
+          g.shrink().pronunciation.first,
+          g.pronunciation.first.diffSecondVowel(Unary.Shrink.ending),
         );
         expect(
-          g.down().pronunciation,
-          g.pronunciation + Unary.Down.ending.shortName.toLowerCase(),
+          g.up().pronunciation.first,
+          g.pronunciation.first.diffSecondVowel(Unary.Up.ending),
         );
         expect(
-          g.left().pronunciation,
-          g.pronunciation + Unary.Left.ending.shortName.toLowerCase(),
+          g.down().pronunciation.first,
+          g.pronunciation.first.diffSecondVowel(Unary.Down.ending),
         );
         expect(
-          g.right().pronunciation,
-          g.pronunciation + Unary.Right.ending.shortName.toLowerCase(),
+          g.left().pronunciation.first,
+          g.pronunciation.first.diffSecondVowel(Unary.Left.ending),
+        );
+        expect(
+          g.right().pronunciation.first,
+          g.pronunciation.first.diffSecondVowel(Unary.Right.ending),
         );
       }
     }
@@ -127,36 +156,45 @@ void main() {
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation, "Sa");
+    expect(sun.pronunciation.first, Syllable(Consonant.S, Vowel.A)); // "Sa"
 
     final house = Quads.Angle.up.merge(Quads.Gate.down);
     expect(house.toString(), "Angle up * Gate down");
-    expect(house.pronunciation, "GirDu");
+    expect(house.pronunciation.length, 2); // "Gir-Du"
+    expect(house.pronunciation.first,
+        Syllable.cvc(Consonant.G, Vowel.I, EndConsonant.R));
+    expect(house.pronunciation.last, Syllable(Consonant.D, Vowel.U));
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Line up");
-    expect(person.pronunciation, "AsI");
+    expect(person.pronunciation.length, 2); // "As-I"
+    expect(person.pronunciation.first, Syllable.vc(Vowel.A, EndConsonant.S));
+    expect(person.pronunciation.last, Syllable.v(Vowel.I));
 
     final rain = Quads.Flow.down.next(Quads.Flow.down);
     expect(rain.toString(), "Flow down | Flow down");
-    expect(rain.pronunciation, "FuFu");
+    expect(rain.pronunciation.length, 2); // "Fu-Fu"
+    expect(rain.pronunciation.first, Syllable(Consonant.F, Vowel.U));
+    expect(rain.pronunciation.last, Syllable(Consonant.F, Vowel.U));
 
     final speech = Quads.Gate.left.wrap(Quads.Flow.right);
     expect(speech.toString(), "Gate left @ Flow right");
-    expect(speech.pronunciation, "DonFe");
+    expect(speech.pronunciation.length, 2); // "Don-Fe"
+    expect(speech.pronunciation.first,
+        Syllable.cvc(Consonant.D, Vowel.O, EndConsonant.N));
+    expect(speech.pronunciation.last, Syllable(Consonant.F, Vowel.E));
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
-    expect(red.pronunciation, "ChanFa");
+    expect(red.pronunciation.length, 2); // "Chan-Fa"
+    expect(red.pronunciation.first,
+        Syllable.cvc(Consonant.Ch, Vowel.A, EndConsonant.N));
+    expect(red.pronunciation.last, Syllable(Consonant.F, Vowel.A));
   });
 
-  test("CompoundWord pronunciation link is different from all BinaryEnding",
-      () {
-    final endings =
-        BinaryEnding.values.map((ending) => ending.shortName.toLowerCase());
-    expect(endings.contains(CompoundWord.PRONUNCIATION_LINK.toLowerCase()),
-        isFalse);
+  test("CompoundWord throws exception when insufficient words", () {
+    expect(() => CompoundWord([Mono.Sun.gram]), throwsA(isA<ArgumentError>()));
   });
 
   test("CompoundWord symbol is different from all Binary operator symbols", () {
@@ -170,7 +208,11 @@ void main() {
 
     final starMan = CompoundWord([sun, person]); // God? Alien?
     expect(starMan.toString(), "Sun : Dot / Line up");
-    expect(starMan.pronunciation, "Sa-AsI");
+    List<Syllable> syllables = starMan.pronunciation.toList();
+    expect(syllables.length, 3);
+    expect(syllables[0], Syllable.cvc(Consonant.S, Vowel.A, EndConsonant.ng));
+    expect(syllables[1], Syllable.vc(Vowel.A, EndConsonant.S));
+    expect(syllables[2], Syllable.v(Vowel.I));
   });
 
   test("GramMetrics has correct widthRatio", () {

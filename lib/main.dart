@@ -15,8 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -51,7 +49,7 @@ class GrafonApp extends StatelessWidget {
     final controller = PageController(initialPage: 0);
 
     final tileHeight = 100.0;
-    Map<Word, String> word2desc = {
+    Map<GramExpression, String> word2desc = {
       Quads.Angle.up.shrink(): "Test",
       Mono.Circle.next(Quads.Angle.up): "Test",
       Mono.Circle.over(Quads.Angle.up): "Test",
@@ -68,14 +66,9 @@ class GrafonApp extends StatelessWidget {
       Mono.Circle.wrap(Quads.Angle.up.right()): "Test",
       Mono.Circle.wrap(Quads.Angle.up.shrink()): "Test",
       Quads.Step.right.merge(Mono.Circle.up()): "I, first person pronoun.",
-      Mono.Dot.left().over(Quads.Corner.up): "You, second person pronoun.",
-      Mono.Dot.right().over(Quads.Corner.right):
+      Mono.Circle.left().over(Quads.Corner.up): "You, second person pronoun.",
+      Mono.Circle.right().over(Quads.Corner.right):
           "He/She/It, third person pronoun.",
-      Mono.Circle.wrap(Mono.Dot.gram)
-              .next(Quads.Arc.left.next(Quads.Flow.right)):
-          '"Eye Talk", the Grafon language in Grafon.',
-      Mono.Sun.gram: "Sun, star.",
-      Quads.Swirl.up: "Swirling upward, spinning upward.",
       Quads.Angle.up.over(Quads.Gate.down): "House, dwelling, building.",
       Mono.Circle.over(Quads.Line.up): "Human.",
       Mono.Sun.gram.over(Quads.Line.down): "Day time, day.",
@@ -86,34 +79,39 @@ class GrafonApp extends StatelessWidget {
       Quads.Step.up: "Step up, count, number.",
       Mono.Circle.gram: "Zero, Moon, Circle.",
       Quads.Line.up: "One, vertical line.",
-      Quads.Angle.down: "Two, angle down.",
-      Quads.Zap.down: "Three, lighting down.",
+      Quads.Corner.right: "Two, angle down.",
+      Quads.Gate.right: "Three, lighting down.",
       Mono.Square.gram: "Four.",
       Mono.Square.gram.merge(Quads.Line.left): "Number Five.",
-      Quads.Gate.up.merge(Quads.Angle.up): "Number Six.",
-      Mono.Square.merge(Quads.Line.up): "Number Seven.",
+      Quads.Gate.right.merge(Quads.Angle.right): "Number Six.",
+      Mono.Square.merge(Quads.Angle.right): "Number Seven.",
       Mono.Square.merge(Mono.X.gram): "Eight.",
       Mono.Square.merge(Quads.Zap.down): "Nine.",
       Mono.Circle.next(Quads.Line.up.up()): "Ten(s), ten to the power of 1.",
-      Mono.Circle.next(Quads.Angle.down.up()):
+      Mono.Circle.next(Quads.Corner.right.up()):
           "Hundred(s), ten to the power of 2.",
-      Mono.Circle.next(Quads.Zap.down.up()):
+      Mono.Circle.next(Quads.Gate.right.up()):
           "Thousand(s), ten to the power of 3.",
       Quads.Angle.up.over(Quads.Arc.down): "Drip.",
       Mono.Light.wrap(Quads.Zap.down): "White, light from lightning.",
       Mono.Light.wrap(Mono.Flower.gram): "Red, light from flower.",
-      Mono.Light.wrap(Quads.Arc.left.next(Quads.Arc.right)):
+      Mono.Light.wrapCluster(Quads.Arc.left.next(Quads.Arc.right)):
           "Green, light from leaf.",
       Mono.Light.wrap(Quads.Flow.right): "Blue, light from water.",
       Mono.Light.wrap(Mono.X.gram): "Black, no light.",
+      ClusterExpression(Quads.Arc.up.next(Quads.Arc.up)).over(Quads.Angle.down):
+          "Heart, Love.",
+      CompoundWord([
+        Mono.Circle.wrap(Mono.Dot.gram),
+        Quads.Arc.left.next(Quads.Flow.right),
+      ]): '"Eye Talk", the Grafon language in Grafon.',
       CompoundWord([Mono.Sun.gram, Mono.Circle.over(Quads.Line.up)]):
           "Star being, alien, god?",
-      Quads.Arc.up.over(Mono.Dot.gram): "Eye.",
     };
 
     final pad = tileHeight * .2;
     final wordViews = [
-      for (Word word in word2desc.keys)
+      for (GramExpression word in word2desc.keys)
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -126,7 +124,7 @@ class GrafonApp extends StatelessWidget {
               alignment: Alignment.center,
               padding: EdgeInsets.all(pad),
               height: 2 * pad + tileHeight,
-              width: 2 * pad + tileHeight * max(3 / 4, word.ratioWH),
+              width: 2 * pad + word.flexRenderWidth(tileHeight),
               child: GrafonTile(word, height: tileHeight, flexFit: true),
             ),
             Spacer(),
@@ -147,7 +145,7 @@ class GrafonApp extends StatelessWidget {
             Padding(
               padding: EdgeInsets.all(5),
               child: Text(
-                '"${word.pronunciation}"',
+                '"${word.pronunciation.join('-')}"',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,

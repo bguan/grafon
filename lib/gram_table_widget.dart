@@ -23,7 +23,6 @@ import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
 
 import 'gram_table.dart';
-import 'operators.dart';
 import 'phonetics.dart';
 
 /// Widget that display a GramTable
@@ -110,8 +109,8 @@ class GramTableView extends StatelessWidget {
         'Binary\nOperator & Compounding',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
-            '…${b.ending.base}${b.ending.tail.length > 0 ? ' …' + b.ending.tail : ''}'),
-        'Compounding\n${CompoundWord.SEPARATOR_SYMBOL}\n…${CompoundWord.PRONUNCIATION_LINK}…',
+            '…${b.ending.base.phoneme}${b.ending.tail.phoneme.length > 0 ? ' …' + b.ending.tail.phoneme : ''}'),
+        'Compounding\n${CompoundWord.SEPARATOR_SYMBOL}\n…${CompoundWord.PRONUNCIATION_LINK.phoneme}…',
         'Ending\nConsonant\nbase, tail, compound'
       ])
         bTxt.length <= 0
@@ -133,7 +132,7 @@ class GramTableView extends StatelessWidget {
         Container(
           child: Center(
             child: Text(
-              '${m.gram.consPair.base.shortName}, ${m.gram.consPair.head.shortName}',
+              '${m.gram.consPair.base.phoneme} ${m.gram.consPair.head.phoneme}',
               textAlign: TextAlign.center,
               style: rowHeadTextStyle,
             ),

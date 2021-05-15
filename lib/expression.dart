@@ -24,13 +24,91 @@ import 'package:vector_math/vector_math.dart';
 
 import 'gram_infra.dart';
 import 'gram_table.dart';
-import 'operators.dart';
 import 'phonetics.dart';
 import 'render_plan.dart';
 
-/// Word is the abstract base class for all Gram Expression and Compound Word
-abstract class Word {
-  String get pronunciation;
+/// Unary Operator can only operate on Gra's
+/// by supplying a transformation as well as ending vowel
+enum Unary { Shrink, Right, Up, Left, Down }
+
+extension UnaryExtension on Unary {
+  String get shortName => this.toString().split('.').last;
+
+  String get symbol {
+    switch (this) {
+      case Unary.Shrink:
+        return '~';
+      case Unary.Right:
+        return '>';
+      case Unary.Up:
+        return '+';
+      case Unary.Left:
+        return '<';
+      case Unary.Down:
+        return '-';
+      default:
+        throw Exception("Unexpected Unary Enum ${this}");
+    }
+  }
+
+  Vowel get ending {
+    switch (this) {
+      case Unary.Shrink:
+        return Face.Center.vowel;
+      case Unary.Right:
+        return Face.Right.vowel;
+      case Unary.Up:
+        return Face.Up.vowel;
+      case Unary.Left:
+        return Face.Left.vowel;
+      case Unary.Down:
+        return Face.Down.vowel;
+      default:
+        throw Exception("Unexpected Unary Enum ${this}");
+    }
+  }
+}
+
+/// Binary Operator works on a pair of Gram Expression
+enum Binary { Merge, Next, Over, Wrap }
+
+extension BinaryExtension on Binary {
+  String get shortName => this.toString().split('.').last;
+
+  String get symbol {
+    switch (this) {
+      case Binary.Next:
+        return '|';
+      case Binary.Over:
+        return '/';
+      case Binary.Wrap:
+        return '@';
+      case Binary.Merge:
+        return '*';
+      default:
+        throw Exception("Unexpected Binary Enum ${this}");
+    }
+  }
+
+  EndConsPair get ending {
+    switch (this) {
+      case Binary.Merge:
+        return EndConsPair.RL;
+      case Binary.Next:
+        return EndConsPair.H;
+      case Binary.Over:
+        return EndConsPair.SZ;
+      case Binary.Wrap:
+        return EndConsPair.NM;
+      default:
+        throw Exception("Unexpected Binary Enum ${this}");
+    }
+  }
+}
+
+/// abstract base class for all Gram Expression.
+abstract class GramExpression {
+  Iterable<Syllable> get pronunciation;
 
   RenderPlan get renderPlan;
 
@@ -42,39 +120,63 @@ abstract class Word {
 
   double get height => renderPlan.height;
 
-  double get ratioWH => renderPlan.ratioWH;
+  /// get all grams in expression
+  Iterable<Gram> get grams;
+
+  double flexRenderWidth(double devHeight) =>
+      renderPlan.flexRenderWidth(devHeight);
+
+  /// Merge this expression with a single.
+  BinaryOpExpr merge(SingleGramExpression single) =>
+      BinaryOpExpr(this, Binary.Merge, single);
+
+  /// Put this expression before a single, this to left, the single to right.
+  BinaryOpExpr next(SingleGramExpression single) =>
+      BinaryOpExpr(this, Binary.Next, single);
+
+  /// Put this expression over a single, this above, the single below.
+  BinaryOpExpr over(SingleGramExpression single) =>
+      BinaryOpExpr(this, Binary.Over, single);
+
+  /// Put this expression around a single, this outside, the single inside.
+  BinaryOpExpr wrap(SingleGramExpression single) =>
+      BinaryOpExpr(this, Binary.Wrap, single);
+
+  /// Merge this expression with a ClusterExpression.
+  BinaryOpExpr mergeCluster(BinaryOpExpr expr) =>
+      BinaryOpExpr(this, Binary.Merge, ClusterExpression(expr));
+
+  /// Put this expression before a cluster, this to left, the cluster to right.
+  BinaryOpExpr nextCluster(BinaryOpExpr expr) =>
+      BinaryOpExpr(this, Binary.Next, ClusterExpression(expr));
+
+  /// Put this expression over that, this above, the cluster below.
+  BinaryOpExpr overCluster(BinaryOpExpr expr) =>
+      BinaryOpExpr(this, Binary.Over, ClusterExpression(expr));
+
+  /// Put this expression around that, this outside, the cluster inside.
+  BinaryOpExpr wrapCluster(BinaryOpExpr expr) =>
+      BinaryOpExpr(this, Binary.Wrap, ClusterExpression(expr));
 }
 
-/// abstract base class for all Gram Expression.
-abstract class GramExpression extends Word {
-  /// Merge this expression with another.
-  GramExpression merge(GramExpression that) =>
-      BinaryExpr(this, Binary.Merge, that);
-
-  /// Put this expression before that, this to left, that to right.
-  GramExpression next(GramExpression that) =>
-      BinaryExpr(this, Binary.Next, that);
-
-  /// Put this expression over that, this above, that below.
-  GramExpression over(GramExpression that) =>
-      BinaryExpr(this, Binary.Over, that);
-
-  /// Put this expression around that, this outside, that inside.
-  GramExpression wrap(GramExpression that) =>
-      BinaryExpr(this, Binary.Wrap, that);
+abstract class SingleGramExpression extends GramExpression {
+  Gram get gram;
 }
+
+abstract class MultiGramExpression extends GramExpression {}
 
 /// A Unary Gram Expression applies a Unary Operation on a single Gram.
 /// Use factory methods in Gram instead of calling this constructor directly.
-class UnaryExpr extends GramExpression {
+class UnaryOpExpr extends SingleGramExpression {
   final Unary op;
   final Gram gram;
   late final renderPlan;
 
-  UnaryExpr(this.op, this.gram) {
+  UnaryOpExpr(this.op, this.gram) {
     renderPlan = gram.renderPlan.byUnary(op);
   }
 
+  @override
   String toString() =>
       op.symbol +
       (gram is QuadGram
@@ -83,99 +185,131 @@ class UnaryExpr extends GramExpression {
               gram.face.shortName.toLowerCase()
           : GramTable().getMonoEnum(gram).shortName);
 
-  String get pronunciation =>
-      gram.pronunciation + op.ending.shortName.toLowerCase();
+  @override
+  Iterable<Syllable> get pronunciation {
+    final syllable = gram.pronunciation.first;
+    return [syllable.diffSecondVowel(op.ending)];
+  }
+
+  @override
+  Iterable<Gram> get grams => [gram];
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
 /// Private subclass, use respective factory methods in GramExpression instead.
-class BinaryExpr extends GramExpression {
+class BinaryOpExpr extends MultiGramExpression {
   final GramExpression expr1;
   final Binary op;
   final GramExpression expr2;
   late final renderPlan;
 
-  BinaryExpr(this.expr1, this.op, this.expr2) {
+  BinaryOpExpr(this.expr1, this.op, this.expr2) {
     renderPlan = expr1.renderPlan.byBinary(op, expr2.renderPlan);
   }
 
+  @override
   String toString() => "$expr1 ${op.symbol} $expr2";
 
-  String get pronunciation =>
-      expr1.pronunciation + op.ending.base + expr2.pronunciation;
-}
-
-class Cluster extends GramExpression {
-  final Gram headGram;
-  final Binary tailOp;
-  final Gram tailGram;
-  late final renderPlan;
-  late final lines;
-
-  Cluster(this.headGram, this.tailOp, this.tailGram) {
-    renderPlan = headGram.renderPlan.byBinary(tailOp, tailGram.renderPlan);
+  @override
+  Iterable<Syllable> get pronunciation {
+    final p1 = expr1.pronunciation;
+    final last = p1.last;
+    final p1new = p1.map((s) => s != last ? s : last.diffEnd(op.ending.base));
+    return [
+      ...p1new,
+      ...expr2.pronunciation,
+    ];
   }
 
-  String toString() => "($headGram ${tailOp.symbol} $tailGram)";
-
   @override
-  String get pronunciation =>
-      headGram.head.shortName +
-      headGram.vowel.shortName.toLowerCase() +
-      tailOp.ending.tail +
-      tailGram.pronunciation;
+  Iterable<Gram> get grams => [...expr1.grams, ...expr2.grams];
+
+  ClusterExpression toClusterExpression() => ClusterExpression(this);
 }
 
-class ExtendedCluster extends Cluster {
-  final Binary headOp;
-  final GramExpression innerExpr;
+/// Cluster Expression binds 2 grams with a binary operator into a single group.
+/// Applying special pronunciation to the head gram and the tail op.
+class ClusterExpression extends MultiGramExpression {
+  final BinaryOpExpr binaryExpr;
   late final renderPlan;
-  late final lines;
+  late final headGram;
+  late final tailOp;
 
-  ExtendedCluster(headGram, this.headOp, this.innerExpr, tailOp, tailGram)
-      : super(headGram, tailOp, tailGram) {
-    final render1 = headGram.renderPlan.byBinary(headOp, innerExpr.renderPlan);
-    renderPlan = render1.byBinary(tailOp, tailGram.renderPlan);
+  ClusterExpression(this.binaryExpr) {
+    renderPlan = binaryExpr.renderPlan;
   }
 
-  String toString() =>
-      "($headGram ${headOp.symbol} $innerExpr ${tailOp.symbol} $tailGram)";
+  @override
+  String toString() => "(${binaryExpr.toString()})";
 
   @override
-  String get pronunciation =>
-      headGram.head.shortName +
-      headGram.vowel.shortName.toLowerCase() +
-      headOp.ending.base +
-      innerExpr.pronunciation +
-      tailOp.ending.tail +
-      tailGram.pronunciation;
+  Iterable<Syllable> get pronunciation {
+    final p = binaryExpr.pronunciation.toList();
+    final len = p.length;
+    return [
+      for (var i = 0; i < len; i++)
+        if (i == 0 && i == len - 2) // first is also second last
+          Syllable(
+            p[i].consonant.pair.head,
+            p[i].vowel,
+            p[i].endVowel,
+            p[i].endConsonant.pair.tail,
+          )
+        else if (i == 0) // Swap first syllable to head form
+          p[i].diffConsonant(p[i].consonant.pair.head)
+        else if (i == len - 2) // Swap second last syllable to tail form
+          p[i].diffEnd(p[i].endConsonant.pair.tail)
+        else // other syllable are untouched
+          p[i],
+    ];
+  }
+
+  @override
+  Iterable<Gram> get grams => binaryExpr.grams;
 }
 
-class CompoundWord extends Word {
+/// Compound Words combines words into another word.
+class CompoundWord extends GramExpression {
   static const SEPARATOR_SYMBOL = ':';
-  static const PRONUNCIATION_LINK = '-';
+  static const PRONUNCIATION_LINK = EndConsonant.ng;
 
-  final Iterable<GramExpression> exprs;
-  late final Iterable<PolyLine> lines;
+  final Iterable<GramExpression> words;
   late final RenderPlan renderPlan;
 
-  CompoundWord(this.exprs) {
-    if (exprs.length < 2)
-      throw ArgumentError('Minimum words is 2; only ${exprs.length} given.');
+  CompoundWord(this.words) {
+    if (words.length < 2)
+      throw ArgumentError('Minimum words is 2; only ${words.length} given.');
 
-    GramExpression? combo;
-    for (final expr in exprs) {
-      combo = (combo == null ? expr : combo.next(expr));
+    RenderPlan? render;
+    for (var w in words) {
+      if (render == null) {
+        render = w.renderPlan;
+        continue;
+      }
+      render = render.byBinary(Binary.Next, w.renderPlan);
     }
-    lines = combo!.lines;
-    renderPlan = combo.renderPlan;
+    renderPlan = render!;
   }
 
   @override
   String toString() =>
-      exprs.map((w) => w.toString()).join(" $SEPARATOR_SYMBOL ");
+      words.map((w) => w.toString()).join(" $SEPARATOR_SYMBOL ");
 
   @override
-  String get pronunciation =>
-      exprs.map((w) => w.pronunciation).join(PRONUNCIATION_LINK);
+  Iterable<Syllable> get pronunciation {
+    List<Syllable> syllables = [];
+    for (var w in words.take(words.length - 1)) {
+      final wp = w.pronunciation;
+      syllables.addAll(wp.take(wp.length - 1));
+      final last = wp.last;
+      syllables.add(
+          Syllable(last.consonant, last.vowel, last.endVowel, EndConsonant.ng));
+    }
+    syllables.addAll(words.last.pronunciation);
+    return syllables;
+  }
+
+  @override
+  Iterable<Gram> get grams =>
+      words.fold([], (Iterable<Gram> grams, expr) => [...grams, ...expr.grams]);
 }

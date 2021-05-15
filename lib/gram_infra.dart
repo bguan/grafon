@@ -26,7 +26,6 @@ import 'package:vector_math/vector_math.dart';
 
 import 'expression.dart';
 import 'gram_table.dart';
-import 'operators.dart';
 import 'phonetics.dart';
 import 'render_plan.dart';
 
@@ -81,21 +80,7 @@ class Polar {
 
 /// Anchor points to construct a Gram.
 /// 8 directions distance of .5 from origin, 1 center pt
-enum Anchor {
-  E,
-  NE,
-  N,
-  NW,
-  W,
-  SW,
-  S,
-  SE,
-  IE,
-  IN,
-  IW,
-  IS,
-  O,
-}
+enum Anchor { E, NE, N, NW, W, SW, S, SE, IE, IN, IW, IS, O }
 
 /// Extending Anchor to returns its polar coordinate.
 /// In standard grid of +/- 0.5 i.e. 1.0x1.0 square with Origin at 0,0.
@@ -405,7 +390,7 @@ class PolyCurve extends PolyLine {
 /// Drawn by a series of pen stroke paths of dots, lines, and curves
 /// Associated with a vowel and a starting consonant pair.
 /// If at the Head of a new cluster, use Head consonant, else Base.
-abstract class Gram extends GramExpression {
+abstract class Gram extends SingleGramExpression {
   final Iterable<PolyLine> _lines;
   final ConsPair consPair;
   final RenderPlan renderPlan;
@@ -418,6 +403,12 @@ abstract class Gram extends GramExpression {
   Iterable<PolyLine> get lines => _lines;
 
   Face get face;
+
+  @override
+  Gram get gram => this;
+
+  @override
+  Iterable<Gram> get grams => [this];
 
   Vowel get vowel => face.vowel;
 
@@ -445,32 +436,31 @@ abstract class Gram extends GramExpression {
         eq(this.lines, that.lines);
   }
 
+  @override
   String toString() => this is QuadGram
       ? GramTable().getEnumIfQuad(this)!.shortName +
           ' ' +
           face.shortName.toLowerCase()
       : GramTable().getMonoEnum(this).shortName;
 
-  String get pronunciation =>
-      (consPair == ConsPair.aHa ? '' : consPair.base.shortName) +
-      (consPair == ConsPair.aHa
-          ? vowel.shortName
-          : vowel.shortName.toLowerCase());
+  @override
+  Iterable<Syllable> get pronunciation =>
+      [Syllable(consPair.base, vowel, Vowel.nil, EndConsonant.nil)];
 
   /// Shrinks a single Gram by half maintaining its center position.
-  GramExpression shrink() => UnaryExpr(Unary.Shrink, this);
+  UnaryOpExpr shrink() => UnaryOpExpr(Unary.Shrink, this);
 
   /// Shrinks a single Gram by half then move it to upper quadrant.
-  GramExpression up() => UnaryExpr(Unary.Up, this);
+  UnaryOpExpr up() => UnaryOpExpr(Unary.Up, this);
 
   /// Shrinks a single Gram by half then move it to down quadrant.
-  GramExpression down() => UnaryExpr(Unary.Down, this);
+  UnaryOpExpr down() => UnaryOpExpr(Unary.Down, this);
 
   /// Shrinks a single Gram by half then move it to left quadrant.
-  GramExpression left() => UnaryExpr(Unary.Left, this);
+  UnaryOpExpr left() => UnaryOpExpr(Unary.Left, this);
 
   /// Shrinks a single Gram by half then move it to right quadrant.
-  GramExpression right() => UnaryExpr(Unary.Right, this);
+  UnaryOpExpr right() => UnaryOpExpr(Unary.Right, this);
 }
 
 /// MonoGram looks the same when rotated 90' i.e. only 1 variation hence Mono

@@ -16,9 +16,9 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grafon/expression.dart';
+import 'package:grafon/expr_render.dart';
+import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/gram_infra.dart';
-import 'package:grafon/render_plan.dart';
 import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for RenderPlan

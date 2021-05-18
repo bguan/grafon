@@ -14,14 +14,16 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+library gram_table_widget;
 
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grafon/expression.dart';
+import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
 
+import 'grafon_word.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
@@ -41,12 +43,12 @@ class GramTableView extends StatelessWidget {
     final screenWidth = mediaSize.width.clamp(500.0, 2000.0);
     final screenHeight = mediaSize.height.clamp(500.0, 2000.0) - 100;
     final widthHeightRatio = (screenWidth / screenHeight).clamp(.5, 2);
-    final vpad = widthHeightRatio * 8.0;
-    final hpad = widthHeightRatio * 40.0;
+    final vPad = widthHeightRatio * 8.0;
+    final hPad = widthHeightRatio * 40.0;
     final space = 4.0;
     final inset = widthHeightRatio * 12.0;
-    final dim = min((screenWidth - 2 * hpad) / (table.numCols + 2),
-        (0.8 * screenHeight - 2 * vpad) / (table.numRows + 3));
+    final dim = min((screenWidth - 2 * hPad) / (table.numCols + 2),
+        (0.8 * screenHeight - 2 * vPad) / (table.numRows + 3));
 
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
@@ -143,7 +145,7 @@ class GramTableView extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(inset),
             child: GrafonTile(
-              table.atMonoFace(m, f),
+              table.atMonoFace(m, f).renderPlan,
               height: dim,
               flexFit: false,
             ),
@@ -163,7 +165,7 @@ class GramTableView extends StatelessWidget {
     ];
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: vpad, horizontal: hpad),
+      padding: EdgeInsets.symmetric(vertical: vPad, horizontal: hPad),
       child: Center(
         child: GridView.count(
           crossAxisCount: table.numCols + 2,

@@ -16,13 +16,14 @@
 // under the License.
 
 /// Classes and utils for render planning in device independent coordinates.
-library render_planning;
+library expr_render;
 
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'expression.dart';
+import 'grafon_expr.dart';
 import 'gram_infra.dart';
 
 /// GramMetrics is a value class of rendering metrics for each gram expression.
@@ -37,7 +38,7 @@ class RenderPlan {
   static const PEN_WTH_SCALE = 0.075;
   final Iterable<PolyLine> lines;
   late final double width, height, xMin, yMin, xMax, yMax;
-  late final double mass, vmass, hmass;
+  late final double mass, vMass, hMass;
   late final Vector2 center;
 
   RenderPlan(this.lines) {
@@ -46,8 +47,8 @@ class RenderPlan {
         xMax = 0,
         yMax = 0,
         mass = 0,
-        vmass = 0,
-        hmass = 0;
+        vMass = 0,
+        hMass = 0;
     for (final l in lines) {
       late final bool isCurve;
       List<Vector2> curvePts = [];
@@ -116,8 +117,8 @@ class RenderPlan {
         yMax = max(yMax, p.y);
         if (p != prev) {
           mass += prev.distanceTo(p) * PEN_WTH_SCALE;
-          vmass += p.y - prev.y;
-          hmass += p.x - prev.x;
+          vMass += p.y - prev.y;
+          hMass += p.x - prev.x;
         }
       }
     }
@@ -132,8 +133,8 @@ class RenderPlan {
     this.width = quantize(max(width, MIN_WIDTH));
     this.height = quantize(max(height, MIN_HEIGHT));
     this.mass = quantize(max(mass, MIN_MASS));
-    this.hmass = quantize(max(hmass, MIN_MASS));
-    this.vmass = quantize(max(vmass, MIN_MASS));
+    this.hMass = quantize(max(hMass, MIN_MASS));
+    this.vMass = quantize(max(vMass, MIN_MASS));
     this.center = quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
   }
 
@@ -147,8 +148,8 @@ class RenderPlan {
         xMax.hashCode ^
         yMax.hashCode ^
         mass.hashCode ^
-        hmass.hashCode ^
-        vmass.hashCode;
+        hMass.hashCode ^
+        vMass.hashCode;
 
     return lines.fold(hash, (h, l) => h ^ l.hashCode);
   }
@@ -165,21 +166,18 @@ class RenderPlan {
         xMax == that.xMax &&
         yMax == that.yMax &&
         mass == that.mass &&
-        hmass == that.hmass &&
-        vmass == that.vmass;
+        hMass == that.hMass &&
+        vMass == that.vMass;
 
     if (!check) return false;
-    if (lines == that.lines) return true;
-    final l1 = lines.toList();
-    final l2 = that.lines.toList();
-    if (l1.length != l2.length) return false;
-    for (int i = 0; i < l1.length; i++) {
-      if (l1[i] != l2[i]) return false;
-    }
-    return true;
+    final ieq = IterableEquality<PolyLine>().equals;
+
+    return ieq(this.lines, that.lines);
   }
 
   double get area => width * height;
+
+  double get widthRatio => width / height;
 
   bool get hasSideGap => width > (xMax - xMin);
 
@@ -194,8 +192,8 @@ class RenderPlan {
     final w = quantStr(width);
     final h = quantStr(height);
     final m = quantStr(mass);
-    final hm = quantStr(hmass);
-    final vm = quantStr(vmass);
+    final hm = quantStr(hMass);
+    final vm = quantStr(vMass);
     final c = quantV2Str(center);
 
     return "(x: $x1 to $x2, y: $y1 to $y2, w: $w, h: $h, m: $m ($hm, $vm), c: $c) " +
@@ -374,13 +372,6 @@ class RenderPlan {
     final scale = isFlexFit ? hScale : devHt;
     var scaled =
         ((scale - 1).abs() < 0.1 ? this : remap((isFixed, v) => v * scale));
-
-    if (isFlexFit && (devWth - scaled.width).abs() > 0.1) {
-      final wScale2 = devWth / scaled.width;
-      scaled = scaled
-          .remap((isFixed, v) => isFixed ? v : Vector2(v.x * wScale2, v.y));
-    }
-
     final dx = max(devWth, scaled.width) / 2;
     // flip Y and recenter origin to devWth/2. devHt/2)
     return scaled

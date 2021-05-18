@@ -14,32 +14,32 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+library grafon_widget;
 
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grafon/render_plan.dart';
+import 'package:grafon/expr_render.dart';
 import 'package:vector_math/vector_math.dart' as vm;
 
-import 'expression.dart';
 import 'gram_infra.dart';
 
 /// Class to provide widget rendering of Gram expressions.
 class GrafonTile extends StatelessWidget {
   static const HEIGHT_SCREEN_RATIO = 0.25;
-  late final GramExpression word;
+  late final RenderPlan renderPlan;
   final double? height;
   final bool flexFit;
 
-  GrafonTile(this.word, {this.height, this.flexFit = true}) : super();
+  GrafonTile(this.renderPlan, {this.height, this.flexFit = true}) : super();
 
   @override
   Widget build(BuildContext ctx) {
     final ht = height ?? MediaQuery.of(ctx).size.height * HEIGHT_SCREEN_RATIO;
     return CustomPaint(
-      size: Size(flexFit ? word.flexRenderWidth(ht) : ht, ht),
+      size: Size(flexFit ? renderPlan.flexRenderWidth(ht) : ht, ht),
       painter: GrafonPainter(
-        word,
+        renderPlan,
         flexFit: flexFit,
         scheme: Theme.of(ctx).colorScheme,
       ),
@@ -51,10 +51,10 @@ class GrafonTile extends StatelessWidget {
 class GrafonPainter extends CustomPainter {
   static const MIN_PEN_WIDTH = 1.0;
   final bool flexFit;
-  final GramExpression word;
+  final RenderPlan renderPlan;
   final ColorScheme scheme;
 
-  GrafonPainter(this.word, {this.flexFit = false, required this.scheme});
+  GrafonPainter(this.renderPlan, {this.flexFit = false, required this.scheme});
 
   static Offset toOffset(vm.Vector2 v) => Offset(v.x, v.y);
 
@@ -76,19 +76,17 @@ class GrafonPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    final render = word.renderPlan
-        .shift(-word.center.x, -word.center.y)
+    final render = renderPlan
+        .shift(-renderPlan.center.x, -renderPlan.center.y)
         .toDevice(size.height, size.width, flexFit);
-
-    final wordSize = flexFit ? Size(word.width, word.height) : Size(1, 1);
 
     for (var l in render.lines) {
       if (l is PolyDot) {
-        drawPolyDot(l, size, wordSize, canvas, dotPaint);
+        drawPolyDot(l, canvas, dotPaint);
       } else if (l is PolyStraight) {
-        drawPolyLine(l, size, wordSize, canvas, linePaint);
+        drawPolyLine(l, canvas, linePaint);
       } else if (l is PolyCurve) {
-        drawPolySpline(l, size, wordSize, canvas, linePaint);
+        drawPolySpline(l, canvas, linePaint);
       }
     }
   }
@@ -96,8 +94,6 @@ class GrafonPainter extends CustomPainter {
   /// Draw a series of dots at all anchor points
   void drawPolyDot(
     PolyDot l,
-    Size canvasSize,
-    Size wordSize,
     Canvas canvas,
     Paint paint,
   ) {
@@ -111,8 +107,6 @@ class GrafonPainter extends CustomPainter {
   /// Draw a series of straight lines connecting all anchor points
   void drawPolyLine(
     PolyStraight l,
-    Size canvasSize,
-    Size wordSize,
     Canvas canvas,
     Paint paint,
   ) {
@@ -129,8 +123,6 @@ class GrafonPainter extends CustomPainter {
   /// Draw a series of curves connecting anchor points with smooth gradients.
   void drawPolySpline(
     PolyCurve l,
-    Size canvasSize,
-    Size wordSize,
     Canvas canvas,
     Paint paint,
   ) {
@@ -181,6 +173,6 @@ class GrafonPainter extends CustomPainter {
     if (oldDelegate is! GrafonPainter) return true;
 
     GrafonPainter oldPainter = oldDelegate;
-    return word != oldPainter.word;
+    return renderPlan != oldPainter.renderPlan;
   }
 }

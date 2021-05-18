@@ -21,11 +21,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/expr_render.dart';
 import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
-import 'package:grafon/render_plan.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
@@ -73,7 +73,7 @@ void main() {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
         final gram = GramTable().atConsPairVowel(cp, v);
-        await tester.pumpWidget(GrafonTile(gram, height: 100));
+        await tester.pumpWidget(GrafonTile(gram.renderPlan, height: 100));
         expect(find.byType(CustomPaint), findsOneWidget);
         final custPaint = find.byType(CustomPaint).evaluate().first;
         expect(custPaint.renderObject, isNotNull);
@@ -102,7 +102,7 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
 
     final dotGram = Mono.Dot.gram;
-    final painter = GrafonPainter(dotGram, scheme: scheme);
+    final painter = GrafonPainter(dotGram.renderPlan, scheme: scheme);
     final canvas = MockCanvas();
 
     painter.paint(canvas, size);
@@ -142,7 +142,7 @@ void main() {
       Mono.Light.gram,
       ...Quads.Zap.grams.all,
     ]) {
-      final painter = GrafonPainter(g, scheme: scheme);
+      final painter = GrafonPainter(g.renderPlan, scheme: scheme);
       final canvas = MockCanvas();
       painter.paint(canvas, size);
       verify(canvas.drawLine(any, any, any));
@@ -162,7 +162,7 @@ void main() {
       ...Quads.Swirl.grams.all,
     ];
     for (var gram in splineGrams) {
-      final painter = GrafonPainter(gram, scheme: scheme);
+      final painter = GrafonPainter(gram.renderPlan, scheme: scheme);
       final canvas = MockCanvas();
       painter.paint(canvas, size);
       verify(canvas.drawPath(any, any));
@@ -180,7 +180,7 @@ void main() {
 
     final p1 = Offset(75.0, 75.0); // (100, 100)
     final p2 = Offset(25.0, 25.0); // (0, 0)
-    final painter = GrafonPainter(gram, scheme: scheme);
+    final painter = GrafonPainter(gram.renderPlan, scheme: scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);
     verify(canvas.drawLine(p1, p2, any));
@@ -197,7 +197,7 @@ void main() {
 
     final p1 = Offset(50, 0);
     final p2 = Offset(50, 100);
-    final painter = GrafonPainter(gram, scheme: scheme);
+    final painter = GrafonPainter(gram.renderPlan, scheme: scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);
     verify(canvas.drawPath(any, any));

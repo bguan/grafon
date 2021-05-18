@@ -18,6 +18,8 @@
 /// Enums and utils for Phonetics related concepts for the Grafon language.
 library phonetics;
 
+import 'package:collection/collection.dart';
+
 /// Basic vowels for the language. Can be combined into diphthong.
 enum Vowel { nil, A, E, I, O, U }
 
@@ -241,11 +243,12 @@ class Syllable {
         this.endConsonant == that.endConsonant;
   }
 
-  Syllable get headForm =>
-      Syllable(consonant.pair.head, vowel, endVowel, endConsonant);
-
-  Syllable get tailOpForm =>
-      Syllable(consonant, vowel, endVowel, endConsonant.pair.tail);
+  @override
+  int get hashCode =>
+      consonant.hashCode ^
+      vowel.hashCode ^
+      endVowel.hashCode ^
+      endConsonant.hashCode;
 
   @override
   String toString() =>
@@ -254,11 +257,61 @@ class Syllable {
       endVowel.phoneme +
       endConsonant.phoneme;
 
+  /// make a syllable based on another when it is the head of a cluster expr
+  Syllable get headForm =>
+      Syllable(consonant.pair.head, vowel, endVowel, endConsonant);
+
+  /// make a syllable based on another when it's operator is tail of a cluster
+  Syllable get tailOpForm =>
+      Syllable(consonant, vowel, endVowel, endConsonant.pair.tail);
+
+  /// make a syllable based on another with a different consonant
   Syllable diffConsonant(Consonant c) =>
       Syllable(c, vowel, endVowel, endConsonant);
 
-  Syllable diffSecondVowel(Vowel v2) =>
-      Syllable(consonant, vowel, v2, endConsonant);
+  /// make a syllable based on another with a different vowel
+  Syllable diffVowel(Vowel v) => Syllable(consonant, v, endVowel, endConsonant);
 
-  Syllable diffEnd(EndConsonant e) => Syllable(consonant, vowel, endVowel, e);
+  /// make a syllable based on another with a different end vowel
+  Syllable diffEndVowel(Vowel endVowel) =>
+      Syllable(consonant, vowel, endVowel, endConsonant);
+
+  /// make a syllable based on another with a different end consonant
+  Syllable diffEndConsonant(EndConsonant e) =>
+      Syllable(consonant, vowel, endVowel, e);
+}
+
+/// Class to represent Pronunciation as a sequence of Syllable and resp utils.
+class Pronunciation {
+  static const SEPARATOR_SYMBOL = '-';
+  final List<Syllable> syllables;
+
+  Pronunciation(Iterable<Syllable> syllables)
+      : this.syllables = List.unmodifiable(syllables);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Pronunciation) return false;
+
+    Pronunciation that = other;
+
+    final leq = ListEquality<Syllable>().equals;
+
+    return leq(this.syllables, that.syllables);
+  }
+
+  @override
+  int get hashCode => ListEquality<Syllable>().hash(syllables);
+
+  @override
+  String toString() =>
+      syllables.map((s) => s.toString()).join(SEPARATOR_SYMBOL);
+
+  Syllable operator [](int index) => syllables[index];
+
+  Syllable get first => syllables[0];
+
+  Syllable get last => syllables[length - 1];
+
+  int get length => syllables.length;
 }

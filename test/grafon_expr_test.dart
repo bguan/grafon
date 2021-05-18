@@ -16,11 +16,11 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grafon/expression.dart';
+import 'package:grafon/expr_render.dart';
+import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
-import 'package:grafon/render_plan.dart';
 import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for Expressions
@@ -131,23 +131,23 @@ void main() {
         final g = GramTable().atMonoFace(m, f);
         expect(
           g.shrink().pronunciation.first,
-          g.pronunciation.first.diffSecondVowel(Unary.Shrink.ending),
+          g.pronunciation.first.diffEndVowel(Unary.Shrink.ending),
         );
         expect(
           g.up().pronunciation.first,
-          g.pronunciation.first.diffSecondVowel(Unary.Up.ending),
+          g.pronunciation.first.diffEndVowel(Unary.Up.ending),
         );
         expect(
           g.down().pronunciation.first,
-          g.pronunciation.first.diffSecondVowel(Unary.Down.ending),
+          g.pronunciation.first.diffEndVowel(Unary.Down.ending),
         );
         expect(
           g.left().pronunciation.first,
-          g.pronunciation.first.diffSecondVowel(Unary.Left.ending),
+          g.pronunciation.first.diffEndVowel(Unary.Left.ending),
         );
         expect(
           g.right().pronunciation.first,
-          g.pronunciation.first.diffSecondVowel(Unary.Right.ending),
+          g.pronunciation.first.diffEndVowel(Unary.Right.ending),
         );
       }
     }
@@ -172,7 +172,7 @@ void main() {
     expect(person.pronunciation.last, Syllable.v(Vowel.I));
 
     final rain = Quads.Flow.down.next(Quads.Flow.down);
-    expect(rain.toString(), "Flow down | Flow down");
+    expect(rain.toString(), "Flow down . Flow down");
     expect(rain.pronunciation.length, 2); // "Fu-Fu"
     expect(rain.pronunciation.first, Syllable(Consonant.F, Vowel.U));
     expect(rain.pronunciation.last, Syllable(Consonant.F, Vowel.U));
@@ -191,28 +191,6 @@ void main() {
     expect(red.pronunciation.first,
         Syllable.cvc(Consonant.Ch, Vowel.A, EndConsonant.N));
     expect(red.pronunciation.last, Syllable(Consonant.F, Vowel.A));
-  });
-
-  test("CompoundWord throws exception when insufficient words", () {
-    expect(() => CompoundWord([Mono.Sun.gram]), throwsA(isA<ArgumentError>()));
-  });
-
-  test("CompoundWord symbol is different from all Binary operator symbols", () {
-    final symbols = Binary.values.map((bin) => bin.symbol);
-    expect(symbols.contains(CompoundWord.SEPARATOR_SYMBOL), isFalse);
-  });
-
-  test("CompoundWord pronunciation", () {
-    final sun = Mono.Sun.gram; // or star
-    final person = Mono.Dot.gram.over(Quads.Line.up);
-
-    final starMan = CompoundWord([sun, person]); // God? Alien?
-    expect(starMan.toString(), "Sun : Dot / Line up");
-    List<Syllable> syllables = starMan.pronunciation.toList();
-    expect(syllables.length, 3);
-    expect(syllables[0], Syllable.cvc(Consonant.S, Vowel.A, EndConsonant.ng));
-    expect(syllables[1], Syllable.vc(Vowel.A, EndConsonant.S));
-    expect(syllables[2], Syllable.v(Vowel.I));
   });
 
   test("GramMetrics has correct widthRatio", () {

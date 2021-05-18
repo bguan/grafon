@@ -20,7 +20,7 @@
 /// Each column is associated with a Face, shares the same vowel.
 library gram_table;
 
-import 'package:grafon/expression.dart';
+import 'package:grafon/grafon_expr.dart';
 
 import 'gram_infra.dart';
 import 'phonetics.dart';
@@ -257,28 +257,27 @@ extension MonoExtension on Mono {
 
   UnaryOpExpr right() => gram.right();
 
-  MultiGramExpression merge(SingleGramExpression single) => gram.merge(single);
+  BinaryOpExpr merge(SingleGramExpr single) => gram.merge(single);
 
-  MultiGramExpression next(SingleGramExpression single) => gram.next(single);
+  BinaryOpExpr next(SingleGramExpr single) => gram.next(single);
 
   /// Put this expression over a single, this above, the single below.
-  MultiGramExpression over(SingleGramExpression single) => gram.over(single);
+  BinaryOpExpr over(SingleGramExpr single) => gram.over(single);
 
   /// Put this expression around a single, this outside, the single inside.
-  MultiGramExpression wrap(SingleGramExpression single) => gram.wrap(single);
+  BinaryOpExpr wrap(SingleGramExpr single) => gram.wrap(single);
 
   /// Merge this expression with a ClusterExpression.
-  MultiGramExpression mergeCluster(BinaryOpExpr expr) =>
-      gram.mergeCluster(expr);
+  BinaryOpExpr mergeCluster(BinaryOpExpr expr) => gram.mergeCluster(expr);
 
   /// Put this expression before a cluster, this to left, the cluster to right.
-  MultiGramExpression nextCluster(BinaryOpExpr expr) => gram.nextCluster(expr);
+  BinaryOpExpr nextCluster(BinaryOpExpr expr) => gram.nextCluster(expr);
 
   /// Put this expression over that, this above, the cluster below.
-  MultiGramExpression overCluster(BinaryOpExpr expr) => gram.overCluster(expr);
+  BinaryOpExpr overCluster(BinaryOpExpr expr) => gram.overCluster(expr);
 
   /// Put this expression around that, this outside, the cluster inside.
-  MultiGramExpression wrapCluster(BinaryOpExpr expr) => gram.wrapCluster(expr);
+  BinaryOpExpr wrapCluster(BinaryOpExpr expr) => gram.wrapCluster(expr);
 }
 
 /// extension to map quad enum to its QuadGrams, indexing by Face, & short name.

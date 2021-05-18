@@ -24,10 +24,10 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'expression.dart';
+import 'expr_render.dart';
+import 'grafon_expr.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
-import 'render_plan.dart';
 
 /// Rounding Base to convert Double to Integer for storage and comparison
 const int FLOAT_DECIMALS = 2;
@@ -216,29 +216,26 @@ abstract class PolyLine {
 
   int get numPts => _baseVectors.length;
 
+  int get numVisiblePts => numPts;
+
   PolyLine diffPoints(Iterable<Vector2> vs);
 
+  Vector2 get center =>
+      visiblePoints.fold(Vector2(0, 0), (Vector2 sum, Vector2 v) => sum + v) /
+      numVisiblePts.toDouble();
+
   @override
-  int get hashCode {
-    var hash = this.runtimeType.hashCode;
-    for (var v in _baseVectors) {
-      // order matters so hash is shifted for every anchor
-      hash = hash << 1 ^
-          (v.x.round() * _floatStorageBase).hashCode ^
-          v.y.round().hashCode;
-    }
-    return hash;
-  }
+  int get hashCode =>
+      runtimeType.hashCode ^
+      _baseVectors.length.hashCode ^
+      ListEquality<Vector2>().hash(_baseVectors);
 
   @override
   bool operator ==(Object other) {
     if (other is! PolyLine || other.runtimeType != this.runtimeType)
       return false;
-
     PolyLine that = other;
-    final leq = ListEquality<Vector2>().equals;
-
-    return leq(this.vectors, that.vectors);
+    return ListEquality<Vector2>().equals(this.vectors, that.vectors);
   }
 
   @override
@@ -353,6 +350,9 @@ class PolyCurve extends PolyLine {
             isFixedAspect: isFixedAspect);
 
   @override
+  int get numVisiblePts => _baseVectors.length - 2;
+
+  @override
   List<Vector2> get visiblePoints =>
       vectors.length < 3 ? [] : vectors.sublist(1, vectors.length - 1);
 
@@ -390,7 +390,7 @@ class PolyCurve extends PolyLine {
 /// Drawn by a series of pen stroke paths of dots, lines, and curves
 /// Associated with a vowel and a starting consonant pair.
 /// If at the Head of a new cluster, use Head consonant, else Base.
-abstract class Gram extends SingleGramExpression {
+abstract class Gram extends SingleGramExpr {
   final Iterable<PolyLine> _lines;
   final ConsPair consPair;
   final RenderPlan renderPlan;
@@ -444,8 +444,10 @@ abstract class Gram extends SingleGramExpression {
       : GramTable().getMonoEnum(this).shortName;
 
   @override
-  Iterable<Syllable> get pronunciation =>
-      [Syllable(consPair.base, vowel, Vowel.nil, EndConsonant.nil)];
+  Syllable get syllable => Syllable(consPair.base, vowel);
+
+  @override
+  Pronunciation get pronunciation => Pronunciation([syllable]);
 
   /// Shrinks a single Gram by half maintaining its center position.
   UnaryOpExpr shrink() => UnaryOpExpr(Unary.Shrink, this);

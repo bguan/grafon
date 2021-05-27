@@ -20,6 +20,8 @@ library grafon_word;
 
 import 'dart:math';
 
+import 'package:vector_math/vector_math.dart';
+
 import 'expr_render.dart';
 import 'grafon_expr.dart';
 import 'gram_table.dart';
@@ -54,9 +56,8 @@ class CoreWord extends GrafonWord {
 
     /// Make sure word rendering is not too narrow or too wide
     if (r.widthRatio < .8 || r.widthRatio > 1.5) {
-      final s = r.widthRatio < .8 ? .8 : sqrt(r.widthRatio);
-      final newWth = s * r.height;
-      r = r.scaleWidth(newWth);
+      final s = (r.widthRatio < .8 ? .8 : sqrt(r.widthRatio)) / r.widthRatio;
+      r = r.remap((isFixed, v) => isFixed ? v : Vector2(v.x * s, v.y));
     }
     renderPlan = r;
   }
@@ -68,7 +69,7 @@ class CoreWord extends GrafonWord {
 /// Compound Words combines CoreWords into another word.
 class CompoundWord extends GrafonWord {
   static const SEPARATOR_SYMBOL = ':';
-  static const PRONUNCIATION_LINK = EndConsonant.ng;
+  static const PRONUNCIATION_LINK = Coda.ng;
 
   final Iterable<CoreWord> words;
   late final Pronunciation pronunciation;
@@ -98,8 +99,8 @@ class CompoundWord extends GrafonWord {
       final wsl = w.pronunciation.syllables;
       syllables.addAll(wsl.take(wsl.length - 1));
       final last = wsl.last;
-      syllables.add(
-          Syllable(last.consonant, last.vowel, last.endVowel, EndConsonant.ng));
+      syllables
+          .add(Syllable(last.consonant, last.vowel, last.endVowel, Coda.ng));
     }
     syllables.addAll(words.last.pronunciation.syllables);
     pronunciation = Pronunciation(syllables);
@@ -145,6 +146,21 @@ class WordGroup {
   GrafonWord? operator [](String key) => _key2word[key];
 }
 
+final w =
+    WordGroup('?', CoreWord(Mono.Dot.left().over(Mono.Square.gram)), '?', [
+  CoreWord(Mono.Dot.shrink()),
+  CoreWord(Mono.Dot.shrink().over(Mono.Square.gram)),
+  CoreWord(Mono.Dot.up()),
+  CoreWord(Mono.Dot.up().over(Mono.Square.gram)),
+  CoreWord(Mono.Dot.down()),
+  CoreWord(Mono.Dot.down().over(Mono.Square.gram)),
+  CoreWord(Mono.Dot.left()),
+  CoreWord(Mono.Dot.left().over(Mono.Square.gram)),
+  CoreWord(Mono.Dot.right()),
+  CoreWord(Mono.Dot.right().over(Mono.Square.gram)),
+  CoreWord(Mono.Circle.next(Quads.Angle.up)),
+]);
+
 final testGroup = WordGroup(
   'Test',
   CoreWord(Mono.Circle.next(Mono.Square.gram)
@@ -165,17 +181,14 @@ final testGroup = WordGroup(
     CoreWord(Mono.Circle.wrap(Quads.Angle.up.left())),
     CoreWord(Mono.Circle.wrap(Quads.Angle.up.right())),
     CoreWord(Mono.Circle.wrap(Quads.Angle.up.shrink())),
-    CoreWord(Mono.Circle.wrapCluster(Quads.Angle.up
-        .next(Quads.Angle.up)
-        .next(Quads.Angle.up)
-        .next(Quads.Angle.up)
-        .next(Quads.Angle.up))),
+    CoreWord(Mono.Circle.wrapCluster(
+        Quads.Angle.up.next(Quads.Angle.up).next(Quads.Angle.up))),
   ],
 );
 
 final numericGroup = WordGroup(
   'Numeric',
-  CoreWord(Quads.Step.up.nextCluster(Mono.Dot.down().over(Mono.Dot.gram))),
+  CoreWord(Quads.Step.up.over(Mono.Dot.gram).over(Mono.Dot.gram)),
   'Numbers and counting...',
   [
     CoreWord(Mono.Circle.gram, "Zero"),
@@ -209,30 +222,24 @@ final interpersonalGroup = WordGroup(
         "Man, adult male."),
     CoreWord(
         Mono.Circle.over(Mono.Cross.gram), "Woman", "Woman, adult female."),
-    CoreWord(Mono.Circle.up().merge(Quads.Step.left), "I",
+    CoreWord(Mono.Dot.up().merge(Quads.Step.left), "I",
         "I, first person singular pronoun."),
     CoreWord(Mono.Dot.left().over(Quads.Corner.up), "You",
         "You, second person singular pronoun."),
     CoreWord(Mono.Dot.right().over(Quads.Corner.right), "Ze",
         "He or she, third person singular pronoun."),
-    CoreWord(
-        Mono.Dot.up()
-            .merge(Quads.Step.left)
-            .nextCluster(Mono.Dot.down().over(Mono.Dot.gram)),
-        "We",
-        "We, first person plural pronoun."),
-    CoreWord(
-        Mono.Dot.left()
-            .over(Quads.Corner.up)
-            .nextCluster(Mono.Dot.down().over(Mono.Dot.gram)),
-        "Yous",
-        "You, second person plural pronoun."),
-    CoreWord(
-        Mono.Dot.right()
-            .over(Quads.Corner.right)
-            .nextCluster(Mono.Dot.down().over(Mono.Dot.gram)),
-        "They",
-        "They, third person plural pronoun."),
+    CompoundWord([
+      CoreWord(Mono.Dot.up().merge(Quads.Step.left)),
+      CoreWord(Mono.Dot.down().over(Mono.Dot.gram))
+    ], "We", "We, first person plural pronoun."),
+    CompoundWord([
+      CoreWord(Mono.Dot.left().over(Quads.Corner.up)),
+      CoreWord(Mono.Dot.down().over(Mono.Dot.gram))
+    ], "Yous", "You, second person plural pronoun."),
+    CompoundWord([
+      CoreWord(Mono.Dot.right().over(Quads.Corner.right)),
+      CoreWord(Mono.Dot.down().over(Mono.Dot.gram))
+    ], "They", "They, third person plural pronoun."),
     CoreWord(Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.up), "Couple"),
     CoreWord(
         Mono.Circle.wrapCluster(
@@ -257,15 +264,23 @@ final demoGroup = WordGroup(
     CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
     CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
     CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk", "Talk, speech."),
-    CoreWord(Quads.Arc.left.next(Quads.Arc.right), "Leaf"),
+    CoreWord(Quads.Arc.left.next(Quads.Arc.right).merge(Quads.Line.up), "Leaf"),
+    CoreWord(Quads.Line.up.merge(Quads.Angle.down.shrink()), "Wood"),
     CoreWord(Quads.Angle.up.over(Quads.Arc.down), "Drip"),
     CoreWord(Mono.Light.wrap(Quads.Zap.down), "White",
         "White, light from lightning."),
     CoreWord(Mono.Light.wrap(Mono.Sun.gram), "Red", "Red, light from Sun."),
     CoreWord(Mono.Light.wrap(Mono.Flower.gram), "Yellow",
         "Yellow, light from flower."),
-    CoreWord(Mono.Light.wrapCluster(Quads.Arc.left.next(Quads.Arc.right)),
-        "Green", "Green, light from leaf."),
+    CoreWord(
+        Mono.Light.wrapCluster(
+            Quads.Arc.left.next(Quads.Arc.right).merge(Quads.Line.up)),
+        "Green",
+        "Green, light from leaf."),
+    CoreWord(
+        Mono.Light.wrapCluster(Quads.Line.up.merge(Quads.Angle.down.shrink())),
+        "Brown",
+        "Brown, Color of wood."),
     CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
         "Blue", "Blue, light from water."),
     CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),

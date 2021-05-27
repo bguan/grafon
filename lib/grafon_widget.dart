@@ -30,8 +30,10 @@ class GrafonTile extends StatelessWidget {
   late final RenderPlan renderPlan;
   final double? height;
   final double? width;
+  final bool isDebug;
 
-  GrafonTile(this.renderPlan, {this.height, this.width}) : super();
+  GrafonTile(this.renderPlan, {this.height, this.width, this.isDebug = false})
+      : super();
 
   @override
   Widget build(BuildContext ctx) {
@@ -39,7 +41,11 @@ class GrafonTile extends StatelessWidget {
     final wth = width ?? renderPlan.calcWidthByHeight(ht);
     return CustomPaint(
       size: Size(wth, ht),
-      painter: GrafonPainter(renderPlan, scheme: Theme.of(ctx).colorScheme),
+      painter: GrafonPainter(
+        renderPlan,
+        scheme: Theme.of(ctx).colorScheme,
+        isDebug: isDebug,
+      ),
     );
   }
 }
@@ -49,8 +55,9 @@ class GrafonPainter extends CustomPainter {
   static const MIN_PEN_WIDTH = 1.0;
   final RenderPlan renderPlan;
   final ColorScheme scheme;
+  final bool isDebug;
 
-  GrafonPainter(this.renderPlan, {required this.scheme});
+  GrafonPainter(this.renderPlan, {this.isDebug = false, required this.scheme});
 
   static Offset toOffset(vm.Vector2 v) => Offset(v.x, v.y);
 
@@ -72,6 +79,13 @@ class GrafonPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
+    final invisiPaint = Paint()
+      ..color = Colors.red
+      ..strokeWidth = penWidth
+      ..style = PaintingStyle.fill
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
     final render = renderPlan
         .shift(-renderPlan.center.x, -renderPlan.center.y)
         .toDevice(size.height, size.width);
@@ -79,11 +93,26 @@ class GrafonPainter extends CustomPainter {
     for (var l in render.lines) {
       if (l is PolyDot) {
         drawPolyDot(l, canvas, dotPaint);
+      } else if (l is InvisiDot && isDebug) {
+        drawInvisiDot(l, canvas, invisiPaint);
       } else if (l is PolyStraight) {
         drawPolyLine(l, canvas, linePaint);
       } else if (l is PolyCurve) {
         drawPolySpline(l, canvas, linePaint);
       }
+    }
+  }
+
+  /// Draw a series of dots at all anchor points
+  void drawInvisiDot(
+    InvisiDot l,
+    Canvas canvas,
+    Paint paint,
+  ) {
+    final len = l.numPts;
+    for (var i = 0; i < len; i++) {
+      final v = l.vectors[i];
+      canvas.drawCircle(toOffset(v), paint.strokeWidth / 2, paint);
     }
   }
 

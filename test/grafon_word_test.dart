@@ -43,8 +43,8 @@ void main() {
         "CompoundWord(CoreWord(Sun):CoreWord(Dot / Up_Line))");
     List<Syllable> syllables = starMan.pronunciation.syllables;
     expect(syllables.length, 3);
-    expect(syllables[0], Syllable.cvc(Consonant.Sh, Vowel.A, EndConsonant.ng));
-    expect(syllables[1], Syllable.vc(Vowel.A, EndConsonant.S));
+    expect(syllables[0], Syllable.cvc(Consonant.Sh, Vowel.A, Coda.ng));
+    expect(syllables[1], Syllable.vc(Vowel.A, Coda.S));
     expect(syllables[2], Syllable.v(Vowel.I));
   });
 }

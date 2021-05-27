@@ -48,7 +48,7 @@ void main() {
 
   test('Binary ending should all be unique', () {
     final endingsFromBinary = Set.of([
-      ...Binary.values.map((b) => b.ending),
+      ...Binary.values.map((b) => b.coda),
     ]);
     expect(endingsFromBinary.length, Binary.values.length);
   });
@@ -105,7 +105,7 @@ void main() {
         final g = GramTable().atConsPairVowel(cp, v);
         expect(
           g.pronunciation.first,
-          Syllable(cp.base, v, Vowel.nil, EndConsonant.nil),
+          Syllable(cp.base, v, Vowel.nil, Coda.nil),
         );
       }
     }
@@ -160,14 +160,14 @@ void main() {
     final house = Quads.Angle.up.merge(Quads.Gate.down);
     expect(house.toString(), "Up_Angle * Down_Gate");
     expect(house.pronunciation.length, 2);
-    expect(house.pronunciation.first,
-        Syllable.cvc(Consonant.G, Vowel.I, EndConsonant.K));
+    expect(
+        house.pronunciation.first, Syllable.cvc(Consonant.G, Vowel.I, Coda.K));
     expect(house.pronunciation.last, Syllable(Consonant.D, Vowel.U));
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Up_Line");
     expect(person.pronunciation.length, 2); // "As-I"
-    expect(person.pronunciation.first, Syllable.vc(Vowel.A, EndConsonant.S));
+    expect(person.pronunciation.first, Syllable.vc(Vowel.A, Coda.S));
     expect(person.pronunciation.last, Syllable.v(Vowel.I));
 
     final rain = Quads.Flow.down.next(Quads.Flow.down);
@@ -179,16 +179,15 @@ void main() {
     final speech = Quads.Gate.left.wrap(Quads.Flow.right);
     expect(speech.toString(), "Left_Gate @ Right_Flow");
     expect(speech.pronunciation.length, 2); // "Don-Fe"
-    expect(speech.pronunciation.first,
-        Syllable.cvc(Consonant.D, Vowel.O, EndConsonant.N));
+    expect(
+        speech.pronunciation.first, Syllable.cvc(Consonant.D, Vowel.O, Coda.N));
     expect(speech.pronunciation.last, Syllable(Consonant.F, Vowel.E));
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
     expect(red.pronunciation.length, 2);
-    expect(red.pronunciation.first,
-        Syllable.cvc(Consonant.S, Vowel.A, EndConsonant.N));
+    expect(red.pronunciation.first, Syllable.cvc(Consonant.S, Vowel.A, Coda.N));
     expect(red.pronunciation.last, Syllable(Consonant.F, Vowel.A));
   });
 

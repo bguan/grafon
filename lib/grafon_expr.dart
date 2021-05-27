@@ -90,16 +90,16 @@ extension BinaryExtension on Binary {
     }
   }
 
-  EndConsPair get ending {
+  CodaTrio get coda {
     switch (this) {
       case Binary.Merge:
-        return EndConsPair.KG;
+        return CodaTrio.KGT;
       case Binary.Next:
-        return EndConsPair.H;
+        return CodaTrio.HTh;
       case Binary.Over:
-        return EndConsPair.SZ;
+        return CodaTrio.SZR;
       case Binary.Wrap:
-        return EndConsPair.NM;
+        return CodaTrio.NMP;
       default:
         throw Exception("Unexpected Binary Enum ${this}");
     }
@@ -214,7 +214,7 @@ class BinaryOpExpr extends MultiGramExpr {
     final p1 = expr1.pronunciation;
     return Pronunciation([
       ...p1.syllables.take(p1.length - 1),
-      p1[p1.length - 1].diffEndConsonant(op.ending.base),
+      p1[p1.length - 1].diffEndConsonant(op.coda.base),
       ...expr2.pronunciation.syllables,
     ]);
   }
@@ -250,13 +250,13 @@ class ClusterExpr extends MultiGramExpr {
             sList[i].consonant.pair.head,
             sList[i].vowel,
             sList[i].endVowel,
-            sList[i].endConsonant.pair.tail,
+            sList[i].coda.trio.tail,
           )
         else if (i == 0) // Swap first syllable to head form
           sList[i].diffConsonant(sList[i].consonant.pair.head)
         else if (i ==
             sList.length - 2) // Swap second last syllable to tail form
-          sList[i].diffEndConsonant(sList[i].endConsonant.pair.tail)
+            sList[i].diffEndConsonant(sList[i].coda.trio.tail)
         else // other syllable are untouched
           sList[i],
     ]);

@@ -162,36 +162,52 @@ extension ConsPairHelper on ConsPair {
 }
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum EndConsPair { H, KG, NM, SZ }
+enum CodaTrio { HTh, KGT, NMP, SZR }
 
 /// extension to map base, tail ending consonant to enum, short name.
-extension EndingConsPairHelper on EndConsPair {
-  EndConsonant get base {
+extension CodaTrioHelper on CodaTrio {
+  Coda get base {
     switch (this) {
-      case EndConsPair.H:
-        return EndConsonant.nil;
-      case EndConsPair.KG:
-        return EndConsonant.K;
-      case EndConsPair.NM:
-        return EndConsonant.N;
-      case EndConsPair.SZ:
-        return EndConsonant.S;
+      case CodaTrio.HTh:
+        return Coda.nil;
+      case CodaTrio.KGT:
+        return Coda.K;
+      case CodaTrio.NMP:
+        return Coda.N;
+      case CodaTrio.SZR:
+        return Coda.S;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
   }
 
   // use tail when it is the last operator in a cluster group
-  EndConsonant get tail {
+  Coda get tail {
     switch (this) {
-      case EndConsPair.H:
-        return EndConsonant.H;
-      case EndConsPair.KG:
-        return EndConsonant.G;
-      case EndConsPair.NM:
-        return EndConsonant.M;
-      case EndConsPair.SZ:
-        return EndConsonant.Z;
+      case CodaTrio.HTh:
+        return Coda.H;
+      case CodaTrio.KGT:
+        return Coda.G;
+      case CodaTrio.NMP:
+        return Coda.M;
+      case CodaTrio.SZR:
+        return Coda.Z;
+      default:
+        throw Exception("Unexpected BinaryEnding Enum ${this}");
+    }
+  }
+
+  // use alt when the end is the same as the starting consonant of next syllable
+  Coda get alt {
+    switch (this) {
+      case CodaTrio.HTh:
+        return Coda.Th;
+      case CodaTrio.KGT:
+        return Coda.T;
+      case CodaTrio.NMP:
+        return Coda.P;
+      case CodaTrio.SZR:
+        return Coda.R;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -200,35 +216,38 @@ extension EndingConsPairHelper on EndConsPair {
   String get shortName => this.toString().split('.').last;
 }
 
-enum EndConsonant { nil, H, K, G, N, M, S, Z, ng }
+enum Coda { nil, H, Th, K, G, T, N, M, P, S, Z, R, ng }
 
-extension EndConsonantHelper on EndConsonant {
-  EndConsPair get pair {
+extension CodaHelper on Coda {
+  CodaTrio get trio {
     switch (this) {
-      case EndConsonant.nil:
-      case EndConsonant.H:
-        return EndConsPair.H;
+      case Coda.nil:
+      case Coda.H:
+      case Coda.Th:
+        return CodaTrio.HTh;
 
-      case EndConsonant.K:
-      case EndConsonant.G:
-        return EndConsPair.KG;
+      case Coda.K:
+      case Coda.G:
+      case Coda.T:
+        return CodaTrio.KGT;
 
-      case EndConsonant.N:
-      case EndConsonant.M:
-        return EndConsPair.NM;
+      case Coda.N:
+      case Coda.M:
+      case Coda.P:
+        return CodaTrio.NMP;
 
-      case EndConsonant.S:
-      case EndConsonant.Z:
-        return EndConsPair.SZ;
+      case Coda.S:
+      case Coda.Z:
+      case Coda.R:
+        return CodaTrio.SZR;
 
       default:
         throw UnsupportedError('$this does not belong to a Consonant Pair');
     }
   }
 
-  String get phoneme => this == EndConsonant.nil
-      ? ''
-      : this.toString().split('.').last.toLowerCase();
+  String get phoneme =>
+      this == Coda.nil ? '' : this.toString().split('.').last.toLowerCase();
 }
 
 /// Class to handle Syllable and its manipulation
@@ -236,29 +255,28 @@ class Syllable {
   final Consonant consonant;
   final Vowel vowel;
   final Vowel endVowel;
-  final EndConsonant endConsonant;
+  final Coda coda;
 
   Syllable(this.consonant, this.vowel,
-      [this.endVowel = Vowel.nil, this.endConsonant = EndConsonant.nil]);
+      [this.endVowel = Vowel.nil, this.coda = Coda.nil]);
 
   Syllable.v(this.vowel)
       : consonant = Consonant.nil,
         endVowel = Vowel.nil,
-        endConsonant = EndConsonant.nil;
+        coda = Coda.nil;
 
-  Syllable.vc(this.vowel, this.endConsonant)
+  Syllable.vc(this.vowel, this.coda)
       : consonant = Consonant.nil,
         endVowel = Vowel.nil;
 
   Syllable.vv(this.vowel, this.endVowel)
       : consonant = Consonant.nil,
-        endConsonant = EndConsonant.nil;
+        coda = Coda.nil;
 
-  Syllable.vvc(this.vowel, this.endVowel, this.endConsonant)
+  Syllable.vvc(this.vowel, this.endVowel, this.coda)
       : consonant = Consonant.nil;
 
-  Syllable.cvc(this.consonant, this.vowel, this.endConsonant)
-      : endVowel = Vowel.nil;
+  Syllable.cvc(this.consonant, this.vowel, this.coda) : endVowel = Vowel.nil;
 
   @override
   bool operator ==(Object other) {
@@ -269,15 +287,12 @@ class Syllable {
     return this.consonant == that.consonant &&
         this.vowel == that.vowel &&
         this.endVowel == that.endVowel &&
-        this.endConsonant == that.endConsonant;
+        this.coda == that.coda;
   }
 
   @override
   int get hashCode =>
-      consonant.hashCode ^
-      vowel.hashCode ^
-      endVowel.hashCode ^
-      endConsonant.hashCode;
+      consonant.hashCode ^ vowel.hashCode ^ endVowel.hashCode ^ coda.hashCode;
 
   @override
   String toString() =>
@@ -285,39 +300,51 @@ class Syllable {
           ? vowel.phoneme.toUpperCase()
           : consonant.phoneme + vowel.phoneme) +
       endVowel.phoneme +
-      endConsonant.phoneme;
+      coda.phoneme;
 
   /// make a syllable based on another when it is the head of a cluster expr
-  Syllable get headForm =>
-      Syllable(consonant.pair.head, vowel, endVowel, endConsonant);
+  Syllable get headForm => Syllable(consonant.pair.head, vowel, endVowel, coda);
 
   /// make a syllable based on another when it's operator is tail of a cluster
   Syllable get tailOpForm =>
-      Syllable(consonant, vowel, endVowel, endConsonant.pair.tail);
+      Syllable(consonant, vowel, endVowel, coda.trio.tail);
+
+  /// make a syllable based on another when it's operator is tail of a cluster
+  Syllable get altOpForm => Syllable(consonant, vowel, endVowel, coda.trio.alt);
 
   /// make a syllable based on another with a different consonant
-  Syllable diffConsonant(Consonant c) =>
-      Syllable(c, vowel, endVowel, endConsonant);
+  Syllable diffConsonant(Consonant c) => Syllable(c, vowel, endVowel, coda);
 
   /// make a syllable based on another with a different vowel
-  Syllable diffVowel(Vowel v) => Syllable(consonant, v, endVowel, endConsonant);
+  Syllable diffVowel(Vowel v) => Syllable(consonant, v, endVowel, coda);
 
   /// make a syllable based on another with a different end vowel
   Syllable diffEndVowel(Vowel endVowel) =>
-      Syllable(consonant, vowel, endVowel, endConsonant);
+      Syllable(consonant, vowel, endVowel, coda);
 
   /// make a syllable based on another with a different end consonant
-  Syllable diffEndConsonant(EndConsonant e) =>
-      Syllable(consonant, vowel, endVowel, e);
+  Syllable diffEndConsonant(Coda e) => Syllable(consonant, vowel, endVowel, e);
 }
 
 /// Class to represent Pronunciation as a sequence of Syllable and resp utils.
 class Pronunciation {
   static const SEPARATOR_SYMBOL = '-';
-  final List<Syllable> syllables;
+  late final List<Syllable> syllables;
 
-  Pronunciation(Iterable<Syllable> syllables)
-      : this.syllables = List.unmodifiable(syllables);
+  Pronunciation(Iterable<Syllable> syllables) {
+    final slist = <Syllable>[];
+    var s = syllables.first;
+    for (final next in syllables.skip(1)) {
+      if (s.coda.phoneme == next.consonant.phoneme &&
+          (s.coda != Coda.nil || s.endVowel == next.vowel))
+        slist.add(s.altOpForm);
+      else
+        slist.add(s);
+      s = next;
+    }
+    slist.add(s);
+    this.syllables = List.unmodifiable(slist);
+  }
 
   @override
   bool operator ==(Object other) {
@@ -345,5 +372,3 @@ class Pronunciation {
 
   int get length => syllables.length;
 }
-
-enum CodaHeadDup { nil2Th, H2Thr, K2sKr, G2sGr, N2nSr, M2mSr, S2Shr, Z2Zhr }

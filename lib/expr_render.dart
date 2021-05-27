@@ -32,8 +32,8 @@ import 'gram_infra.dart';
 class RenderPlan {
   static const STD_DIM = 1.0;
   static const PEN_WTH_SCALE = 0.05;
-  static const MIN_WIDTH = 0.1;
-  static const MIN_HEIGHT = 0.1;
+  static const MIN_WIDTH = 0.2;
+  static const MIN_HEIGHT = 0.2;
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
   static const STD_GAP = 0.15;
   final Iterable<PolyLine> lines;
@@ -199,40 +199,40 @@ class RenderPlan {
   /// Transform this render plan by unary operation to generate a new render.
   RenderPlan byUnary(Unary op) {
     // assume box is bound by min max X Y of -.5 to .5
-
-    final shrunk = remap((isFixed, v) => v / 3);
+    final shrunk =
+        remap((isFixed, v) => v * (op == Unary.Shrink ? 1 / 2 : 1 / 3));
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up:
         // shift r's top to align with box top
         // extend the height down w InvisiDot at box bottom, maintain width
         lines = [
-          ...shrunk.shift(0, .35 - shrunk.yMax).lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(.35, -.35)])
+          ...shrunk.shift(0, .25 - shrunk.center.y).lines,
+          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
         ];
         break;
       case Unary.Down:
         // shift r's bottom to align with box bottom
         // extend the height up w InvisiDot at box top, maintain width
         lines = [
-          ...shrunk.shift(0, -.35 - shrunk.yMin).lines,
-          InvisiDot([Vector2(-.35, .35), Vector2(.35, .35)])
+          ...shrunk.shift(0, -.25 + shrunk.center.y).lines,
+          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
         ];
         break;
       case Unary.Left:
         // shift r's left to align with box left
         // extend the width w InvisiDot at box right, maintain min height
         lines = [
-          ...shrunk.shift(-.35 - shrunk.xMin, 0).lines,
-          InvisiDot([Vector2(.35, -.35), Vector2(.35, .35)])
+          ...shrunk.shift(-.25 + shrunk.center.x, 0).lines,
+          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
         ];
         break;
       case Unary.Right:
         // shift r's left to align with box left
         // extend the width w InvisiDot at box left, maintain min height
         lines = [
-          ...shrunk.shift(.35 - shrunk.xMax, 0).lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(-.35, .35)])
+          ...shrunk.shift(.25 - shrunk.center.x, 0).lines,
+          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
         ];
         break;
       case Unary.Shrink: // extending all sides to former min max

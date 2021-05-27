@@ -107,14 +107,20 @@ class GramTableView extends StatelessWidget {
               ),
     ];
 
+    final decoStr = (s) => (s == '' ? '' : '…' + s);
     final binaryOpRow = [
       for (var bTxt in [
         'Binary\nOperator & Compound',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
-            '…${b.ending.base.phoneme}${b.ending.tail.phoneme.length > 0 ? ' …' + b.ending.tail.phoneme : ''}'),
-        'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…${CompoundWord.PRONUNCIATION_LINK.phoneme}…',
-        'Ending\nConsonant\nbase, tail, compound'
+            decoStr(b.coda.base.phoneme) +
+            ' ' +
+            decoStr(b.coda.tail.phoneme) +
+            ' ' +
+            decoStr(b.coda.alt.phoneme)),
+        'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…' +
+            CompoundWord.PRONUNCIATION_LINK.phoneme,
+        'Ending\nConsonant\nbase/tail/alt & compound'
       ])
         bTxt.length <= 0
             ? SizedBox()

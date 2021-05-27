@@ -678,8 +678,7 @@ abstract class Gram extends SingleGramExpr {
   }
 
   @override
-  String toString() =>
-      this is QuadGram
+  String toString() => this is QuadGram
       ? face.shortName + '_' + GramTable().getEnumIfQuad(this)!.shortName
       : GramTable().getMonoEnum(this).shortName;
 

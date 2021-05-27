@@ -46,9 +46,10 @@ class GramTableView extends StatelessWidget {
     final vPad = widthHeightRatio * 8.0;
     final hPad = widthHeightRatio * 40.0;
     final space = 4.0;
-    final inset = widthHeightRatio * 12.0;
+    final inset = widthHeightRatio * 20.0;
     final dim = min((screenWidth - 2 * hPad) / (table.numCols + 2),
-        (0.8 * screenHeight - 2 * vPad) / (table.numRows + 3));
+            (0.8 * screenHeight - 2 * vPad) / (table.numRows + 3)) -
+        2 * inset;
 
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
@@ -62,7 +63,7 @@ class GramTableView extends StatelessWidget {
     final unaryFooterStyle = textStyle(16, 1.4);
     final binaryFooterStyle = textStyle(16);
     final rowHeadTextStyle = textStyle(30);
-    final rowTailTextStyle = textStyle(25, 1.5);
+    final rowTailTextStyle = textStyle(22, 1.5);
 
     final headerRow = [
       for (var fTxt in [
@@ -108,11 +109,11 @@ class GramTableView extends StatelessWidget {
 
     final binaryOpRow = [
       for (var bTxt in [
-        'Binary\nOperator & Compounding',
+        'Binary\nOperator & Compound',
         ...Binary.values.map((b) =>
             '${b.shortName}\n${b.symbol}\n' +
             '…${b.ending.base.phoneme}${b.ending.tail.phoneme.length > 0 ? ' …' + b.ending.tail.phoneme : ''}'),
-        'Compounding\n${CompoundWord.SEPARATOR_SYMBOL}\n…${CompoundWord.PRONUNCIATION_LINK.phoneme}…',
+        'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…${CompoundWord.PRONUNCIATION_LINK.phoneme}…',
         'Ending\nConsonant\nbase, tail, compound'
       ])
         bTxt.length <= 0
@@ -147,7 +148,7 @@ class GramTableView extends StatelessWidget {
             child: GrafonTile(
               table.atMonoFace(m, f).renderPlan,
               height: dim,
-              flexFit: false,
+              width: dim,
             ),
             color: scheme.surface,
           ),

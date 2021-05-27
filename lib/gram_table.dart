@@ -31,6 +31,7 @@ enum Mono {
   Cross,
   Square,
   X,
+  Diamond,
   Light,
   Sun,
   Circle,
@@ -43,6 +44,7 @@ enum Quads {
   Line,
   Corner,
   Angle,
+  Triangle,
   Gate,
   Step,
   Zap,
@@ -60,7 +62,7 @@ class _MonoHelper {
   }
 
   final dotPaths = [
-    PolyDot.anchors([Anchor.O], isFixedAspect: true)
+    PolyDot.anchors([Anchor.O], isFixedAspect: true),
   ];
 
   final crossPaths = [
@@ -71,6 +73,16 @@ class _MonoHelper {
   final xPaths = [
     PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
     PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true)
+  ];
+
+  final diamondPaths = [
+    PolyStraight.anchors([
+      Anchor.N,
+      Anchor.E,
+      Anchor.S,
+      Anchor.W,
+      Anchor.N,
+    ], isFixedAspect: true)
   ];
 
   final squarePaths = [
@@ -148,9 +160,10 @@ class _MonoHelper {
       Mono.Dot: MonoGram(dotPaths, ConsPair.aHa),
       Mono.Cross: MonoGram(crossPaths, ConsPair.BaPa),
       Mono.X: MonoGram(xPaths, ConsPair.GaKa),
+      Mono.Diamond: MonoGram(diamondPaths, ConsPair.ChaJa),
       Mono.Square: MonoGram(squarePaths, ConsPair.DaTa),
-      Mono.Light: MonoGram(lightPaths, ConsPair.ChaJa),
-      Mono.Sun: MonoGram(sunPaths, ConsPair.SaZa),
+      Mono.Light: MonoGram(lightPaths, ConsPair.SaZa),
+      Mono.Sun: MonoGram(sunPaths, ConsPair.ShaZha),
       Mono.Circle: MonoGram(circlePaths, ConsPair.MaNa),
       Mono.Flower: MonoGram(flowerPaths, ConsPair.FaVa),
       Mono.Blob: MonoGram(blobPaths, ConsPair.LaRa),
@@ -176,6 +189,10 @@ class _QuadHelper {
 
   final anglePaths = [
     PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
+  ];
+
+  final trianglePaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW, Anchor.NW]),
   ];
 
   final gatePaths = [
@@ -228,9 +245,10 @@ class _QuadHelper {
       Quads.Line: SemiRotatingQuads(linePaths, ConsPair.aHa),
       Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BaPa),
       Quads.Angle: RotatingQuads(anglePaths, ConsPair.GaKa),
+      Quads.Triangle: RotatingQuads(trianglePaths, ConsPair.ChaJa),
       Quads.Gate: RotatingQuads(gatePaths, ConsPair.DaTa),
-      Quads.Step: FlipQuads(stepPaths, ConsPair.ChaJa),
-      Quads.Zap: FlipQuads(zapPaths, ConsPair.SaZa),
+      Quads.Step: FlipQuads(stepPaths, ConsPair.SaZa),
+      Quads.Zap: FlipQuads(zapPaths, ConsPair.ShaZha),
       Quads.Arc: RotatingQuads(arcPaths, ConsPair.MaNa),
       Quads.Flow: FlipQuads(flowPaths, ConsPair.FaVa),
       Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LaRa),

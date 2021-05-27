@@ -93,7 +93,7 @@ extension BinaryExtension on Binary {
   EndConsPair get ending {
     switch (this) {
       case Binary.Merge:
-        return EndConsPair.RL;
+        return EndConsPair.KG;
       case Binary.Next:
         return EndConsPair.H;
       case Binary.Over:
@@ -179,9 +179,9 @@ class UnaryOpExpr extends SingleGramExpr {
   String toString() =>
       op.symbol +
       (gram is QuadGram
-          ? GramTable().getEnumIfQuad(gram)!.shortName +
-              ' ' +
-              gram.face.shortName.toLowerCase()
+          ? gram.face.shortName +
+              '_' +
+              GramTable().getEnumIfQuad(gram)!.shortName
           : GramTable().getMonoEnum(gram).shortName);
 
   @override

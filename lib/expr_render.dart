@@ -31,128 +31,61 @@ import 'gram_infra.dart';
 /// Origin is always (0, 0), visualCenter is center of visual balance.
 class RenderPlan {
   static const STD_DIM = 1.0;
-  static const MIN_WIDTH = 0.2;
-  static const MIN_HEIGHT = 0.2;
-  static const MIN_MASS = 0.2;
-  static const STRAIGHT_TO_CURVE_EST = 0.7; // .5*sqrt(2)
-  static const PEN_WTH_SCALE = 0.075;
+  static const PEN_WTH_SCALE = 0.05;
+  static const MIN_WIDTH = 0.1;
+  static const MIN_HEIGHT = 0.1;
+  static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
+  static const STD_GAP = 0.15;
   final Iterable<PolyLine> lines;
-  late final double width, height, xMin, yMin, xMax, yMax;
+  late final double xMin, yMin, xMax, yMax, xAvg, yAvg, width, height;
   late final double mass, vMass, hMass;
   late final Vector2 center;
+  late final int _hashCode;
 
   RenderPlan(this.lines) {
-    double xMin = 0,
-        yMin = 0,
-        xMax = 0,
-        yMax = 0,
+    double xMin = double.maxFinite,
+        yMin = double.maxFinite,
+        xMax = -double.maxFinite,
+        yMax = -double.maxFinite,
         mass = 0,
         vMass = 0,
-        hMass = 0;
+        hMass = 0,
+        xSum = 0,
+        ySum = 0,
+        num = 0;
+
     for (final l in lines) {
-      late final bool isCurve;
-      List<Vector2> curvePts = [];
-      if (l is PolyCurve) {
-        // use lines of anchor points and control points to approximate curve
-        isCurve = true;
-        final len = l.numPts;
-        for (var i = 1; i < len - 2; i++) {
-          final pre = l.vectors[max(0, i - 1)];
-          final beg = l.vectors[max(1, i)];
-          final end = l.vectors[min(i + 1, len - 1)];
-          final next = l.vectors[min(i + 2, len - 1)];
-          if (i == 1) curvePts.add(beg);
-          if (pre == beg && end == next) {
-            // degenerate case, just a straight line
-            curvePts.add(end);
-          } else {
-            if ((pre == beg) || (end == next)) {
-              final ctl = (pre == beg)
-                  ? PolyCurve.calcEndCtl(
-                      beg,
-                      end,
-                      next,
-                      controlType: SplineControlType.StraightApproximate,
-                    )
-                  : PolyCurve.calcBegCtl(
-                      pre,
-                      beg,
-                      end,
-                      controlType: SplineControlType.StraightApproximate,
-                    );
-              curvePts.add(ctl);
-              curvePts.add(end);
-            } else {
-              final begCtl = PolyCurve.calcBegCtl(
-                pre,
-                beg,
-                end,
-                controlType: SplineControlType.StraightApproximate,
-              );
-              final endCtl = PolyCurve.calcEndCtl(
-                beg,
-                end,
-                next,
-                controlType: SplineControlType.StraightApproximate,
-              );
-              curvePts.add(begCtl);
-              curvePts.add(endCtl);
-              curvePts.add(end);
-            }
-          }
-        }
-      } else {
-        isCurve = false;
-      }
-
-      final pts = isCurve ? curvePts : l.vectors;
-
-      if (pts.length < 1) break;
-
-      var prev = pts.first;
-      for (final p in pts) {
-        xMin = min(xMin, p.x);
-        yMin = min(yMin, p.y);
-        xMax = max(xMax, p.x);
-        yMax = max(yMax, p.y);
-        if (p != prev) {
-          mass += prev.distanceTo(p) * PEN_WTH_SCALE;
-          vMass += p.y - prev.y;
-          hMass += p.x - prev.x;
-        }
-      }
+      final m = l.metrics;
+      final d = l.lengthDim;
+      xMin = min(xMin, m.xMin);
+      yMin = min(yMin, m.yMin);
+      xMax = max(xMax, m.xMax);
+      yMax = max(yMax, m.yMax);
+      num += l.numPts;
+      xSum += m.xAvg * l.numPts;
+      ySum += m.yAvg * l.numPts;
+      mass += d.length * PEN_WTH_SCALE;
+      hMass += d.dxSum * PEN_WTH_SCALE;
+      vMass += d.dySum * PEN_WTH_SCALE;
     }
 
-    final width = xMax - xMin;
-    final height = yMax - yMin;
-
-    this.xMin = quantize(xMin);
-    this.xMax = quantize(xMax);
-    this.yMin = quantize(yMin);
-    this.yMax = quantize(yMax);
-    this.width = quantize(max(width, MIN_WIDTH));
-    this.height = quantize(max(height, MIN_HEIGHT));
+    this.xMin = quantize(num == 0 ? 0 : xMin);
+    this.xMax = quantize(num == 0 ? 0 : xMax);
+    this.yMin = quantize(num == 0 ? 0 : yMin);
+    this.yMax = quantize(num == 0 ? 0 : yMax);
+    this.xAvg = quantize(xSum == 0 || num == 0 ? 0 : xSum / num);
+    this.yAvg = quantize(ySum == 0 || num == 0 ? 0 : ySum / num);
     this.mass = quantize(max(mass, MIN_MASS));
     this.hMass = quantize(max(hMass, MIN_MASS));
     this.vMass = quantize(max(vMass, MIN_MASS));
     this.center = quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
+    this.width = quantize(max(xMax - xMin, MIN_WIDTH));
+    this.height = quantize(max(yMax - yMin, MIN_HEIGHT));
+    this._hashCode = lines.fold(mass.hashCode, (h, l) => h ^ l.hashCode);
   }
 
   @override
-  int get hashCode {
-    var hash = center.hashCode ^
-        width.hashCode ^
-        height.hashCode ^
-        xMin.hashCode ^
-        yMin.hashCode ^
-        xMax.hashCode ^
-        yMax.hashCode ^
-        mass.hashCode ^
-        hMass.hashCode ^
-        vMass.hashCode;
-
-    return lines.fold(hash, (h, l) => h ^ l.hashCode);
-  }
+  int get hashCode => _hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -165,6 +98,8 @@ class RenderPlan {
         yMin == that.yMin &&
         xMax == that.xMax &&
         yMax == that.yMax &&
+        xAvg == that.xAvg &&
+        yAvg == that.yAvg &&
         mass == that.mass &&
         hMass == that.hMass &&
         vMass == that.vMass;
@@ -179,10 +114,6 @@ class RenderPlan {
 
   double get widthRatio => width / height;
 
-  bool get hasSideGap => width > (xMax - xMin);
-
-  bool get hasVertGap => height > (yMax - yMin);
-
   @override
   String toString() {
     final x1 = quantStr(xMin);
@@ -195,8 +126,10 @@ class RenderPlan {
     final hm = quantStr(hMass);
     final vm = quantStr(vMass);
     final c = quantV2Str(center);
+    final xa = quantStr(xAvg);
+    final ya = quantStr(yAvg);
 
-    return "(x: $x1 to $x2, y: $y1 to $y2, w: $w, h: $h, m: $m ($hm, $vm), c: $c) " +
+    return '(x:$x1~$x2, y:$y1~$y2, sz:$w*$h, c:$c, avg:($xa,$ya), m:$m($hm,$vm))' +
         lines.toString();
   }
 
@@ -211,12 +144,18 @@ class RenderPlan {
     return RenderPlan(newL);
   }
 
+  // Move the center of the render plan to (0,0) if necessary
+  RenderPlan reCenter() {
+    final c = center;
+    return (c == Vector2(0, 0) ? this : shift(-c.x, -c.y));
+  }
+
+  RenderPlan relaxFixedAspect() =>
+      RenderPlan(lines.map((l) => l.diffAspect(false)));
+
   /// Merge this with another Render Plan.
   RenderPlan merge(RenderPlan that) {
-    return RenderPlan([
-      ...lines,
-      ...that.lines,
-    ]);
+    return RenderPlan([...lines, ...that.lines]);
   }
 
   /// Scale height of a RenderPlan to hNew, enforce by InvisiDots if needed.
@@ -227,10 +166,10 @@ class RenderPlan {
     // corner case if newR is not hNew, e.g. unchanged from oldR as Mono.Dot
     if ((newR.height - hNew).abs() > 0.1) {
       // add InvisiDots to stretch out the height
-      final cx = newR.center.x;
-      final cy = newR.center.y;
+      final cx = center.x;
+      final cy = center.y;
       newR = RenderPlan([
-        ...newR.lines.where((l) => l is! InvisiDot),
+        ...this.lines,
         InvisiDot([Vector2(cx, cy - hNew / 2), Vector2(cx, cy + hNew / 2)]),
       ]);
     }
@@ -246,11 +185,11 @@ class RenderPlan {
     // corner case if newR is not wNew, e.g. unchanged from oldR as Mono.Dot
     if ((newR.width - wNew).abs() > 0.1) {
       // add InvisiDots to stretch out the width
-      final cx = newR.center.x;
-      final cy = newR.center.y;
+      final cx = center.x;
+      final cy = center.y;
       newR = RenderPlan([
-        ...newR.lines.where((l) => l is! InvisiDot),
-        InvisiDot([Vector2(cx - wNew / 2, cy), Vector2(cx + wNew / 2, cy)])
+        ...this.lines,
+        InvisiDot([Vector2(cx - wNew / 2, cy), Vector2(cx + wNew / 2, cy)]),
       ]);
     }
 
@@ -261,45 +200,51 @@ class RenderPlan {
   RenderPlan byUnary(Unary op) {
     // assume box is bound by min max X Y of -.5 to .5
 
-    // reduce to 1/3 size
     final shrunk = remap((isFixed, v) => v / 3);
+    late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up:
         // shift r's top to align with box top
         // extend the height down w InvisiDot at box bottom, maintain width
-        return RenderPlan([
-          ...shrunk.shift(0, .5 - shrunk.yMax).lines,
-          InvisiDot([Vector2(-.25, -.5), Vector2(.25, -.5)])
-        ]);
+        lines = [
+          ...shrunk.shift(0, .35 - shrunk.yMax).lines,
+          InvisiDot([Vector2(-.35, -.35), Vector2(.35, -.35)])
+        ];
+        break;
       case Unary.Down:
         // shift r's bottom to align with box bottom
         // extend the height up w InvisiDot at box top, maintain width
-        return RenderPlan([
-          ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
-          InvisiDot([Vector2(-.25, .5), Vector2(.25, .5)])
-        ]);
+        lines = [
+          ...shrunk.shift(0, -.35 - shrunk.yMin).lines,
+          InvisiDot([Vector2(-.35, .35), Vector2(.35, .35)])
+        ];
+        break;
       case Unary.Left:
         // shift r's left to align with box left
         // extend the width w InvisiDot at box right, maintain min height
-        return RenderPlan([
-          ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
-          InvisiDot([Vector2(.5, -.25), Vector2(.5, .25)])
-        ]);
+        lines = [
+          ...shrunk.shift(-.35 - shrunk.xMin, 0).lines,
+          InvisiDot([Vector2(.35, -.35), Vector2(.35, .35)])
+        ];
+        break;
       case Unary.Right:
         // shift r's left to align with box left
         // extend the width w InvisiDot at box left, maintain min height
-        return RenderPlan([
-          ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
-          InvisiDot([Vector2(-.5, -.25), Vector2(-.5, .25)])
-        ]);
+        lines = [
+          ...shrunk.shift(.35 - shrunk.xMax, 0).lines,
+          InvisiDot([Vector2(-.35, -.35), Vector2(-.35, .35)])
+        ];
+        break;
       case Unary.Shrink: // extending all sides to former min max
-        return RenderPlan([
+        lines = [
           ...shrunk.lines,
-          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)])
-        ]);
+          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
+        ];
+        break;
       default:
         throw UnsupportedError('Unary operation $op not supported.');
     }
+    return RenderPlan(lines).reCenter();
   }
 
   /// Transform this render plan by unary operation to generate a new render.
@@ -307,74 +252,74 @@ class RenderPlan {
     var r1 = this;
     var r2 = that;
 
-    if (r1.center != Vector2(0, 0)) r1 = r1.shift(-r1.center.x, -r1.center.y);
-    if (r2.center != Vector2(0, 0)) r2 = r2.shift(-r2.center.x, -r2.center.y);
+    r1 = r1.reCenter();
+    r2 = r2.reCenter();
     // both operands are centered, no need to trim surrounding whitespace
     switch (op) {
       case Binary.Next:
         // align the heights of r1 or r2 to the taller height
         if (r1.height > r2.height) {
-          r2 = r2.scaleHeight(r1.height);
+          r2 = r2.scaleHeight(r1.height).reCenter();
         } else if (r2.height > r1.height) {
-          r1 = r1.scaleHeight(r2.height);
+          r1 = r1.scaleHeight(r2.height).reCenter();
         }
         // move 2nd operand to right of 1st
-        final gap =
-            r1.hasSideGap || r2.hasSideGap ? 0 : .05 * (r2.width + r1.width);
-        return r1.merge(r2.shift(.5 * r1.width + gap + .5 * r2.width, 0));
+        return r1.merge(r2.shift(.5 * r1.width + STD_GAP + .5 * r2.width, 0));
       case Binary.Over:
         // align the widths of r1 or r2 to the wider width
         if (r1.width > r2.width) {
-          r2 = r2.scaleWidth(r1.width);
+          r2 = r2.scaleWidth(r1.width).reCenter();
         } else if (r2.width > r1.width) {
-          r1 = r1.scaleWidth(r2.width);
+          r1 = r1.scaleWidth(r2.width).reCenter();
         }
-        final gap =
-            r1.hasVertGap || r2.hasVertGap ? 0 : .05 * (r1.height + r2.height);
-        return r1.merge(r2.shift(0, -.5 * r1.height - gap - .5 * r2.height));
+        return r1
+            .merge(r2.shift(0, -.5 * r1.height - STD_GAP - .5 * r2.height))
+            .reCenter();
       case Binary.Wrap:
-        // scale 2nd operand to 1/2 height of 1st
-        var scale = .5 * r1.height / r2.height;
-        // if r2 width after scaling is more than 1/2 of r1 width, scale more
-        if (scale * r2.width > .5 * r1.width) {
-          scale *= .5 * r1.width / (scale * r2.width);
-        }
-        return r1.merge(scale == 1 ? r2 : r2.remap((isFixed, v) => v * scale));
-      case Binary.Merge:
         final hScale = r1.height / r2.height;
-        final wScale = r1.width / r2.width;
-        final scale = min(hScale, wScale);
-        r2 = ((scale - 1).abs() < 0.1
-            ? r2
-            : r2.remap((isFixed, v) => v * scale));
-        return r1.merge(r2);
+        r2 = r2.remap((isF, v) => v * hScale / 2).reCenter();
+        // if r2 width more than .75 of r1 width, scale r1
+        if (r2.width / r1.width > .8) {
+          r1 = r1.relaxFixedAspect().scaleWidth(1.6 * r2.width).reCenter();
+        }
+        // align r2's avg(x,y) to r1's avg(x,y)
+        r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);
+        return r1.merge(r2).reCenter();
+      case Binary.Merge:
+        // scale heights of r1 or r2 to taller height if too short
+        if (r1.height > r2.height) {
+          r2 = r2.scaleHeight(r1.height).reCenter();
+        } else if (r2.height > r1.height) {
+          r1 = r1.scaleHeight(r2.height).reCenter();
+        }
+        // scale widths of r1 or r2 to wider width if too narrow
+        if (r1.width > r2.width && r2.width / r1.width < .5) {
+          r2 = r2.scaleWidth(r1.width).reCenter();
+        } else if (r2.width > r1.width && r1.width / r2.width < .5) {
+          r1 = r1.scaleWidth(r2.width).reCenter();
+        }
+        return r1.merge(r2).reCenter();
       default:
         throw UnsupportedError('Binary Operation $op not supported!');
     }
   }
 
   /// compute flex rendering width by adjusting raw width
-  double flexRenderWidth(double devHeight) {
-    final hScale = devHeight / height;
-    final rawWidth = hScale * width;
-    return max(.75 * devHeight, rawWidth);
-  }
+  double calcWidthByHeight(double devHeight) => widthRatio * devHeight;
 
   /// Transform this render plan by a function that remap points
-  /// But InvisiDots are skipped to avoid distortion
   RenderPlan remap(Vector2 f(bool isFixed, Vector2 v)) => RenderPlan(lines
-      .where((l) => l is! InvisiDot)
       .map((l) => l.diffPoints(l.vectors.map((v) => f(l.isFixedAspect, v)))));
 
   /// Change to device coordinates. Assume (0,0) is upper left corner.
-  RenderPlan toDevice(double devHt, double devWth, [bool isFlexFit = true]) {
+  RenderPlan toDevice(double devHt, double devWth) {
     final hScale = devHt / height;
-    final scale = isFlexFit ? hScale : devHt;
-    var scaled =
-        ((scale - 1).abs() < 0.1 ? this : remap((isFixed, v) => v * scale));
-    final dx = max(devWth, scaled.width) / 2;
+    final wScale = devWth / width;
+    final scale = min(hScale, wScale);
+    final render =
+        ((scale - 1).abs() < 0.1 ? this : remap((isF, v) => v * scale));
     // flip Y and recenter origin to devWth/2. devHt/2)
-    return scaled
-        .remap((isF, v) => Vector2(v.x + dx, devHt - (v.y + devHt / 2)));
+    return render.reCenter().remap(
+        (isF, v) => Vector2(v.x + devWth / 2, devHt - (v.y + devHt / 2)));
   }
 }

@@ -200,14 +200,130 @@ extension VowelHelper on Vowel {
   }
 }
 
+class LineMetrics {
+  late final double xMin, yMin, xMax, yMax, xAvg, yAvg;
+
+  LineMetrics({
+    this.xMin = -RenderPlan.STD_DIM / 2,
+    this.yMin = -RenderPlan.STD_DIM / 2,
+    this.xMax = RenderPlan.STD_DIM / 2,
+    this.yMax = RenderPlan.STD_DIM / 2,
+    this.xAvg = 0,
+    this.yAvg = 0,
+  });
+
+  @override
+  int get hashCode {
+    return xMin.hashCode ^
+        yMin.hashCode ^
+        xMax.hashCode ^
+        yMax.hashCode ^
+        xAvg.hashCode ^
+        yAvg.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! LineMetrics) return false;
+    LineMetrics that = other;
+    return xMin == that.xMin &&
+        yMin == that.yMin &&
+        xMax == that.xMax &&
+        yMax == that.yMax &&
+        xAvg == that.xAvg &&
+        yAvg == that.yAvg;
+  }
+
+  @override
+  String toString() {
+    final x1 = quantStr(xMin);
+    final x2 = quantStr(xMax);
+    final y1 = quantStr(yMin);
+    final y2 = quantStr(yMax);
+    final w = quantStr(width);
+    final h = quantStr(height);
+    final xa = quantStr(xAvg);
+    final ya = quantStr(yAvg);
+
+    return 'LineMetrics(x:$x1~$x2, y:$y1~$y2, sz:$w*$h, avg:($xa,$ya))';
+  }
+
+  double get height => max(yMax - yMin, RenderPlan.MIN_HEIGHT);
+
+  double get width => max(xMax - xMin, RenderPlan.MIN_WIDTH);
+
+  LineMetrics.ofPoints(Iterable<Vector2> pts) {
+    double xMin = double.maxFinite,
+        yMin = double.maxFinite,
+        xMax = -double.maxFinite,
+        yMax = -double.maxFinite,
+        xSum = 0,
+        ySum = 0,
+        num = 0;
+
+    final visited = <Vector2>{};
+    for (Vector2 p in pts) {
+      if (!visited.contains(p)) {
+        visited.add(p);
+        num++;
+        xSum += p.x;
+        ySum += p.y;
+        xMin = min(xMin, p.x);
+        yMin = min(yMin, p.y);
+        xMax = max(xMax, p.x);
+        yMax = max(yMax, p.y);
+      }
+    }
+
+    this.xMin = quantize(num == 0 ? 0 : xMin);
+    this.xMax = quantize(num == 0 ? 0 : xMax);
+    this.yMin = quantize(num == 0 ? 0 : yMin);
+    this.yMax = quantize(num == 0 ? 0 : yMax);
+    this.xAvg = quantize(xSum == 0 || num == 0 ? 0 : xSum / num);
+    this.yAvg = quantize(ySum == 0 || num == 0 ? 0 : ySum / num);
+  }
+}
+
+class LengthDim {
+  final double length, dxSum, dySum;
+
+  const LengthDim({this.length = 0, this.dxSum = 0, this.dySum = 0});
+
+  @override
+  int get hashCode {
+    return length.hashCode ^ dxSum.hashCode ^ dySum.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! LengthDim) return false;
+    LengthDim that = other;
+    return length == that.length && dxSum == that.dxSum && dySum == that.dySum;
+  }
+
+  @override
+  String toString() {
+    final lenStr = quantStr(length);
+    final dxStr = quantStr(dxSum);
+    final dyStr = quantStr(dySum);
+
+    return 'LengthDim(len:$lenStr, dxSum:$dxStr, dySum:$dyStr)';
+  }
+}
+
 /// Pen Stroke lines as series of anchor points joined by straight lines or curves
 abstract class PolyLine {
   final List<Vector2> _baseVectors;
   final bool isFixedAspect;
+  late final int _hashCode;
 
   PolyLine(Iterable<Vector2> vs, {this.isFixedAspect = false})
       : this._baseVectors = List.unmodifiable(
-            vs.map((v) => (v * (1.0 * _floatStorageBase))..round()));
+            vs.map((v) => (v * (1.0 * _floatStorageBase))..round())) {
+    this._hashCode = runtimeType.hashCode ^
+        _baseVectors.length.hashCode ^
+        ListEquality<Vector2>().hash(_baseVectors);
+  }
 
   List<Vector2> get vectors => List.unmodifiable(
       _baseVectors.map((v) => quantizeV2(v / (1.0 * _floatStorageBase))));
@@ -218,17 +334,20 @@ abstract class PolyLine {
 
   int get numVisiblePts => numPts;
 
+  LineMetrics get metrics;
+
+  LengthDim get lengthDim;
+
   PolyLine diffPoints(Iterable<Vector2> vs);
+
+  PolyLine diffAspect(bool isFixedAspect);
 
   Vector2 get center =>
       visiblePoints.fold(Vector2(0, 0), (Vector2 sum, Vector2 v) => sum + v) /
       numVisiblePts.toDouble();
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      _baseVectors.length.hashCode ^
-      ListEquality<Vector2>().hash(_baseVectors);
+  int get hashCode => _hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -276,46 +395,99 @@ abstract class PolyLine {
 
 /// Dot(s), different from Lines of 0 length as it has different metrics
 class PolyDot extends PolyLine {
+  late final LineMetrics metrics;
+
   PolyDot(Iterable<Vector2> vs, {isFixedAspect = false})
-      : super(vs, isFixedAspect: isFixedAspect);
+      : metrics = LineMetrics.ofPoints(vs),
+        super(vs, isFixedAspect: isFixedAspect);
 
   PolyDot.anchors(List<Anchor> anchors, {isFixedAspect = false})
       : super(List.unmodifiable(anchors.map((a) => a.vector)),
-            isFixedAspect: isFixedAspect);
+            isFixedAspect: isFixedAspect) {
+    metrics = LineMetrics.ofPoints(vectors);
+  }
 
   @override
-  PolyDot diffPoints(Iterable<Vector2> vs) {
-    return PolyDot(vs, isFixedAspect: this.isFixedAspect);
-  }
+  PolyDot diffPoints(Iterable<Vector2> vs) =>
+      PolyDot(vs, isFixedAspect: this.isFixedAspect);
+
+  @override
+  PolyDot diffAspect(bool isFixedAspect) =>
+      PolyDot(this.vectors, isFixedAspect: isFixedAspect);
+
+  @override
+  LengthDim get lengthDim => const LengthDim();
 }
 
 /// Invisible Dots to aid in maintaining Metrics for placement control
 class InvisiDot extends PolyLine {
+  late final LineMetrics metrics;
+
   InvisiDot(Iterable<Vector2> vs, {isFixedAspect = false})
-      : super(vs, isFixedAspect: isFixedAspect);
+      : metrics = LineMetrics.ofPoints(vs),
+        super(vs, isFixedAspect: isFixedAspect);
 
   InvisiDot.anchors(List<Anchor> anchors, {isFixedAspect = false})
       : super(List.unmodifiable(anchors.map((a) => a.vector)),
-            isFixedAspect: isFixedAspect);
+            isFixedAspect: isFixedAspect) {
+    metrics = LineMetrics.ofPoints(vectors);
+  }
 
   @override
-  InvisiDot diffPoints(Iterable<Vector2> vs) {
-    return InvisiDot(vs);
-  }
+  InvisiDot diffPoints(Iterable<Vector2> vs) =>
+      InvisiDot(vs, isFixedAspect: isFixedAspect);
+
+  @override
+  InvisiDot diffAspect(bool isFixedAspect) =>
+      InvisiDot(this.vectors, isFixedAspect: isFixedAspect);
+
+  @override
+  LengthDim get lengthDim => const LengthDim();
 }
 
 /// Straight Line from anchor point to anchor point
 class PolyStraight extends PolyLine {
+  late final LineMetrics metrics;
+  late final LengthDim lengthDim;
+
   PolyStraight(Iterable<Vector2> vs, {isFixedAspect = false})
-      : super(vs, isFixedAspect: isFixedAspect);
+      : metrics = LineMetrics.ofPoints(vs),
+        lengthDim = calcLengthDim(vs),
+        super(vs, isFixedAspect: isFixedAspect);
 
   PolyStraight.anchors(List<Anchor> anchors, {isFixedAspect = false})
       : super(List.unmodifiable(anchors.map((a) => a.vector)),
-            isFixedAspect: isFixedAspect);
+            isFixedAspect: isFixedAspect) {
+    metrics = LineMetrics.ofPoints(vectors);
+    lengthDim = calcLengthDim(vectors);
+  }
 
   @override
-  PolyStraight diffPoints(Iterable<Vector2> vs) {
-    return PolyStraight(vs, isFixedAspect: this.isFixedAspect);
+  PolyStraight diffPoints(Iterable<Vector2> vs) =>
+      PolyStraight(vs, isFixedAspect: this.isFixedAspect);
+
+  @override
+  PolyStraight diffAspect(bool isFixedAspect) =>
+      PolyStraight(this.vectors, isFixedAspect: isFixedAspect);
+
+  static LengthDim calcLengthDim(Iterable<Vector2> pts) {
+    if (pts.length < 1) return LengthDim();
+
+    double lSum = 0, dxSum = 0, dySum = 0;
+    var prev = pts.first;
+    for (final p in pts) {
+      if (p != prev) {
+        lSum += prev.distanceTo(p);
+        dxSum += (p.x - prev.x).abs();
+        dySum += (p.y - prev.y).abs();
+        prev = p;
+      }
+    }
+    return LengthDim(
+      length: quantize(lSum),
+      dxSum: quantize(dxSum),
+      dySum: quantize(dySum),
+    );
   }
 }
 
@@ -342,12 +514,24 @@ class PolyCurve extends PolyLine {
   static const STD_CTRL_SCALE = 0.4;
   static const APPROX_STRAIGHT_SCALE = 0.2;
 
+  late final List<Vector2> approxPts;
+  late final LineMetrics metrics;
+  late final LengthDim lengthDim;
+
   PolyCurve(Iterable<Vector2> vs, {isFixedAspect = false})
-      : super(vs, isFixedAspect: isFixedAspect);
+      : super(vs, isFixedAspect: isFixedAspect) {
+    approxPts = calcApproxPts(vs);
+    metrics = LineMetrics.ofPoints(approxPts);
+    lengthDim = PolyStraight.calcLengthDim(approxPts);
+  }
 
   PolyCurve.anchors(List<Anchor> anchors, {isFixedAspect = false})
       : super(List.unmodifiable(anchors.map((a) => a.vector)),
-            isFixedAspect: isFixedAspect);
+            isFixedAspect: isFixedAspect) {
+    approxPts = calcApproxPts(vectors);
+    metrics = LineMetrics.ofPoints(approxPts);
+    lengthDim = PolyStraight.calcLengthDim(approxPts);
+  }
 
   @override
   int get numVisiblePts => _baseVectors.length - 2;
@@ -357,9 +541,12 @@ class PolyCurve extends PolyLine {
       vectors.length < 3 ? [] : vectors.sublist(1, vectors.length - 1);
 
   @override
-  PolyCurve diffPoints(Iterable<Vector2> vs) {
-    return PolyCurve(vs, isFixedAspect: this.isFixedAspect);
-  }
+  PolyCurve diffPoints(Iterable<Vector2> vs) =>
+      PolyCurve(vs, isFixedAspect: this.isFixedAspect);
+
+  @override
+  PolyCurve diffAspect(bool isFixedAspect) =>
+      PolyCurve(this.vectors, isFixedAspect: isFixedAspect);
 
   /// utility function to calc Spline beginning control point
   static Vector2 calcBegCtl(Vector2 pre, Vector2 beg, Vector2 end,
@@ -384,6 +571,58 @@ class PolyCurve extends PolyLine {
             preV.scaled(controlType.scale);
     return dir + end;
   }
+
+  static List<Vector2> calcApproxPts(Iterable<Vector2> points) {
+    List<Vector2> pts = points.toList();
+    List<Vector2> curvePts = [];
+    // use lines of anchor points and control points to approximate curve
+    for (var i = 1; i < pts.length - 2; i++) {
+      final pre = pts[max(0, i - 1)];
+      final beg = pts[max(1, i)];
+      final end = pts[min(i + 1, pts.length - 1)];
+      final next = pts[min(i + 2, pts.length - 1)];
+      if (i == 1) curvePts.add(beg);
+      if (pre == beg && end == next) {
+        // degenerate case, just a straight line
+        curvePts.add(end);
+      } else {
+        if ((pre == beg) || (end == next)) {
+          final ctl = (pre == beg)
+              ? PolyCurve.calcEndCtl(
+                  beg,
+                  end,
+                  next,
+                  controlType: SplineControlType.StraightApproximate,
+                )
+              : PolyCurve.calcBegCtl(
+                  pre,
+                  beg,
+                  end,
+                  controlType: SplineControlType.StraightApproximate,
+                );
+          curvePts.add(ctl);
+          curvePts.add(end);
+        } else {
+          final begCtl = PolyCurve.calcBegCtl(
+            pre,
+            beg,
+            end,
+            controlType: SplineControlType.StraightApproximate,
+          );
+          final endCtl = PolyCurve.calcEndCtl(
+            beg,
+            end,
+            next,
+            controlType: SplineControlType.StraightApproximate,
+          );
+          curvePts.add(begCtl);
+          curvePts.add(endCtl);
+          curvePts.add(end);
+        }
+      }
+    }
+    return curvePts;
+  }
 }
 
 /// Gram is a Graphical Symbol i.e. logogram
@@ -394,10 +633,16 @@ abstract class Gram extends SingleGramExpr {
   final Iterable<PolyLine> _lines;
   final ConsPair consPair;
   final RenderPlan renderPlan;
+  late final int _hashCode;
 
   Gram(paths, this.consPair)
       : _lines = List.unmodifiable(paths),
-        renderPlan = RenderPlan(paths);
+        renderPlan = RenderPlan(paths) {
+    this._hashCode = consPair.hashCode ^
+        vowel.hashCode ^
+        face.hashCode ^
+        lines.fold(0, (int h, PolyLine p) => h ^ p.hashCode);
+  }
 
   @override
   Iterable<PolyLine> get lines => _lines;
@@ -417,11 +662,7 @@ abstract class Gram extends SingleGramExpr {
   Consonant get head => consPair.head;
 
   @override
-  int get hashCode =>
-      consPair.hashCode ^
-      vowel.hashCode ^
-      face.hashCode ^
-      lines.fold(0, (int h, PolyLine p) => h ^ p.hashCode);
+  int get hashCode => _hashCode;
 
   @override
   bool operator ==(Object other) {
@@ -437,10 +678,9 @@ abstract class Gram extends SingleGramExpr {
   }
 
   @override
-  String toString() => this is QuadGram
-      ? GramTable().getEnumIfQuad(this)!.shortName +
-          ' ' +
-          face.shortName.toLowerCase()
+  String toString() =>
+      this is QuadGram
+      ? face.shortName + '_' + GramTable().getEnumIfQuad(this)!.shortName
       : GramTable().getMonoEnum(this).shortName;
 
   @override
@@ -502,6 +742,7 @@ class QuadGram extends Gram {
 abstract class QuadGrams {
   final ConsPair consPair;
   final Map<Face, Gram> f2g;
+  late final int _hashCode;
 
   QuadGrams(
     this.consPair, {
@@ -514,20 +755,22 @@ abstract class QuadGrams {
           Face.Up: QuadGram(u, Face.Up, consPair),
           Face.Left: QuadGram(l, Face.Left, consPair),
           Face.Down: QuadGram(d, Face.Down, consPair)
-        });
+        }) {
+    this._hashCode = consPair.hashCode ^
+        Face.values.fold(
+            // use Face.values instead of face2gra.keys for fixed order
+            0,
+            (prev, f) => f2g[f] == null
+                ? prev
+                : prev << 1 ^ f.hashCode ^ f2g[f].hashCode);
+  }
 
   Gram operator [](Face f) => f2g[f]!;
 
   List<Gram> get all => f2g.values.toList();
 
   @override
-  int get hashCode =>
-      consPair.hashCode ^
-      Face.values.fold(
-          // use Face.values instead of face2gra.keys for fixed order
-          0,
-          (prev, f) =>
-              f2g[f] == null ? prev : prev << 1 ^ f.hashCode ^ f2g[f].hashCode);
+  int get hashCode => _hashCode;
 
   @override
   bool operator ==(Object other) {

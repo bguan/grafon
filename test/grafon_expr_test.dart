@@ -94,8 +94,7 @@ void main() {
       expect(mg.toString(), m.shortName);
       for (final f in FaceHelper.directionals) {
         final qg = GramTable().atMonoFace(m, f);
-        expect(qg.toString(),
-            "${m.quadPeer.shortName} ${f.shortName.toLowerCase()}");
+        expect(qg.toString(), "${f.shortName}_${m.quadPeer.shortName}");
       }
     }
   });
@@ -156,29 +155,29 @@ void main() {
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation.first, Syllable(Consonant.S, Vowel.A)); // "Sa"
+    expect(sun.pronunciation.first, Syllable(Consonant.Sh, Vowel.A));
 
     final house = Quads.Angle.up.merge(Quads.Gate.down);
-    expect(house.toString(), "Angle up * Gate down");
-    expect(house.pronunciation.length, 2); // "Gir-Du"
+    expect(house.toString(), "Up_Angle * Down_Gate");
+    expect(house.pronunciation.length, 2);
     expect(house.pronunciation.first,
-        Syllable.cvc(Consonant.G, Vowel.I, EndConsonant.R));
+        Syllable.cvc(Consonant.G, Vowel.I, EndConsonant.K));
     expect(house.pronunciation.last, Syllable(Consonant.D, Vowel.U));
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
-    expect(person.toString(), "Dot / Line up");
+    expect(person.toString(), "Dot / Up_Line");
     expect(person.pronunciation.length, 2); // "As-I"
     expect(person.pronunciation.first, Syllable.vc(Vowel.A, EndConsonant.S));
     expect(person.pronunciation.last, Syllable.v(Vowel.I));
 
     final rain = Quads.Flow.down.next(Quads.Flow.down);
-    expect(rain.toString(), "Flow down . Flow down");
+    expect(rain.toString(), "Down_Flow . Down_Flow");
     expect(rain.pronunciation.length, 2); // "Fu-Fu"
     expect(rain.pronunciation.first, Syllable(Consonant.F, Vowel.U));
     expect(rain.pronunciation.last, Syllable(Consonant.F, Vowel.U));
 
     final speech = Quads.Gate.left.wrap(Quads.Flow.right);
-    expect(speech.toString(), "Gate left @ Flow right");
+    expect(speech.toString(), "Left_Gate @ Right_Flow");
     expect(speech.pronunciation.length, 2); // "Don-Fe"
     expect(speech.pronunciation.first,
         Syllable.cvc(Consonant.D, Vowel.O, EndConsonant.N));
@@ -187,9 +186,9 @@ void main() {
     // Red is the light from a Flower
     final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
-    expect(red.pronunciation.length, 2); // "Chan-Fa"
+    expect(red.pronunciation.length, 2);
     expect(red.pronunciation.first,
-        Syllable.cvc(Consonant.Ch, Vowel.A, EndConsonant.N));
+        Syllable.cvc(Consonant.S, Vowel.A, EndConsonant.N));
     expect(red.pronunciation.last, Syllable(Consonant.F, Vowel.A));
   });
 

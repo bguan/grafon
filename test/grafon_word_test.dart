@@ -40,10 +40,10 @@ void main() {
     final starMan =
         CompoundWord([CoreWord(sun), CoreWord(person)]); // God? Alien?
     expect(starMan.toString(),
-        "CompoundWord(CoreWord(Sun):CoreWord(Dot / Line up))");
+        "CompoundWord(CoreWord(Sun):CoreWord(Dot / Up_Line))");
     List<Syllable> syllables = starMan.pronunciation.syllables;
     expect(syllables.length, 3);
-    expect(syllables[0], Syllable.cvc(Consonant.S, Vowel.A, EndConsonant.ng));
+    expect(syllables[0], Syllable.cvc(Consonant.Sh, Vowel.A, EndConsonant.ng));
     expect(syllables[1], Syllable.vc(Vowel.A, EndConsonant.S));
     expect(syllables[2], Syllable.v(Vowel.I));
   });

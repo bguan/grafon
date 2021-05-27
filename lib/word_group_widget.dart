@@ -37,7 +37,7 @@ class WordGroupPage extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontStyle: FontStyle.normal,
       height: 1.5,
-      color: scheme.primary,
+      color: scheme.primaryVariant,
       fontSize: 20,
       fontFamily: "Arial",
     );
@@ -45,7 +45,7 @@ class WordGroupPage extends StatelessWidget {
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.1,
-      color: scheme.primary,
+      color: scheme.primaryVariant,
       fontSize: 14,
       fontFamily: "Times",
     );
@@ -54,7 +54,7 @@ class WordGroupPage extends StatelessWidget {
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
-      color: scheme.primary,
+      color: scheme.primaryVariant,
       fontSize: 12,
       fontFamily: "Courier",
     );
@@ -66,42 +66,47 @@ class WordGroupPage extends StatelessWidget {
         children: [
           Row(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                flex: 4,
+                flex: 3,
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(20),
                       alignment: Alignment.topLeft,
                       child: Text(wordGroup.title,
                           textAlign: TextAlign.left, style: titleStyle),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       alignment: Alignment.topLeft,
                       child: Text(wordGroup.description,
-                          textAlign: TextAlign.left, style: groupDescStyle),
+                          textAlign: TextAlign.justify, style: groupDescStyle),
                     ),
                   ],
                 ),
               ),
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(10),
-                      height: 80,
-                      width: wordGroup.logo.flexRenderWidth(80),
-                      child: GrafonTile(wordGroup.logo.renderPlan, height: 80),
+                      // color: scheme.background,
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      height: 100,
+                      width: wordGroup.logo.widthAtHeight(60),
+                      child: GrafonTile(
+                        wordGroup.logo.renderPlan,
+                        height: 60,
+                        width: wordGroup.logo.widthAtHeight(60),
+                      ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(5),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Text('"${wordGroup.logo.pronunciation}"',
                           textAlign: TextAlign.right, style: voicingStyle),
                     ),
@@ -123,11 +128,14 @@ class WordGroupPage extends StatelessWidget {
                 TableRow(
                   children: <Widget>[
                     Container(
-                      constraints:
-                          BoxConstraints.tight(Size(w.flexRenderWidth(70), 70)),
-                      padding: EdgeInsets.all(10),
-                      child:
-                          GrafonTile(w.renderPlan, height: 50, flexFit: true),
+                      height: 80,
+                      width: w.widthAtHeight(50),
+                      padding: EdgeInsets.all(15),
+                      child: GrafonTile(
+                        w.renderPlan,
+                        height: 50,
+                        width: w.widthAtHeight(50),
+                      ),
                     ),
                     RichText(
                       text: TextSpan(

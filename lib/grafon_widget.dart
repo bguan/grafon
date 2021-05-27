@@ -26,23 +26,20 @@ import 'gram_infra.dart';
 
 /// Class to provide widget rendering of Gram expressions.
 class GrafonTile extends StatelessWidget {
-  static const HEIGHT_SCREEN_RATIO = 0.25;
+  static const HEIGHT_SCREEN_RATIO = 0.1;
   late final RenderPlan renderPlan;
   final double? height;
-  final bool flexFit;
+  final double? width;
 
-  GrafonTile(this.renderPlan, {this.height, this.flexFit = true}) : super();
+  GrafonTile(this.renderPlan, {this.height, this.width}) : super();
 
   @override
   Widget build(BuildContext ctx) {
     final ht = height ?? MediaQuery.of(ctx).size.height * HEIGHT_SCREEN_RATIO;
+    final wth = width ?? renderPlan.calcWidthByHeight(ht);
     return CustomPaint(
-      size: Size(flexFit ? renderPlan.flexRenderWidth(ht) : ht, ht),
-      painter: GrafonPainter(
-        renderPlan,
-        flexFit: flexFit,
-        scheme: Theme.of(ctx).colorScheme,
-      ),
+      size: Size(wth, ht),
+      painter: GrafonPainter(renderPlan, scheme: Theme.of(ctx).colorScheme),
     );
   }
 }
@@ -50,11 +47,10 @@ class GrafonTile extends StatelessWidget {
 /// The custom painter to provide canvas rendering logic
 class GrafonPainter extends CustomPainter {
   static const MIN_PEN_WIDTH = 1.0;
-  final bool flexFit;
   final RenderPlan renderPlan;
   final ColorScheme scheme;
 
-  GrafonPainter(this.renderPlan, {this.flexFit = false, required this.scheme});
+  GrafonPainter(this.renderPlan, {required this.scheme});
 
   static Offset toOffset(vm.Vector2 v) => Offset(v.x, v.y);
 
@@ -78,7 +74,7 @@ class GrafonPainter extends CustomPainter {
 
     final render = renderPlan
         .shift(-renderPlan.center.x, -renderPlan.center.y)
-        .toDevice(size.height, size.width, flexFit);
+        .toDevice(size.height, size.width);
 
     for (var l in render.lines) {
       if (l is PolyDot) {

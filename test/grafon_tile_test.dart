@@ -118,7 +118,7 @@ void main() {
 
     expect(c.dx, 50.0);
     expect(c.dy, 50.0);
-    expect(r, 7.5);
+    expect(r, 5.0);
     expect(paint.strokeWidth, size.height * RenderPlan.PEN_WTH_SCALE);
     expect(paint.color.value, scheme.primary.value);
     expect(paint.style, PaintingStyle.fill);
@@ -178,8 +178,8 @@ void main() {
       PolyStraight.anchors([Anchor.E, Anchor.N])
     ], Face.Up, ConsPair.aHa);
 
-    final p1 = Offset(75.0, 75.0); // (100, 100)
-    final p2 = Offset(25.0, 25.0); // (0, 0)
+    final p1 = Offset(100, 100);
+    final p2 = Offset(0, 0);
     final painter = GrafonPainter(gram.renderPlan, scheme: scheme);
     final canvas = MockCanvas();
     painter.paint(canvas, size);

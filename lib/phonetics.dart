@@ -28,13 +28,34 @@ extension VowelHelper on Vowel {
       this == Vowel.nil ? '' : this.toString().split('.').last.toLowerCase();
 }
 
-/// Basic consonants for the language. Can be combined into cluster.
-enum Consonant { nil, H, B, P, J, Ch, D, T, V, F, G, K, L, R, M, N, S, Z }
+/// Basic consonants at the beginning of a syllable.
+enum Consonant {
+  nil,
+  H,
+  B,
+  P,
+  J,
+  Ch,
+  D,
+  T,
+  V,
+  F,
+  G,
+  K,
+  L,
+  R,
+  M,
+  N,
+  S,
+  Z,
+  Sh,
+  Zh
+}
 
 /// Consonants are paired based on related vocalization.
 /// One is used as the "Base" form, the other the "Head" form.
 /// Head form overrides spatial operator to indicate "head" of cluster.
-enum ConsPair { aHa, BaPa, ChaJa, DaTa, FaVa, GaKa, LaRa, MaNa, SaZa }
+enum ConsPair { aHa, BaPa, ChaJa, DaTa, FaVa, GaKa, LaRa, MaNa, SaZa, ShaZha }
 
 /// Extension to map Consonant to the Pair and provide short name
 extension ConsonantHelper on Consonant {
@@ -72,6 +93,10 @@ extension ConsonantHelper on Consonant {
       case Consonant.S:
         return ConsPair.SaZa;
 
+      case Consonant.Zh:
+      case Consonant.Sh:
+        return ConsPair.ShaZha;
+
       default:
         return ConsPair.aHa;
     }
@@ -101,6 +126,8 @@ extension ConsPairHelper on ConsPair {
         return Consonant.M;
       case ConsPair.SaZa:
         return Consonant.S;
+      case ConsPair.ShaZha:
+        return Consonant.Sh;
       default:
         return Consonant.nil;
     }
@@ -124,6 +151,8 @@ extension ConsPairHelper on ConsPair {
         return Consonant.N;
       case ConsPair.SaZa:
         return Consonant.Z;
+      case ConsPair.ShaZha:
+        return Consonant.Zh;
       default:
         return Consonant.H;
     }
@@ -133,7 +162,7 @@ extension ConsPairHelper on ConsPair {
 }
 
 /// enum for ending consonant pair for preceding gram in a binary operation.
-enum EndConsPair { H, RL, NM, SZ }
+enum EndConsPair { H, KG, NM, SZ }
 
 /// extension to map base, tail ending consonant to enum, short name.
 extension EndingConsPairHelper on EndConsPair {
@@ -141,8 +170,8 @@ extension EndingConsPairHelper on EndConsPair {
     switch (this) {
       case EndConsPair.H:
         return EndConsonant.nil;
-      case EndConsPair.RL:
-        return EndConsonant.R;
+      case EndConsPair.KG:
+        return EndConsonant.K;
       case EndConsPair.NM:
         return EndConsonant.N;
       case EndConsPair.SZ:
@@ -157,8 +186,8 @@ extension EndingConsPairHelper on EndConsPair {
     switch (this) {
       case EndConsPair.H:
         return EndConsonant.H;
-      case EndConsPair.RL:
-        return EndConsonant.L;
+      case EndConsPair.KG:
+        return EndConsonant.G;
       case EndConsPair.NM:
         return EndConsonant.M;
       case EndConsPair.SZ:
@@ -171,7 +200,7 @@ extension EndingConsPairHelper on EndConsPair {
   String get shortName => this.toString().split('.').last;
 }
 
-enum EndConsonant { nil, H, R, L, N, M, S, Z, ng }
+enum EndConsonant { nil, H, K, G, N, M, S, Z, ng }
 
 extension EndConsonantHelper on EndConsonant {
   EndConsPair get pair {
@@ -180,9 +209,9 @@ extension EndConsonantHelper on EndConsonant {
       case EndConsonant.H:
         return EndConsPair.H;
 
-      case EndConsonant.R:
-      case EndConsonant.L:
-        return EndConsPair.RL;
+      case EndConsonant.K:
+      case EndConsonant.G:
+        return EndConsPair.KG;
 
       case EndConsonant.N:
       case EndConsonant.M:
@@ -252,8 +281,9 @@ class Syllable {
 
   @override
   String toString() =>
-      consonant.phoneme +
-      vowel.phoneme +
+      (consonant == Consonant.nil
+          ? vowel.phoneme.toUpperCase()
+          : consonant.phoneme + vowel.phoneme) +
       endVowel.phoneme +
       endConsonant.phoneme;
 
@@ -315,3 +345,5 @@ class Pronunciation {
 
   int get length => syllables.length;
 }
+
+enum CodaHeadDup { nil2Th, H2Thr, K2sKr, G2sGr, N2nSr, M2mSr, S2Shr, Z2Zhr }

@@ -18,20 +18,122 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grafon/expr_render.dart';
 import 'package:grafon/grafon_expr.dart';
+import 'package:grafon/grafon_word.dart';
 import 'package:grafon/gram_infra.dart';
+import 'package:grafon/gram_table.dart';
 import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for RenderPlan
 void main() {
+  test('RenderPlan next operators leaves expected gap btw non-fixed expr', () {
+    final r = Quads.Arc.left.next(Quads.Arc.right).renderPlan;
+    final lines = r.lines.toList();
+    expect(lines.length, 2);
+    // Previous height about same as Next
+    expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));
+    // Previous don't overlap with Next
+    expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
+    // Gap is not too big
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(0.2));
+  });
+
+  test('RenderPlan compounding next operators does not lead to exploding width',
+      () {
+    final up = Quads.Angle.up;
+    final upWth = up.renderPlan.width;
+    final upHt = up.renderPlan.height;
+    final expr = up.next(up).next(up).next(up).next(up);
+    final r = expr.renderPlan;
+    final exprWth = r.width;
+    final exprHt = r.height;
+    expect(exprHt, moreOrLessEquals(upHt));
+    expect(exprWth, closeTo(5 * upWth + 4 * RenderPlan.STD_GAP, 0.1));
+    expect(r.widthRatio, moreOrLessEquals(exprWth / exprHt));
+  });
+
+  test('RenderPlan next operators leaves gap btw fixed aspect and non-fixed',
+      () {
+    final r = Mono.Diamond.next(Quads.Gate.left).renderPlan;
+    final lines = r.lines.toList();
+    expect(lines.length, 2);
+    // Previous height about same as Next
+    expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));
+    // Previous don't overlap with Next
+    expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
+    // Gap is not too big
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(.2));
+  });
+
+  test('RenderPlan over operators leaves gap btw fixed aspect and non-fixed',
+      () {
+    final r = Mono.Dot.over(Quads.Line.up).renderPlan;
+    final lines = r.lines.toList();
+    expect(lines.length, 2);
+    final m0 = lines[0].metrics;
+    final m1 = lines[1].metrics;
+    // Previous width about same as Next
+    expect(m0.width, moreOrLessEquals(m1.width));
+    // Previous don't overlap with Next
+    expect(m1.yMax, lessThan(m0.yMin));
+    // Gap is not too big
+    expect(m0.yMin - m1.yMax, lessThan(.25));
+  });
+
+  test('Metrics calculation for Circle is correct', () {
+    final cp = RenderPlan([
+      PolyCurve.anchors([
+        Anchor.W,
+        Anchor.N,
+        Anchor.E,
+        Anchor.S,
+        Anchor.W,
+        Anchor.N,
+        Anchor.E,
+      ], isFixedAspect: true)
+    ]);
+
+    expect(cp.xMin, -.5);
+    expect(cp.xMax, .5);
+    expect(cp.yMin, -.5);
+    expect(cp.yMax, .5);
+    expect(cp.xAvg, .0);
+    expect(cp.yAvg, .0);
+    expect(cp.width, 1.0);
+    expect(cp.height, 1.0);
+    expect(cp.center, Vector2(.0, .0));
+    expect(cp.mass, 0.16);
+    expect(cp.vMass, 0.1);
+    expect(cp.hMass, 0.1);
+  });
+
   test('Unary Shrink operator works', () {
-    final empty = RenderPlan([]);
-    final shrinkEmpty = empty.byUnary(Unary.Shrink);
+    final dot = RenderPlan([
+      PolyDot([Vector2(0, 0)])
+    ]);
+    final shrinkDot = dot.byUnary(Unary.Shrink);
     expect(
-        shrinkEmpty,
+        shrinkDot,
         RenderPlan([
-          InvisiDot([Vector2(-0.5, -0.5), Vector2(0.5, 0.5)])
+          PolyDot([Vector2(0, 0)]),
+          InvisiDot([Vector2(-0.35, -0.35), Vector2(0.35, 0.35)])
         ]));
   });
+
+  test('RenderPlan toDevice works', () {
+    final word = CoreWord(Quads.Arc.left.next(Quads.Arc.right));
+    final devHt = 100.0;
+    final devWth = word.widthAtHeight(devHt);
+    final r = word.renderPlan.toDevice(devHt, devWth);
+    final lines = r.lines.toList();
+    expect(lines.length, 2);
+    // Previous height about same as Next
+    expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));
+    // Previous don't overlap with Next
+    expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
+    // Gap is not too big
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(20));
+  });
+
   // TODO: impl tests by migrating old operator tests
   // test('Unary Shrink operator works', () {
   //   final empty = PolyStraight.anchors([]);

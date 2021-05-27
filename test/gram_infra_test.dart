@@ -35,6 +35,17 @@ class PolyTester extends PolyLine {
   PolyLine diffPoints(Iterable<Vector2> vs) {
     throw UnimplementedError();
   }
+
+  @override
+  PolyLine diffAspect(bool isFixedAspect) {
+    throw UnimplementedError();
+  }
+
+  @override
+  LengthDim get lengthDim => const LengthDim();
+
+  @override
+  LineMetrics get metrics => LineMetrics();
 }
 
 void main() {
@@ -260,6 +271,30 @@ void main() {
   test('PolySpline visiblePoints are all visible except first and last', () {
     final spline = PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W]);
     expect(spline.visiblePoints, [Anchor.S.vector, Anchor.E.vector]);
+  });
+
+  test('Metrics calculation for PolySpline is correct', () {
+    final flow = PolyCurve.anchors([
+      Anchor.SW,
+      Anchor.W,
+      Anchor.E,
+      Anchor.NE,
+    ]);
+    final m = flow.metrics;
+    final l = flow.lengthDim;
+
+    expect(m.xMin, -.5);
+    expect(m.xMax, .5);
+    expect(m.yMin, -.17);
+    expect(m.yMax, .17);
+    expect(m.xAvg, .0);
+    expect(m.yAvg, .0);
+    expect(m.width, 1.0);
+    expect(m.height, .34);
+    expect(flow.center, Vector2(.0, .0));
+    expect(l.length, 1.25);
+    expect(l.dxSum, 1.0);
+    expect(l.dySum, 0.67);
   });
 
   test('turn by default of 90° except at Origin', () {

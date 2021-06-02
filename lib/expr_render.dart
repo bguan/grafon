@@ -35,7 +35,7 @@ class RenderPlan {
   static const MIN_WIDTH = 0.25;
   static const MIN_HEIGHT = 0.25;
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
-  static const STD_GAP = 0.05;
+  static const STD_GAP = 0.1;
   final Iterable<PolyLine> lines;
   late final double xMin, yMin, xMax, yMax, xAvg, yAvg, width, height;
   late final double mass, vMass, hMass;
@@ -281,10 +281,10 @@ class RenderPlan {
             .reCenter();
       case Binary.Wrap:
         final hScale = r1.height / r2.height;
-        r2 = r2.remap((isF, v) => v * hScale / 3).reCenter();
+        r2 = r2.remap((isF, v) => v * hScale / 2).reCenter();
         // if r2 width much more than r1 width, scale r1
-        if (r2.width / r1.width > .8) {
-          r1 = r1.relaxFixedAspect().scaleWidth(r2.width).reCenter();
+        while (r2.width > .7 * r1.width) {
+          r1 = r1.relaxFixedAspect().scaleWidth(1.4 * r1.width).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);

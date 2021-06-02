@@ -46,7 +46,7 @@ abstract class GrafonWord {
 
 /// Core Word
 class CoreWord extends GrafonWord {
-  static const MIN_WIDTH_RATIO = 3 / 4;
+  static const MIN_WIDTH_RATIO = 2 / 3;
   final GrafonExpr expr;
   final Pronunciation pronunciation;
   late final RenderPlan renderPlan;
@@ -161,7 +161,7 @@ class WordGroup {
 
 final w = WordGroup(
     'Edge Cases',
-    CoreWord(Mono.Dot.over(Mono.Dot.gram).over(Mono.Circle.shrink())),
+    CoreWord(Mono.X.over(Mono.X.gram).merge(Quads.Line.up)),
     'Random tricky edge cases for rendering.', [
   CoreWord(Quads.Angle.up.over(Quads.Arc.down)),
   CoreWord(ClusterExpr(Quads.Arc.up.next(Quads.Arc.up)).over(Quads.Angle.down)),
@@ -213,7 +213,7 @@ final testGroup = WordGroup(
 
 final numericGroup = WordGroup(
   'Numeric',
-  CoreWord(Mono.Dot.over(Mono.Dot.gram).over(Mono.Circle.shrink())),
+  CoreWord(Mono.X.over(Mono.X.gram).merge(Quads.Line.up)),
   'Numbers and counting...',
   [
     CoreWord(Mono.Circle.gram, "Zero"),

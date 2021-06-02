@@ -256,7 +256,7 @@ class ClusterExpr extends MultiGramExpr {
           sList[i].diffConsonant(sList[i].cons.pair.head)
         else if (i ==
             sList.length - 2) // Swap second last syllable to tail form
-            sList[i].diffEndConsonant(sList[i].coda.group.tail)
+          sList[i].diffEndConsonant(sList[i].coda.group.tail)
         else // other syllable are untouched
           sList[i],
     ]);

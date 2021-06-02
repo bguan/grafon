@@ -139,67 +139,14 @@ extension ConsPairHelper on ConsPair {
   String get shortName => this.toString().split('.').last;
 }
 
-/// enum for Coda grouping for leading gram in a binary operation.
-enum CodaGroup { hthdh, kgt, nmp, szf }
+/// Coda is the ending consonant at the end of a syllable
+enum Coda { NIL, h, th, dh, k, g, t, n, m, p, s, z, f, ng }
 
-/// extension to map base, tail ending consonant to enum, short name.
-extension CodaGroupHelper on CodaGroup {
-  Coda get base {
-    switch (this) {
-      case CodaGroup.hthdh:
-        return Coda.nil;
-      case CodaGroup.kgt:
-        return Coda.k;
-      case CodaGroup.nmp:
-        return Coda.n;
-      case CodaGroup.szf:
-        return Coda.s;
-      default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
-    }
-  }
-
-  // use tail when it is the last operator in a cluster group
-  Coda get tail {
-    switch (this) {
-      case CodaGroup.hthdh:
-        return Coda.h;
-      case CodaGroup.kgt:
-        return Coda.g;
-      case CodaGroup.nmp:
-        return Coda.m;
-      case CodaGroup.szf:
-        return Coda.z;
-      default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
-    }
-  }
-
-  // use alt when the end is the same as the starting consonant of next syllable
-  Coda get alt {
-    switch (this) {
-      case CodaGroup.hthdh:
-        return Coda.th; // 1 exception "aa" => "atha" but "ahha" => "adhha"
-      case CodaGroup.kgt:
-        return Coda.t;
-      case CodaGroup.nmp:
-        return Coda.p;
-      case CodaGroup.szf:
-        return Coda.f;
-      default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
-    }
-  }
-
-  String get shortName => this.toString().split('.').last;
-}
-
-enum Coda { nil, h, th, dh, k, g, t, n, m, p, s, z, f, ng }
-
+/// Helper to map coda to get the group that its associated with and phoneme
 extension CodaHelper on Coda {
   CodaGroup get group {
     switch (this) {
-      case Coda.nil:
+      case Coda.NIL:
       case Coda.h:
       case Coda.th:
       case Coda.dh:
@@ -225,7 +172,64 @@ extension CodaHelper on Coda {
     }
   }
 
-  String get phoneme => this == Coda.nil ? '' : this.toString().split('.').last;
+  String get phoneme => this == Coda.NIL ? '' : this.toString().split('.').last;
+}
+
+/// Enum for Coda grouping for leading gram in a binary operation.
+enum CodaGroup { hthdh, kgt, nmp, szf }
+
+/// Extension to map base, tail, alt Coda to enum, short name.
+extension CodaGroupHelper on CodaGroup {
+  Coda get base {
+    switch (this) {
+      case CodaGroup.hthdh:
+        return Coda.NIL;
+      case CodaGroup.kgt:
+        return Coda.k;
+      case CodaGroup.nmp:
+        return Coda.n;
+      case CodaGroup.szf:
+        return Coda.s;
+      default:
+        throw Exception("Unexpected BinaryEnding Enum ${this}");
+    }
+  }
+
+  /// Use tail when it is the last operator in a cluster group
+  Coda get tail {
+    switch (this) {
+      case CodaGroup.hthdh:
+        return Coda.h;
+      case CodaGroup.kgt:
+        return Coda.g;
+      case CodaGroup.nmp:
+        return Coda.m;
+      case CodaGroup.szf:
+        return Coda.z;
+      default:
+        throw Exception("Unexpected BinaryEnding Enum ${this}");
+    }
+  }
+
+  /// Use alt when coda is the same as the starting consonant of next syllable.
+  /// The only exception is "ahHa". Simply change coda alt to "athHa" wont work.
+  /// As "athHa" sounds to close to "athA", pronunciation will handle it.
+  Coda get alt {
+    switch (this) {
+      case CodaGroup.hthdh:
+        return Coda.th; // 1 exception "aA" => "athA" but "ahHa" => "adhHa"
+      case CodaGroup.kgt:
+        return Coda.t;
+      case CodaGroup.nmp:
+        return Coda.p;
+      case CodaGroup.szf:
+        return Coda.f;
+      default:
+        throw Exception("Unexpected BinaryEnding Enum ${this}");
+    }
+  }
+
+  String get shortName => this.toString().split('.').last;
 }
 
 /// Class to handle Syllable and its manipulation
@@ -236,12 +240,12 @@ class Syllable {
   final Coda coda;
 
   Syllable(this.cons, this.vowel,
-      [this.endVowel = Vowel.NIL, this.coda = Coda.nil]);
+      [this.endVowel = Vowel.NIL, this.coda = Coda.NIL]);
 
   Syllable.v(this.vowel)
       : cons = Cons.NIL,
         endVowel = Vowel.NIL,
-        coda = Coda.nil;
+        coda = Coda.NIL;
 
   Syllable.vc(this.vowel, this.coda)
       : cons = Cons.NIL,
@@ -249,7 +253,7 @@ class Syllable {
 
   Syllable.vv(this.vowel, this.endVowel)
       : cons = Cons.NIL,
-        coda = Coda.nil;
+        coda = Coda.NIL;
 
   Syllable.vvc(this.vowel, this.endVowel, this.coda) : cons = Cons.NIL;
 
@@ -274,8 +278,8 @@ class Syllable {
   @override
   String toString() =>
       (cons == Cons.NIL ? vowel.phoneme : cons.phoneme + vowel.phoneme) +
-      endVowel.phoneme +
-      coda.phoneme;
+      (endVowel == Vowel.NIL ? '' : endVowel.phoneme) +
+      (coda == Coda.NIL ? '' : coda.phoneme);
 
   /// make a syllable based on another when it is the head of a cluster expr
   Syllable get headForm => Syllable(cons.pair.head, vowel, endVowel, coda);
@@ -297,9 +301,9 @@ class Syllable {
       Syllable(cons, vowel, endVowel, coda);
 
   /// make a syllable based on another with a different end consonant
-  Syllable diffEndConsonant(Coda e) => Syllable(cons, vowel, endVowel, e);
+  Syllable diffCoda(Coda e) => Syllable(cons, vowel, endVowel, e);
 
-  String get lastPhoneme => (coda != Coda.nil)
+  String get lastPhoneme => (coda != Coda.NIL)
       ? coda.phoneme
       : (endVowel != Vowel.NIL ? endVowel : vowel).phoneme;
 
@@ -308,9 +312,17 @@ class Syllable {
 
 /// Class to represent Pronunciation as a sequence of Syllable and resp utils.
 class Pronunciation {
-  late final List<Syllable> syllables;
+  final Iterable<Syllable> syllables;
 
-  Pronunciation(Iterable<Syllable> syllables) {
+  /// input
+  late final List<Syllable> voicing;
+
+  /// voicing, transformed as needed
+  late final String _voicingString;
+
+  /// precompute voicing string representation
+
+  Pronunciation(this.syllables) {
     final slist = <Syllable>[];
     var s = syllables.first;
     for (var next in syllables.skip(1)) {
@@ -318,14 +330,15 @@ class Pronunciation {
         slist.add(s);
       } else if (s.coda == Coda.h && next.cons == Cons.h) {
         // special case i.e. "ah-Ha" => "adh-Ha"
-        slist.add(s.diffEndConsonant(Coda.dh));
+        slist.add(s.diffCoda(Coda.dh));
       } else {
         slist.add(s.altOpForm);
       }
       s = next;
     }
     slist.add(s);
-    this.syllables = List.unmodifiable(slist);
+    voicing = List.unmodifiable(slist);
+    _voicingString = voicing.map((s) => s.toString()).join();
   }
 
   @override
@@ -334,22 +347,22 @@ class Pronunciation {
 
     Pronunciation that = other;
 
-    final leq = ListEquality<Syllable>().equals;
+    final ieq = IterableEquality<Syllable>().equals;
 
-    return leq(this.syllables, that.syllables);
+    return ieq(this.syllables, that.syllables);
   }
 
   @override
-  int get hashCode => ListEquality<Syllable>().hash(syllables);
+  int get hashCode => IterableEquality<Syllable>().hash(syllables);
 
   @override
-  String toString() => syllables.map((s) => s.toString()).join();
+  String toString() => _voicingString;
 
-  Syllable operator [](int index) => syllables[index];
+  Syllable operator [](int index) => voicing[index];
 
-  Syllable get first => syllables[0];
+  Syllable get first => voicing[0];
 
-  Syllable get last => syllables[length - 1];
+  Syllable get last => voicing[length - 1];
 
   int get length => syllables.length;
 }

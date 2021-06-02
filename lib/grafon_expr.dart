@@ -214,7 +214,7 @@ class BinaryOpExpr extends MultiGramExpr {
     final p1 = expr1.pronunciation;
     return Pronunciation([
       ...p1.syllables.take(p1.length - 1),
-      p1[p1.length - 1].diffEndConsonant(op.coda.base),
+      p1[p1.length - 1].diffCoda(op.coda.base),
       ...expr2.pronunciation.syllables,
     ]);
   }
@@ -242,7 +242,7 @@ class ClusterExpr extends MultiGramExpr {
 
   @override
   Pronunciation get pronunciation {
-    final sList = binaryExpr.pronunciation.syllables;
+    final sList = binaryExpr.pronunciation.voicing;
     return Pronunciation([
       for (var i = 0; i < sList.length; i++)
         if (i == 0 && i == sList.length - 2) // first is also second last
@@ -256,7 +256,7 @@ class ClusterExpr extends MultiGramExpr {
           sList[i].diffConsonant(sList[i].cons.pair.head)
         else if (i ==
             sList.length - 2) // Swap second last syllable to tail form
-          sList[i].diffEndConsonant(sList[i].coda.group.tail)
+            sList[i].diffCoda(sList[i].coda.group.tail)
         else // other syllable are untouched
           sList[i],
     ]);

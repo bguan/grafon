@@ -105,7 +105,7 @@ void main() {
         final g = GramTable().atConsPairVowel(cp, v);
         expect(
           g.pronunciation.first,
-          Syllable(cp.base, v, Vowel.NIL, Coda.nil),
+          Syllable(cp.base, v, Vowel.NIL, Coda.NIL),
         );
       }
     }

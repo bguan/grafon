@@ -31,12 +31,7 @@ void main() {
 class GrafonApp extends StatelessWidget {
   Future<void> _launchInBrowser(String url) async {
     if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: false,
-        forceWebView: false,
-        headers: <String, String>{'my_header_key': 'my_header_value'},
-      );
+      await launch(url);
     } else {
       throw 'Could not launch $url';
     }
@@ -67,13 +62,15 @@ class GrafonApp extends StatelessWidget {
                 _launchInBrowser('https://github.com/bguan/grafon'),
           ),
         ),
-        body: PageView(
-          scrollDirection: Axis.horizontal,
-          controller: controller,
-          children: [
-            GramTableView(),
-            ...wordViews,
-          ],
+        body: SafeArea(
+          child: PageView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            children: [
+              GramTableView(),
+              ...wordViews,
+            ],
+          ),
         ),
       ),
     );

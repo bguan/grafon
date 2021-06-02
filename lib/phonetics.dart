@@ -21,161 +21,139 @@ library phonetics;
 import 'package:collection/collection.dart';
 
 /// Basic vowels for the language. Can be combined into diphthong.
-enum Vowel { nil, A, E, I, O, U }
+enum Vowel { NIL, a, e, i, o, u }
 
 extension VowelHelper on Vowel {
   String get phoneme =>
-      this == Vowel.nil ? '' : this.toString().split('.').last.toLowerCase();
+      this == Vowel.NIL ? '' : this.toString().split('.').last;
 }
 
-/// Basic consonants at the beginning of a syllable.
-enum Consonant {
-  nil,
-  H,
-  B,
-  P,
-  J,
-  Ch,
-  D,
-  T,
-  V,
-  F,
-  G,
-  K,
-  L,
-  R,
-  M,
-  N,
-  S,
-  Z,
-  Sh,
-  Zh
-}
+/// Consonants at the beginning of a syllable.
+enum Cons { NIL, h, b, p, j, ch, d, t, v, f, g, k, l, r, m, n, s, z, sh, zh }
 
 /// Consonants are paired based on related vocalization.
 /// One is used as the "Base" form, the other the "Head" form.
 /// Head form overrides spatial operator to indicate "head" of cluster.
-enum ConsPair { aHa, BaPa, ChaJa, DaTa, FaVa, GaKa, LaRa, MaNa, SaZa, ShaZha }
+enum ConsPair { h, bp, chj, dt, fv, gk, lr, mn, sz, shzh }
 
 /// Extension to map Consonant to the Pair and provide short name
-extension ConsonantHelper on Consonant {
+extension ConsonantHelper on Cons {
   ConsPair get pair {
     switch (this) {
-      case Consonant.B:
-      case Consonant.P:
-        return ConsPair.BaPa;
+      case Cons.b:
+      case Cons.p:
+        return ConsPair.bp;
 
-      case Consonant.Ch:
-      case Consonant.J:
-        return ConsPair.ChaJa;
+      case Cons.ch:
+      case Cons.j:
+        return ConsPair.chj;
 
-      case Consonant.D:
-      case Consonant.T:
-        return ConsPair.DaTa;
+      case Cons.d:
+      case Cons.t:
+        return ConsPair.dt;
 
-      case Consonant.V:
-      case Consonant.F:
-        return ConsPair.FaVa;
+      case Cons.v:
+      case Cons.f:
+        return ConsPair.fv;
 
-      case Consonant.G:
-      case Consonant.K:
-        return ConsPair.GaKa;
+      case Cons.g:
+      case Cons.k:
+        return ConsPair.gk;
 
-      case Consonant.R:
-      case Consonant.L:
-        return ConsPair.LaRa;
+      case Cons.r:
+      case Cons.l:
+        return ConsPair.lr;
 
-      case Consonant.N:
-      case Consonant.M:
-        return ConsPair.MaNa;
+      case Cons.n:
+      case Cons.m:
+        return ConsPair.mn;
 
-      case Consonant.Z:
-      case Consonant.S:
-        return ConsPair.SaZa;
+      case Cons.z:
+      case Cons.s:
+        return ConsPair.sz;
 
-      case Consonant.Zh:
-      case Consonant.Sh:
-        return ConsPair.ShaZha;
+      case Cons.zh:
+      case Cons.sh:
+        return ConsPair.shzh;
 
       default:
-        return ConsPair.aHa;
+        return ConsPair.h;
     }
   }
 
-  String get phoneme =>
-      this == Consonant.nil ? '' : this.toString().split('.').last;
+  String get phoneme => this == Cons.NIL ? '' : this.toString().split('.').last;
 }
 
 /// Extension to map ConsonantPair to the base and head, and provide short name.
 extension ConsPairHelper on ConsPair {
-  Consonant get base {
+  Cons get base {
     switch (this) {
-      case ConsPair.BaPa:
-        return Consonant.B;
-      case ConsPair.ChaJa:
-        return Consonant.Ch;
-      case ConsPair.DaTa:
-        return Consonant.D;
-      case ConsPair.FaVa:
-        return Consonant.F;
-      case ConsPair.GaKa:
-        return Consonant.G;
-      case ConsPair.LaRa:
-        return Consonant.L;
-      case ConsPair.MaNa:
-        return Consonant.M;
-      case ConsPair.SaZa:
-        return Consonant.S;
-      case ConsPair.ShaZha:
-        return Consonant.Sh;
+      case ConsPair.bp:
+        return Cons.b;
+      case ConsPair.chj:
+        return Cons.ch;
+      case ConsPair.dt:
+        return Cons.d;
+      case ConsPair.fv:
+        return Cons.f;
+      case ConsPair.gk:
+        return Cons.g;
+      case ConsPair.lr:
+        return Cons.l;
+      case ConsPair.mn:
+        return Cons.m;
+      case ConsPair.sz:
+        return Cons.s;
+      case ConsPair.shzh:
+        return Cons.sh;
       default:
-        return Consonant.nil;
+        return Cons.NIL;
     }
   }
 
-  Consonant get head {
+  Cons get head {
     switch (this) {
-      case ConsPair.BaPa:
-        return Consonant.P;
-      case ConsPair.ChaJa:
-        return Consonant.J;
-      case ConsPair.DaTa:
-        return Consonant.T;
-      case ConsPair.FaVa:
-        return Consonant.V;
-      case ConsPair.GaKa:
-        return Consonant.K;
-      case ConsPair.LaRa:
-        return Consonant.R;
-      case ConsPair.MaNa:
-        return Consonant.N;
-      case ConsPair.SaZa:
-        return Consonant.Z;
-      case ConsPair.ShaZha:
-        return Consonant.Zh;
+      case ConsPair.bp:
+        return Cons.p;
+      case ConsPair.chj:
+        return Cons.j;
+      case ConsPair.dt:
+        return Cons.t;
+      case ConsPair.fv:
+        return Cons.v;
+      case ConsPair.gk:
+        return Cons.k;
+      case ConsPair.lr:
+        return Cons.r;
+      case ConsPair.mn:
+        return Cons.n;
+      case ConsPair.sz:
+        return Cons.z;
+      case ConsPair.shzh:
+        return Cons.zh;
       default:
-        return Consonant.H;
+        return Cons.h;
     }
   }
 
   String get shortName => this.toString().split('.').last;
 }
 
-/// enum for ending consonant pair for preceding gram in a binary operation.
-enum CodaTrio { HTh, KGT, NMP, SZR }
+/// enum for Coda grouping for leading gram in a binary operation.
+enum CodaGroup { hthdh, kgt, nmp, szf }
 
 /// extension to map base, tail ending consonant to enum, short name.
-extension CodaTrioHelper on CodaTrio {
+extension CodaGroupHelper on CodaGroup {
   Coda get base {
     switch (this) {
-      case CodaTrio.HTh:
+      case CodaGroup.hthdh:
         return Coda.nil;
-      case CodaTrio.KGT:
-        return Coda.K;
-      case CodaTrio.NMP:
-        return Coda.N;
-      case CodaTrio.SZR:
-        return Coda.S;
+      case CodaGroup.kgt:
+        return Coda.k;
+      case CodaGroup.nmp:
+        return Coda.n;
+      case CodaGroup.szf:
+        return Coda.s;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -184,14 +162,14 @@ extension CodaTrioHelper on CodaTrio {
   // use tail when it is the last operator in a cluster group
   Coda get tail {
     switch (this) {
-      case CodaTrio.HTh:
-        return Coda.H;
-      case CodaTrio.KGT:
-        return Coda.G;
-      case CodaTrio.NMP:
-        return Coda.M;
-      case CodaTrio.SZR:
-        return Coda.Z;
+      case CodaGroup.hthdh:
+        return Coda.h;
+      case CodaGroup.kgt:
+        return Coda.g;
+      case CodaGroup.nmp:
+        return Coda.m;
+      case CodaGroup.szf:
+        return Coda.z;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -200,14 +178,14 @@ extension CodaTrioHelper on CodaTrio {
   // use alt when the end is the same as the starting consonant of next syllable
   Coda get alt {
     switch (this) {
-      case CodaTrio.HTh:
-        return Coda.Th;
-      case CodaTrio.KGT:
-        return Coda.T;
-      case CodaTrio.NMP:
-        return Coda.P;
-      case CodaTrio.SZR:
-        return Coda.R;
+      case CodaGroup.hthdh:
+        return Coda.th; // 1 exception "aa" => "atha" but "ahha" => "adhha"
+      case CodaGroup.kgt:
+        return Coda.t;
+      case CodaGroup.nmp:
+        return Coda.p;
+      case CodaGroup.szf:
+        return Coda.f;
       default:
         throw Exception("Unexpected BinaryEnding Enum ${this}");
     }
@@ -216,67 +194,66 @@ extension CodaTrioHelper on CodaTrio {
   String get shortName => this.toString().split('.').last;
 }
 
-enum Coda { nil, H, Th, K, G, T, N, M, P, S, Z, R, ng }
+enum Coda { nil, h, th, dh, k, g, t, n, m, p, s, z, f, ng }
 
 extension CodaHelper on Coda {
-  CodaTrio get trio {
+  CodaGroup get group {
     switch (this) {
       case Coda.nil:
-      case Coda.H:
-      case Coda.Th:
-        return CodaTrio.HTh;
+      case Coda.h:
+      case Coda.th:
+      case Coda.dh:
+        return CodaGroup.hthdh;
 
-      case Coda.K:
-      case Coda.G:
-      case Coda.T:
-        return CodaTrio.KGT;
+      case Coda.k:
+      case Coda.g:
+      case Coda.t:
+        return CodaGroup.kgt;
 
-      case Coda.N:
-      case Coda.M:
-      case Coda.P:
-        return CodaTrio.NMP;
+      case Coda.n:
+      case Coda.m:
+      case Coda.p:
+        return CodaGroup.nmp;
 
-      case Coda.S:
-      case Coda.Z:
-      case Coda.R:
-        return CodaTrio.SZR;
+      case Coda.s:
+      case Coda.z:
+      case Coda.f:
+        return CodaGroup.szf;
 
       default:
-        throw UnsupportedError('$this does not belong to a Consonant Pair');
+        throw UnsupportedError('$this does not belong to a Coda Pair');
     }
   }
 
-  String get phoneme =>
-      this == Coda.nil ? '' : this.toString().split('.').last.toLowerCase();
+  String get phoneme => this == Coda.nil ? '' : this.toString().split('.').last;
 }
 
 /// Class to handle Syllable and its manipulation
 class Syllable {
-  final Consonant consonant;
+  final Cons cons;
   final Vowel vowel;
   final Vowel endVowel;
   final Coda coda;
 
-  Syllable(this.consonant, this.vowel,
-      [this.endVowel = Vowel.nil, this.coda = Coda.nil]);
+  Syllable(this.cons, this.vowel,
+      [this.endVowel = Vowel.NIL, this.coda = Coda.nil]);
 
   Syllable.v(this.vowel)
-      : consonant = Consonant.nil,
-        endVowel = Vowel.nil,
+      : cons = Cons.NIL,
+        endVowel = Vowel.NIL,
         coda = Coda.nil;
 
   Syllable.vc(this.vowel, this.coda)
-      : consonant = Consonant.nil,
-        endVowel = Vowel.nil;
+      : cons = Cons.NIL,
+        endVowel = Vowel.NIL;
 
   Syllable.vv(this.vowel, this.endVowel)
-      : consonant = Consonant.nil,
+      : cons = Cons.NIL,
         coda = Coda.nil;
 
-  Syllable.vvc(this.vowel, this.endVowel, this.coda)
-      : consonant = Consonant.nil;
+  Syllable.vvc(this.vowel, this.endVowel, this.coda) : cons = Cons.NIL;
 
-  Syllable.cvc(this.consonant, this.vowel, this.coda) : endVowel = Vowel.nil;
+  Syllable.cvc(this.cons, this.vowel, this.coda) : endVowel = Vowel.NIL;
 
   @override
   bool operator ==(Object other) {
@@ -284,7 +261,7 @@ class Syllable {
 
     Syllable that = other;
 
-    return this.consonant == that.consonant &&
+    return this.cons == that.cons &&
         this.vowel == that.vowel &&
         this.endVowel == that.endVowel &&
         this.coda == that.coda;
@@ -292,54 +269,59 @@ class Syllable {
 
   @override
   int get hashCode =>
-      consonant.hashCode ^ vowel.hashCode ^ endVowel.hashCode ^ coda.hashCode;
+      cons.hashCode ^ vowel.hashCode ^ endVowel.hashCode ^ coda.hashCode;
 
   @override
   String toString() =>
-      (consonant == Consonant.nil
-          ? vowel.phoneme.toUpperCase()
-          : consonant.phoneme + vowel.phoneme) +
+      (cons == Cons.NIL ? vowel.phoneme : cons.phoneme + vowel.phoneme) +
       endVowel.phoneme +
       coda.phoneme;
 
   /// make a syllable based on another when it is the head of a cluster expr
-  Syllable get headForm => Syllable(consonant.pair.head, vowel, endVowel, coda);
+  Syllable get headForm => Syllable(cons.pair.head, vowel, endVowel, coda);
 
   /// make a syllable based on another when it's operator is tail of a cluster
-  Syllable get tailOpForm =>
-      Syllable(consonant, vowel, endVowel, coda.trio.tail);
+  Syllable get tailOpForm => Syllable(cons, vowel, endVowel, coda.group.tail);
 
   /// make a syllable based on another when it's operator is tail of a cluster
-  Syllable get altOpForm => Syllable(consonant, vowel, endVowel, coda.trio.alt);
+  Syllable get altOpForm => Syllable(cons, vowel, endVowel, coda.group.alt);
 
   /// make a syllable based on another with a different consonant
-  Syllable diffConsonant(Consonant c) => Syllable(c, vowel, endVowel, coda);
+  Syllable diffConsonant(Cons c) => Syllable(c, vowel, endVowel, coda);
 
   /// make a syllable based on another with a different vowel
-  Syllable diffVowel(Vowel v) => Syllable(consonant, v, endVowel, coda);
+  Syllable diffVowel(Vowel v) => Syllable(cons, v, endVowel, coda);
 
   /// make a syllable based on another with a different end vowel
   Syllable diffEndVowel(Vowel endVowel) =>
-      Syllable(consonant, vowel, endVowel, coda);
+      Syllable(cons, vowel, endVowel, coda);
 
   /// make a syllable based on another with a different end consonant
-  Syllable diffEndConsonant(Coda e) => Syllable(consonant, vowel, endVowel, e);
+  Syllable diffEndConsonant(Coda e) => Syllable(cons, vowel, endVowel, e);
+
+  String get lastPhoneme => (coda != Coda.nil)
+      ? coda.phoneme
+      : (endVowel != Vowel.NIL ? endVowel : vowel).phoneme;
+
+  String get firstPhoneme => (cons != Cons.NIL) ? cons.phoneme : vowel.phoneme;
 }
 
 /// Class to represent Pronunciation as a sequence of Syllable and resp utils.
 class Pronunciation {
-  static const SEPARATOR_SYMBOL = '-';
   late final List<Syllable> syllables;
 
   Pronunciation(Iterable<Syllable> syllables) {
     final slist = <Syllable>[];
     var s = syllables.first;
-    for (final next in syllables.skip(1)) {
-      if (s.coda.phoneme == next.consonant.phoneme &&
-          (s.coda != Coda.nil || s.endVowel == next.vowel))
-        slist.add(s.altOpForm);
-      else
+    for (var next in syllables.skip(1)) {
+      if (s.lastPhoneme != next.firstPhoneme) {
         slist.add(s);
+      } else if (s.coda == Coda.h && next.cons == Cons.h) {
+        // special case i.e. "ah-Ha" => "adh-Ha"
+        slist.add(s.diffEndConsonant(Coda.dh));
+      } else {
+        slist.add(s.altOpForm);
+      }
       s = next;
     }
     slist.add(s);
@@ -361,8 +343,7 @@ class Pronunciation {
   int get hashCode => ListEquality<Syllable>().hash(syllables);
 
   @override
-  String toString() =>
-      syllables.map((s) => s.toString()).join(SEPARATOR_SYMBOL);
+  String toString() => syllables.map((s) => s.toString()).join();
 
   Syllable operator [](int index) => syllables[index];
 

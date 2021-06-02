@@ -90,16 +90,16 @@ extension BinaryExtension on Binary {
     }
   }
 
-  CodaTrio get coda {
+  CodaGroup get coda {
     switch (this) {
       case Binary.Merge:
-        return CodaTrio.KGT;
+        return CodaGroup.kgt;
       case Binary.Next:
-        return CodaTrio.HTh;
+        return CodaGroup.hthdh;
       case Binary.Over:
-        return CodaTrio.SZR;
+        return CodaGroup.szf;
       case Binary.Wrap:
-        return CodaTrio.NMP;
+        return CodaGroup.nmp;
       default:
         throw Exception("Unexpected Binary Enum ${this}");
     }
@@ -247,16 +247,16 @@ class ClusterExpr extends MultiGramExpr {
       for (var i = 0; i < sList.length; i++)
         if (i == 0 && i == sList.length - 2) // first is also second last
           Syllable(
-            sList[i].consonant.pair.head,
+            sList[i].cons.pair.head,
             sList[i].vowel,
             sList[i].endVowel,
-            sList[i].coda.trio.tail,
+            sList[i].coda.group.tail,
           )
         else if (i == 0) // Swap first syllable to head form
-          sList[i].diffConsonant(sList[i].consonant.pair.head)
+          sList[i].diffConsonant(sList[i].cons.pair.head)
         else if (i ==
             sList.length - 2) // Swap second last syllable to tail form
-          sList[i].diffEndConsonant(sList[i].coda.trio.tail)
+            sList[i].diffEndConsonant(sList[i].coda.group.tail)
         else // other syllable are untouched
           sList[i],
     ]);

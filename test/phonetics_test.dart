@@ -26,12 +26,12 @@ void main() {
       ...ConsPair.values.map((cp) => cp.head)
     ]);
 
-    expect(consFromPairs, Set.of(Consonant.values));
+    expect(consFromPairs, Set.of(Cons.values));
   });
 
   test('Consonants should cover all ConsPair', () {
     final conspairFromCons = Set.of([
-      ...Consonant.values.map((c) => c.pair),
+      ...Cons.values.map((c) => c.pair),
     ]);
 
     expect(conspairFromCons, Set.of(ConsPair.values));
@@ -39,10 +39,10 @@ void main() {
 
   test('Consonants short names should all be unique', () {
     final shortNamesFromCons = Set.of([
-      ...Consonant.values.map((c) => c.phoneme),
+      ...Cons.values.map((c) => c.phoneme),
     ]);
 
-    expect(shortNamesFromCons.length, Consonant.values.length);
+    expect(shortNamesFromCons.length, Cons.values.length);
   });
 
   test('ConsPairs short names should all be unique', () {

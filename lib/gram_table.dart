@@ -111,7 +111,7 @@ class _MonoHelper {
       Anchor.W,
       Anchor.N,
       Anchor.E,
-    ], isFixedAspect: true)
+    ], isFixedAspect: true),
   ];
 
   final blobPaths = [
@@ -157,16 +157,16 @@ class _MonoHelper {
 
   _MonoHelper._internal() {
     enum2mono = Map.unmodifiable({
-      Mono.Dot: MonoGram(dotPaths, ConsPair.aHa),
-      Mono.Cross: MonoGram(crossPaths, ConsPair.BaPa),
-      Mono.X: MonoGram(xPaths, ConsPair.GaKa),
-      Mono.Diamond: MonoGram(diamondPaths, ConsPair.ChaJa),
-      Mono.Square: MonoGram(squarePaths, ConsPair.DaTa),
-      Mono.Light: MonoGram(lightPaths, ConsPair.SaZa),
-      Mono.Sun: MonoGram(sunPaths, ConsPair.ShaZha),
-      Mono.Circle: MonoGram(circlePaths, ConsPair.MaNa),
-      Mono.Flower: MonoGram(flowerPaths, ConsPair.FaVa),
-      Mono.Blob: MonoGram(blobPaths, ConsPair.LaRa),
+      Mono.Dot: MonoGram(dotPaths, ConsPair.h),
+      Mono.Cross: MonoGram(crossPaths, ConsPair.bp),
+      Mono.X: MonoGram(xPaths, ConsPair.gk),
+      Mono.Diamond: MonoGram(diamondPaths, ConsPair.chj),
+      Mono.Square: MonoGram(squarePaths, ConsPair.dt),
+      Mono.Light: MonoGram(lightPaths, ConsPair.sz),
+      Mono.Sun: MonoGram(sunPaths, ConsPair.shzh),
+      Mono.Circle: MonoGram(circlePaths, ConsPair.mn),
+      Mono.Flower: MonoGram(flowerPaths, ConsPair.fv),
+      Mono.Blob: MonoGram(blobPaths, ConsPair.lr),
     });
   }
 }
@@ -211,10 +211,10 @@ class _QuadHelper {
     PolyCurve.anchors([
       Anchor.NW,
       Anchor.N,
-      Anchor.IE,
       Anchor.S,
       Anchor.SW,
     ]),
+    InvisiDot.anchors([Anchor.E]),
   ];
 
   final flowPaths = [
@@ -242,16 +242,16 @@ class _QuadHelper {
 
   _QuadHelper._internal() {
     enum2quads = Map.unmodifiable({
-      Quads.Line: SemiRotatingQuads(linePaths, ConsPair.aHa),
-      Quads.Corner: RotatingQuads(cornerPaths, ConsPair.BaPa),
-      Quads.Angle: RotatingQuads(anglePaths, ConsPair.GaKa),
-      Quads.Triangle: RotatingQuads(trianglePaths, ConsPair.ChaJa),
-      Quads.Gate: RotatingQuads(gatePaths, ConsPair.DaTa),
-      Quads.Step: FlipQuads(stepPaths, ConsPair.SaZa),
-      Quads.Zap: FlipQuads(zapPaths, ConsPair.ShaZha),
-      Quads.Arc: RotatingQuads(arcPaths, ConsPair.MaNa),
-      Quads.Flow: FlipQuads(flowPaths, ConsPair.FaVa),
-      Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.LaRa),
+      Quads.Line: SemiRotatingQuads(linePaths, ConsPair.h),
+      Quads.Corner: RotatingQuads(cornerPaths, ConsPair.bp),
+      Quads.Angle: RotatingQuads(anglePaths, ConsPair.gk),
+      Quads.Triangle: RotatingQuads(trianglePaths, ConsPair.chj),
+      Quads.Gate: RotatingQuads(gatePaths, ConsPair.dt),
+      Quads.Step: FlipQuads(stepPaths, ConsPair.sz),
+      Quads.Zap: FlipQuads(zapPaths, ConsPair.shzh),
+      Quads.Arc: RotatingQuads(arcPaths, ConsPair.mn),
+      Quads.Flow: FlipQuads(flowPaths, ConsPair.fv),
+      Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.lr),
     });
   }
 }
@@ -342,8 +342,7 @@ class GramTable {
 
   Gram atConsPairVowel(ConsPair cp, Vowel v) => _gramByConsPairVowel[cp]![v]!;
 
-  Gram atConsonantVowel(Consonant c, Vowel v) =>
-      _gramByConsPairVowel[c.pair]![v]!;
+  Gram atConsonantVowel(Cons c, Vowel v) => _gramByConsPairVowel[c.pair]![v]!;
 
   Gram atMonoFace(Mono m, Face f) =>
       _gramByConsPairVowel[m.gram.consPair]![f.vowel]!;
@@ -353,8 +352,8 @@ class GramTable {
     if (r is ConsPair) {
       final ConsPair cp = r;
       v2g = _gramByConsPairVowel[cp]!;
-    } else if (r is Consonant) {
-      final Consonant c = r;
+    } else if (r is Cons) {
+      final Cons c = r;
       v2g = _gramByConsPairVowel[c.pair]!;
     } else if (r is Mono) {
       final Mono m = r;

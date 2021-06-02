@@ -32,10 +32,10 @@ import 'gram_infra.dart';
 class RenderPlan {
   static const STD_DIM = 1.0;
   static const PEN_WTH_SCALE = 0.05;
-  static const MIN_WIDTH = 0.2;
-  static const MIN_HEIGHT = 0.2;
+  static const MIN_WIDTH = 0.25;
+  static const MIN_HEIGHT = 0.25;
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
-  static const STD_GAP = 0.15;
+  static const STD_GAP = 0.05;
   final Iterable<PolyLine> lines;
   late final double xMin, yMin, xMax, yMax, xAvg, yAvg, width, height;
   late final double mass, vMass, hMass;
@@ -168,9 +168,11 @@ class RenderPlan {
       // add InvisiDots to stretch out the height
       final cx = center.x;
       final cy = center.y;
+      final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
       newR = RenderPlan([
         ...this.lines,
-        InvisiDot([Vector2(cx, cy - hNew / 2), Vector2(cx, cy + hNew / 2)]),
+        InvisiDot([Vector2(cx, cy - hNew / 2), Vector2(cx, cy + hNew / 2)],
+            isFixedAspect: fix),
       ]);
     }
 
@@ -187,9 +189,11 @@ class RenderPlan {
       // add InvisiDots to stretch out the width
       final cx = center.x;
       final cy = center.y;
+      final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
       newR = RenderPlan([
         ...this.lines,
-        InvisiDot([Vector2(cx - wNew / 2, cy), Vector2(cx + wNew / 2, cy)]),
+        InvisiDot([Vector2(cx - wNew / 2, cy), Vector2(cx + wNew / 2, cy)],
+            isFixedAspect: fix),
       ]);
     }
 
@@ -199,46 +203,46 @@ class RenderPlan {
   /// Transform this render plan by unary operation to generate a new render.
   RenderPlan byUnary(Unary op) {
     // assume box is bound by min max X Y of -.5 to .5
-    final shrunk =
-        remap((isFixed, v) => v * (op == Unary.Shrink ? 1 / 2 : 1 / 3));
+    final shrunk = remap((isFixed, v) => v * .5);
+    final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up:
         // shift r's top to align with box top
         // extend the height down w InvisiDot at box bottom, maintain width
         lines = [
-          ...shrunk.shift(0, .25 - shrunk.center.y).lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
+          ...shrunk.shift(0, .5 - shrunk.yMax).lines,
+          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Down:
         // shift r's bottom to align with box bottom
         // extend the height up w InvisiDot at box top, maintain width
         lines = [
-          ...shrunk.shift(0, -.25 + shrunk.center.y).lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
+          ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
+          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Left:
         // shift r's left to align with box left
         // extend the width w InvisiDot at box right, maintain min height
         lines = [
-          ...shrunk.shift(-.25 + shrunk.center.x, 0).lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
+          ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
+          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Right:
         // shift r's left to align with box left
         // extend the width w InvisiDot at box left, maintain min height
         lines = [
-          ...shrunk.shift(.25 - shrunk.center.x, 0).lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
+          ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
+          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Shrink: // extending all sides to former min max
         lines = [
           ...shrunk.lines,
-          InvisiDot([Vector2(-.35, -.35), Vector2(.35, .35)])
+          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
         ];
         break;
       default:
@@ -277,10 +281,10 @@ class RenderPlan {
             .reCenter();
       case Binary.Wrap:
         final hScale = r1.height / r2.height;
-        r2 = r2.remap((isF, v) => v * hScale / 2).reCenter();
-        // if r2 width more than .75 of r1 width, scale r1
+        r2 = r2.remap((isF, v) => v * hScale / 3).reCenter();
+        // if r2 width much more than r1 width, scale r1
         if (r2.width / r1.width > .8) {
-          r1 = r1.relaxFixedAspect().scaleWidth(1.6 * r2.width).reCenter();
+          r1 = r1.relaxFixedAspect().scaleWidth(r2.width).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);

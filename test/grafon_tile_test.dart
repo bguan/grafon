@@ -71,7 +71,7 @@ void main() {
   testWidgets('GramTile has a CustomPaint for every Gram',
       (WidgetTester tester) async {
     for (final cp in ConsPair.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gram = GramTable().atConsPairVowel(cp, v);
         await tester.pumpWidget(GrafonTile(gram.renderPlan, height: 100));
         expect(find.byType(CustomPaint), findsOneWidget);
@@ -176,7 +176,7 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
     final gram = QuadGram([
       PolyStraight.anchors([Anchor.E, Anchor.N])
-    ], Face.Up, ConsPair.aHa);
+    ], Face.Up, ConsPair.h);
 
     final p1 = Offset(100, 100);
     final p2 = Offset(0, 0);
@@ -193,7 +193,7 @@ void main() {
 
     final gram = QuadGram([
       PolyCurve.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
-    ], Face.Up, ConsPair.aHa);
+    ], Face.Up, ConsPair.h);
 
     final p1 = Offset(50, 0);
     final p2 = Offset(50, 100);

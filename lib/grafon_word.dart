@@ -24,6 +24,7 @@ import 'package:vector_math/vector_math.dart';
 
 import 'expr_render.dart';
 import 'grafon_expr.dart';
+import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
@@ -45,6 +46,7 @@ abstract class GrafonWord {
 
 /// Core Word
 class CoreWord extends GrafonWord {
+  static const MIN_WIDTH_RATIO = 3 / 4;
   final GrafonExpr expr;
   final Pronunciation pronunciation;
   late final RenderPlan renderPlan;
@@ -55,9 +57,21 @@ class CoreWord extends GrafonWord {
     var r = expr.renderPlan;
 
     /// Make sure word rendering is not too narrow or too wide
-    if (r.widthRatio < .8 || r.widthRatio > 1.5) {
-      final s = (r.widthRatio < .8 ? .8 : sqrt(r.widthRatio)) / r.widthRatio;
-      r = r.remap((isFixed, v) => isFixed ? v : Vector2(v.x * s, v.y));
+    if (r.widthRatio < MIN_WIDTH_RATIO || r.widthRatio > 2 * MIN_WIDTH_RATIO) {
+      final s = (r.widthRatio < MIN_WIDTH_RATIO
+              ? MIN_WIDTH_RATIO
+              : sqrt(r.widthRatio)) /
+          r.widthRatio;
+      r = r.remap(
+          (isFixed, v) => isFixed ? v * min(s, 1) : Vector2(v.x * s, v.y));
+
+      if (r.widthRatio < MIN_WIDTH_RATIO) {
+        final w = MIN_WIDTH_RATIO * r.height;
+        r = RenderPlan([
+          ...r.lines,
+          InvisiDot([Vector2(-w / 2, 0), Vector2(w / 2, 0)]),
+        ]);
+      }
     }
     renderPlan = r;
   }
@@ -99,8 +113,7 @@ class CompoundWord extends GrafonWord {
       final wsl = w.pronunciation.syllables;
       syllables.addAll(wsl.take(wsl.length - 1));
       final last = wsl.last;
-      syllables
-          .add(Syllable(last.consonant, last.vowel, last.endVowel, Coda.ng));
+      syllables.add(Syllable(last.cons, last.vowel, last.endVowel, Coda.ng));
     }
     syllables.addAll(words.last.pronunciation.syllables);
     pronunciation = Pronunciation(syllables);
@@ -146,19 +159,17 @@ class WordGroup {
   GrafonWord? operator [](String key) => _key2word[key];
 }
 
-final w =
-    WordGroup('?', CoreWord(Mono.Dot.left().over(Mono.Square.gram)), '?', [
-  CoreWord(Mono.Dot.shrink()),
-  CoreWord(Mono.Dot.shrink().over(Mono.Square.gram)),
-  CoreWord(Mono.Dot.up()),
-  CoreWord(Mono.Dot.up().over(Mono.Square.gram)),
-  CoreWord(Mono.Dot.down()),
-  CoreWord(Mono.Dot.down().over(Mono.Square.gram)),
-  CoreWord(Mono.Dot.left()),
-  CoreWord(Mono.Dot.left().over(Mono.Square.gram)),
-  CoreWord(Mono.Dot.right()),
-  CoreWord(Mono.Dot.right().over(Mono.Square.gram)),
-  CoreWord(Mono.Circle.next(Quads.Angle.up)),
+final w = WordGroup(
+    'Edge Cases',
+    CoreWord(Mono.Dot.over(Mono.Dot.gram).over(Mono.Circle.shrink())),
+    'Random tricky edge cases for rendering.', [
+  CoreWord(Quads.Angle.up.over(Quads.Arc.down)),
+  CoreWord(ClusterExpr(Quads.Arc.up.next(Quads.Arc.up)).over(Quads.Angle.down)),
+  CoreWord(Mono.Dot.up().merge(Quads.Step.left)),
+  CoreWord(Mono.Dot.left().over(Quads.Corner.up)),
+  CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
+      .next(Quads.Arc.left)
+      .next(Quads.Flow.right)),
 ]);
 
 final testGroup = WordGroup(
@@ -167,6 +178,20 @@ final testGroup = WordGroup(
       .overCluster(Quads.Triangle.up.next(Mono.Diamond.gram))),
   'Test expression rendering...',
   [
+    CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
+        .next(Quads.Arc.left)
+        .next(Quads.Flow.right)),
+    CoreWord(Mono.Dot.shrink()),
+    CoreWord(Mono.Dot.shrink().over(Mono.Square.gram)),
+    CoreWord(Mono.Dot.up()),
+    CoreWord(Mono.Dot.up().over(Mono.Square.gram)),
+    CoreWord(Mono.Dot.down()),
+    CoreWord(Mono.Dot.down().over(Mono.Square.gram)),
+    CoreWord(Mono.Dot.left()),
+    CoreWord(Mono.Dot.left().over(Mono.Square.gram)),
+    CoreWord(Mono.Dot.right()),
+    CoreWord(Mono.Dot.right().over(Mono.Square.gram)),
+    CoreWord(Mono.Circle.next(Quads.Angle.up)),
     CoreWord(Mono.Circle.next(Quads.Angle.up)),
     CoreWord(Mono.Circle.over(Quads.Angle.up)),
     CoreWord(Mono.Circle.merge(Quads.Angle.up)),
@@ -188,7 +213,7 @@ final testGroup = WordGroup(
 
 final numericGroup = WordGroup(
   'Numeric',
-  CoreWord(Quads.Step.up.over(Mono.Dot.gram).over(Mono.Dot.gram)),
+  CoreWord(Mono.Dot.over(Mono.Dot.gram).over(Mono.Circle.shrink())),
   'Numbers and counting...',
   [
     CoreWord(Mono.Circle.gram, "Zero"),
@@ -218,8 +243,8 @@ final interpersonalGroup = WordGroup(
   [
     CoreWord(Mono.Circle.over(Quads.Line.up), "Person", "Person, Adult."),
     CoreWord(Mono.Dot.over(Quads.Line.up), "Child"),
-    CoreWord(Quads.Angle.up.merge(Quads.Line.up).over(Mono.Circle.gram), "Man",
-        "Man, adult male."),
+    CoreWord(Quads.Angle.up.up().merge(Quads.Line.up).over(Mono.Circle.gram),
+        "Man", "Man, adult male."),
     CoreWord(
         Mono.Circle.over(Mono.Cross.gram), "Woman", "Woman, adult female."),
     CoreWord(Mono.Dot.up().merge(Quads.Step.left), "I",
@@ -243,7 +268,7 @@ final interpersonalGroup = WordGroup(
     CoreWord(Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.up), "Couple"),
     CoreWord(
         Mono.Circle.wrapCluster(
-            Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.up)),
+            Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.down)),
         "Family"),
   ],
 );
@@ -264,21 +289,18 @@ final demoGroup = WordGroup(
     CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
     CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
     CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk", "Talk, speech."),
-    CoreWord(Quads.Arc.left.next(Quads.Arc.right).merge(Quads.Line.up), "Leaf"),
-    CoreWord(Quads.Line.up.merge(Quads.Angle.down.shrink()), "Wood"),
+    CoreWord(Quads.Arc.left.next(Quads.Arc.right), "Leaf"),
+    CoreWord(Quads.Angle.down.shrink().merge(Quads.Line.up), "Wood"),
     CoreWord(Quads.Angle.up.over(Quads.Arc.down), "Drip"),
     CoreWord(Mono.Light.wrap(Quads.Zap.down), "White",
         "White, light from lightning."),
     CoreWord(Mono.Light.wrap(Mono.Sun.gram), "Red", "Red, light from Sun."),
     CoreWord(Mono.Light.wrap(Mono.Flower.gram), "Yellow",
         "Yellow, light from flower."),
+    CoreWord(Mono.Light.wrapCluster(Quads.Arc.left.next(Quads.Arc.right)),
+        "Green", "Green, light from leaf."),
     CoreWord(
-        Mono.Light.wrapCluster(
-            Quads.Arc.left.next(Quads.Arc.right).merge(Quads.Line.up)),
-        "Green",
-        "Green, light from leaf."),
-    CoreWord(
-        Mono.Light.wrapCluster(Quads.Line.up.merge(Quads.Angle.down.shrink())),
+        Mono.Light.wrapCluster(Quads.Angle.down.shrink().merge(Quads.Line.up)),
         "Brown",
         "Brown, Color of wood."),
     CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),

@@ -27,7 +27,7 @@ import 'package:vector_math/vector_math.dart';
 void main() {
   test('RenderPlan next operators leaves expected gap btw non-fixed expr', () {
     final r = Quads.Arc.left.next(Quads.Arc.right).renderPlan;
-    final lines = r.lines.toList();
+    final lines = r.lines.where((l) => l is! InvisiDot).toList();
     expect(lines.length, 2);
     // Previous height about same as Next
     expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));
@@ -115,7 +115,7 @@ void main() {
         shrinkDot,
         RenderPlan([
           PolyDot([Vector2(0, 0)]),
-          InvisiDot([Vector2(-0.35, -0.35), Vector2(0.35, 0.35)])
+          InvisiDot([Vector2(-0.5, -0.5), Vector2(0.5, 0.5)])
         ]));
   });
 
@@ -124,7 +124,7 @@ void main() {
     final devHt = 100.0;
     final devWth = word.widthAtHeight(devHt);
     final r = word.renderPlan.toDevice(devHt, devWth);
-    final lines = r.lines.toList();
+    final lines = r.lines.where((l) => l is! InvisiDot).toList();
     expect(lines.length, 2);
     // Previous height about same as Next
     expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));

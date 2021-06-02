@@ -167,15 +167,15 @@ extension FaceHelper on Face {
   Vowel get vowel {
     switch (this) {
       case Face.Right:
-        return Vowel.E;
+        return Vowel.e;
       case Face.Up:
-        return Vowel.I;
+        return Vowel.i;
       case Face.Left:
-        return Vowel.O;
+        return Vowel.o;
       case Face.Down:
-        return Vowel.U;
+        return Vowel.u;
       default:
-        return Vowel.A;
+        return Vowel.a;
     }
   }
 }
@@ -186,13 +186,13 @@ extension VowelHelper on Vowel {
 
   Face get face {
     switch (this) {
-      case Vowel.E:
+      case Vowel.e:
         return Face.Right;
-      case Vowel.I:
+      case Vowel.i:
         return Face.Up;
-      case Vowel.O:
+      case Vowel.o:
         return Face.Left;
-      case Vowel.U:
+      case Vowel.u:
         return Face.Down;
       default:
         return Face.Center;
@@ -657,9 +657,9 @@ abstract class Gram extends SingleGramExpr {
 
   Vowel get vowel => face.vowel;
 
-  Consonant get base => consPair.base;
+  Cons get base => consPair.base;
 
-  Consonant get head => consPair.head;
+  Cons get head => consPair.head;
 
   @override
   int get hashCode => _hashCode;

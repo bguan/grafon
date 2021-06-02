@@ -46,7 +46,7 @@ class GrafonApp extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final controller = PageController(initialPage: 0);
     final wordViews = [
-      // WordGroupPage(w),
+      WordGroupPage(w),
       WordGroupPage(testGroup),
       WordGroupPage(interpersonalGroup),
       WordGroupPage(numericGroup),

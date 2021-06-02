@@ -60,7 +60,7 @@ void main() {
 
   test('GramTable test atConsPairVowel', () {
     for (final cp in ConsPair.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().atConsPairVowel(cp, v);
 
         expect(gra.consPair, cp);
@@ -70,8 +70,8 @@ void main() {
   });
 
   test('GramTable test atConsonantVowel', () {
-    for (final c in Consonant.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+    for (final c in Cons.values) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().atConsonantVowel(c, v);
         expect(gra.consPair, c.pair);
         expect(gra.vowel, v);
@@ -98,7 +98,7 @@ void main() {
 
   test('GramTable test at dynamics', () {
     for (final cp in ConsPair.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().at(cp, v);
         expect(gra.consPair, cp);
         expect(gra.vowel, v);
@@ -110,8 +110,8 @@ void main() {
       }
     }
 
-    for (final c in Consonant.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+    for (final c in Cons.values) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().at(c, v);
         expect(gra.consPair, c.pair);
         expect(gra.vowel, v);
@@ -136,7 +136,7 @@ void main() {
           expect(gra, isA<QuadGram>());
         }
       }
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().at(m, v);
         expect(gra.consPair, m.gram.consPair);
         expect(gra.vowel, v);
@@ -158,7 +158,7 @@ void main() {
 
   test('GramTable numCols match num of Vowels', () {
     expect(
-        GramTable().numCols, Vowel.values.where((e) => e != Vowel.nil).length);
+        GramTable().numCols, Vowel.values.where((e) => e != Vowel.NIL).length);
   });
 
   test('GramTable numCols match num of Faces', () {

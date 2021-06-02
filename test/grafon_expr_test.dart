@@ -101,11 +101,11 @@ void main() {
 
   test('SingleGram pronunciation matches gram equivalent', () {
     for (final cp in ConsPair.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.nil)) {
+      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final g = GramTable().atConsPairVowel(cp, v);
         expect(
           g.pronunciation.first,
-          Syllable(cp.base, v, Vowel.nil, Coda.nil),
+          Syllable(cp.base, v, Vowel.NIL, Coda.nil),
         );
       }
     }
@@ -155,40 +155,38 @@ void main() {
   test('BinaryExpr toString and pronunciation is correct', () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.toString(), "Sun");
-    expect(sun.pronunciation.first, Syllable(Consonant.Sh, Vowel.A));
+    expect(sun.pronunciation.first, Syllable(Cons.sh, Vowel.a));
 
     final house = Quads.Angle.up.merge(Quads.Gate.down);
     expect(house.toString(), "Up_Angle * Down_Gate");
     expect(house.pronunciation.length, 2);
-    expect(
-        house.pronunciation.first, Syllable.cvc(Consonant.G, Vowel.I, Coda.K));
-    expect(house.pronunciation.last, Syllable(Consonant.D, Vowel.U));
+    expect(house.pronunciation.first, Syllable.cvc(Cons.g, Vowel.i, Coda.k));
+    expect(house.pronunciation.last, Syllable(Cons.d, Vowel.u));
 
     final person = Mono.Dot.gram.over(Quads.Line.up);
     expect(person.toString(), "Dot / Up_Line");
     expect(person.pronunciation.length, 2); // "As-I"
-    expect(person.pronunciation.first, Syllable.vc(Vowel.A, Coda.S));
-    expect(person.pronunciation.last, Syllable.v(Vowel.I));
+    expect(person.pronunciation.first, Syllable.vc(Vowel.a, Coda.s));
+    expect(person.pronunciation.last, Syllable.v(Vowel.i));
 
     final rain = Quads.Flow.down.next(Quads.Flow.down);
     expect(rain.toString(), "Down_Flow . Down_Flow");
     expect(rain.pronunciation.length, 2); // "Fu-Fu"
-    expect(rain.pronunciation.first, Syllable(Consonant.F, Vowel.U));
-    expect(rain.pronunciation.last, Syllable(Consonant.F, Vowel.U));
+    expect(rain.pronunciation.first, Syllable(Cons.f, Vowel.u));
+    expect(rain.pronunciation.last, Syllable(Cons.f, Vowel.u));
 
     final speech = Quads.Gate.left.wrap(Quads.Flow.right);
     expect(speech.toString(), "Left_Gate @ Right_Flow");
     expect(speech.pronunciation.length, 2); // "Don-Fe"
-    expect(
-        speech.pronunciation.first, Syllable.cvc(Consonant.D, Vowel.O, Coda.N));
-    expect(speech.pronunciation.last, Syllable(Consonant.F, Vowel.E));
+    expect(speech.pronunciation.first, Syllable.cvc(Cons.d, Vowel.o, Coda.n));
+    expect(speech.pronunciation.last, Syllable(Cons.f, Vowel.e));
 
     // Red is the light from a Flower
     final red = Mono.Light.gram.wrap(Mono.Flower.gram);
     expect(red.toString(), "Light @ Flower");
     expect(red.pronunciation.length, 2);
-    expect(red.pronunciation.first, Syllable.cvc(Consonant.S, Vowel.A, Coda.N));
-    expect(red.pronunciation.last, Syllable(Consonant.F, Vowel.A));
+    expect(red.pronunciation.first, Syllable.cvc(Cons.s, Vowel.a, Coda.n));
+    expect(red.pronunciation.last, Syllable(Cons.f, Vowel.a));
   });
 
   test("GramMetrics has correct widthRatio", () {

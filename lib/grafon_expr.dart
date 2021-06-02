@@ -252,11 +252,10 @@ class ClusterExpr extends MultiGramExpr {
             sList[i].endVowel,
             sList[i].coda.group.tail,
           )
-        else if (i == 0) // Swap first syllable to head form
+        else if (i == 0) // Swap 1st syllable to head form
           sList[i].diffConsonant(sList[i].cons.pair.head)
-        else if (i ==
-            sList.length - 2) // Swap second last syllable to tail form
-            sList[i].diffCoda(sList[i].coda.group.tail)
+        else if (i == sList.length - 2) // Swap 2nd last syllable to tail form
+          sList[i].diffCoda(sList[i].coda.group.tail)
         else // other syllable are untouched
           sList[i],
     ]);

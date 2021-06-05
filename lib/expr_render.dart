@@ -218,7 +218,7 @@ class RenderPlan {
         ];
         break;
       case Unary.Down:
-      // shift shrunk's bottom to align with box bottom
+        // shift shrunk's bottom to align with box bottom
         // extend the height up w InvisiDot at box top, maintain width
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,

@@ -217,7 +217,7 @@ class RenderPlan {
         ];
         break;
       case Unary.Down:
-      // shift to align w bottom, maintain height w InvisiDot at top
+        // shift to align w bottom, maintain height w InvisiDot at top
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
           InvisiDot([Vector2(0, .5)], isFixedAspect: fix)

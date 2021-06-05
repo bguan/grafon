@@ -36,8 +36,6 @@ extension UnaryExtension on Unary {
 
   String get symbol {
     switch (this) {
-      case Unary.Shrink:
-        return '~';
       case Unary.Right:
         return '>';
       case Unary.Up:
@@ -46,15 +44,14 @@ extension UnaryExtension on Unary {
         return '<';
       case Unary.Down:
         return '-';
+      case Unary.Shrink:
       default:
-        throw Exception("Unexpected Unary Enum ${this}");
+        return '!';
     }
   }
 
   Vowel get ending {
     switch (this) {
-      case Unary.Shrink:
-        return Face.Center.vowel;
       case Unary.Right:
         return Face.Right.vowel;
       case Unary.Up:
@@ -63,8 +60,9 @@ extension UnaryExtension on Unary {
         return Face.Left.vowel;
       case Unary.Down:
         return Face.Down.vowel;
+      case Unary.Shrink:
       default:
-        throw Exception("Unexpected Unary Enum ${this}");
+        return Face.Center.vowel;
     }
   }
 }
@@ -77,16 +75,15 @@ extension BinaryExtension on Binary {
 
   String get symbol {
     switch (this) {
-      case Binary.Next:
-        return '.';
       case Binary.Over:
         return '/';
       case Binary.Wrap:
         return '@';
       case Binary.Merge:
         return '*';
+      case Binary.Next:
       default:
-        throw Exception("Unexpected Binary Enum ${this}");
+        return '.';
     }
   }
 
@@ -94,14 +91,13 @@ extension BinaryExtension on Binary {
     switch (this) {
       case Binary.Merge:
         return CodaGroup.kgt;
-      case Binary.Next:
-        return CodaGroup.hthdh;
       case Binary.Over:
         return CodaGroup.szf;
       case Binary.Wrap:
         return CodaGroup.nmp;
+      case Binary.Next:
       default:
-        throw Exception("Unexpected Binary Enum ${this}");
+        return CodaGroup.hthdh;
     }
   }
 }

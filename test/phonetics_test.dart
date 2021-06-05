@@ -73,27 +73,27 @@ void main() {
     expect(phonemes.length, Vowel.values.length);
   });
 
-  test('CodaGroup should cover all codas', () {
+  test('CodaGroup should cover all codas except "dh" and "ng"', () {
     final codaFromGroups = Set.of([
       ...CodaGroup.values.map((cg) => cg.base),
       ...CodaGroup.values.map((cg) => cg.tail),
       ...CodaGroup.values.map((cg) => cg.alt),
-      // ...dh and ...ng are special codas
-      Coda.dh,
-      Coda.ng,
     ]);
 
-    expect(codaFromGroups, Set.of(Coda.values));
+    // ...dh and ...ng are special codas
+    expect(codaFromGroups, Set.of(Coda.values)..removeAll([Coda.dh, Coda.ng]));
   });
 
-  test('Codas should cover all CodaGroups', () {
+  test('Codas except "ng" should cover all CodaGroups', () {
     final groupsFromCodas = Set.of([
-      ...Coda.values
-          .where((c) => c != Coda.ng && c != Coda.dh)
-          .map((c) => c.group),
+      ...Coda.values.where((c) => c != Coda.ng).map((c) => c.group),
     ]);
 
     expect(groupsFromCodas, Set.of(CodaGroup.values));
+  });
+
+  test('Coda "ng" will throw exception if attempt to get its Group', () {
+    expect(() => Coda.ng.group, throwsA(const TypeMatcher<UnsupportedError>()));
   });
 
   test('Coda phonemes should all be unique', () {
@@ -146,6 +146,9 @@ void main() {
 
     final ah = Syllable.vc(Vowel.a, Coda.h);
     expect(a1 == ah, isFalse);
+
+    final aah = Syllable.vvc(Vowel.a, Vowel.a, Coda.h);
+    expect(a1 == aah, isFalse);
   });
 
   test('Syllable toString works', () {
@@ -157,6 +160,8 @@ void main() {
     expect(aa.toString(), 'aa');
     final ah = Syllable.vc(Vowel.a, Coda.h);
     expect(ah.toString(), 'ah');
+    final aah = Syllable.vvc(Vowel.a, Vowel.a, Coda.h);
+    expect(aah.toString(), 'aah');
     final baah = Syllable(Cons.b, Vowel.a, Vowel.a, Coda.h);
     expect(baah.toString(), 'baah');
   });
@@ -216,6 +221,19 @@ void main() {
     expect(
         bais.diffEndVowel(Vowel.u), Syllable(Cons.b, Vowel.a, Vowel.u, Coda.s));
     expect(bais.diffCoda(Coda.m), Syllable(Cons.b, Vowel.a, Vowel.i, Coda.m));
+  });
+
+  test('Pronunciation equality works', () {
+    final a = Syllable.v(Vowel.a);
+    final ma = Syllable(Cons.m, Vowel.a);
+    final aMa = Pronunciation([a, ma]);
+    expect(aMa == aMa, true);
+    final aA = Pronunciation([a, a]);
+    expect(aMa == aA, false);
+    final maA = Pronunciation([ma, a]);
+    expect(aMa == maA, false);
+    final maMa = Pronunciation([ma, ma]);
+    expect(aMa == maMa, false);
   });
 
   test('Simple Pronunciation works', () {

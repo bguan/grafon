@@ -76,6 +76,7 @@ extension ConsonantHelper on Cons {
       case Cons.sh:
         return ConsPair.shzh;
 
+      case Cons.h:
       default:
         return ConsPair.h;
     }
@@ -106,6 +107,7 @@ extension ConsPairHelper on ConsPair {
         return Cons.s;
       case ConsPair.shzh:
         return Cons.sh;
+      case ConsPair.h:
       default:
         return Cons.NIL;
     }
@@ -131,6 +133,7 @@ extension ConsPairHelper on ConsPair {
         return Cons.z;
       case ConsPair.shzh:
         return Cons.zh;
+      case ConsPair.h:
       default:
         return Cons.h;
     }
@@ -167,6 +170,7 @@ extension CodaHelper on Coda {
       case Coda.f:
         return CodaGroup.szf;
 
+      case Coda.ng:
       default:
         throw UnsupportedError('$this does not belong to a Coda Pair');
     }
@@ -182,32 +186,30 @@ enum CodaGroup { hthdh, kgt, nmp, szf }
 extension CodaGroupHelper on CodaGroup {
   Coda get base {
     switch (this) {
-      case CodaGroup.hthdh:
-        return Coda.NIL;
       case CodaGroup.kgt:
         return Coda.k;
       case CodaGroup.nmp:
         return Coda.n;
       case CodaGroup.szf:
         return Coda.s;
+      case CodaGroup.hthdh:
       default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
+        return Coda.NIL;
     }
   }
 
   /// Use tail when it is the last operator in a cluster group
   Coda get tail {
     switch (this) {
-      case CodaGroup.hthdh:
-        return Coda.h;
       case CodaGroup.kgt:
         return Coda.g;
       case CodaGroup.nmp:
         return Coda.m;
       case CodaGroup.szf:
         return Coda.z;
+      case CodaGroup.hthdh:
       default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
+        return Coda.h;
     }
   }
 
@@ -216,16 +218,15 @@ extension CodaGroupHelper on CodaGroup {
   /// As "athHa" sounds to close to "athA", pronunciation will handle it.
   Coda get alt {
     switch (this) {
-      case CodaGroup.hthdh:
-        return Coda.th; // 1 exception "aA" => "athA" but "ahHa" => "adhHa"
       case CodaGroup.kgt:
         return Coda.t;
       case CodaGroup.nmp:
         return Coda.p;
       case CodaGroup.szf:
         return Coda.f;
+      case CodaGroup.hthdh:
       default:
-        throw Exception("Unexpected BinaryEnding Enum ${this}");
+        return Coda.th; // 1 exception "aA" => "athA" but "ahHa" => "adhHa"
     }
   }
 

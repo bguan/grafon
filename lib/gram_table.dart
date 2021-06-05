@@ -180,11 +180,11 @@ class _QuadHelper {
   }
 
   final cornerPaths = [
-    PolyStraight.anchors([Anchor.SE, Anchor.NE, Anchor.NW])
+    PolyStraight.anchors([Anchor.SE, Anchor.NE, Anchor.NW]),
   ];
 
   final linePaths = [
-    PolyStraight.anchors([Anchor.NE, Anchor.SW])
+    PolyStraight.anchors([Anchor.NE, Anchor.SW]),
   ];
 
   final anglePaths = [
@@ -196,25 +196,25 @@ class _QuadHelper {
   ];
 
   final gatePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW])
+    PolyStraight.anchors([Anchor.NW, Anchor.NE, Anchor.SE, Anchor.SW]),
   ];
 
   final stepPaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE])
+    PolyStraight.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE]),
   ];
 
   final zapPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E])
+    PolyStraight.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E]),
   ];
 
   final arcPaths = [
     PolyCurve.anchors([
       Anchor.NW,
       Anchor.N,
+      Anchor.IE,
       Anchor.S,
       Anchor.SW,
     ]),
-    InvisiDot.anchors([Anchor.E]),
   ];
 
   final flowPaths = [

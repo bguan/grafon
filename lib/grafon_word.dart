@@ -57,15 +57,18 @@ class CoreWord extends GrafonWord {
     var r = expr.renderPlan;
 
     /// Make sure word rendering is not too narrow or too wide
-    if (r.widthRatio < MIN_WIDTH_RATIO || r.widthRatio > 2 * MIN_WIDTH_RATIO) {
+    if ((MIN_WIDTH_RATIO - r.widthRatio) > 0.1 ||
+        r.widthRatio > 2 * MIN_WIDTH_RATIO) {
       final s = (r.widthRatio < MIN_WIDTH_RATIO
               ? MIN_WIDTH_RATIO
-              : sqrt(r.widthRatio)) /
+              : min(MIN_WIDTH_RATIO * r.widthRatio, sqrt(r.widthRatio))) /
           r.widthRatio;
-      r = r.remap(
-          (isFixed, v) => isFixed ? v * min(s, 1) : Vector2(v.x * s, v.y));
+      r = r
+          .remap(
+              (isFixed, v) => isFixed ? v * min(s, 1) : Vector2(v.x * s, v.y))
+          .reCenter();
 
-      if (r.widthRatio < MIN_WIDTH_RATIO) {
+      if ((MIN_WIDTH_RATIO - r.widthRatio) > 0.1) {
         final w = MIN_WIDTH_RATIO * r.height;
         r = RenderPlan([
           ...r.lines,
@@ -161,10 +164,13 @@ class WordGroup {
 
 final w = WordGroup(
     'Edge Cases',
-    CoreWord(Mono.X.over(Mono.X.gram).merge(Quads.Line.up)),
+    CoreWord(Quads.Arc.left.next(Quads.Arc.right)),
     'Random tricky edge cases for rendering.', [
+  CoreWord(Quads.Arc.left.wrap(Quads.Flow.right)),
+  CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down)),
+  CoreWord(Quads.Arc.left.next(Quads.Arc.right)),
   CoreWord(Quads.Angle.up.over(Quads.Arc.down)),
-  CoreWord(ClusterExpr(Quads.Arc.up.next(Quads.Arc.up)).over(Quads.Angle.down)),
+  CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down)),
   CoreWord(Mono.Dot.up().merge(Quads.Step.left)),
   CoreWord(Mono.Dot.left().over(Quads.Corner.up)),
   CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
@@ -174,13 +180,11 @@ final w = WordGroup(
 
 final testGroup = WordGroup(
   'Test',
-  CoreWord(Mono.Circle.next(Mono.Square.gram)
-      .overCluster(Quads.Triangle.up.next(Mono.Diamond.gram))),
+  CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
+      .next(Quads.Arc.left)
+      .next(Quads.Flow.right)),
   'Test expression rendering...',
   [
-    CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
-        .next(Quads.Arc.left)
-        .next(Quads.Flow.right)),
     CoreWord(Mono.Dot.shrink()),
     CoreWord(Mono.Dot.shrink().over(Mono.Square.gram)),
     CoreWord(Mono.Dot.up()),
@@ -213,7 +217,7 @@ final testGroup = WordGroup(
 
 final numericGroup = WordGroup(
   'Numeric',
-  CoreWord(Mono.X.over(Mono.X.gram).merge(Quads.Line.up)),
+  CoreWord(Quads.Line.right.over(Quads.Line.right).merge(Quads.Line.up)),
   'Numbers and counting...',
   [
     CoreWord(Mono.Circle.gram, "Zero"),
@@ -306,9 +310,7 @@ final demoGroup = WordGroup(
     CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
         "Blue", "Blue, light from water."),
     CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),
-    CoreWord(
-        ClusterExpr(Quads.Arc.up.next(Quads.Arc.up)).over(Quads.Angle.down),
-        "Heart",
+    CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down), "Heart",
         "Heart, Love."),
     CompoundWord(
         [CoreWord(Mono.Sun.gram), CoreWord(Mono.Circle.over(Quads.Line.up))],

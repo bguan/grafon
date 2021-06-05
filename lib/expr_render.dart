@@ -153,6 +153,8 @@ class RenderPlan {
   RenderPlan relaxFixedAspect() =>
       RenderPlan(lines.map((l) => l.diffAspect(false)));
 
+  RenderPlan noInvisiDots() => RenderPlan(lines.where((l) => l is! InvisiDot));
+
   /// Merge this with another Render Plan.
   RenderPlan merge(RenderPlan that) {
     return RenderPlan([...lines, ...that.lines]);
@@ -202,44 +204,53 @@ class RenderPlan {
 
   /// Transform this render plan by unary operation to generate a new render.
   RenderPlan byUnary(Unary op) {
+    final shrunk = remap((isF, v) => v / 2);
     // assume box is bound by min max X Y of -.5 to .5
-    final shrunk = remap((isFixed, v) => v * .5);
     final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up:
+        // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
         // shift r's top to align with box top
         // extend the height down w InvisiDot at box bottom, maintain width
         lines = [
           ...shrunk.shift(0, .5 - shrunk.yMax).lines,
-          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
+          // InvisiDot([Vector2(-.25, -.5), Vector2(.25, .5)], isFixedAspect: fix)
+          InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Down:
+      // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
         // shift r's bottom to align with box bottom
         // extend the height up w InvisiDot at box top, maintain width
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
-          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
+          // InvisiDot([Vector2(-.25, -.5), Vector2(.25, .5)], isFixedAspect: fix)
+          InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Left:
+      // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
         // shift r's left to align with box left
         // extend the width w InvisiDot at box right, maintain min height
         lines = [
           ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
-          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
+          // InvisiDot([Vector2(-.5, -.25), Vector2(.5, .25)], isFixedAspect: fix)
+          InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Right:
+      // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
         // shift r's left to align with box left
         // extend the width w InvisiDot at box left, maintain min height
         lines = [
           ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
-          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
+          // InvisiDot([Vector2(-.5, -.25), Vector2(.5, .25)], isFixedAspect: fix)
+          InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Shrink: // extending all sides to former min max
+        // final shrunk = remap((isF, v) => v / 2);
         lines = [
           ...shrunk.lines,
           InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
@@ -280,11 +291,12 @@ class RenderPlan {
             .merge(r2.shift(0, -.5 * r1.height - STD_GAP - .5 * r2.height))
             .reCenter();
       case Binary.Wrap:
-        final hScale = r1.height / r2.height;
-        r2 = r2.remap((isF, v) => v * hScale / 2).reCenter();
+        r1 = r1.noInvisiDots().reCenter();
+        final hScale = .5 * r1.height / r2.height;
+        r2 = r2.remap((isF, v) => v * hScale).reCenter();
         // if r2 width much more than r1 width, scale r1
-        while (r2.width > .7 * r1.width) {
-          r1 = r1.relaxFixedAspect().scaleWidth(1.4 * r1.width).reCenter();
+        if (r2.width > .7 * r1.width) {
+          r1 = r1.relaxFixedAspect().scaleWidth(1.4 * r2.width).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);

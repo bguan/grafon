@@ -106,7 +106,7 @@ class WordGroupPage extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text('"${wordGroup.logo.pronunciation}"',
                           textAlign: TextAlign.right, style: voicingStyle),
                     ),
@@ -129,7 +129,7 @@ class WordGroupPage extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       height: 80,
-                      width: w.widthAtHeight(50),
+                      width: w.widthAtHeight(50) + 30,
                       padding: EdgeInsets.all(15),
                       child: GrafonTile(
                         w.renderPlan,

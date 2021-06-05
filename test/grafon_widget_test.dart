@@ -147,6 +147,7 @@ void main() {
       painter.paint(canvas, size);
       verify(canvas.drawLine(any, any, any));
       verifyNever(canvas.drawPath(any, any));
+      verifyNever(canvas.drawCircle(any, any, any));
       verifyNoMoreInteractions(canvas);
     }
   });
@@ -167,8 +168,25 @@ void main() {
       painter.paint(canvas, size);
       verify(canvas.drawPath(any, any));
       verifyNever(canvas.drawLine(any, any, any));
+      verifyNever(canvas.drawCircle(any, any, any));
       verifyNoMoreInteractions(canvas);
     }
+  });
+
+  test('test GramPainter on Spline with Bezier Curve', () {
+    final size = Size(100, 100);
+    final scheme = ColorScheme.fromSwatch();
+    final bezier = QuadGram([
+      PolyCurve.anchors([Anchor.W, Anchor.W, Anchor.N, Anchor.E, Anchor.S])
+    ], Face.Up, ConsPair.lr);
+
+    final painter = GrafonPainter(bezier.renderPlan, scheme: scheme);
+    final canvas = MockCanvas();
+    painter.paint(canvas, size);
+    verify(canvas.drawPath(any, any));
+    verifyNever(canvas.drawLine(any, any, any));
+    verifyNever(canvas.drawCircle(any, any, any));
+    verifyNoMoreInteractions(canvas);
   });
 
   test('test GramPainter correctly handles visualCenter', () {
@@ -204,5 +222,33 @@ void main() {
     verifyNoMoreInteractions(canvas);
     final path = canvas.drawPathArgs.first.item1;
     expect(path.contains(p1) && path.contains(p2), isTrue);
+  });
+
+  test('test GramPainter correctly shows InvisiDot only in debug mode', () {
+    final size = Size(100, 100);
+    final scheme = ColorScheme.fromSwatch();
+    final gram = QuadGram([
+      PolyStraight.anchors([Anchor.N, Anchor.S]),
+      InvisiDot.anchors([Anchor.W])
+    ], Face.Right, ConsPair.lr);
+
+    final p1 = Offset(75, 0);
+    final p2 = Offset(75, 100);
+    final painter = GrafonPainter(gram.renderPlan, scheme: scheme);
+    final canvas = MockCanvas();
+    painter.paint(canvas, size);
+    verify(canvas.drawLine(p1, p2, any));
+    verifyNoMoreInteractions(canvas);
+
+    final debugPainter = GrafonPainter(
+      gram.renderPlan,
+      scheme: scheme,
+      isDebug: true,
+    );
+    final debugCanvas = MockCanvas();
+    debugPainter.paint(debugCanvas, size);
+    verify(debugCanvas.drawLine(p1, p2, any));
+    verify(debugCanvas.drawCircle(Offset(25, 50), any, any));
+    verifyNoMoreInteractions(debugCanvas);
   });
 }

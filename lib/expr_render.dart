@@ -209,29 +209,25 @@ class RenderPlan {
     final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
     late final List<PolyLine> lines;
     switch (op) {
-      case Unary.Up:
-        // shift to align w top, maintain height w InvisiDot at bottom
+      case Unary.Up: // shift align w top, InvisiDot at bottom to keep height
         lines = [
           ...shrunk.shift(0, .5 - shrunk.yMax).lines,
           InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
         ];
         break;
-      case Unary.Down:
-        // shift to align w bottom, maintain height w InvisiDot at top
+      case Unary.Down: // shift align w bottom, InvisiDot at top to keep height
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
           InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
         ];
         break;
-      case Unary.Left:
-      // shift to align w left, maintain width w InvisiDot at right
+      case Unary.Left: // shift align w left, InvisiDot at right to keep width
         lines = [
           ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
           InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
         ];
         break;
-      case Unary.Right:
-      // shift to align with right, maintain width w InvisiDot at left
+      case Unary.Right: // shift align w right, keep width w InvisiDot at left
         lines = [
           ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)

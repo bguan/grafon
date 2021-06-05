@@ -210,47 +210,38 @@ class RenderPlan {
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up:
-        // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
-        // shift r's top to align with box top
+        // shift shrunk's top to align with box top
         // extend the height down w InvisiDot at box bottom, maintain width
         lines = [
           ...shrunk.shift(0, .5 - shrunk.yMax).lines,
-          // InvisiDot([Vector2(-.25, -.5), Vector2(.25, .5)], isFixedAspect: fix)
           InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Down:
-      // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
-        // shift r's bottom to align with box bottom
+      // shift shrunk's bottom to align with box bottom
         // extend the height up w InvisiDot at box top, maintain width
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
-          // InvisiDot([Vector2(-.25, -.5), Vector2(.25, .5)], isFixedAspect: fix)
           InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Left:
-      // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
-        // shift r's left to align with box left
+      // shift shrunk's left to align with box left
         // extend the width w InvisiDot at box right, maintain min height
         lines = [
           ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
-          // InvisiDot([Vector2(-.5, -.25), Vector2(.5, .25)], isFixedAspect: fix)
           InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Right:
-      // final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
-        // shift r's left to align with box left
+      // shift shrunk's left to align with box left
         // extend the width w InvisiDot at box left, maintain min height
         lines = [
           ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
-          // InvisiDot([Vector2(-.5, -.25), Vector2(.5, .25)], isFixedAspect: fix)
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Shrink: // extending all sides to former min max
-        // final shrunk = remap((isF, v) => v / 2);
         lines = [
           ...shrunk.lines,
           InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)

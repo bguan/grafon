@@ -78,46 +78,46 @@ void main() {
   });
 
   test('RenderPlan compounding next operators does not lead to exploding width',
-          () {
-        final up = Quads.Angle.up;
-        final upWth = up.renderPlan.width;
-        final upHt = up.renderPlan.height;
-        final expr = up.next(up).next(up).next(up).next(up);
-        final r = expr.renderPlan;
-        final exprWth = r.width;
-        final exprHt = r.height;
-        expect(exprHt, moreOrLessEquals(upHt));
-        expect(exprWth, closeTo(5 * upWth + 4 * RenderPlan.STD_GAP, 0.1));
-        expect(r.widthRatio, moreOrLessEquals(exprWth / exprHt));
-      });
+      () {
+    final up = Quads.Angle.up;
+    final upWth = up.renderPlan.width;
+    final upHt = up.renderPlan.height;
+    final expr = up.next(up).next(up).next(up).next(up);
+    final r = expr.renderPlan;
+    final exprWth = r.width;
+    final exprHt = r.height;
+    expect(exprHt, moreOrLessEquals(upHt));
+    expect(exprWth, closeTo(5 * upWth + 4 * RenderPlan.STD_GAP, 0.1));
+    expect(r.widthRatio, moreOrLessEquals(exprWth / exprHt));
+  });
 
   test('RenderPlan next operators leaves gap btw fixed aspect and non-fixed',
-          () {
-        final r = Mono.Diamond.next(Quads.Gate.left).renderPlan;
-        final lines = r.lines.toList();
-        expect(lines.length, 2);
-        // Previous height about same as Next
-        expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));
-        // Previous don't overlap with Next
-        expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
-        // Gap is not too big
-        expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(.2));
-      });
+      () {
+    final r = Mono.Diamond.next(Quads.Gate.left).renderPlan;
+    final lines = r.lines.toList();
+    expect(lines.length, 2);
+    // Previous height about same as Next
+    expect(lines[0].metrics.height, moreOrLessEquals(lines[1].metrics.height));
+    // Previous don't overlap with Next
+    expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
+    // Gap is not too big
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(.2));
+  });
 
   test('RenderPlan over operators leaves gap btw fixed aspect and non-fixed',
-          () {
-        final r = Mono.Dot.over(Quads.Line.up).renderPlan;
-        final lines = r.lines.toList();
-        expect(lines.length, 2);
-        final m0 = lines[0].metrics;
-        final m1 = lines[1].metrics;
-        // Previous width about same as Next
-        expect(m0.width, moreOrLessEquals(m1.width));
-        // Previous don't overlap with Next
-        expect(m1.yMax, lessThan(m0.yMin));
-        // Gap is not too big
-        expect(m0.yMin - m1.yMax, lessThan(.25));
-      });
+      () {
+    final r = Mono.Dot.over(Quads.Line.up).renderPlan;
+    final lines = r.lines.toList();
+    expect(lines.length, 2);
+    final m0 = lines[0].metrics;
+    final m1 = lines[1].metrics;
+    // Previous width about same as Next
+    expect(m0.width, moreOrLessEquals(m1.width));
+    // Previous don't overlap with Next
+    expect(m1.yMax, lessThan(m0.yMin));
+    // Gap is not too big
+    expect(m0.yMin - m1.yMax, lessThan(.25));
+  });
 
   test('Metrics calculation for Circle is correct', () {
     final cp = RenderPlan([

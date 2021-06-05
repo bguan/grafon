@@ -210,32 +210,28 @@ class RenderPlan {
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up:
-        // shift shrunk's top to align with box top
-        // extend the height down w InvisiDot at box bottom, maintain width
+        // shift to align w top, maintain height w InvisiDot at bottom
         lines = [
           ...shrunk.shift(0, .5 - shrunk.yMax).lines,
           InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Down:
-        // shift shrunk's bottom to align with box bottom
-        // extend the height up w InvisiDot at box top, maintain width
+      // shift to align w bottom, maintain height w InvisiDot at top
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
           InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Left:
-      // shift shrunk's left to align with box left
-        // extend the width w InvisiDot at box right, maintain min height
+      // shift to align w left, maintain width w InvisiDot at right
         lines = [
           ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
           InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Right:
-      // shift shrunk's left to align with box left
-        // extend the width w InvisiDot at box left, maintain min height
+      // shift to align with right, maintain width w InvisiDot at left
         lines = [
           ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)

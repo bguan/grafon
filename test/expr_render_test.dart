@@ -162,15 +162,214 @@ void main() {
   });
 
   test('Unary Shrink operator works', () {
-    final dot = RenderPlan([
-      PolyDot([Vector2(0, 0)])
+    final cross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S]),
+      PolyStraight.anchors([Anchor.W, Anchor.E]),
     ]);
-    final shrinkDot = dot.byUnary(Unary.Shrink);
+
+    final shrinkCross = cross.byUnary(Unary.Shrink);
+    final filtered =
+        RenderPlan(shrinkCross.lines.where((l) => l is! InvisiDot));
+
+    expect(cross.width > filtered.width, isTrue);
+    expect(cross.height > filtered.height, isTrue);
+    expect(shrinkCross.width > filtered.width, isTrue);
+    expect(shrinkCross.height > filtered.height, isTrue);
+
     expect(
-        shrinkDot,
+        shrinkCross,
         RenderPlan([
-          PolyDot([Vector2(0, 0)]),
+          PolyStraight([Vector2(0, .25), Vector2(0, -.25)]),
+          PolyStraight([Vector2(-.25, 0), Vector2(.25, 0)]),
           InvisiDot([Vector2(-0.5, -0.5), Vector2(0.5, 0.5)])
+        ]));
+  });
+
+  test('Unary Up operator works', () {
+    final fixedCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    ]);
+
+    final upFixedCross = fixedCross.byUnary(Unary.Up);
+    final fixedFiltered =
+        RenderPlan(upFixedCross.lines.where((l) => l is! InvisiDot));
+
+    expect(fixedCross.width > fixedFiltered.width, isTrue);
+    expect(fixedCross.height > fixedFiltered.height, isTrue);
+    expect(upFixedCross.width, fixedFiltered.width);
+    expect(upFixedCross.height > fixedFiltered.height, isTrue);
+
+    expect(
+        upFixedCross,
+        RenderPlan([
+          PolyStraight([Vector2(0, .5), Vector2(0, 0)], isFixedAspect: true),
+          PolyStraight([Vector2(-.25, .25), Vector2(.25, .25)],
+              isFixedAspect: true),
+          InvisiDot([Vector2(0, -0.5)], isFixedAspect: true)
+        ]));
+
+    final flexCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
+    ]);
+
+    final upFlexCross = flexCross.byUnary(Unary.Up);
+    final filtered =
+        RenderPlan(upFlexCross.lines.where((l) => l is! InvisiDot));
+
+    expect(flexCross.width, filtered.width);
+    expect(flexCross.height > filtered.height, isTrue);
+    expect(upFlexCross.width, filtered.width);
+    expect(upFlexCross.height > filtered.height, isTrue);
+
+    expect(
+        upFlexCross,
+        RenderPlan([
+          PolyStraight([Vector2(0, .5), Vector2(0, -.16)]),
+          PolyStraight([Vector2(-.5, .17), Vector2(.5, .17)]),
+          InvisiDot([Vector2(0, -0.5)])
+        ]));
+  });
+
+  test('Unary Down operator works', () {
+    final fixedCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    ]);
+
+    final downFixedCross = fixedCross.byUnary(Unary.Down);
+    final fixedFiltered =
+        RenderPlan(downFixedCross.lines.where((l) => l is! InvisiDot));
+
+    expect(fixedCross.width > fixedFiltered.width, isTrue);
+    expect(fixedCross.height > fixedFiltered.height, isTrue);
+    expect(downFixedCross.width, fixedFiltered.width);
+    expect(downFixedCross.height > fixedFiltered.height, isTrue);
+
+    expect(
+        downFixedCross,
+        RenderPlan([
+          PolyStraight([Vector2(0, 0), Vector2(0, -.5)], isFixedAspect: true),
+          PolyStraight([Vector2(-.25, -.25), Vector2(.25, -.25)],
+              isFixedAspect: true),
+          InvisiDot([Vector2(0, 0.5)], isFixedAspect: true)
+        ]));
+
+    final flexCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
+    ]);
+
+    final downFlexCross = flexCross.byUnary(Unary.Down);
+    final filtered =
+        RenderPlan(downFlexCross.lines.where((l) => l is! InvisiDot));
+
+    expect(flexCross.width, filtered.width);
+    expect(flexCross.height > filtered.height, isTrue);
+    expect(downFlexCross.width, filtered.width);
+    expect(downFlexCross.height > filtered.height, isTrue);
+
+    expect(
+        downFlexCross,
+        RenderPlan([
+          PolyStraight([Vector2(0, .16), Vector2(0, -.5)]),
+          PolyStraight([Vector2(-.5, -.17), Vector2(.5, -.17)]),
+          InvisiDot([Vector2(0, 0.5)])
+        ]));
+  });
+
+  test('Unary Left operator works', () {
+    final fixedCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    ]);
+
+    final leftFixedCross = fixedCross.byUnary(Unary.Left);
+    final fixedFiltered =
+        RenderPlan(leftFixedCross.lines.where((l) => l is! InvisiDot));
+
+    expect(fixedCross.width > fixedFiltered.width, isTrue);
+    expect(fixedCross.height > fixedFiltered.height, isTrue);
+    expect(leftFixedCross.width > fixedFiltered.width, isTrue);
+    expect(leftFixedCross.height, fixedFiltered.height);
+
+    expect(
+        leftFixedCross,
+        RenderPlan([
+          PolyStraight([Vector2(-.25, .25), Vector2(-.25, -.25)],
+              isFixedAspect: true),
+          PolyStraight([Vector2(-.5, 0), Vector2(0, 0)], isFixedAspect: true),
+          InvisiDot([Vector2(.5, 0)], isFixedAspect: true)
+        ]));
+
+    final flexCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
+    ]);
+
+    final leftFlexCross = flexCross.byUnary(Unary.Left);
+    final filtered =
+        RenderPlan(leftFlexCross.lines.where((l) => l is! InvisiDot));
+
+    expect(flexCross.width > filtered.width, isTrue);
+    expect(flexCross.height, filtered.height);
+    expect(leftFlexCross.width > filtered.width, isTrue);
+    expect(leftFlexCross.height, filtered.height);
+
+    expect(
+        leftFlexCross,
+        RenderPlan([
+          PolyStraight([Vector2(-.17, .5), Vector2(-.17, -.5)]),
+          PolyStraight([Vector2(-.5, 0), Vector2(.16, 0)]),
+          InvisiDot([Vector2(.5, 0)])
+        ]));
+  });
+
+  test('Unary Right operator works', () {
+    final fixedCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    ]);
+
+    final rightFixedCross = fixedCross.byUnary(Unary.Right);
+    final fixedFiltered =
+        RenderPlan(rightFixedCross.lines.where((l) => l is! InvisiDot));
+
+    expect(fixedCross.width > fixedFiltered.width, isTrue);
+    expect(fixedCross.height > fixedFiltered.height, isTrue);
+    expect(rightFixedCross.width > fixedFiltered.width, isTrue);
+    expect(rightFixedCross.height, fixedFiltered.height);
+
+    expect(
+        rightFixedCross,
+        RenderPlan([
+          PolyStraight([Vector2(.25, .25), Vector2(.25, -.25)],
+              isFixedAspect: true),
+          PolyStraight([Vector2(0, 0), Vector2(.5, 0)], isFixedAspect: true),
+          InvisiDot([Vector2(-.5, 0)], isFixedAspect: true)
+        ]));
+
+    final flexCross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
+      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
+    ]);
+
+    final rightFlexCross = flexCross.byUnary(Unary.Right);
+    final filtered =
+        RenderPlan(rightFlexCross.lines.where((l) => l is! InvisiDot));
+
+    expect(flexCross.width > filtered.width, isTrue);
+    expect(flexCross.height, filtered.height);
+    expect(rightFlexCross.width > filtered.width, isTrue);
+    expect(rightFlexCross.height, filtered.height);
+
+    expect(
+        rightFlexCross,
+        RenderPlan([
+          PolyStraight([Vector2(.17, .5), Vector2(.17, -.5)]),
+          PolyStraight([Vector2(-.16, 0), Vector2(.5, 0)]),
+          InvisiDot([Vector2(-.5, 0)])
         ]));
   });
 
@@ -207,6 +406,37 @@ void main() {
     expect(numFixedRelaxed, 0);
   });
 
+  test('RenderPlan padding check works', () {
+    final dot = RenderPlan([
+      PolyDot.anchors([Anchor.O]),
+    ]);
+    expect(dot.isHeightPadded, true);
+    expect(dot.isWidthPadded, true);
+    expect(dot.isPadded, true);
+
+    final vLine = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S]),
+    ]);
+    expect(vLine.isHeightPadded, false);
+    expect(vLine.isWidthPadded, true);
+    expect(vLine.isPadded, true);
+
+    final hLine = RenderPlan([
+      PolyStraight.anchors([Anchor.W, Anchor.E]),
+    ]);
+    expect(hLine.isHeightPadded, true);
+    expect(hLine.isWidthPadded, false);
+    expect(hLine.isPadded, true);
+
+    final cross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S]),
+      PolyStraight.anchors([Anchor.W, Anchor.E]),
+    ]);
+    expect(cross.isHeightPadded, false);
+    expect(cross.isWidthPadded, false);
+    expect(cross.isPadded, false);
+  });
+
   test('Brute force all level 1 gram combo RenderPlan', () {
     final table = GramTable();
     for (final m1 in Mono.values) {
@@ -238,244 +468,4 @@ void main() {
       }
     }
   });
-
-  // TODO: impl tests by migrating old operator tests
-  // test('Unary Shrink operator works', () {
-  //   final empty = PolyStraight.anchors([]);
-  //   final shrinkEmpty = Unary.Shrink.apply(empty);
-  //   expect(shrinkEmpty, empty);
-  //
-  //   final dot = PolyStraight.anchors([Anchor.O]);
-  //   final shrinkDot = Unary.Shrink.apply(dot);
-  //   expect(shrinkDot, dot);
-  //
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //   final shrinkHLine = Unary.Shrink.apply(hLine);
-  //   expect(shrinkHLine, PolyStraight([Vector2(-0.25, 0), Vector2(0.25, 0)]));
-  //
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final shrinkVLine = Unary.Shrink.apply(vLine);
-  //   expect(shrinkVLine, PolyStraight([Vector2(0, 0.25), Vector2(0, -0.25)]));
-  // });
-  //
-  // test('Unary Up operator works', () {
-  //   final empty = PolyStraight.anchors([]);
-  //   final upEmpty = Unary.Up.apply(empty);
-  //   expect(upEmpty, empty);
-  //
-  //   final dot = PolyStraight.anchors([Anchor.O]);
-  //   expect(dot.vectors, [Vector2(0, 0)]);
-  //   final upDot = Unary.Up.apply(dot);
-  //   expect(upDot, PolyStraight([Vector2(0, 0.25)]));
-  //
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //   final upHLine = Unary.Up.apply(hLine);
-  //   expect(upHLine, PolyStraight([Vector2(-0.5, 0.25), Vector2(0.5, 0.25)]));
-  //
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final upVLine = Unary.Up.apply(vLine);
-  //   expect(upVLine, PolyStraight([Vector2(0, 0.5), Vector2(0, 0)]));
-  // });
-  //
-  // test('Unary Down operator works', () {
-  //   final empty = PolyStraight.anchors([]);
-  //   final downEmpty = Unary.Down.apply(empty);
-  //   expect(downEmpty, empty);
-  //
-  //   final dot = PolyStraight.anchors([Anchor.O]);
-  //   expect(dot.vectors, [Vector2(0, 0)]);
-  //   final downDot = Unary.Down.apply(dot);
-  //   expect(downDot, PolyStraight([Vector2(0, -0.25)]));
-  //
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //   final downHLine = Unary.Down.apply(hLine);
-  //   expect(
-  //       downHLine, PolyStraight([Vector2(-0.5, -0.25), Vector2(0.5, -0.25)]));
-  //
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final downVLine = Unary.Down.apply(vLine);
-  //   expect(downVLine, PolyStraight([Vector2(0, 0), Vector2(0, -0.5)]));
-  // });
-  //
-  // test('Unary Right operator works', () {
-  //   final empty = PolyStraight.anchors([]);
-  //   final rightEmpty = Unary.Right.apply(empty);
-  //   expect(rightEmpty, empty);
-  //
-  //   final dot = PolyStraight.anchors([Anchor.O]);
-  //   expect(dot.vectors, [Vector2(0, 0)]);
-  //   final rightDot = Unary.Right.apply(dot);
-  //   expect(rightDot, PolyStraight([Vector2(0.25, 0)]));
-  //
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //   final rightHLine = Unary.Right.apply(hLine);
-  //   expect(rightHLine, PolyStraight([Vector2(0, 0), Vector2(0.5, 0)]));
-  //
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final rightVLine = Unary.Right.apply(vLine);
-  //   expect(rightVLine, PolyStraight([Vector2(0.25, 0.5), Vector2(0.25, -0.5)]));
-  // });
-  //
-  // test('Unary Left operator works', () {
-  //   final empty = PolyStraight.anchors([]);
-  //   final leftEmpty = Unary.Left.apply(empty);
-  //   expect(leftEmpty, empty);
-  //
-  //   final dot = PolyStraight.anchors([Anchor.O]);
-  //   expect(dot.vectors, [Vector2(0, 0)]);
-  //   final leftDot = Unary.Left.apply(dot);
-  //   expect(leftDot, PolyStraight([Vector2(-0.25, 0)]));
-  //
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //   final leftHLine = Unary.Left.apply(hLine);
-  //   expect(leftHLine, PolyStraight([Vector2(-0.5, 0), Vector2(0, 0)]));
-  //
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final leftVLine = Unary.Left.apply(vLine);
-  //   expect(
-  //       leftVLine, PolyStraight([Vector2(-0.25, 0.5), Vector2(-0.25, -0.5)]));
-  // });
-  //
-  // test('Binary Merge operator works', () {
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //
-  //   final tfm1 = Binary.Merge.apply1(hLine);
-  //   final tfm2 = Binary.Merge.apply2(vLine);
-  //   expect(tfm1, hLine);
-  //   expect(tfm2, vLine);
-  // });
-  //
-  // test('Binary Before operator works', () {
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //
-  //   final vLineBefore = Binary.Before.apply1(vLine, 0.1);
-  //   expect(vLineBefore.runtimeType, PolyStraight);
-  //   expect(vLineBefore.vectors, [Vector2(-0.45, 0.5), Vector2(-0.45, -0.5)]);
-  //
-  //   final vLineAfter = Binary.Before.apply2(vLine, 0.1);
-  //   expect(vLineAfter.runtimeType, PolyStraight);
-  //   expect(vLineAfter.vectors, [Vector2(0.45, 0.5), Vector2(0.45, -0.5)]);
-  //
-  //   final hLineBefore = Binary.Before.apply1(hLine, 0.1);
-  //   expect(hLineBefore.runtimeType, PolyStraight);
-  //   expect(hLineBefore.vectors, [Vector2(-0.5, 0), Vector2(-0.4, 0)]);
-  //
-  //   final hLineAfter = Binary.Before.apply2(hLine, 0.1);
-  //   expect(hLineAfter.runtimeType, PolyStraight);
-  //   expect(hLineAfter.vectors, [Vector2(0.4, 0), Vector2(0.5, 0)]);
-  //
-  //   // sanity check a Curve
-  //   final hCurve = PolyCurve.anchors([Anchor.S, Anchor.W, Anchor.E, Anchor.N]);
-  //   expect(hCurve.vectors,
-  //       [Vector2(0, -0.5), Vector2(-0.5, 0), Vector2(0.5, 0), Vector2(0, 0.5)]);
-  //
-  //   final hCurveBefore = Binary.Before.apply1(hCurve, 0.1);
-  //   expect(hCurveBefore.runtimeType, PolyCurve);
-  //   expect(hCurveBefore.vectors, [
-  //     Vector2(-0.45, -0.5),
-  //     Vector2(-0.5, 0),
-  //     Vector2(-0.4, 0),
-  //     Vector2(-0.45, 0.5),
-  //   ]);
-  //
-  //   final hCurveAfter = Binary.Before.apply2(hCurve, 0.1);
-  //   expect(hCurveAfter.runtimeType, PolyCurve);
-  //   expect(hCurveAfter.vectors, [
-  //     Vector2(0.45, -0.5),
-  //     Vector2(0.4, 0),
-  //     Vector2(0.5, 0),
-  //     Vector2(0.45, 0.5),
-  //   ]);
-  // });
-  //
-  // test('Binary Over operator works', () {
-  //   final vLine = PolyStraight.anchors([Anchor.N, Anchor.S]);
-  //   expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
-  //   final hLine = PolyStraight.anchors([Anchor.W, Anchor.E]);
-  //   expect(hLine.vectors, [Vector2(-0.5, 0), Vector2(0.5, 0)]);
-  //
-  //   final vLineOver = Binary.Over.apply1(vLine, 0.1);
-  //   expect(vLineOver.runtimeType, PolyStraight);
-  //   expect(vLineOver.vectors, [Vector2(0, 0.5), Vector2(0, 0.4)]);
-  //
-  //   final vLineUnder = Binary.Over.apply2(vLine, 0.1);
-  //   expect(vLineUnder.runtimeType, PolyStraight);
-  //   expect(vLineUnder.vectors, [Vector2(0, -0.4), Vector2(0, -0.5)]);
-  //
-  //   final hLineOver = Binary.Over.apply1(hLine, 0.1);
-  //   expect(hLineOver.runtimeType, PolyStraight);
-  //   expect(hLineOver.vectors, [Vector2(-0.5, 0.45), Vector2(0.5, 0.45)]);
-  //
-  //   final hLineUnder = Binary.Over.apply2(hLine, 0.1);
-  //   expect(hLineUnder.runtimeType, PolyStraight);
-  //   expect(hLineUnder.vectors, [Vector2(-0.5, -0.45), Vector2(0.5, -0.45)]);
-  // });
-  //
-  // test('Binary Around operator works', () {
-  //   final circle = PolyCurve.anchors([
-  //     Anchor.S,
-  //     Anchor.W,
-  //     Anchor.N,
-  //     Anchor.E,
-  //     Anchor.S,
-  //     Anchor.W,
-  //     Anchor.N,
-  //   ]);
-  //
-  //   expect(circle.vectors, [
-  //     Vector2(0, -.5),
-  //     Vector2(-0.5, 0),
-  //     Vector2(0, .5),
-  //     Vector2(0.5, 0),
-  //     Vector2(0, -.5),
-  //     Vector2(-0.5, 0),
-  //     Vector2(0, .5),
-  //   ]);
-  //
-  //   final square = PolyStraight.anchors([
-  //     Anchor.W,
-  //     Anchor.N,
-  //     Anchor.E,
-  //     Anchor.S,
-  //     Anchor.W,
-  //   ]);
-  //
-  //   expect(square.vectors, [
-  //     Vector2(-0.5, 0),
-  //     Vector2(0, 0.5),
-  //     Vector2(0.5, 0),
-  //     Vector2(0, -0.5),
-  //     Vector2(-.5, 0),
-  //   ]);
-  //
-  //   final circleOutside = Binary.Around.apply1(circle, 0.2);
-  //   expect(circleOutside.runtimeType, PolyCurve);
-  //   expect(circleOutside.vectors, circle.vectors);
-  //
-  //   final squareInside = Binary.Around.apply2(square, 0.2);
-  //   expect(squareInside.runtimeType, PolyStraight);
-  //   expect(squareInside.vectors, [
-  //     Vector2(-0.1, 0),
-  //     Vector2(0, 0.1),
-  //     Vector2(0.1, 0),
-  //     Vector2(0, -0.1),
-  //     Vector2(-.1, 0),
-  //   ]);
-  // });
 }

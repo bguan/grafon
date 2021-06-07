@@ -79,7 +79,10 @@ class Polar {
 }
 
 /// Anchor points to construct a Gram.
-/// 8 directions distance of .5 from origin, 1 center pt
+/// 8 directions distance of .5 from origin, 1 center pt, and
+/// 4 shorter directions IE, IN, IW, IS distance of .35 from origin.
+/// e.g. IN (Inner North) is on N line, intersected by line from NW to NE,
+/// and IN is roughly sqrt(2)/4 north of origin.
 enum Anchor { E, NE, N, NW, W, SW, S, SE, IE, IN, IW, IS, O }
 
 /// Extending Anchor to returns its polar coordinate.

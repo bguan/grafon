@@ -16,6 +16,7 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
@@ -142,6 +143,36 @@ void main() {
         expect(gra.vowel, v);
       }
     }
+
+    for (final q in Quads.values) {
+      for (final f in Face.values) {
+        final gra = GramTable().at(q, f);
+        expect(gra.face, f);
+        if (f != Face.Center) {
+          expect(gra, q[f]);
+          expect(gra, isA<QuadGram>());
+        } else {
+          expect(gra, q.monoPeer.gram);
+          expect(gra, isA<MonoGram>());
+        }
+      }
+      for (final v in Vowel.values.where((v) => v != Vowel.NIL)) {
+        final gra = GramTable().at(q, v);
+        if (v.face != Face.Center) {
+          expect(gra.consPair, q[v.face].gram.consPair);
+        }
+        expect(gra.vowel, v);
+      }
+    }
+
+    expect(
+      () => GramTable().at(0, Face.Center),
+      throwsA(isA<UnsupportedError>()),
+    );
+    expect(
+      () => GramTable().at(Mono.Dot, 0),
+      throwsA(isA<UnsupportedError>()),
+    );
   });
 
   test('GramTable numRows match num of Mono', () {
@@ -201,6 +232,35 @@ void main() {
         Mono mEnum = GramTable().getMonoEnum(q.grams[f]);
         expect(mEnum, q.monoPeer);
       }
+    }
+  });
+
+  test('Mono convenience helper for expression building works', () {
+    for (final m in Mono.values) {
+      expect(m.shrink().renderPlan, m.gram.renderPlan.byUnary(Unary.Shrink));
+      expect(m.up().renderPlan, m.gram.renderPlan.byUnary(Unary.Up));
+      expect(m.down().renderPlan, m.gram.renderPlan.byUnary(Unary.Down));
+      expect(m.left().renderPlan, m.gram.renderPlan.byUnary(Unary.Left));
+      expect(m.right().renderPlan, m.gram.renderPlan.byUnary(Unary.Right));
+
+      final SingleGramExpr s = Mono.Dot.gram;
+      final BinaryOpExpr b = Mono.Dot.next(Mono.Dot.gram);
+      expect(m.next(s).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Next, s.renderPlan));
+      expect(m.nextCluster(b).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Next, b.renderPlan));
+      expect(m.merge(s).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Merge, s.renderPlan));
+      expect(m.mergeCluster(b).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Merge, b.renderPlan));
+      expect(m.over(s).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Over, s.renderPlan));
+      expect(m.overCluster(b).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Over, b.renderPlan));
+      expect(m.wrap(s).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Wrap, s.renderPlan));
+      expect(m.wrapCluster(b).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Wrap, b.renderPlan));
     }
   });
 }

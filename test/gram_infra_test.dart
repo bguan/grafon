@@ -18,7 +18,9 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/gram_infra.dart';
+import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -81,6 +83,12 @@ void main() {
     expect(p1, p3);
   });
 
+  test('Polar toString works', () {
+    final p = Polar(angle: pi, length: .5);
+
+    expect(p.toString(), "Polar(angle: 3.14, length: 0.50)");
+  });
+
   test('Anchors should have different polar values', () {
     final polarsFromAnchors = Set.of([
       ...Anchor.values.map((a) => a.polar),
@@ -99,6 +107,35 @@ void main() {
 
   test('Anchors at Origin should have 0 distance from center', () {
     expect(Anchor.O.vector.length, 0.0);
+  });
+
+  test('Anchor angle works', () {
+    expect(Anchor.E.angle, closeTo(0, 0.1));
+    expect(Anchor.N.angle, closeTo(1.57, 0.1));
+    expect(Anchor.W.angle, closeTo(3.14, 0.1));
+    expect(Anchor.S.angle, closeTo(4.71, 0.1));
+  });
+
+  test('Anchor x y works', () {
+    expect(Anchor.E.x, moreOrLessEquals(0.5));
+    expect(Anchor.E.y, moreOrLessEquals(0));
+    expect(Anchor.N.x, moreOrLessEquals(0));
+    expect(Anchor.N.y, moreOrLessEquals(0.5));
+    expect(Anchor.W.x, moreOrLessEquals(-0.5));
+    expect(Anchor.W.y, moreOrLessEquals(0));
+    expect(Anchor.S.x, moreOrLessEquals(0));
+    expect(Anchor.S.y, moreOrLessEquals(-.5));
+    expect(Anchor.O.x, moreOrLessEquals(0));
+    expect(Anchor.O.y, moreOrLessEquals(0));
+  });
+
+  test('findAnchor works', () {
+    expect(AnchorHelper.findAnchor(Vector2(0, 0)), Anchor.O);
+    expect(AnchorHelper.findAnchor(Vector2(.5, 0)), Anchor.E);
+    expect(AnchorHelper.findAnchor(Vector2(0, .5)), Anchor.N);
+    expect(AnchorHelper.findAnchor(Vector2(-.5, 0)), Anchor.W);
+    expect(AnchorHelper.findAnchor(Vector2(0, -.5)), Anchor.S);
+    expect(AnchorHelper.findAnchor(Vector2(123, 456)), null);
   });
 
   test('Anchor outerPoints should only have anchor with outer distance', () {
@@ -138,6 +175,35 @@ void main() {
       expect(from.vector.angleToSigned(to.vector),
           moreOrLessEquals(pi / 4, epsilon: floatPrecision));
     }
+  });
+
+  test('LineMetrics equals, hashCode, toString works', () {
+    final lm1 =
+        LineMetrics(xMin: 1, yMin: 2, xMax: 3, yMax: 4, xAvg: 2, yAvg: 3);
+    final lm1B =
+        LineMetrics(xMin: 1, yMin: 2, xMax: 3, yMax: 4, xAvg: 2, yAvg: 3);
+    final lm2 =
+        LineMetrics(xMin: 2, yMin: 4, xMax: 6, yMax: 8, xAvg: 4, yAvg: 6);
+
+    expect(lm1, lm1);
+    expect(lm1, lm1B);
+    expect(lm1 == lm2, isFalse);
+    expect(lm1.hashCode, lm1B.hashCode);
+    expect(lm1.toString(), lm1B.toString());
+    expect(lm1.toString() == lm2.toString(), isFalse);
+  });
+
+  test('LengthDim equals, hashCode, toString works', () {
+    final ld1 = LengthDim(length: 5, dxSum: 3, dySum: 4);
+    final ld1B = LengthDim(length: 5, dxSum: 3, dySum: 4);
+    final ld2 = LengthDim(length: 10, dxSum: 6, dySum: 8);
+
+    expect(ld1, ld1);
+    expect(ld1, ld1B);
+    expect(ld1 == ld2, isFalse);
+    expect(ld1.hashCode, ld1B.hashCode);
+    expect(ld1.toString(), ld1B.toString());
+    expect(ld1.toString() == ld2.toString(), isFalse);
   });
 
   test('Vowels should cover all Faces', () {
@@ -180,7 +246,7 @@ void main() {
     }
   });
 
-  test('PolyLine equality and hashcode', () {
+  test('PolyStraight equality and hashcode', () {
     for (final a1 in Anchor.values) {
       final line1 = PolyStraight.anchors([a1]);
 
@@ -220,10 +286,11 @@ void main() {
     }
   });
 
-  test('PolyLine visiblePoints are same as all anchors', () {
+  test('PolyStraight visiblePoints are same as all anchors', () {
     final nsew = [Anchor.N, Anchor.S, Anchor.E, Anchor.W];
     final lines = PolyStraight.anchors(nsew);
     expect(lines.visiblePoints, nsew.map((a) => a.vector));
+    expect(lines.numVisiblePts, 4);
   });
 
   test('PolySpline equality and hashcode', () {
@@ -271,6 +338,35 @@ void main() {
   test('PolySpline visiblePoints are all visible except first and last', () {
     final spline = PolyCurve.anchors([Anchor.N, Anchor.S, Anchor.E, Anchor.W]);
     expect(spline.visiblePoints, [Anchor.S.vector, Anchor.E.vector]);
+    expect(spline.numVisiblePts, 2);
+  });
+
+  test('diffAspect works', () {
+    final fixedDot = PolyDot.anchors([Anchor.O], isFixedAspect: true);
+    expect(fixedDot.isFixedAspect, isTrue);
+    expect(fixedDot.diffAspect(false).isFixedAspect, isFalse);
+    expect(fixedDot.diffAspect(false).diffAspect(true).isFixedAspect, isTrue);
+
+    final fixedInvisiDot = InvisiDot.anchors([Anchor.O], isFixedAspect: true);
+    expect(fixedInvisiDot.isFixedAspect, isTrue);
+    expect(fixedInvisiDot.diffAspect(false).isFixedAspect, isFalse);
+    expect(fixedInvisiDot.diffAspect(false).diffAspect(true).isFixedAspect,
+        isTrue);
+
+    final fixedLine =
+        PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true);
+    expect(fixedLine.isFixedAspect, isTrue);
+    expect(fixedLine.diffAspect(false).isFixedAspect, isFalse);
+    expect(fixedLine.diffAspect(false).diffAspect(true).isFixedAspect, isTrue);
+
+    final fixedSpline = PolyCurve.anchors(
+      [Anchor.N, Anchor.S, Anchor.E, Anchor.W],
+      isFixedAspect: true,
+    );
+    expect(fixedSpline.isFixedAspect, isTrue);
+    expect(fixedSpline.diffAspect(false).isFixedAspect, isFalse);
+    expect(
+        fixedSpline.diffAspect(false).diffAspect(true).isFixedAspect, isTrue);
   });
 
   test('Metrics calculation for PolySpline is correct', () {
@@ -953,5 +1049,19 @@ void main() {
     expect(bc.y, moreOrLessEquals(0.1, epsilon: 0.1));
     expect(ec.x, moreOrLessEquals(-0.6, epsilon: 0.1));
     expect(ec.y, moreOrLessEquals(-0.1, epsilon: 0.1));
+  });
+
+  test('test SingleExpr get gram works', () {
+    final table = GramTable();
+    for (final m in Mono.values) {
+      for (final f in Face.values) {
+        final g = table.atMonoFace(m, f);
+        for (final uop in [null, ...Unary.values]) {
+          final expr = uop == null ? g : UnaryOpExpr(uop, g);
+          expect(expr.gram, g);
+          expect(expr.grams, [g]);
+        }
+      }
+    }
   });
 }

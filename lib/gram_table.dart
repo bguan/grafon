@@ -188,11 +188,11 @@ class _QuadHelper {
   ];
 
   final anglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
+    PolyStraight.anchors([Anchor.NW, Anchor.E, Anchor.SW]),
   ];
 
   final trianglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW, Anchor.NW]),
+    PolyStraight.anchors([Anchor.NW, Anchor.E, Anchor.SW, Anchor.NW]),
   ];
 
   final gatePaths = [

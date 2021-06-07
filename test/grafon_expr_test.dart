@@ -30,11 +30,25 @@ void main() {
     expect(symbolsFromUnary.length, Unary.values.length);
   });
 
+  test('Unary shortName should all be unique', () {
+    final namesFromUnary = Set.of([
+      ...Unary.values.map((u) => u.shortName),
+    ]);
+    expect(namesFromUnary.length, Unary.values.length);
+  });
+
   test('Binary symbol should all be unique', () {
     final symbolsFromBinary = Set.of([
       ...Binary.values.map((b) => b.symbol),
     ]);
     expect(symbolsFromBinary.length, Binary.values.length);
+  });
+
+  test('Binary shortName should all be unique', () {
+    final namesFromBinary = Set.of([
+      ...Binary.values.map((b) => b.shortName),
+    ]);
+    expect(namesFromBinary.length, Binary.values.length);
   });
 
   test('Unary ending should all be unique', () {
@@ -62,6 +76,17 @@ void main() {
     }
   });
 
+  test('Grafon Expr lines, width, height works', () {
+    final cross = Mono.Cross.gram;
+    expect(cross.lines.length, 2);
+    expect(cross.lines.first,
+        PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true));
+    expect(cross.lines.last,
+        PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true));
+    expect(cross.width, moreOrLessEquals(1.0));
+    expect(cross.height, moreOrLessEquals(1.0));
+  });
+
   test('SingleGram pronunciation matches gram equivalent', () {
     for (final cp in ConsPair.values) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
@@ -70,6 +95,24 @@ void main() {
           g.pronunciation.first,
           Syllable(cp.base, v, Vowel.NIL, Coda.NIL),
         );
+      }
+    }
+  });
+
+  test('UnaryExpr grams property works', () {
+    for (final m in Mono.values) {
+      for (final f in Face.values) {
+        final g = GramTable().atMonoFace(m, f);
+        expect(g.shrink().grams.length, 1);
+        expect(g.shrink().grams.first, g);
+        expect(g.up().grams.length, 1);
+        expect(g.up().grams.first, g);
+        expect(g.down().grams.length, 1);
+        expect(g.down().grams.first, g);
+        expect(g.left().grams.length, 1);
+        expect(g.left().grams.first, g);
+        expect(g.right().grams.length, 1);
+        expect(g.right().grams.first, g);
       }
     }
   });
@@ -147,18 +190,30 @@ void main() {
     expect(sunRight.pronunciation.first, Syllable(Cons.sh, Vowel.a, Vowel.e));
   });
 
-  test('merge() and mergeCluster() toString and pronunciation is correct', () {
+  test('merge() and mergeCluster() grams, toString & pronunciation is correct',
+      () {
     final x = Mono.X.gram;
-    final hline = Quads.Line.down;
-    final six = x.merge(hline);
+    final hLine = Quads.Line.down;
+    final six = x.merge(hLine);
+
+    expect(six.grams.length, 2);
+    expect(six.grams.first, x);
+    expect(six.grams.last, hLine);
 
     expect(six.toString(), "X * Down_Line");
     expect(six.pronunciation.length, 2);
     expect(six.pronunciation.first, Syllable.cvc(Cons.g, Vowel.a, Coda.k));
     expect(six.pronunciation.last, Syllable.v(Vowel.u));
 
-    final vline = Quads.Line.up;
-    final hash = vline.next(vline).mergeCluster(hline.next(hline));
+    final vLine = Quads.Line.up;
+    final hash = vLine.next(vLine).mergeCluster(hLine.next(hLine));
+
+    expect(hash.grams.length, 4);
+    expect(hash.grams[0], vLine);
+    expect(hash.grams[1], vLine);
+    expect(hash.grams[2], hLine);
+    expect(hash.grams[3], hLine);
+
     expect(hash.toString(), "Up_Line . Up_Line * (Down_Line . Down_Line)");
     expect(hash.pronunciation.length, 4);
     expect(hash.pronunciation[0], Syllable.vc(Vowel.i, Coda.th));
@@ -167,10 +222,15 @@ void main() {
     expect(hash.pronunciation[3], Syllable.v(Vowel.u));
   });
 
-  test('over() and overCluster() toString and pronunciation is correct', () {
+  test('over() and overCluster() grams, toString & pronunciation is correct',
+      () {
     final dot = Mono.Dot.gram;
-    final vline = Quads.Line.up;
-    final child = dot.over(vline);
+    final vLine = Quads.Line.up;
+    final child = dot.over(vLine);
+
+    expect(child.grams.length, 2);
+    expect(child.grams[0], dot);
+    expect(child.grams[1], vLine);
 
     expect(child.toString(), "Dot / Up_Line");
     expect(child.pronunciation.length, 2);
@@ -181,6 +241,12 @@ void main() {
     final cornerDown = Quads.Corner.down;
     final cornerLeft = Quads.Corner.left;
     final feet = dot.overCluster(cornerDown.next(cornerLeft));
+
+    expect(feet.grams.length, 3);
+    expect(feet.grams[0], dot);
+    expect(feet.grams[1], cornerDown);
+    expect(feet.grams[2], cornerLeft);
+
     expect(feet.toString(), "Dot / (Down_Corner . Left_Corner)");
     expect(feet.pronunciation.length, 3);
     expect(feet.pronunciation[0], Syllable.vc(Vowel.a, Coda.s));
@@ -189,10 +255,15 @@ void main() {
     expect(feet.pronunciation.toString(), 'aspuhbo');
   });
 
-  test('next() and nextCluster() toString and pronunciation is correct', () {
+  test('next() and nextCluster() grams, toString & pronunciation is correct',
+      () {
     final lArc = Quads.Arc.left;
     final rFlow = Quads.Flow.right;
     final talk = lArc.next(rFlow);
+
+    expect(talk.grams.length, 2);
+    expect(talk.grams[0], lArc);
+    expect(talk.grams[1], rFlow);
 
     expect(talk.toString(), "Left_Arc . Right_Flow");
     expect(talk.pronunciation.length, 2);
@@ -203,6 +274,12 @@ void main() {
     final rSlash = Quads.Line.right;
     final bSlash = Quads.Line.left;
     final shout = lArc.nextCluster(rSlash.over(bSlash));
+
+    expect(shout.grams.length, 3);
+    expect(shout.grams[0], lArc);
+    expect(shout.grams[1], rSlash);
+    expect(shout.grams[2], bSlash);
+
     expect(shout.toString(), "Left_Arc . (Right_Line / Left_Line)");
     expect(shout.pronunciation.length, 3);
     expect(shout.pronunciation[0], Syllable(Cons.m, Vowel.o));
@@ -211,10 +288,15 @@ void main() {
     expect(shout.pronunciation.toString(), 'mohezo');
   });
 
-  test('wrap() and wrapCluster() toString and pronunciation is correct', () {
+  test('wrap() and wrapCluster(), grams, toString & pronunciation is correct',
+      () {
     final circle = Mono.Circle.gram;
     final dot = Mono.Dot.gram;
     final eye = circle.wrap(dot);
+
+    expect(eye.grams.length, 2);
+    expect(eye.grams[0], circle);
+    expect(eye.grams[1], dot);
 
     expect(eye.toString(), "Circle @ Dot");
     expect(eye.pronunciation.length, 2);
@@ -224,6 +306,13 @@ void main() {
 
     final gateDown = Quads.Gate.down;
     final family = circle.wrapCluster(dot.next(dot).over(gateDown));
+
+    expect(family.grams.length, 4);
+    expect(family.grams[0], circle);
+    expect(family.grams[1], dot);
+    expect(family.grams[2], dot);
+    expect(family.grams[3], gateDown);
+
     expect(family.toString(), "Circle @ (Dot . Dot / Down_Gate)");
     expect(family.pronunciation.length, 4);
     expect(family.pronunciation[0], Syllable.cvc(Cons.m, Vowel.a, Coda.n));

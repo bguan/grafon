@@ -177,7 +177,14 @@ void main() {
     final size = Size(100, 100);
     final scheme = ColorScheme.fromSwatch();
     final bezier = QuadGram([
-      PolyCurve.anchors([Anchor.W, Anchor.W, Anchor.N, Anchor.E, Anchor.S])
+      PolyCurve.anchors([
+        Anchor.W,
+        Anchor.W,
+        Anchor.N,
+        Anchor.E,
+        Anchor.S,
+        Anchor.S,
+      ])
     ], Face.Up, ConsPair.lr);
 
     final painter = GrafonPainter(bezier.renderPlan, scheme: scheme);

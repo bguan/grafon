@@ -18,7 +18,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'grafon_word.dart';
+import 'grafon_dictionary.dart';
 import 'gram_table_widget.dart';
 import 'word_group_widget.dart';
 
@@ -41,6 +41,7 @@ class GrafonApp extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final controller = PageController(initialPage: 0);
     final wordViews = [
+      WordGroupPage(spiritual),
       WordGroupPage(w),
       WordGroupPage(testGroup),
       WordGroupPage(interpersonalGroup),

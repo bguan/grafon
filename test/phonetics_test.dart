@@ -228,6 +228,8 @@ void main() {
     final ma = Syllable(Cons.m, Vowel.a);
     final aMa = Pronunciation([a, ma]);
     expect(aMa == aMa, true);
+    expect(aMa.hashCode == aMa.hashCode, true);
+
     final aA = Pronunciation([a, a]);
     expect(aMa == aA, false);
     final maA = Pronunciation([ma, a]);

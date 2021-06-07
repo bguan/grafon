@@ -26,9 +26,7 @@ import 'package:vector_math/vector_math.dart';
 import 'grafon_expr.dart';
 import 'gram_infra.dart';
 
-/// GramMetrics is a value class of rendering metrics for each gram expression.
-/// Height is normalized to always be 1.0, width is adjusted for visual balance.
-/// Origin is always (0, 0), visualCenter is center of visual balance.
+/// RenderPlan contains info on rendering each gram expression.
 class RenderPlan {
   static const STD_DIM = 1.0;
   static const PEN_WTH_SCALE = 0.05;
@@ -81,7 +79,7 @@ class RenderPlan {
     this.center = quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
     this.width = quantize(max(xMax - xMin, MIN_WIDTH));
     this.height = quantize(max(yMax - yMin, MIN_HEIGHT));
-    this._hashCode = lines.fold(mass.hashCode, (h, l) => h ^ l.hashCode);
+    this._hashCode = lines.fold(mass.hashCode, (h, l) => h << 1 ^ l.hashCode);
   }
 
   @override
@@ -204,43 +202,49 @@ class RenderPlan {
 
   /// Transform this render plan by unary operation to generate a new render.
   RenderPlan byUnary(Unary op) {
-    final shrunk = remap((isF, v) => v / 2);
-    // assume box is bound by min max X Y of -.5 to .5
     final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up: // shift align w top, InvisiDot at bottom to keep height
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 1.5));
+        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/2, v.y/3));
         lines = [
           ...shrunk.shift(0, .5 - shrunk.yMax).lines,
           InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Down: // shift align w bottom, InvisiDot at top to keep height
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 1.5));
+        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/2, v.y/3));
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
           InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Left: // shift align w left, InvisiDot at right to keep width
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 1.5, v.y));
+        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/3, v.y/2));
         lines = [
           ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
           InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Right: // shift align w right, keep width w InvisiDot at left
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 1.5, v.y));
+        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/3, v.y/2));
         lines = [
           ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Shrink: // extending all sides to former min max
+      default:
+        final shrunk = remap((isF, v) => v / 2);
         lines = [
           ...shrunk.lines,
           InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
         ];
         break;
-      default:
-        throw UnsupportedError('Unary operation $op not supported.');
     }
     return RenderPlan(lines).reCenter();
   }
@@ -249,46 +253,49 @@ class RenderPlan {
   RenderPlan byBinary(Binary op, RenderPlan that) {
     var r1 = this;
     var r2 = that;
-
-    r1 = r1.reCenter();
-    r2 = r2.reCenter();
-    // both operands are centered, no need to trim surrounding whitespace
     switch (op) {
       case Binary.Next:
+        r1 = r1.reCenter();
+        r2 = r2.reCenter();
         // align the heights of r1 or r2 to the taller height
-        if (r1.height > r2.height) {
+        if ((r1.height / r2.height) > 1.2) {
           r2 = r2.scaleHeight(r1.height).reCenter();
-        } else if (r2.height > r1.height) {
+        } else if ((r2.height / r1.height) > 1.2) {
           r1 = r1.scaleHeight(r2.height).reCenter();
         }
         // move 2nd operand to right of 1st
         return r1.merge(r2.shift(.5 * r1.width + STD_GAP + .5 * r2.width, 0));
       case Binary.Over:
+        r1 = r1.reCenter();
+        r2 = r2.reCenter();
         // align the widths of r1 or r2 to the wider width
-        if (r1.width > r2.width) {
+        if ((r1.width / r2.width) > 1.2) {
           r2 = r2.scaleWidth(r1.width).reCenter();
-        } else if (r2.width > r1.width) {
+        } else if ((r2.width / r1.width) > 1.2) {
           r1 = r1.scaleWidth(r2.width).reCenter();
         }
         return r1
             .merge(r2.shift(0, -.5 * r1.height - STD_GAP - .5 * r2.height))
             .reCenter();
       case Binary.Wrap:
+        r1 = r1.reCenter();
+        r2 = r2.reCenter();
         r1 = r1.noInvisiDots().reCenter();
         final hScale = .5 * r1.height / r2.height;
         r2 = r2.remap((isF, v) => v * hScale).reCenter();
         // if r2 width much more than r1 width, scale r1
-        if (r2.width > .7 * r1.width) {
-          r1 = r1.relaxFixedAspect().scaleWidth(1.4 * r2.width).reCenter();
+        if (r2.width > .5 * r1.width) {
+          r1 = r1.relaxFixedAspect().scaleWidth(2 * r2.width).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);
         return r1.merge(r2).reCenter();
       case Binary.Merge:
+      default:
         // scale heights of r1 or r2 to taller height if too short
-        if (r1.height > r2.height) {
+        if ((r1.height / r2.height) > 1.5) {
           r2 = r2.scaleHeight(r1.height).reCenter();
-        } else if (r2.height > r1.height) {
+        } else if ((r2.height / r1.height) > 1.5) {
           r1 = r1.scaleHeight(r2.height).reCenter();
         }
         // scale widths of r1 or r2 to wider width if too narrow
@@ -298,8 +305,6 @@ class RenderPlan {
           r1 = r1.scaleWidth(r2.width).reCenter();
         }
         return r1.merge(r2).reCenter();
-      default:
-        throw UnsupportedError('Binary Operation $op not supported!');
     }
   }
 
@@ -321,4 +326,10 @@ class RenderPlan {
     return render.reCenter().remap(
         (isF, v) => Vector2(v.x + devWth / 2, devHt - (v.y + devHt / 2)));
   }
+
+  bool get isWidthPadded => (width - (xMax - xMin)).abs() > 0.1;
+
+  bool get isHeightPadded => (height - (yMax - yMin)).abs() > 0.1;
+
+  bool get isPadded => isWidthPadded || isHeightPadded;
 }

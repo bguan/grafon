@@ -117,7 +117,7 @@ abstract class GrafonExpr {
   double get height => renderPlan.height;
 
   /// get all grams in expression
-  Iterable<Gram> get grams;
+  List<Gram> get grams;
 
   /// Merge this expression with a single.
   BinaryOpExpr merge(SingleGramExpr single) =>
@@ -187,7 +187,7 @@ class UnaryOpExpr extends SingleGramExpr {
   Pronunciation get pronunciation => Pronunciation([syllable]);
 
   @override
-  Iterable<Gram> get grams => [gram];
+  List<Gram> get grams => [gram];
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
@@ -216,7 +216,7 @@ class BinaryOpExpr extends MultiGramExpr {
   }
 
   @override
-  Iterable<Gram> get grams => [...expr1.grams, ...expr2.grams];
+  List<Gram> get grams => [...expr1.grams, ...expr2.grams];
 
   ClusterExpr toClusterExpression() => ClusterExpr(this);
 }
@@ -258,5 +258,5 @@ class ClusterExpr extends MultiGramExpr {
   }
 
   @override
-  Iterable<Gram> get grams => binaryExpr.grams;
+  List<Gram> get grams => binaryExpr.grams;
 }

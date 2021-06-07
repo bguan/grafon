@@ -653,7 +653,7 @@ abstract class Gram extends SingleGramExpr {
   Gram get gram => this;
 
   @override
-  Iterable<Gram> get grams => [this];
+  List<Gram> get grams => [this];
 
   Vowel get vowel => face.vowel;
 

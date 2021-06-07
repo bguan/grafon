@@ -25,12 +25,12 @@ import 'package:vector_math/vector_math.dart';
 
 /// Unit Tests for RenderPlan
 void main() {
-  test("GramMetrics has correct widthRatio", () {
+  test("RenderPlan has correct widthRatio", () {
     final sun = Mono.Sun.gram; // or star
     expect(sun.renderPlan.width, 1.0);
   });
 
-  test('GramMetrics computation', () {
+  test('RenderPlan metrics computation works', () {
     final dot = PolyStraight.anchors([Anchor.O, Anchor.O]);
     expect(dot.vectors, [Vector2(0, 0), Vector2(0, 0)]);
 
@@ -119,7 +119,21 @@ void main() {
     expect(m0.yMin - m1.yMax, lessThan(.25));
   });
 
-  test('Metrics calculation for Circle is correct', () {
+  test('RenderPlan equality, hashcode, toString works', () {
+    final dot = Mono.Dot.gram.renderPlan;
+    final dotPlan = RenderPlan([
+      PolyDot.anchors([Anchor.O])
+    ]);
+    final circle = Mono.Circle.gram.renderPlan;
+
+    expect(dot == dot, isTrue);
+    expect(dot == dotPlan, isTrue);
+    expect(dot.hashCode == dotPlan.hashCode, isTrue);
+    expect(dot.toString(), dotPlan.toString());
+    expect(dot == circle, isFalse);
+  });
+
+  test('RenderPlan metrics calculation for Circle is correct', () {
     final cp = RenderPlan([
       PolyCurve.anchors([
         Anchor.W,
@@ -144,6 +158,7 @@ void main() {
     expect(cp.mass, 0.16);
     expect(cp.vMass, 0.1);
     expect(cp.hMass, 0.1);
+    expect(cp.area, moreOrLessEquals(1.0));
   });
 
   test('Unary Shrink operator works', () {
@@ -172,6 +187,56 @@ void main() {
     expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
     // Gap is not too big
     expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(20));
+  });
+
+  test('RenderPlan metrics computation works', () {
+    final cross = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+      PolyStraight.anchors([Anchor.E, Anchor.W], isFixedAspect: true),
+    ]);
+
+    final foldFixed = (int numFixed, l) => numFixed + (l.isFixedAspect ? 1 : 0);
+    final numFixed = cross.lines.fold(0, foldFixed);
+
+    expect(numFixed, 2);
+
+    final relaxed = cross.relaxFixedAspect();
+
+    final numFixedRelaxed = relaxed.lines.fold(0, foldFixed);
+
+    expect(numFixedRelaxed, 0);
+  });
+
+  test('Brute force all level 1 gram combo RenderPlan', () {
+    final table = GramTable();
+    for (final m1 in Mono.values) {
+      for (final f1 in Face.values) {
+        final g1 = table.atMonoFace(m1, f1);
+        for (final uop1 in [null, ...Unary.values]) {
+          final expr1 = uop1 == null ? g1 : UnaryOpExpr(uop1, g1);
+          for (final bop in [null, ...Binary.values]) {
+            final exprs = <GrafonExpr>[];
+            if (bop == null) {
+              exprs.add(expr1);
+            } else {
+              for (final m2 in Mono.values) {
+                for (final f2 in Face.values) {
+                  final g2 = table.atMonoFace(m2, f2);
+                  for (final uop2 in [null, ...Unary.values]) {
+                    final expr2 = uop2 == null ? g2 : UnaryOpExpr(uop2, g2);
+                    exprs.add(BinaryOpExpr(expr1, bop, expr2));
+                  }
+                }
+              }
+            }
+            for (var e in exprs) {
+              final render = e.renderPlan;
+              expect(render.mass > 0, isTrue);
+            }
+          }
+        }
+      }
+    }
   });
 
   // TODO: impl tests by migrating old operator tests

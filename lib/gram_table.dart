@@ -20,8 +20,7 @@
 /// Each column is associated with a Face, shares the same vowel.
 library gram_table;
 
-import 'package:grafon/grafon_expr.dart';
-
+import 'grafon_expr.dart';
 import 'gram_infra.dart';
 import 'phonetics.dart';
 
@@ -188,11 +187,11 @@ class _QuadHelper {
   ];
 
   final anglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.E, Anchor.SW]),
+    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
   ];
 
   final trianglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.E, Anchor.SW, Anchor.NW]),
+    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW, Anchor.NW]),
   ];
 
   final gatePaths = [
@@ -215,6 +214,7 @@ class _QuadHelper {
       Anchor.S,
       Anchor.SW,
     ]),
+    InvisiDot.anchors([Anchor.E])
   ];
 
   final flowPaths = [

@@ -25,7 +25,7 @@ final w = WordGroup(
     'Edge Cases',
     CoreWord(Quads.Line.up.merge(Quads.Angle.up.up())),
     'Random tricky edge cases for rendering.', [
-  CoreWord(Quads.Arc.left.wrap(Quads.Flow.right)),
+  CoreWord(Quads.Arc.left.next(Quads.Flow.right)),
   CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down)),
   CoreWord(Quads.Arc.left.next(Quads.Arc.right)),
   CoreWord(Quads.Angle.up.over(Quads.Arc.down)),
@@ -136,12 +136,12 @@ final interpersonalGroup = WordGroup(
   ],
 );
 
-final spiritual = WordGroup('Spiritual', CoreWord(Mono.Sun.over(Quads.Gate.up)),
-    'Random tricky edge cases for rendering.', [
+final spiritual = WordGroup(
+    'Spiritual', CoreWord(Mono.Sun.over(Quads.Gate.up)), 'Spiritual.', [
   CoreWord(Mono.Cross.over(Quads.Gate.up)),
   CoreWord(Quads.Triangle.up.merge(Quads.Triangle.down).over(Quads.Gate.up)),
   CoreWord(Quads.Step.up.merge(Quads.Step.right).over(Quads.Gate.up)),
-  CoreWord(Quads.Arc.left.next(Mono.Sun.shrink()).over(Quads.Gate.up)),
+  CoreWord(Quads.Arc.left.next(Mono.Light.shrink()).over(Quads.Gate.up)),
   CoreWord(Mono.Circle.merge(Quads.Flow.down).over(Quads.Gate.up)),
   CoreWord(Mono.Square.merge(Mono.Diamond.gram)
       .wrap(Mono.Sun.gram)
@@ -181,6 +181,8 @@ final demoGroup = WordGroup(
     CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
         "Blue", "Blue, light from water."),
     CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),
+    CoreWord(
+        Quads.Arc.up.over(Quads.Arc.down).wrap(Mono.Dot.gram), "Eye", "Eye."),
     CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down), "Heart",
         "Heart, Love."),
     CompoundWord(

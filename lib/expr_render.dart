@@ -30,8 +30,8 @@ import 'gram_infra.dart';
 class RenderPlan {
   static const STD_DIM = 1.0;
   static const PEN_WTH_SCALE = 0.05;
-  static const MIN_WIDTH = 0.25;
-  static const MIN_HEIGHT = 0.25;
+  static const MIN_WIDTH = 0.2;
+  static const MIN_HEIGHT = 0.2;
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
   static const STD_GAP = 0.1;
   final Iterable<PolyLine> lines;
@@ -280,7 +280,7 @@ class RenderPlan {
       case Binary.Wrap:
         r1 = r1.reCenter();
         r2 = r2.reCenter();
-        r1 = r1.noInvisiDots().reCenter();
+        // r1 = r1.noInvisiDots().reCenter();
         final hScale = .5 * r1.height / r2.height;
         r2 = r2.remap((isF, v) => v * hScale).reCenter();
         // if r2 width much more than r1 width, scale r1
@@ -304,6 +304,8 @@ class RenderPlan {
         } else if (r2.width > r1.width && r1.width / r2.width < .5) {
           r1 = r1.scaleWidth(r2.width).reCenter();
         }
+        // align r2's avg(x,y) to r1's avg(x,y)
+        r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);
         return r1.merge(r2).reCenter();
     }
   }

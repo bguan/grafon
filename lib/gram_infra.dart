@@ -578,12 +578,13 @@ class PolyCurve extends PolyLine {
   static List<Vector2> calcApproxPts(Iterable<Vector2> points) {
     List<Vector2> pts = points.toList();
     List<Vector2> curvePts = [];
+    int len = pts.length;
     // use lines of anchor points and control points to approximate curve
-    for (var i = 1; i < pts.length - 2; i++) {
+    for (var i = 1; i < len - 2; i++) {
       final pre = pts[max(0, i - 1)];
       final beg = pts[max(1, i)];
-      final end = pts[min(i + 1, pts.length - 1)];
-      final next = pts[min(i + 2, pts.length - 1)];
+      final end = pts[min(i + 1, len - 1)];
+      final next = pts[min(i + 2, len - 1)];
       if (i == 1) curvePts.add(beg);
       if (pre == beg && end == next) {
         // degenerate case, just a straight line

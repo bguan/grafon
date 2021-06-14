@@ -122,13 +122,13 @@ void main() {
   test('RenderPlan equality, hashcode, toString works', () {
     final dot = Mono.Dot.gram.renderPlan;
     final dotPlan = RenderPlan([
-      PolyDot.anchors([Anchor.O])
+      PolyDot.anchors([Anchor.O], isFixedAspect: true)
     ]);
     final circle = Mono.Circle.gram.renderPlan;
 
     expect(dot == dot, isTrue);
-    expect(dot == dotPlan, isTrue);
-    expect(dot.hashCode == dotPlan.hashCode, isTrue);
+    expect(dot, dotPlan);
+    expect(dot.hashCode, dotPlan.hashCode);
     expect(dot.toString(), dotPlan.toString());
     expect(dot == circle, isFalse);
   });
@@ -207,7 +207,7 @@ void main() {
           PolyStraight([Vector2(-.25, .25), Vector2(.25, .25)],
               isFixedAspect: true),
           InvisiDot([Vector2(0, -0.5)], isFixedAspect: true)
-        ]));
+        ], overrideCenter: true));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -215,21 +215,21 @@ void main() {
     ]);
 
     final upFlexCross = flexCross.byUnary(Unary.Up);
-    final filtered =
+    final filteredUp =
         RenderPlan(upFlexCross.lines.where((l) => l is! InvisiDot));
 
-    expect(flexCross.width, filtered.width);
-    expect(flexCross.height > filtered.height, isTrue);
-    expect(upFlexCross.width, filtered.width);
-    expect(upFlexCross.height > filtered.height, isTrue);
+    expect(filteredUp.width, flexCross.width);
+    expect(flexCross.height > filteredUp.height, isTrue);
+    expect(upFlexCross.width, filteredUp.width);
+    expect(upFlexCross.height > filteredUp.height, isTrue);
 
     expect(
         upFlexCross,
         RenderPlan([
-          PolyStraight([Vector2(0, .5), Vector2(0, -.16)]),
-          PolyStraight([Vector2(-.5, .17), Vector2(.5, .17)]),
+          PolyStraight([Vector2(0, .5), Vector2(0, 0)]),
+          PolyStraight([Vector2(-.5, .25), Vector2(.5, .25)]),
           InvisiDot([Vector2(0, -0.5)])
-        ]));
+        ], overrideCenter: true));
   });
 
   test('Unary Down operator works', () {
@@ -254,7 +254,7 @@ void main() {
           PolyStraight([Vector2(-.25, -.25), Vector2(.25, -.25)],
               isFixedAspect: true),
           InvisiDot([Vector2(0, 0.5)], isFixedAspect: true)
-        ]));
+        ], overrideCenter: true));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -262,21 +262,21 @@ void main() {
     ]);
 
     final downFlexCross = flexCross.byUnary(Unary.Down);
-    final filtered =
+    final filteredDown =
         RenderPlan(downFlexCross.lines.where((l) => l is! InvisiDot));
 
-    expect(flexCross.width, filtered.width);
-    expect(flexCross.height > filtered.height, isTrue);
-    expect(downFlexCross.width, filtered.width);
-    expect(downFlexCross.height > filtered.height, isTrue);
+    expect(filteredDown.width, flexCross.width);
+    expect(flexCross.height > filteredDown.height, isTrue);
+    expect(downFlexCross.width, filteredDown.width);
+    expect(downFlexCross.height > filteredDown.height, isTrue);
 
     expect(
         downFlexCross,
         RenderPlan([
-          PolyStraight([Vector2(0, .16), Vector2(0, -.5)]),
-          PolyStraight([Vector2(-.5, -.17), Vector2(.5, -.17)]),
+          PolyStraight([Vector2(0, 0), Vector2(0, -.5)]),
+          PolyStraight([Vector2(-.5, -.25), Vector2(.5, -.25)]),
           InvisiDot([Vector2(0, 0.5)])
-        ]));
+        ], overrideCenter: true));
   });
 
   test('Unary Left operator works', () {
@@ -301,7 +301,7 @@ void main() {
               isFixedAspect: true),
           PolyStraight([Vector2(-.5, 0), Vector2(0, 0)], isFixedAspect: true),
           InvisiDot([Vector2(.5, 0)], isFixedAspect: true)
-        ]));
+        ], overrideCenter: true));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -309,21 +309,21 @@ void main() {
     ]);
 
     final leftFlexCross = flexCross.byUnary(Unary.Left);
-    final filtered =
+    final filteredLeft =
         RenderPlan(leftFlexCross.lines.where((l) => l is! InvisiDot));
 
-    expect(flexCross.width > filtered.width, isTrue);
-    expect(flexCross.height, filtered.height);
-    expect(leftFlexCross.width > filtered.width, isTrue);
-    expect(leftFlexCross.height, filtered.height);
+    expect(flexCross.width > filteredLeft.width, isTrue);
+    expect(filteredLeft.height, flexCross.height);
+    expect(leftFlexCross.width > filteredLeft.width, isTrue);
+    expect(leftFlexCross.height, filteredLeft.height);
 
     expect(
         leftFlexCross,
         RenderPlan([
-          PolyStraight([Vector2(-.17, .5), Vector2(-.17, -.5)]),
-          PolyStraight([Vector2(-.5, 0), Vector2(.16, 0)]),
+          PolyStraight([Vector2(-.25, .5), Vector2(-.25, -.5)]),
+          PolyStraight([Vector2(-.5, 0), Vector2(0, 0)]),
           InvisiDot([Vector2(.5, 0)])
-        ]));
+        ], overrideCenter: true));
   });
 
   test('Unary Right operator works', () {
@@ -348,7 +348,7 @@ void main() {
               isFixedAspect: true),
           PolyStraight([Vector2(0, 0), Vector2(.5, 0)], isFixedAspect: true),
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: true)
-        ]));
+        ], overrideCenter: true));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -360,17 +360,17 @@ void main() {
         RenderPlan(rightFlexCross.lines.where((l) => l is! InvisiDot));
 
     expect(flexCross.width > filtered.width, isTrue);
-    expect(flexCross.height, filtered.height);
+    expect(filtered.height, flexCross.height);
     expect(rightFlexCross.width > filtered.width, isTrue);
     expect(rightFlexCross.height, filtered.height);
 
     expect(
         rightFlexCross,
         RenderPlan([
-          PolyStraight([Vector2(.17, .5), Vector2(.17, -.5)]),
-          PolyStraight([Vector2(-.16, 0), Vector2(.5, 0)]),
+          PolyStraight([Vector2(.25, .5), Vector2(.25, -.5)]),
+          PolyStraight([Vector2(0, 0), Vector2(.5, 0)]),
           InvisiDot([Vector2(-.5, 0)])
-        ]));
+        ], overrideCenter: true));
   });
 
   test('RenderPlan toDevice works', () {
@@ -437,12 +437,12 @@ void main() {
     expect(cross.isPadded, false);
   });
 
-  test('Brute force all level 1 gram combo RenderPlan', () {
+  test('Brute force many 1st levelgram combo RenderPlan', () {
     final table = GramTable();
     for (final m1 in Mono.values) {
-      for (final f1 in Face.values) {
+      for (final f1 in [Face.Center, Face.Right]) {
         final g1 = table.atMonoFace(m1, f1);
-        for (final uop1 in [null, ...Unary.values]) {
+        for (final uop1 in [null, Unary.Shrink, Unary.Up, Unary.Left]) {
           final expr1 = uop1 == null ? g1 : UnaryOpExpr(uop1, g1);
           for (final bop in [null, ...Binary.values]) {
             final exprs = <GrafonExpr>[];
@@ -450,9 +450,9 @@ void main() {
               exprs.add(expr1);
             } else {
               for (final m2 in Mono.values) {
-                for (final f2 in Face.values) {
+                for (final f2 in [Face.Center, Face.Down]) {
                   final g2 = table.atMonoFace(m2, f2);
-                  for (final uop2 in [null, ...Unary.values]) {
+                  for (final uop2 in [null, Unary.Down, Unary.Right]) {
                     final expr2 = uop2 == null ? g2 : UnaryOpExpr(uop2, g2);
                     exprs.add(BinaryOpExpr(expr1, bop, expr2));
                   }

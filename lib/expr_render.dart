@@ -35,12 +35,13 @@ class RenderPlan {
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
   static const STD_GAP = 0.1;
   final Iterable<PolyLine> lines;
+  late final numPts, numVisiblePts;
   late final double xMin, yMin, xMax, yMax, xAvg, yAvg, width, height;
   late final double mass, vMass, hMass;
   late final Vector2 center;
   late final int _hashCode;
 
-  RenderPlan(this.lines) {
+  RenderPlan(this.lines, {overrideCenter: false}) {
     double xMin = double.maxFinite,
         yMin = double.maxFinite,
         xMax = -double.maxFinite,
@@ -50,7 +51,8 @@ class RenderPlan {
         hMass = 0,
         xSum = 0,
         ySum = 0,
-        num = 0;
+        num = 0,
+        numVis = 0;
 
     for (final l in lines) {
       final m = l.metrics;
@@ -60,6 +62,7 @@ class RenderPlan {
       xMax = max(xMax, m.xMax);
       yMax = max(yMax, m.yMax);
       num += l.numPts;
+      numVis += l.numVisiblePts;
       xSum += m.xAvg * l.numPts;
       ySum += m.yAvg * l.numPts;
       mass += d.length * PEN_WTH_SCALE;
@@ -67,16 +70,22 @@ class RenderPlan {
       vMass += d.dySum * PEN_WTH_SCALE;
     }
 
+    this.numPts = num.toInt();
+    this.numVisiblePts = numVis.toInt();
     this.xMin = quantize(num == 0 ? 0 : xMin);
     this.xMax = quantize(num == 0 ? 0 : xMax);
     this.yMin = quantize(num == 0 ? 0 : yMin);
     this.yMax = quantize(num == 0 ? 0 : yMax);
-    this.xAvg = quantize(xSum == 0 || num == 0 ? 0 : xSum / num);
-    this.yAvg = quantize(ySum == 0 || num == 0 ? 0 : ySum / num);
+    this.xAvg =
+        overrideCenter ? 0 : quantize(xSum == 0 || num == 0 ? 0 : xSum / num);
+    this.yAvg =
+        overrideCenter ? 0 : quantize(ySum == 0 || num == 0 ? 0 : ySum / num);
     this.mass = quantize(max(mass, MIN_MASS));
     this.hMass = quantize(max(hMass, MIN_MASS));
     this.vMass = quantize(max(vMass, MIN_MASS));
-    this.center = quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
+    this.center = overrideCenter
+        ? Vector2(0, 0)
+        : quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
     this.width = quantize(max(xMax - xMin, MIN_WIDTH));
     this.height = quantize(max(yMax - yMin, MIN_HEIGHT));
     this._hashCode = lines.fold(mass.hashCode, (h, l) => h << 1 ^ l.hashCode);
@@ -206,32 +215,28 @@ class RenderPlan {
     late final List<PolyLine> lines;
     switch (op) {
       case Unary.Up: // shift align w top, InvisiDot at bottom to keep height
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 1.5));
-        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/2, v.y/3));
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
         lines = [
           ...shrunk.shift(0, .5 - shrunk.yMax).lines,
           InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Down: // shift align w bottom, InvisiDot at top to keep height
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 1.5));
-        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/2, v.y/3));
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
         lines = [
           ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
           InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
         ];
         break;
       case Unary.Left: // shift align w left, InvisiDot at right to keep width
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 1.5, v.y));
-        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/3, v.y/2));
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
         lines = [
           ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
           InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
         ];
         break;
       case Unary.Right: // shift align w right, keep width w InvisiDot at left
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 1.5, v.y));
-        // final shrunk = remap((isF, v) => isF ? v / 3 : Vector2(v.x/3, v.y/2));
+        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
         lines = [
           ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)
@@ -246,7 +251,7 @@ class RenderPlan {
         ];
         break;
     }
-    return RenderPlan(lines).reCenter();
+    return RenderPlan(lines, overrideCenter: true);
   }
 
   /// Transform this render plan by unary operation to generate a new render.

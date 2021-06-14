@@ -156,6 +156,16 @@ abstract class SingleGramExpr extends GrafonExpr {
   Gram get gram;
 
   Syllable get syllable;
+
+  @override
+  int get hashCode => gram.hashCode ^ syllable.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! SingleGramExpr) return false;
+    SingleGramExpr that = other;
+    return gram == that.gram && syllable == that.syllable;
+  }
 }
 
 abstract class MultiGramExpr extends GrafonExpr {}
@@ -219,6 +229,16 @@ class BinaryOpExpr extends MultiGramExpr {
   List<Gram> get grams => [...expr1.grams, ...expr2.grams];
 
   ClusterExpr toClusterExpression() => ClusterExpr(this);
+
+  @override
+  int get hashCode => expr1.hashCode << 2 ^ op.hashCode << 1 ^ expr2.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! BinaryOpExpr) return false;
+    BinaryOpExpr that = other;
+    return expr1 == that.expr1 && expr2 == that.expr2 && op == that.op;
+  }
 }
 
 /// Cluster Expression binds 2 grams with a binary operator into a single group.
@@ -228,18 +248,12 @@ class ClusterExpr extends MultiGramExpr {
   late final renderPlan;
   late final headGram;
   late final tailOp;
+  late final pronunciation;
 
   ClusterExpr(this.binaryExpr) {
     renderPlan = binaryExpr.renderPlan;
-  }
-
-  @override
-  String toString() => "(${binaryExpr.toString()})";
-
-  @override
-  Pronunciation get pronunciation {
     final sList = binaryExpr.pronunciation.voicing;
-    return Pronunciation([
+    pronunciation = Pronunciation([
       for (var i = 0; i < sList.length; i++)
         if (i == 0 && i == sList.length - 2) // first is also second last
           Syllable(
@@ -258,5 +272,18 @@ class ClusterExpr extends MultiGramExpr {
   }
 
   @override
+  String toString() => "(${binaryExpr.toString()})";
+
+  @override
   List<Gram> get grams => binaryExpr.grams;
+
+  @override
+  int get hashCode => binaryExpr.hashCode << 1 ^ pronunciation.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! ClusterExpr) return false;
+    ClusterExpr that = other;
+    return binaryExpr == that.binaryExpr && pronunciation == that.pronunciation;
+  }
 }

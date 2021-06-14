@@ -321,4 +321,50 @@ void main() {
     expect(family.pronunciation[3], Syllable(Cons.d, Vowel.u));
     expect(family.pronunciation.toString(), 'manhathazdu');
   });
+
+  test('test SingleExpr equality and hashcode works', () {
+    final table = GramTable();
+    for (final m1 in Mono.values) {
+      for (final f1 in Face.values) {
+        final g1 = table.atMonoFace(m1, f1);
+        for (final u1 in [null, ...Unary.values]) {
+          final e1 = u1 == null ? g1 : UnaryOpExpr(u1, g1);
+          for (final m2 in Mono.values) {
+            for (final f2 in Face.values) {
+              final g2 = table.atMonoFace(m2, f2);
+              for (final u2 in [null, ...Unary.values]) {
+                final e2 = u2 == null ? g2 : UnaryOpExpr(u2, g2);
+                if (m1 == m2 && f1 == f2 && u1 == u2) {
+                  expect(e1, e2);
+                  expect(e1.hashCode, e2.hashCode);
+                } else {
+                  expect(e1 == e2, isFalse);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  test('test MultiGramExpr equality and hashcode works', () {
+    final dot = Mono.Dot.gram;
+    final vLine = Quads.Line.up;
+    final e1 = dot.over(vLine);
+    final e11 = dot.over(vLine);
+    final ce1 = ClusterExpr(e1);
+    final ce11 = ClusterExpr(e11);
+    final e2 = vLine.over(dot);
+
+    expect(e1, e1);
+    expect(e1, e11);
+    expect(e1.hashCode, e11.hashCode);
+    expect(e1 == e2, isFalse);
+    expect(e1 == ce1, isFalse);
+    expect(ce1, ce1);
+    expect(ce1.hashCode, ce1.hashCode);
+    expect(ce1, ce11);
+    expect(ce1.hashCode, ce11.hashCode);
+  });
 }

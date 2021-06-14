@@ -20,6 +20,7 @@ library grafon_word;
 
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
 import 'expr_render.dart';
@@ -41,6 +42,16 @@ abstract class GrafonWord {
 
   double widthAtHeight(double devHeight) =>
       renderPlan.calcWidthByHeight(devHeight);
+
+  @override
+  int get hashCode => key.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! GrafonWord) return false;
+    GrafonWord that = other;
+    return key == that.key;
+  }
 }
 
 /// Core Word
@@ -128,17 +139,6 @@ class CompoundWord extends GrafonWord {
       ')';
 }
 
-/// Entry of a Word in WordGroup
-class WordGroupEntry {
-  final String key;
-  final GrafonWord word;
-  final String description;
-
-  WordGroupEntry(this.word, [String? key, String? description])
-      : this.key = key ?? word.toString(),
-        this.description = description ?? '';
-}
-
 /// A Group of Related Words
 class WordGroup {
   String title;
@@ -159,4 +159,21 @@ class WordGroup {
   bool contains(String key) => _key2word.containsKey(key);
 
   GrafonWord? operator [](String key) => _key2word[key];
+
+  @override
+  int get hashCode => _key2word.keys.fold(
+        title.hashCode << 1 ^ logo.hashCode,
+        (hash, key) => hash << 1 ^ key.hashCode,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! WordGroup) return false;
+    WordGroup that = other;
+    final ieq = IterableEquality<String>().equals;
+
+    return title == that.title &&
+        logo == that.logo &&
+        ieq(_key2word.keys, that._key2word.keys);
+  }
 }

@@ -357,12 +357,14 @@ abstract class PolyLine {
     if (other is! PolyLine || other.runtimeType != this.runtimeType)
       return false;
     PolyLine that = other;
-    return ListEquality<Vector2>().equals(this.vectors, that.vectors);
+    return isFixedAspect == that.isFixedAspect &&
+        ListEquality<Vector2>().equals(this.vectors, that.vectors);
   }
 
   @override
   String toString() =>
-      "$runtimeType with $numPts points: ${vectors.map((v) => quantV2Str(v))}";
+      "$runtimeType with $numPts pts: ${vectors.map((v) => quantV2Str(v))}" +
+      (isFixedAspect ? " fixed aspect." : "");
 
   /// Turn by either full step(s) of 90' or semi step of 45'
   PolyLine turn({int steps = 1, bool isSemi = false}) {
@@ -446,6 +448,9 @@ class InvisiDot extends PolyLine {
 
   @override
   LengthDim get lengthDim => const LengthDim();
+
+  @override
+  int get numVisiblePts => 0;
 }
 
 /// Straight Line from anchor point to anchor point

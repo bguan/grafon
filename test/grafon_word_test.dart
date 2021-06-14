@@ -47,4 +47,14 @@ void main() {
     expect(voicing[1], Syllable.vc(Vowel.a, Coda.s));
     expect(voicing[2], Syllable.v(Vowel.i));
   });
+
+  test("Word equality and hashcode works", () {
+    final dot1 = CoreWord(Mono.Dot.gram);
+    final dot2 = CoreWord(Mono.Dot.gram);
+    final circle = CoreWord(Mono.Circle.gram);
+    expect(dot1, dot1);
+    expect(dot1, dot2);
+    expect(dot1.hashCode, dot2.hashCode);
+    expect(dot1 == circle, isFalse);
+  });
 }

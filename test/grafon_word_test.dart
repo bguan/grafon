@@ -72,7 +72,7 @@ void main() {
     expect(g1 == g2, isFalse);
   });
 
-  test("WordGroup contains", () {
+  test("WordGroup keys and contains", () {
     final circle = CoreWord(Mono.Circle.gram);
     final dot = CoreWord(Mono.Dot.gram, "dot");
     final vLine = CoreWord(Quads.Line.up, "line.up");
@@ -85,5 +85,8 @@ void main() {
     expect(g['dot'], dot);
     expect(g['line.up'], vLine);
     expect(g['nope'], null);
+    expect(g.keys.length, 2);
+    expect(g.keys.first, "dot");
+    expect(g.keys.last, "line.up");
   });
 }

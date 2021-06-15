@@ -85,6 +85,10 @@ void main() {
         PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true));
     expect(cross.width, moreOrLessEquals(1.0));
     expect(cross.height, moreOrLessEquals(1.0));
+
+    final x = Quads.Line.right.merge(Quads.Line.left);
+    expect(x.lines.length, 2);
+    expect(x.lines.first, PolyStraight.anchors([Anchor.NE, Anchor.SW]));
   });
 
   test('SingleGram pronunciation matches gram equivalent', () {
@@ -366,5 +370,16 @@ void main() {
     expect(ce1.hashCode, ce1.hashCode);
     expect(ce1, ce11);
     expect(ce1.hashCode, ce11.hashCode);
+  });
+
+  test('test BinaryExpr toClusterExpr', () {
+    final dot = Mono.Dot.gram;
+    final vLine = Quads.Line.up;
+    final e = dot.over(vLine);
+    final cluster = e.toClusterExpression();
+    expect(e == cluster, isFalse);
+    expect(cluster.binaryExpr, e);
+    expect(cluster.pronunciation == e.pronunciation, isFalse);
+    expect(cluster.renderPlan, e.renderPlan);
   });
 }

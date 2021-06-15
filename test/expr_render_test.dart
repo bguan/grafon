@@ -468,4 +468,20 @@ void main() {
       }
     }
   });
+
+  test('RenderPlan noInvisidot works', () {
+    final lineNO = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.O]),
+    ]);
+    expect(lineNO.noInvisiDots(), lineNO);
+    final lineNOIDotS = RenderPlan([
+      PolyStraight.anchors([Anchor.N, Anchor.O]),
+      InvisiDot.anchors([Anchor.S]),
+    ]);
+
+    expect(lineNOIDotS == lineNO, isFalse);
+    expect(lineNOIDotS.noInvisiDots(), lineNO);
+    expect(lineNOIDotS.height, 1);
+    expect(lineNOIDotS.noInvisiDots().height, .5);
+  });
 }

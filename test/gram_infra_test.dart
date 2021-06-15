@@ -1021,6 +1021,14 @@ void main() {
         dflipSwirlAHA[Face.Down].lines, hFlip(vFlip(hFlip(turn(swirlPaths)))));
   });
 
+  test('test PolyCurve degenerate control pts', () {
+    final line = PolyCurve.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S]);
+    expect(line.lengthDim.length, 1);
+    final turn =
+        PolyCurve.anchors([Anchor.W, Anchor.W, Anchor.O, Anchor.N, Anchor.N]);
+    expect(turn.lengthDim.length == 1.0, isFalse);
+  });
+
   test('test PolyCurve compute Spline begin & end normal control pts', () {
     final bc = PolyCurve.calcBegCtl(
         Anchor.NW.vector, Anchor.N.vector, Anchor.S.vector);

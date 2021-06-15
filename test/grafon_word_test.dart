@@ -57,4 +57,33 @@ void main() {
     expect(dot1.hashCode, dot2.hashCode);
     expect(dot1 == circle, isFalse);
   });
+
+  test("WordGroup equality and hashcode", () {
+    final g1 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
+        [CoreWord(Mono.Dot.gram)]);
+    final g11 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
+        [CoreWord(Mono.Dot.gram)]);
+    final g2 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
+        [CoreWord(Mono.Dot.gram), CoreWord(Mono.Dot.shrink())]);
+
+    expect(g1, g1);
+    expect(g1, g11);
+    expect(g1.hashCode, g11.hashCode);
+    expect(g1 == g2, isFalse);
+  });
+
+  test("WordGroup contains", () {
+    final circle = CoreWord(Mono.Circle.gram);
+    final dot = CoreWord(Mono.Dot.gram, "dot");
+    final vLine = CoreWord(Quads.Line.up, "line.up");
+    final g = WordGroup('Test', circle, '?', [dot, vLine]);
+
+    expect(g.contains("dot"), isTrue);
+    expect(g.contains("tod"), isFalse);
+    expect(g.values.first, dot);
+    expect(g.values.last, vLine);
+    expect(g['dot'], dot);
+    expect(g['line.up'], vLine);
+    expect(g['nope'], null);
+  });
 }

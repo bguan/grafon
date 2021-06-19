@@ -256,7 +256,7 @@ void main() {
     expect(feet.pronunciation[0], Syllable.vc(Vowel.a, Coda.s));
     expect(feet.pronunciation[1], Syllable.cvc(Cons.p, Vowel.u, Coda.h));
     expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.o));
-        //expect(feet.pronunciation.toString(), 'aspuhbo');
+    //expect(feet.pronunciation.toString(), 'aspuhbo');
   });
 
   test('next() and nextCluster() grams, toString & pronunciation is correct',

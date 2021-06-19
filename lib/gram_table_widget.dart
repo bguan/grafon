@@ -64,11 +64,11 @@ class GramTableView extends StatelessWidget {
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
     final textStyle = (fontSize, [lineHeight = 1.25]) => TextStyle(
-      fontWeight: FontWeight.bold,
-      height: lineHeight,
-      color: Colors.white,
-      fontSize: fontSizing(fontSize),
-    );
+          fontWeight: FontWeight.bold,
+          height: lineHeight,
+          color: Colors.white,
+          fontSize: fontSizing(fontSize),
+        );
     final headerStyle = textStyle(16);
     final unaryFooterStyle = textStyle(16, 1.4);
     final binaryFooterStyle = textStyle(16);
@@ -85,36 +85,36 @@ class GramTableView extends StatelessWidget {
         fTxt.length <= 0
             ? SizedBox()
             : Container(
-          child: Center(
-            child: Text(
-              '$fTxt',
-              textAlign: TextAlign.center,
-              style: headerStyle,
-            ),
-          ),
-          color: scheme.secondaryVariant,
-        ),
+                child: Center(
+                  child: Text(
+                    '$fTxt',
+                    textAlign: TextAlign.center,
+                    style: headerStyle,
+                  ),
+                ),
+                color: scheme.secondaryVariant,
+              ),
     ];
 
     final unaryOpRow = [
       for (var uTxt in [
         'Unary\nOperator',
         ...Unary.values.map((u) =>
-        '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
+            '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
         'Ending\nVowel'
       ])
         uTxt.length <= 0
             ? SizedBox()
             : Container(
-          child: Center(
-            child: Text(
-              '$uTxt',
-              textAlign: TextAlign.center,
-              style: unaryFooterStyle,
-            ),
-          ),
-          color: scheme.primaryVariant,
-        ),
+                child: Center(
+                  child: Text(
+                    '$uTxt',
+                    textAlign: TextAlign.center,
+                    style: unaryFooterStyle,
+                  ),
+                ),
+                color: scheme.primaryVariant,
+              ),
     ];
 
     final decoStr = (s) => (s == '' ? '' : '…' + s);
@@ -135,15 +135,15 @@ class GramTableView extends StatelessWidget {
         bTxt.length <= 0
             ? SizedBox()
             : Container(
-          child: Center(
-            child: Text(
-              '$bTxt',
-              textAlign: TextAlign.center,
-              style: binaryFooterStyle,
-            ),
-          ),
-          color: scheme.primaryVariant,
-        ),
+                child: Center(
+                  child: Text(
+                    '$bTxt',
+                    textAlign: TextAlign.center,
+                    style: binaryFooterStyle,
+                  ),
+                ),
+                color: scheme.primaryVariant,
+              ),
     ];
 
     final gramTable = [

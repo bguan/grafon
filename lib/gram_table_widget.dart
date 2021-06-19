@@ -64,11 +64,10 @@ class GramTableView extends StatelessWidget {
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
     final textStyle = (fontSize, [lineHeight = 1.25]) => TextStyle(
-          fontWeight: FontWeight.bold,
-          height: lineHeight,
-          color: Colors.white,
-          fontSize: fontSizing(fontSize),
-        );
+        fontWeight: FontWeight.bold,
+        height: lineHeight,
+        color: Colors.white,
+        fontSize: fontSizing(fontSize));
     final headerStyle = textStyle(16);
     final unaryFooterStyle = textStyle(16, 1.4);
     final binaryFooterStyle = textStyle(16);

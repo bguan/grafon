@@ -256,6 +256,7 @@ void main() {
     expect(feet.pronunciation[0], Syllable.vc(Vowel.a, Coda.s));
     expect(feet.pronunciation[1], Syllable.cvc(Cons.p, Vowel.u, Coda.h));
     expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.o));
+
     //expect(feet.pronunciation.toString(), 'aspuhbo');
   });
 
@@ -289,7 +290,7 @@ void main() {
     expect(shout.pronunciation[0], Syllable(Cons.m, Vowel.o));
     expect(shout.pronunciation[1], Syllable.cvc(Cons.h, Vowel.e, Coda.z));
     expect(shout.pronunciation[2], Syllable.v(Vowel.o));
-        //expect(shout.pronunciation.toString(), 'mohezo');
+    //expect(shout.pronunciation.toString(), 'mohezo');
   });
 
   test('wrap() and wrapCluster(), grams, toString & pronunciation is correct',

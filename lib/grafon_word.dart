@@ -56,7 +56,7 @@ abstract class GrafonWord {
 
 /// Core Word
 class CoreWord extends GrafonWord {
-  static const MIN_WIDTH_RATIO = 2 / 3;
+  static const MIN_WIDTH_RATIO = 3 / 4;
   final GrafonExpr expr;
   final Pronunciation pronunciation;
   late final RenderPlan renderPlan;

@@ -25,6 +25,7 @@ final w = WordGroup(
     'Edge Cases',
     CoreWord(Mono.Circle.up().merge(Quads.Step.left)),
     'Random tricky edge cases for rendering.', [
+  CoreWord(Quads.Curve.up.merge(Quads.Curve.down)),
   CoreWord(Quads.Line.up.merge(Quads.Angle.up.up())),
   CoreWord(Quads.Arc.left.next(Quads.Flow.right)),
   CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down)),
@@ -86,9 +87,9 @@ final numericGroup = WordGroup(
     CoreWord(Quads.Gate.down, "Three"),
     CoreWord(Mono.Square.gram, "Four"),
     CoreWord(Mono.Diamond.merge(Quads.Line.down), "Five"),
-    CoreWord(Quads.Triangle.down.over(Quads.Triangle.up), "Six"),
+    CoreWord(Mono.X.merge(Quads.Line.up), "Six"),
     CoreWord(Quads.Gate.up.merge(Mono.X.gram), "Seven"),
-    CoreWord(Mono.Square.merge(Mono.X.gram), "Eight"),
+    CoreWord(Mono.Diamond.merge(Mono.Cross.gram), "Eight"),
     CoreWord(Quads.Triangle.down.wrap(Quads.Triangle.up), "Nine"),
     CoreWord(Mono.Circle.wrap(Quads.Line.up), "Ten",
         "Ten(s), ten to the power of 1."),
@@ -147,15 +148,17 @@ final interpersonalGroup = WordGroup(
 );
 
 final spiritual = WordGroup(
-    'Spiritual', CoreWord(Mono.Sun.over(Quads.Gate.up)), 'Spiritual.', [
-  CoreWord(Mono.Cross.over(Quads.Gate.up)),
-  CoreWord(Quads.Triangle.up.merge(Quads.Triangle.down).over(Quads.Gate.up)),
-  CoreWord(Quads.Step.up.merge(Quads.Step.right).over(Quads.Gate.up)),
-  CoreWord(Quads.Arc.left.next(Mono.Light.shrink()).over(Quads.Gate.up)),
-  CoreWord(Mono.Circle.merge(Quads.Flow.down).over(Quads.Gate.up)),
+    'Spiritual', CoreWord(Mono.Sun.over(Quads.Arc.up)), 'Spiritual.', [
+  CoreWord(Mono.Cross.over(Quads.Arc.up)),
+  CoreWord(Quads.Triangle.up.merge(Quads.Triangle.down).over(Quads.Arc.up)),
+  CoreWord(Quads.Step.up.merge(Quads.Step.right).over(Quads.Arc.up)),
+  CoreWord(Quads.Arc.left.next(Mono.Light.shrink()).over(Quads.Arc.up)),
+  CoreWord(Mono.Circle.merge(Quads.Flow.down).over(Quads.Arc.up)),
   CoreWord(Mono.Square.merge(Mono.Diamond.gram)
       .wrap(Mono.Sun.gram)
-      .over(Quads.Gate.up)),
+      .over(Quads.Arc.up)),
+  CoreWord(Mono.Dot.merge(Quads.Arc.down.shrink()).overCluster(
+      Quads.Arc.right.over(Quads.Arc.right).next(Quads.Flow.left))),
 ]);
 
 final demoGroup = WordGroup(
@@ -171,28 +174,30 @@ final demoGroup = WordGroup(
         "House, dwelling, building."),
     CoreWord(
         Mono.Sun.gram.over(Quads.Line.down), "Day", "Sun over land, day time."),
+    CoreWord(Quads.Curve.right.next(Quads.Curve.up), "Grass"),
     CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
     CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
     CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk", "Talk, speech."),
-    CoreWord(Quads.Arc.left.next(Quads.Arc.right), "Leaf"),
+    // CoreWord(Quads.Arc.left.next(Quads.Arc.right), "Leaf"),
+    CoreWord(Quads.Curve.up.merge(Quads.Curve.down), "Leaf"),
     CoreWord(Quads.Angle.down.shrink().merge(Quads.Line.up), "Wood"),
+    CoreWord(Quads.Corner.left.shrink().merge(Quads.Line.right), "Wood 2"),
     CoreWord(Quads.Angle.up.over(Quads.Arc.down), "Drip"),
     CoreWord(Mono.Light.wrap(Quads.Zap.down), "White",
         "White, light from lightning."),
     CoreWord(Mono.Light.wrap(Mono.Sun.gram), "Red", "Red, light from Sun."),
     CoreWord(Mono.Light.wrap(Mono.Flower.gram), "Yellow",
         "Yellow, light from flower."),
-    CoreWord(Mono.Light.wrapCluster(Quads.Arc.left.next(Quads.Arc.right)),
+    CoreWord(Mono.Light.wrapCluster(Quads.Curve.up.merge(Quads.Curve.down)),
         "Green", "Green, light from leaf."),
     CoreWord(
-        Mono.Light.wrapCluster(Quads.Angle.down.shrink().merge(Quads.Line.up)),
+        Mono.Light.wrapCluster(
+            Quads.Corner.left.shrink().merge(Quads.Line.right)),
         "Brown",
         "Brown, Color of wood."),
     CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
         "Blue", "Blue, light from water."),
     CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),
-    CoreWord(
-        Quads.Arc.up.over(Quads.Arc.down).wrap(Mono.Dot.gram), "Eye", "Eye."),
     CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down), "Heart",
         "Heart, Love."),
     CompoundWord(

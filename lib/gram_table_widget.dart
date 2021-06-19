@@ -19,11 +19,13 @@ library gram_table_widget;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grafon/grafon_expr.dart';
-import 'package:grafon/grafon_widget.dart';
-import 'package:grafon/gram_infra.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 
+import 'grafon_expr.dart';
+import 'grafon_widget.dart';
 import 'grafon_word.dart';
+import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
@@ -36,8 +38,16 @@ class GramTableView extends StatelessWidget {
       : table = GramTable(),
         super(key: key);
 
+  Future _speak(FlutterTts speechGen, String voiceText) async {
+    if (voiceText.isNotEmpty) {
+      await speechGen.awaitSpeakCompletion(true);
+      await speechGen.speak(voiceText);
+    }
+  }
+
   @override
   Widget build(BuildContext ctx) {
+    final speechGen = ctx.watch<FlutterTts>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (size ?? MediaQuery.of(ctx).size);
     final screenWidth = mediaSize.width.clamp(500.0, 2000.0);
@@ -54,11 +64,11 @@ class GramTableView extends StatelessWidget {
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
     final textStyle = (fontSize, [lineHeight = 1.25]) => TextStyle(
-          fontWeight: FontWeight.bold,
-          height: lineHeight,
-          color: Colors.white,
-          fontSize: fontSizing(fontSize),
-        );
+      fontWeight: FontWeight.bold,
+      height: lineHeight,
+      color: Colors.white,
+      fontSize: fontSizing(fontSize),
+    );
     final headerStyle = textStyle(16);
     final unaryFooterStyle = textStyle(16, 1.4);
     final binaryFooterStyle = textStyle(16);
@@ -75,36 +85,36 @@ class GramTableView extends StatelessWidget {
         fTxt.length <= 0
             ? SizedBox()
             : Container(
-                child: Center(
-                  child: Text(
-                    '$fTxt',
-                    textAlign: TextAlign.center,
-                    style: headerStyle,
-                  ),
-                ),
-                color: scheme.secondaryVariant,
-              ),
+          child: Center(
+            child: Text(
+              '$fTxt',
+              textAlign: TextAlign.center,
+              style: headerStyle,
+            ),
+          ),
+          color: scheme.secondaryVariant,
+        ),
     ];
 
     final unaryOpRow = [
       for (var uTxt in [
         'Unary\nOperator',
         ...Unary.values.map((u) =>
-            '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
+        '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
         'Ending\nVowel'
       ])
         uTxt.length <= 0
             ? SizedBox()
             : Container(
-                child: Center(
-                  child: Text(
-                    '$uTxt',
-                    textAlign: TextAlign.center,
-                    style: unaryFooterStyle,
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
+          child: Center(
+            child: Text(
+              '$uTxt',
+              textAlign: TextAlign.center,
+              style: unaryFooterStyle,
+            ),
+          ),
+          color: scheme.primaryVariant,
+        ),
     ];
 
     final decoStr = (s) => (s == '' ? '' : '…' + s);
@@ -112,7 +122,7 @@ class GramTableView extends StatelessWidget {
       for (var bTxt in [
         'Binary\nOperator & Compound',
         ...Binary.values.map((b) =>
-            '${b.shortName}\n${b.symbol}\n' +
+        '${b.shortName}\n${b.symbol}\n' +
             decoStr(b.coda.base.phoneme) +
             ' ' +
             decoStr(b.coda.tail.phoneme) +
@@ -125,15 +135,15 @@ class GramTableView extends StatelessWidget {
         bTxt.length <= 0
             ? SizedBox()
             : Container(
-                child: Center(
-                  child: Text(
-                    '$bTxt',
-                    textAlign: TextAlign.center,
-                    style: binaryFooterStyle,
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
+          child: Center(
+            child: Text(
+              '$bTxt',
+              textAlign: TextAlign.center,
+              style: binaryFooterStyle,
+            ),
+          ),
+          color: scheme.primaryVariant,
+        ),
     ];
 
     final gramTable = [
@@ -141,7 +151,7 @@ class GramTableView extends StatelessWidget {
         Container(
           child: Center(
             child: Text(
-              '${m.gram.consPair.base.phoneme} ${m.gram.consPair.head.phoneme}',
+              '${m.gram.consPair.base.shortName} ${m.gram.consPair.head.shortName}',
               textAlign: TextAlign.center,
               style: rowHeadTextStyle,
             ),
@@ -151,10 +161,20 @@ class GramTableView extends StatelessWidget {
         for (var f in Face.values)
           Container(
             padding: EdgeInsets.all(inset),
-            child: GrafonTile(
-              table.atMonoFace(m, f).renderPlan,
-              height: dim,
-              width: dim,
+            child: GestureDetector(
+              onTap: () => _speak(
+                speechGen,
+                "${table.atMonoFace(m, f).syllable}",
+              ),
+              onLongPress: () => _speak(
+                speechGen,
+                "${table.atMonoFace(m, f).syllable.headForm}",
+              ),
+              child: GrafonTile(
+                table.atMonoFace(m, f).renderPlan,
+                height: dim,
+                width: dim,
+              ),
             ),
             color: scheme.surface,
           ),

@@ -16,6 +16,9 @@
 // under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'grafon_dictionary.dart';
@@ -24,12 +27,27 @@ import 'word_group_widget.dart';
 
 /// Main Starting Point of the App.
 void main() {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((r) {
+    print('${r.loggerName} ${r.level.name} ${r.time}: ${r.message}');
+  });
   runApp(GrafonApp());
 }
 
 /// This widget is the root of Grafon application.
 class GrafonApp extends StatelessWidget {
-  Future<void> _launchInBrowser(String url) async {
+  static final log = Logger("GrafonApp");
+  static const GITHUB_LINK = 'https://github.com/bguan/grafon';
+
+  Future<void> _initSpeechGen(FlutterTts flutterTts) async {
+    final languages = await flutterTts.getLanguages;
+    log.info("FlutterTts supported languages: $languages");
+    await flutterTts.setLanguage("en-GB");
+    await flutterTts.setSpeechRate(.5);
+    await flutterTts.setPitch(1);
+  }
+
+  Future<void> _openBrowser(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -54,23 +72,31 @@ class GrafonApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Grafon Home'),
-          leading: IconButton(
-            icon: Icon(Icons.help_outline_rounded),
-            onPressed: () =>
-                _launchInBrowser('https://github.com/bguan/grafon'),
+      home: MultiProvider(
+        providers: [
+          Provider<FlutterTts>(create: (_) {
+            final speechGen = FlutterTts();
+            _initSpeechGen(speechGen);
+            return speechGen;
+          })
+        ],
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Grafon Home'),
+            leading: IconButton(
+              icon: Icon(Icons.help_outline_rounded),
+              onPressed: () => _openBrowser(GITHUB_LINK),
+            ),
           ),
-        ),
-        body: SafeArea(
-          child: PageView(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            children: [
-              GramTableView(),
-              ...wordViews,
-            ],
+          body: SafeArea(
+            child: PageView(
+              scrollDirection: Axis.horizontal,
+              controller: controller,
+              children: [
+                GramTableView(),
+                ...wordViews,
+              ],
+            ),
           ),
         ),
       ),

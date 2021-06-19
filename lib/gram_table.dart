@@ -35,7 +35,8 @@ enum Mono {
   Sun,
   Circle,
   Flower,
-  Blob,
+  Star,
+  // Blob,
 }
 
 /// enum for each of the QuadGram grouping.
@@ -49,7 +50,8 @@ enum Quads {
   Zap,
   Arc,
   Flow,
-  Swirl,
+  Curve,
+  // Swirl,
 }
 
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
@@ -113,6 +115,33 @@ class _MonoHelper {
     ], isFixedAspect: true),
   ];
 
+  final starPaths = [
+    PolyCurve.anchors([
+      Anchor.N,
+      Anchor.IN,
+      Anchor.IE,
+      Anchor.E,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.N,
+      Anchor.IN,
+      Anchor.IW,
+      Anchor.W,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.W,
+      Anchor.IW,
+      Anchor.IS,
+      Anchor.S,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.E,
+      Anchor.IE,
+      Anchor.IS,
+      Anchor.S,
+    ], isFixedAspect: true),
+  ];
+
   final blobPaths = [
     PolyCurve.anchors([
       Anchor.IW,
@@ -165,7 +194,8 @@ class _MonoHelper {
       Mono.Sun: MonoGram(sunPaths, ConsPair.shzh),
       Mono.Circle: MonoGram(circlePaths, ConsPair.mn),
       Mono.Flower: MonoGram(flowerPaths, ConsPair.fv),
-      Mono.Blob: MonoGram(blobPaths, ConsPair.lr),
+      // Mono.Blob: MonoGram(blobPaths, ConsPair.lr),
+      Mono.Star: MonoGram(starPaths, ConsPair.lr),
     });
   }
 }
@@ -210,7 +240,7 @@ class _QuadHelper {
     PolyCurve.anchors([
       Anchor.NW,
       Anchor.N,
-      Anchor.IE,
+      Anchor.E,
       Anchor.S,
       Anchor.SW,
     ]),
@@ -238,6 +268,15 @@ class _QuadHelper {
     ])
   ];
 
+  final curvePaths = [
+    PolyCurve.anchors([
+      Anchor.W,
+      Anchor.NW,
+      Anchor.SE,
+      Anchor.S,
+    ]),
+  ];
+
   late final Map<Quads, QuadGrams> enum2quads;
 
   _QuadHelper._internal() {
@@ -251,7 +290,8 @@ class _QuadHelper {
       Quads.Zap: FlipQuads(zapPaths, ConsPair.shzh),
       Quads.Arc: RotatingQuads(arcPaths, ConsPair.mn),
       Quads.Flow: FlipQuads(flowPaths, ConsPair.fv),
-      Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.lr),
+      // Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.lr),
+      Quads.Curve: RotatingQuads(curvePaths, ConsPair.lr, overrideCenter: true),
     });
   }
 }

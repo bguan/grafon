@@ -160,7 +160,7 @@ void main() {
       ...Quads.Arc.grams.all,
       Mono.Flower.gram,
       ...Quads.Flow.grams.all,
-      ...Quads.Swirl.grams.all,
+      // ...Quads.Swirl.grams.all,
     ];
     for (var gram in splineGrams) {
       final painter = GrafonPainter(gram.renderPlan, scheme: scheme);

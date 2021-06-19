@@ -30,8 +30,8 @@ import 'gram_infra.dart';
 class RenderPlan {
   static const STD_DIM = 1.0;
   static const PEN_WTH_SCALE = 0.05;
-  static const MIN_WIDTH = 0.2;
-  static const MIN_HEIGHT = 0.2;
+  static const MIN_WIDTH = 0.25;
+  static const MIN_HEIGHT = 0.25;
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
   static const STD_GAP = 0.1;
   final Iterable<PolyLine> lines;

@@ -24,8 +24,27 @@ import 'package:collection/collection.dart';
 enum Vowel { NIL, a, e, i, o, u }
 
 extension VowelHelper on Vowel {
-  String get phoneme =>
-      this == Vowel.NIL ? '' : this.toString().split('.').last;
+  String get shortName =>
+      this == Vowel.NIL ? '_' : this.toString().split('.').last;
+
+  // hack to get intended sound with text-to-speech engine in en-GB
+  String get phoneme {
+    switch (this) {
+      case Vowel.a:
+        return 'ar';
+      case Vowel.e:
+        return 'er';
+      case Vowel.i:
+        return 'ee';
+      case Vowel.o:
+        return 'or';
+      case Vowel.u:
+        return 'ooh';
+      case Vowel.NIL:
+      default:
+        return '';
+    }
+  }
 }
 
 /// Consonants at the beginning of a syllable.
@@ -82,7 +101,54 @@ extension ConsonantHelper on Cons {
     }
   }
 
-  String get phoneme => this == Cons.NIL ? '' : this.toString().split('.').last;
+  String get shortName =>
+      this == Cons.NIL ? '_' : this.toString().split('.').last;
+
+  String get phoneme {
+    switch (this) {
+      case Cons.h:
+        return 'h';
+      case Cons.b:
+        return 'b';
+      case Cons.p:
+        return 'p';
+      case Cons.j:
+        return 'j';
+      case Cons.ch:
+        return 'ch';
+      case Cons.d:
+        return 'd';
+      case Cons.t:
+        return 't';
+      case Cons.f:
+        return 'f';
+      case Cons.v:
+        return 'v';
+      case Cons.g:
+        return 'g';
+      case Cons.k:
+        return 'k';
+      case Cons.l:
+        return 'l';
+      case Cons.r:
+        return 'r';
+      case Cons.m:
+        return 'm';
+      case Cons.n:
+        return 'n';
+      case Cons.s:
+        return 's';
+      case Cons.z:
+        return 'z';
+      case Cons.sh:
+        return 'sh';
+      case Cons.zh:
+        return 'zh';
+      case Cons.NIL:
+      default:
+        return '';
+    }
+  }
 }
 
 /// Extension to map ConsonantPair to the base and head, and provide short name.
@@ -277,10 +343,81 @@ class Syllable {
       cons.hashCode ^ vowel.hashCode ^ endVowel.hashCode ^ coda.hashCode;
 
   @override
-  String toString() =>
-      (cons == Cons.NIL ? vowel.phoneme : cons.phoneme + vowel.phoneme) +
-      (endVowel == Vowel.NIL ? '' : endVowel.phoneme) +
-      (coda == Coda.NIL ? '' : coda.phoneme);
+  String toString() {
+    // Hack to get TTS working
+    final v = vowel.phoneme;
+    final e = endVowel.phoneme;
+
+    StringBuffer s = StringBuffer();
+
+    if (cons == Cons.NIL && vowel == Vowel.a && endVowel == Vowel.u) {
+      s.write('ah-');
+    } else if (cons == Cons.NIL &&
+        vowel == Vowel.a &&
+        endVowel == Vowel.NIL &&
+        coda == Coda.ng) {
+      s.write('a');
+    } else if (cons == Cons.g && vowel == Vowel.i) {
+      s.write('ghee');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.f && vowel == Vowel.e) {
+      s.write('fur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.ch && vowel == Vowel.e) {
+      s.write('chur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.m && vowel == Vowel.e) {
+      s.write('mur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.z && vowel == Vowel.e) {
+      s.write('zur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.zh && vowel == Vowel.e) {
+      s.write('zhe');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.n && vowel == Vowel.e) {
+      s.write('nur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.n && vowel == Vowel.i) {
+      s.write('ni');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.r && vowel == Vowel.e) {
+      s.write('rhur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.r && vowel == Vowel.o) {
+      s.write('roh');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.s && vowel == Vowel.a) {
+      s.write('sah');
+      if (e != '') s.write('-');
+    } else {
+      if (cons != Cons.NIL) s.write(cons.phoneme);
+      if (endVowel == Vowel.NIL) {
+        s.write(vowel.phoneme);
+      } else if (vowel == endVowel) {
+        s.writeAll([v.length < 2 ? v : v.substring(0, v.length - 1), '-']);
+      } else {
+        s.writeAll([v.length < 2 ? v : v.substring(0, v.length - 1), 'h', '-']);
+      }
+    }
+
+    if (coda == Coda.g && endVowel != Vowel.NIL) {
+      final e = endVowel.phoneme;
+      s.write(e.length < 2 ? v : e.substring(0, e.length - 1));
+    } else {
+      s.write(endVowel.phoneme);
+    }
+    if ((cons == Cons.NIL &&
+            vowel == Vowel.a &&
+            endVowel == Vowel.a &&
+            coda == Coda.s) ||
+        (cons == Cons.m && vowel == Vowel.e && coda == Coda.h) ||
+        (cons == Cons.s && vowel == Vowel.e && coda == Coda.s)) {
+      s.write("'");
+    }
+    s.write(coda.phoneme);
+    return s.toString();
+  }
 
   /// make a syllable based on another when it is the head of a cluster expr
   Syllable get headForm => Syllable(cons.pair.head, vowel, endVowel, coda);
@@ -324,22 +461,22 @@ class Pronunciation {
   /// precompute voicing string representation
 
   Pronunciation(this.syllables) {
-    final slist = <Syllable>[];
+    final syllableList = <Syllable>[];
     var s = syllables.first;
     for (var next in syllables.skip(1)) {
       if (s.lastPhoneme != next.firstPhoneme) {
-        slist.add(s);
+        syllableList.add(s);
       } else if (s.coda == Coda.h && next.cons == Cons.h) {
         // special case i.e. "ah-Ha" => "adh-Ha"
-        slist.add(s.diffCoda(Coda.dh));
+        syllableList.add(s.diffCoda(Coda.dh));
       } else {
-        slist.add(s.altOpForm);
+        syllableList.add(s.altOpForm);
       }
       s = next;
     }
-    slist.add(s);
-    voicing = List.unmodifiable(slist);
-    _voicingString = voicing.map((s) => s.toString()).join();
+    syllableList.add(s);
+    voicing = List.unmodifiable(syllableList);
+    _voicingString = voicing.map((s) => s.toString()).join(' ');
   }
 
   @override

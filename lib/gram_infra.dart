@@ -185,8 +185,6 @@ extension FaceHelper on Face {
 
 /// Map a Vowel to a Face
 extension VowelHelper on Vowel {
-  String get shortName => this.toString().split('.').last;
-
   Face get face {
     switch (this) {
       case Vowel.e:
@@ -644,9 +642,9 @@ abstract class Gram extends SingleGramExpr {
   final RenderPlan renderPlan;
   late final int _hashCode;
 
-  Gram(paths, this.consPair)
+  Gram(paths, this.consPair, {overrideCenter: false})
       : _lines = List.unmodifiable(paths),
-        renderPlan = RenderPlan(paths) {
+        renderPlan = RenderPlan(paths, overrideCenter: overrideCenter) {
     this._hashCode = consPair.hashCode ^
         vowel.hashCode ^
         face.hashCode ^
@@ -717,7 +715,8 @@ abstract class Gram extends SingleGramExpr {
 class MonoGram extends Gram {
   final face = Face.Center;
 
-  MonoGram(Iterable<PolyLine> paths, ConsPair cons) : super(paths, cons);
+  MonoGram(Iterable<PolyLine> paths, ConsPair cons, {overrideCenter: false})
+      : super(paths, cons, overrideCenter: overrideCenter);
 
   @override
   bool operator ==(Object other) {
@@ -733,8 +732,9 @@ class MonoGram extends Gram {
 class QuadGram extends Gram {
   final Face face;
 
-  QuadGram(Iterable<PolyLine> paths, this.face, ConsPair cons)
-      : super(paths, cons);
+  QuadGram(Iterable<PolyLine> paths, this.face, ConsPair cons,
+      {overrideCenter: false})
+      : super(paths, cons, overrideCenter: overrideCenter);
 
   @override
   bool operator ==(Object other) {
@@ -752,17 +752,21 @@ abstract class QuadGrams {
   final Map<Face, Gram> f2g;
   late final int _hashCode;
 
-  QuadGrams(
-    this.consPair, {
-    required List<PolyLine> r,
-    required List<PolyLine> u,
-    required List<PolyLine> l,
-    required List<PolyLine> d,
-  }) : f2g = Map.unmodifiable({
-          Face.Right: QuadGram(r, Face.Right, consPair),
-          Face.Up: QuadGram(u, Face.Up, consPair),
-          Face.Left: QuadGram(l, Face.Left, consPair),
-          Face.Down: QuadGram(d, Face.Down, consPair)
+  QuadGrams(this.consPair,
+      {required List<PolyLine> r,
+      required List<PolyLine> u,
+      required List<PolyLine> l,
+      required List<PolyLine> d,
+      overrideCenter: false})
+      : f2g = Map.unmodifiable({
+          Face.Right:
+              QuadGram(r, Face.Right, consPair, overrideCenter: overrideCenter),
+          Face.Up:
+              QuadGram(u, Face.Up, consPair, overrideCenter: overrideCenter),
+          Face.Left:
+              QuadGram(l, Face.Left, consPair, overrideCenter: overrideCenter),
+          Face.Down:
+              QuadGram(d, Face.Down, consPair, overrideCenter: overrideCenter)
         }) {
     this._hashCode = consPair.hashCode ^
         Face.values.fold(
@@ -809,8 +813,13 @@ List<PolyLine> hFlip(List<PolyLine> paths) =>
 
 /// In RotatingRow, quads are rotated by full step of 90'
 class RotatingQuads extends QuadGrams {
-  RotatingQuads(List<PolyLine> r, ConsPair cons)
-      : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
+  RotatingQuads(List<PolyLine> r, ConsPair cons, {overrideCenter: false})
+      : super(cons,
+            r: r,
+            u: r2u(r),
+            l: r2l(r),
+            d: r2d(r),
+            overrideCenter: overrideCenter);
 
   static List<PolyLine> r2u(List<PolyLine> rightPaths) => turn(rightPaths);
 
@@ -823,8 +832,13 @@ class RotatingQuads extends QuadGrams {
 
 /// In SemiRotatingRow, quads are rotated by semi step of 45'
 class SemiRotatingQuads extends QuadGrams {
-  SemiRotatingQuads(List<PolyLine> r, ConsPair cons)
-      : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
+  SemiRotatingQuads(List<PolyLine> r, ConsPair cons, {overrideCenter: false})
+      : super(cons,
+            r: r,
+            u: r2u(r),
+            l: r2l(r),
+            d: r2d(r),
+            overrideCenter: overrideCenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => turn(r, isSemi: true);
 
@@ -840,8 +854,13 @@ class SemiRotatingQuads extends QuadGrams {
 /// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically flipping Up paths.
 class FlipQuads extends QuadGrams {
-  FlipQuads(List<PolyLine> r, ConsPair cons)
-      : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
+  FlipQuads(List<PolyLine> r, ConsPair cons, {overrideCenter: false})
+      : super(cons,
+            r: r,
+            u: r2u(r),
+            l: r2l(r),
+            d: r2d(r),
+            overrideCenter: overrideCenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => turn(r);
 
@@ -855,8 +874,13 @@ class FlipQuads extends QuadGrams {
 /// Up paths are obtained by rotating Right paths by 90';
 /// Down paths are obtained by vertically and horizontally flipping Up paths.
 class DoubleFlipQuads extends QuadGrams {
-  DoubleFlipQuads(List<PolyLine> r, ConsPair cons)
-      : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r));
+  DoubleFlipQuads(List<PolyLine> r, ConsPair cons, {overrideCenter: false})
+      : super(cons,
+            r: r,
+            u: r2u(r),
+            l: r2l(r),
+            d: r2d(r),
+            overrideCenter: overrideCenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => hFlip(turn(r));
 

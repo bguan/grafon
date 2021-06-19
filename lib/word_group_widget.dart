@@ -20,6 +20,8 @@ library word_group_widget;
 import 'package:charcode/html_entity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 
 import 'grafon_widget.dart';
 import 'grafon_word.dart';
@@ -30,8 +32,16 @@ class WordGroupPage extends StatelessWidget {
 
   WordGroupPage(this.wordGroup);
 
+  Future _speak(FlutterTts speechGen, String voiceText) async {
+    if (voiceText.isNotEmpty) {
+      await speechGen.awaitSpeakCompletion(true);
+      await speechGen.speak(voiceText);
+    }
+  }
+
   @override
   Widget build(BuildContext ctx) {
+    final speechGen = ctx.watch<FlutterTts>();
     final scheme = Theme.of(ctx).colorScheme;
     final titleStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -99,10 +109,16 @@ class WordGroupPage extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 20),
                       height: 100,
                       width: wordGroup.logo.widthAtHeight(60),
-                      child: GrafonTile(
-                        wordGroup.logo.renderPlan,
-                        height: 60,
-                        width: wordGroup.logo.widthAtHeight(60),
+                      child: GestureDetector(
+                        onTap: () => _speak(
+                          speechGen,
+                          "/${wordGroup.logo.pronunciation}/",
+                        ),
+                        child: GrafonTile(
+                          wordGroup.logo.renderPlan,
+                          height: 60,
+                          width: wordGroup.logo.widthAtHeight(60),
+                        ),
                       ),
                     ),
                     Container(
@@ -131,10 +147,16 @@ class WordGroupPage extends StatelessWidget {
                       height: 80,
                       width: w.widthAtHeight(50) + 30,
                       padding: EdgeInsets.all(15),
-                      child: GrafonTile(
-                        w.renderPlan,
-                        height: 50,
-                        width: w.widthAtHeight(50),
+                      child: GestureDetector(
+                        onTap: () => _speak(
+                          speechGen,
+                          "/${w.pronunciation}/",
+                        ),
+                        child: GrafonTile(
+                          w.renderPlan,
+                          height: 50,
+                          width: w.widthAtHeight(50),
+                        ),
                       ),
                     ),
                     RichText(

@@ -120,13 +120,14 @@ class GramTableView extends StatelessWidget {
     final binaryOpRow = [
       for (var bTxt in [
         'Binary\nOperator & Compound',
-        ...Binary.values.map((b) =>
-        '${b.shortName}\n${b.symbol}\n' +
-            decoStr(b.coda.base.phoneme) +
-            ' ' +
-            decoStr(b.coda.tail.phoneme) +
-            ' ' +
-            decoStr(b.coda.alt.phoneme)),
+        ...Binary.values.map((b) => StringBuffer([
+              '${b.shortName}\n${b.symbol}\n',
+              decoStr(b.coda.base.phoneme),
+              ' ',
+              decoStr(b.coda.tail.phoneme),
+              ' ',
+              decoStr(b.coda.alt.phoneme),
+            ]).toString()),
         'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…' +
             CompoundWord.PRONUNCIATION_LINK.phoneme,
         'Ending\nConsonant\nbase/tail/alt & compound'

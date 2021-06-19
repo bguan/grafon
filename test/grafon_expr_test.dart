@@ -290,6 +290,7 @@ void main() {
     expect(shout.pronunciation[0], Syllable(Cons.m, Vowel.o));
     expect(shout.pronunciation[1], Syllable.cvc(Cons.h, Vowel.e, Coda.z));
     expect(shout.pronunciation[2], Syllable.v(Vowel.o));
+
     //expect(shout.pronunciation.toString(), 'mohezo');
   });
 
@@ -324,7 +325,8 @@ void main() {
     expect(family.pronunciation[1], Syllable.cvc(Cons.h, Vowel.a, Coda.th));
     expect(family.pronunciation[2], Syllable.vc(Vowel.a, Coda.z));
     expect(family.pronunciation[3], Syllable(Cons.d, Vowel.u));
-        //expect(family.pronunciation.toString(), 'manhathazdu');
+
+    //expect(family.pronunciation.toString(), 'manhathazdu');
   });
 
   test('test SingleExpr equality and hashcode works', () {

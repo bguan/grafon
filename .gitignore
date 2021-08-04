@@ -5,6 +5,10 @@
 .packages
 build/
 .flutter*
+
+# Directory not commited to git otherwise
+keys/
+
 # If you're building an application, you may want to check-in your pubspec.lock
 pubspec.lock
 

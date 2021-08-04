@@ -17,9 +17,11 @@
 library gram_table_widget;
 
 import 'dart:math';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'grafon_expr.dart';
@@ -28,9 +30,10 @@ import 'grafon_word.dart';
 import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
+import 'speech_svc.dart';
 
 /// Widget that display a GramTable
-class GramTableView extends StatelessWidget {
+class GramTableView extends StatefulWidget {
   final Size? size;
   final GramTable table;
 
@@ -38,41 +41,56 @@ class GramTableView extends StatelessWidget {
       : table = GramTable(),
         super(key: key);
 
-  Future _speak(FlutterTts speechGen, String voiceText) async {
-    if (voiceText.isNotEmpty) {
-      await speechGen.awaitSpeakCompletion(true);
-      await speechGen.speak(voiceText);
-    }
-  }
+  @override
+  _GramTableViewState createState() => _GramTableViewState();
+}
+
+class _GramTableViewState extends State<GramTableView> {
+  static final log = Logger("_GramTableViewState");
+
+  Unary? _unOp;
+  Binary? _binOp;
+  CodaForm? _codaForm;
+  bool _compound = false;
+
+  Unary? get unary => _unOp;
+
+  Binary? get binary => _binOp;
+
+  CodaForm? get codaForm => _codaForm;
 
   @override
   Widget build(BuildContext ctx) {
-    final speechGen = ctx.watch<FlutterTts>();
+    final speechSvc = ctx.watch<SpeechService>();
     final scheme = Theme.of(ctx).colorScheme;
-    final mediaSize = (size ?? MediaQuery.of(ctx).size);
-    final screenWidth = mediaSize.width.clamp(500.0, 2000.0);
-    final screenHeight = mediaSize.height.clamp(500.0, 2000.0) - 100;
-    final widthHeightRatio = (screenWidth / screenHeight).clamp(.5, 2);
-    final vPad = widthHeightRatio * 8.0;
-    final hPad = widthHeightRatio * 40.0;
-    final space = 4.0;
-    final inset = widthHeightRatio * 20.0;
-    final dim = min((screenWidth - 2 * hPad) / (table.numCols + 2),
-            (0.8 * screenHeight - 2 * vPad) / (table.numRows + 3)) -
-        2 * inset;
+    final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
+    final screenWidth = mediaSize.width;
+    final screenHeight = mediaSize.height;
+    final vPad = 5.0;
+    final hPad = 20.0;
+    final space = 5.0;
+    final inset = 10.0;
+    final dim = min(
+      (screenWidth - 2 * hPad) / (widget.table.numCols + 2),
+      (screenHeight - 2 * vPad) / (widget.table.numRows + 1),
+    );
 
     final fontScale = screenWidth / 1000;
     final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
-    final textStyle = (fontSize, [lineHeight = 1.25]) => TextStyle(
-        fontWeight: FontWeight.bold,
-        height: lineHeight,
-        color: Colors.white,
-        fontSize: fontSizing(fontSize));
-    final headerStyle = textStyle(16);
-    final unaryFooterStyle = textStyle(16, 1.4);
-    final binaryFooterStyle = textStyle(16);
+    final textStyle =
+        (fontSize, [lineHeight = 1.25, color = Colors.white]) => TextStyle(
+              fontWeight: FontWeight.bold,
+              height: lineHeight,
+              color: color,
+              fontSize: fontSizing(fontSize),
+            );
+    final headerStyle = textStyle(18);
     final rowHeadTextStyle = textStyle(30);
-    final rowTailTextStyle = textStyle(22, 1.5);
+    final rowTailTextStyle = textStyle(20, 1.5);
+    final unaryFooterStyle = textStyle(18, 1.4);
+    final unarySelectedStyle = textStyle(18, 1.4); //, scheme.primary);
+    final binaryFooterStyle = textStyle(18, 1.4);
+    final binarySelectedStyle = textStyle(18, 1.4); //, scheme.primary);
 
     final headerRow = [
       for (var fTxt in [
@@ -81,74 +99,16 @@ class GramTableView extends StatelessWidget {
             .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
         'Symbol\nName'
       ])
-        fTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$fTxt',
-                    textAlign: TextAlign.center,
-                    style: headerStyle,
-                  ),
-                ),
-                color: scheme.secondaryVariant,
-              ),
-    ];
-
-    final unaryOpRow = [
-      for (var uTxt in [
-        'Unary\nOperator',
-        ...Unary.values.map((u) =>
-            '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}'),
-        'Ending\nVowel'
-      ])
-        uTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$uTxt',
-                    textAlign: TextAlign.center,
-                    style: unaryFooterStyle,
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
-    ];
-
-    final decoStr = (s) => (s == '' ? '' : '…' + s);
-    final binaryOpRow = [
-      for (var bTxt in [
-        'Binary\nOperator & Compound',
-        ...Binary.values.map((b) => (StringBuffer()
-              ..writeAll([
-                b.shortName,
-                '\n',
-                b.symbol,
-                '\n',
-                decoStr(b.coda.base.phoneme),
-                ' ',
-                decoStr(b.coda.tail.phoneme),
-                ' ',
-                decoStr(b.coda.alt.phoneme),
-              ]))
-            .toString()),
-        'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…' +
-            CompoundWord.PRONUNCIATION_LINK.phoneme,
-        'Ending\nConsonant\nbase/tail/alt & compound'
-      ])
-        bTxt.length <= 0
-            ? SizedBox()
-            : Container(
-                child: Center(
-                  child: Text(
-                    '$bTxt',
-                    textAlign: TextAlign.center,
-                    style: binaryFooterStyle,
-                  ),
-                ),
-                color: scheme.primaryVariant,
-              ),
+        Container(
+          child: Center(
+            child: Text(
+              '$fTxt',
+              textAlign: TextAlign.center,
+              style: headerStyle,
+            ),
+          ),
+          color: scheme.secondaryVariant,
+        ),
     ];
 
     final gramTable = [
@@ -167,16 +127,37 @@ class GramTableView extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(inset),
             child: GestureDetector(
-              onTap: () => _speak(
-                speechGen,
-                "${table.atMonoFace(m, f).syllable}",
+              onTap: () => speechSvc.pronounce(
+                Pronunciation(
+                  [
+                    widget.table
+                        .atMonoFace(m, f)
+                        .syllable
+                        .diffEndVowel(_unOp == null ? Vowel.NIL : _unOp!.ending)
+                        .diffCoda(_compound
+                            ? Coda.ng
+                            : (_binOp == null
+                                ? Coda.NIL
+                                : _binOp!.coda[_codaForm!])),
+                  ],
+                ),
               ),
-              onLongPress: () => _speak(
-                speechGen,
-                "${table.atMonoFace(m, f).syllable.headForm}",
+              onLongPress: () => speechSvc.pronounce(
+                Pronunciation([
+                  widget.table
+                      .atMonoFace(m, f)
+                      .syllable
+                      .headForm
+                      .diffEndVowel(_unOp == null ? Vowel.NIL : _unOp!.ending)
+                      .diffCoda(_compound
+                          ? Coda.ng
+                          : (_binOp == null
+                              ? Coda.NIL
+                              : _binOp!.coda[_codaForm!]))
+                ]),
               ),
               child: GrafonTile(
-                table.atMonoFace(m, f).renderPlan,
+                widget.table.atMonoFace(m, f).renderPlan,
                 height: dim,
                 width: dim,
               ),
@@ -196,14 +177,157 @@ class GramTableView extends StatelessWidget {
       ],
     ];
 
-    return Padding(
+    final biBorderCol = _codaForm == CodaForm.base
+        ? Colors.greenAccent
+        : (_codaForm == CodaForm.tail ? Colors.yellow : Colors.pinkAccent);
+    final biBorder = Border.all(color: biBorderCol, width: 4);
+    final uniBorder = Border.all(color: Colors.purpleAccent, width: 4);
+    final uniBorderDeco = BoxDecoration(
+      border: uniBorder,
+      color: scheme.primaryVariant,
+    );
+    final biBorderDeco = BoxDecoration(
+      border: biBorder,
+      color: scheme.primaryVariant,
+    );
+    final unaryOpRow = [
+      Container(
+        child: Center(
+          child: Text(
+            'Unary\nOperator',
+            textAlign: TextAlign.center,
+            style: rowTailTextStyle,
+          ),
+        ),
+        color: scheme.primaryVariant,
+      ),
+      for (var u in Unary.values)
+        GestureDetector(
+          onTap: () => setState(() {
+            _unOp = (_unOp == u ? null : u);
+            log.info("Toggling Unary operator to $_unOp");
+          }),
+          child: Container(
+            child: Center(
+              child: Text(
+                '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}',
+                textAlign: TextAlign.center,
+                style: _unOp != u ? unaryFooterStyle : unarySelectedStyle,
+              ),
+            ),
+            color: _unOp != u ? scheme.primaryVariant : null,
+            decoration: _unOp == u ? uniBorderDeco : null,
+          ),
+        ),
+      Container(
+        child: Center(
+          child: Text(
+            'Ending\nVowel',
+            textAlign: TextAlign.center,
+            style: rowTailTextStyle,
+          ),
+        ),
+        color: scheme.primaryVariant,
+      ),
+    ];
+
+    final binaryOpRow = [
+      Container(
+        child: Center(
+          child: Text(
+            'Binary\nOperator, Compound',
+            textAlign: TextAlign.center,
+            style: rowTailTextStyle,
+          ),
+        ),
+        color: scheme.primaryVariant,
+      ),
+      for (var b in Binary.values)
+        GestureDetector(
+          onTap: () => setState(() {
+            if (_binOp != b) {
+              _binOp = b;
+              _codaForm = CodaForm.base;
+            } else {
+              // cycle thru the CodaForms
+              if (_codaForm == CodaForm.alt) {
+                _binOp = null;
+                _codaForm = null;
+              } else if (_codaForm == CodaForm.base) {
+                _codaForm = CodaForm.tail;
+              } else {
+                _codaForm = CodaForm.alt;
+              }
+            }
+            _compound = false;
+            log.info("Toggling Binary operator to $_binOp");
+          }),
+          child: Container(
+            child: Center(
+              child: Text(
+                '${b.shortName}\n${b.symbol}\n' +
+                    (_binOp == b && _codaForm != null
+                        ? '(${_codaForm!.shortName}) …${b.coda[_codaForm!].shortName}'
+                        : [
+                            b.coda.base.shortName,
+                            b.coda.tail.shortName,
+                            b.coda.alt.shortName
+                          ].join(' ')),
+                textAlign: TextAlign.center,
+                style: _binOp == b ? binarySelectedStyle : binaryFooterStyle,
+              ),
+            ),
+            color: _binOp != b ? scheme.primaryVariant : null,
+            decoration: _binOp == b ? biBorderDeco : null,
+          ),
+        ),
+      GestureDetector(
+        onTap: () => setState(() {
+          _compound = !_compound;
+          _binOp = null;
+          _codaForm = null;
+          log.info("Toggling Compound operator to $_compound");
+        }),
+        child: Container(
+          child: Center(
+            child: Text(
+              'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…' +
+                  CompoundWord.PRONUNCIATION_LINK.shortName,
+              textAlign: TextAlign.center,
+              style: _compound ? binarySelectedStyle : binaryFooterStyle,
+            ),
+          ),
+          color: _compound ? null : scheme.primaryVariant,
+          decoration: _compound ? uniBorderDeco : null,
+        ),
+      ),
+      Container(
+        child: Center(
+          child: Text(
+            'Ending\nConsonant',
+            textAlign: TextAlign.center,
+            style: rowTailTextStyle,
+          ),
+        ),
+        color: scheme.primaryVariant,
+      ),
+    ];
+
+    return Container(
+      width: dim * (widget.table.numCols + 2) + 2 * hPad,
+      height: dim * (widget.table.numRows + 1) + 2 * vPad,
       padding: EdgeInsets.symmetric(vertical: vPad, horizontal: hPad),
       child: Center(
         child: GridView.count(
-          crossAxisCount: table.numCols + 2,
+          crossAxisCount: widget.table.numCols + 2,
           crossAxisSpacing: space,
           mainAxisSpacing: space,
-          children: [...headerRow, ...gramTable, ...unaryOpRow, ...binaryOpRow],
+          children: [
+            ...headerRow,
+            ...gramTable,
+            ...unaryOpRow,
+            ...binaryOpRow,
+          ],
         ),
       ),
     );

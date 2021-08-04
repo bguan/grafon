@@ -25,10 +25,50 @@ enum Vowel { NIL, a, e, i, o, u }
 
 extension VowelHelper on Vowel {
   String get shortName =>
-      this == Vowel.NIL ? '_' : this.toString().split('.').last;
+      this == Vowel.NIL ? '' : this.toString().split('.').last;
+
+  /// IPA phoneme
+  String get shortPhoneme {
+    switch (this) {
+      case Vowel.a:
+        return 'ɑː';
+      case Vowel.e:
+        return 'ə';
+      case Vowel.i:
+        return 'iː';
+      case Vowel.o:
+        return 'ʊ';
+      case Vowel.u:
+        return 'uː';
+      case Vowel.NIL:
+        return '';
+      default:
+        return shortName;
+    }
+  }
+
+  /// IPA phoneme
+  String get phoneme {
+    switch (this) {
+      case Vowel.a:
+        return 'ɑː';
+      case Vowel.e:
+        return 'ɜː';
+      case Vowel.i:
+        return 'iː';
+      case Vowel.o:
+        return 'ɔː';
+      case Vowel.u:
+        return 'uː';
+      case Vowel.NIL:
+        return '';
+      default:
+        return shortName;
+    }
+  }
 
   // hack to get intended sound with text-to-speech engine in en-GB
-  String get phoneme {
+  String get approxVoice {
     switch (this) {
       case Vowel.a:
         return 'ar';
@@ -102,9 +142,29 @@ extension ConsonantHelper on Cons {
   }
 
   String get shortName =>
-      this == Cons.NIL ? '_' : this.toString().split('.').last;
+      this == Cons.NIL ? '' : this.toString().split('.').last;
 
+  /// IPA Phoneme
   String get phoneme {
+    switch (this) {
+      // case Cons.r:
+      //   return 'ɹ';
+      case Cons.j:
+        return 'ʤ';
+      case Cons.ch:
+        return 'ʧ';
+      case Cons.sh:
+        return 'ʃ';
+      case Cons.zh:
+        return 'ʒ';
+      case Cons.NIL:
+        return '';
+      default:
+        return shortName;
+    }
+  }
+
+  String get approxVoice {
     switch (this) {
       case Cons.h:
         return 'h';
@@ -131,7 +191,7 @@ extension ConsonantHelper on Cons {
       case Cons.l:
         return 'l';
       case Cons.r:
-        return 'r';
+        return 'ɹ';
       case Cons.m:
         return 'm';
       case Cons.n:
@@ -209,32 +269,31 @@ extension ConsPairHelper on ConsPair {
 }
 
 /// Coda is the ending consonant at the end of a syllable
-enum Coda { NIL, h, th, dh, k, g, t, n, m, p, s, z, f, ng }
+enum Coda { NIL, f, th, p, t, k, s, sh, ch, n, m, r, ng }
 
 /// Helper to map coda to get the group that its associated with and phoneme
 extension CodaHelper on Coda {
   CodaGroup get group {
     switch (this) {
       case Coda.NIL:
-      case Coda.h:
+      case Coda.f:
       case Coda.th:
-      case Coda.dh:
-        return CodaGroup.hthdh;
+        return CodaGroup.nilFTh;
 
-      case Coda.k:
-      case Coda.g:
+      case Coda.p:
       case Coda.t:
-        return CodaGroup.kgt;
+      case Coda.k:
+        return CodaGroup.PTK;
 
       case Coda.n:
       case Coda.m:
-      case Coda.p:
-        return CodaGroup.nmp;
+      case Coda.r:
+        return CodaGroup.MNR;
 
       case Coda.s:
-      case Coda.z:
-      case Coda.f:
-        return CodaGroup.szf;
+      case Coda.sh:
+      case Coda.ch:
+        return CodaGroup.SShCh;
 
       case Coda.ng:
       default:
@@ -242,23 +301,49 @@ extension CodaHelper on Coda {
     }
   }
 
-  String get phoneme => this == Coda.NIL ? '' : this.toString().split('.').last;
+  String get shortName =>
+      this == Coda.NIL ? '' : this.toString().split('.').last;
+
+  /// IPA Phoneme
+  String get phoneme {
+    switch (this) {
+      case Coda.th:
+        return 'θ';
+      case Coda.r:
+        return 'ɹ';
+      case Coda.sh:
+        return 'ʃ';
+      case Coda.ch:
+        return 'ʧ';
+      case Coda.ng:
+        return 'ŋ';
+      case Coda.NIL:
+        return '';
+      default:
+        return shortName;
+    }
+  }
+
+  String get approxVoice => this == Coda.NIL ? '' : shortName;
 }
 
 /// Enum for Coda grouping for leading gram in a binary operation.
-enum CodaGroup { hthdh, kgt, nmp, szf }
+enum CodaGroup { nilFTh, PTK, MNR, SShCh }
+
+/// Enum for the 3 forms in each CodaGroup
+enum CodaForm { base, tail, alt }
 
 /// Extension to map base, tail, alt Coda to enum, short name.
 extension CodaGroupHelper on CodaGroup {
   Coda get base {
     switch (this) {
-      case CodaGroup.kgt:
-        return Coda.k;
-      case CodaGroup.nmp:
-        return Coda.n;
-      case CodaGroup.szf:
+      case CodaGroup.PTK:
+        return Coda.p;
+      case CodaGroup.MNR:
+        return Coda.m;
+      case CodaGroup.SShCh:
         return Coda.s;
-      case CodaGroup.hthdh:
+      case CodaGroup.nilFTh:
       default:
         return Coda.NIL;
     }
@@ -267,15 +352,15 @@ extension CodaGroupHelper on CodaGroup {
   /// Use tail when it is the last operator in a cluster group
   Coda get tail {
     switch (this) {
-      case CodaGroup.kgt:
-        return Coda.g;
-      case CodaGroup.nmp:
-        return Coda.m;
-      case CodaGroup.szf:
-        return Coda.z;
-      case CodaGroup.hthdh:
+      case CodaGroup.PTK:
+        return Coda.t;
+      case CodaGroup.MNR:
+        return Coda.n;
+      case CodaGroup.SShCh:
+        return Coda.sh;
+      case CodaGroup.nilFTh:
       default:
-        return Coda.h;
+        return Coda.f;
     }
   }
 
@@ -284,23 +369,36 @@ extension CodaGroupHelper on CodaGroup {
   /// As "athHa" sounds to close to "athA", pronunciation will handle it.
   Coda get alt {
     switch (this) {
-      case CodaGroup.kgt:
-        return Coda.t;
-      case CodaGroup.nmp:
-        return Coda.p;
-      case CodaGroup.szf:
-        return Coda.f;
-      case CodaGroup.hthdh:
+      case CodaGroup.PTK:
+        return Coda.k;
+      case CodaGroup.MNR:
+        return Coda.r;
+      case CodaGroup.SShCh:
+        return Coda.ch;
+      case CodaGroup.nilFTh:
       default:
-        return Coda.th; // 1 exception "aA" => "athA" but "ahHa" => "adhHa"
+        return Coda.th;
     }
   }
 
+  String get shortName => this.toString().split('.').last;
+
+  Coda operator [](CodaForm f) => f == CodaForm.base
+      ? this.base
+      : (f == CodaForm.tail ? this.tail : this.alt);
+}
+
+/// Extension to map CodaForm enum to short name.
+extension CodaFormHelper on CodaForm {
   String get shortName => this.toString().split('.').last;
 }
 
 /// Class to handle Syllable and its manipulation
 class Syllable {
+  static const int CONS_MILLIS = 100;
+  static const int VOWEL_MILLIS = 200;
+  static const int END_VOWEL_MILLIS = 150;
+  static const int CODA_MILLIS = 150;
   final Cons cons;
   final Vowel vowel;
   final Vowel endVowel;
@@ -343,10 +441,30 @@ class Syllable {
       cons.hashCode ^ vowel.hashCode ^ endVowel.hashCode ^ coda.hashCode;
 
   @override
-  String toString() {
+  String toString() => [
+        cons.shortName,
+        vowel.shortName,
+        endVowel.shortName,
+        coda.shortName,
+      ].join();
+
+  String get pronunciation => [
+        cons.phoneme,
+        vowel.phoneme,
+        endVowel == Vowel.NIL ? '' : 'ˌ${endVowel.shortPhoneme}',
+        coda.phoneme,
+      ].join();
+
+  int get durationMillis =>
+      (cons != Cons.NIL ? CONS_MILLIS : 0) +
+      VOWEL_MILLIS +
+      (endVowel != Vowel.NIL ? END_VOWEL_MILLIS : 0) +
+      (coda != Coda.NIL ? CODA_MILLIS : 0);
+
+  String get approxVoice {
     // Hack to get TTS working
-    final v = vowel.phoneme;
-    final e = endVowel.phoneme;
+    final v = vowel.approxVoice;
+    final e = endVowel.approxVoice;
 
     StringBuffer s = StringBuffer();
 
@@ -360,8 +478,14 @@ class Syllable {
     } else if (cons == Cons.g && vowel == Vowel.i) {
       s.write('ghee');
       if (e != '') s.write('-');
+    } else if (cons == Cons.g && vowel == Vowel.e) {
+      s.write('gher');
+      if (e != '') s.write('-');
     } else if (cons == Cons.f && vowel == Vowel.e) {
       s.write('fur');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.ch && vowel == Vowel.u) {
+      s.write('choo');
       if (e != '') s.write('-');
     } else if (cons == Cons.ch && vowel == Vowel.e) {
       s.write('chur');
@@ -385,15 +509,24 @@ class Syllable {
       s.write('rhur');
       if (e != '') s.write('-');
     } else if (cons == Cons.r && vowel == Vowel.o) {
-      s.write('roh');
+      s.write('raw');
       if (e != '') s.write('-');
     } else if (cons == Cons.s && vowel == Vowel.a) {
       s.write('sah');
       if (e != '') s.write('-');
+    } else if (cons == Cons.sh && vowel == Vowel.a) {
+      s.write('shaa');
+      if (e != '') s.write('-');
+    } else if (cons == Cons.zh && vowel == Vowel.a) {
+      s.write("zhaar");
+      if (e != '') s.write('-');
+    } else if (cons == Cons.zh && vowel == Vowel.e) {
+      s.write("zh'er");
+      if (e != '') s.write('-');
     } else {
-      if (cons != Cons.NIL) s.write(cons.phoneme);
+      if (cons != Cons.NIL) s.write(cons.approxVoice);
       if (endVowel == Vowel.NIL) {
-        s.write(vowel.phoneme);
+        s.write(vowel.approxVoice);
       } else if (vowel == endVowel) {
         s.writeAll([v.length < 2 ? v : v.substring(0, v.length - 1), '-']);
       } else {
@@ -401,21 +534,20 @@ class Syllable {
       }
     }
 
-    if (coda == Coda.g && endVowel != Vowel.NIL) {
-      final e = endVowel.phoneme;
+    if (coda == Coda.ch && endVowel != Vowel.NIL) {
+      final e = endVowel.approxVoice;
       s.write(e.length < 2 ? v : e.substring(0, e.length - 1));
     } else {
-      s.write(endVowel.phoneme);
+      s.write(endVowel.approxVoice);
     }
     if ((cons == Cons.NIL &&
             vowel == Vowel.a &&
             endVowel == Vowel.a &&
             coda == Coda.s) ||
-        (cons == Cons.m && vowel == Vowel.e && coda == Coda.h) ||
         (cons == Cons.s && vowel == Vowel.e && coda == Coda.s)) {
       s.write("'");
     }
-    s.write(coda.phoneme);
+    s.write(coda.approxVoice);
     return s.toString();
   }
 
@@ -452,31 +584,39 @@ class Syllable {
 class Pronunciation {
   final Iterable<Syllable> syllables;
 
-  /// input
+  /// final syllables after applying disambiguation transformation
   late final List<Syllable> voicing;
 
+  /// for linking discrete syllable fragment files into a long pronunciation
+  late final List<String> fragmentSequence;
+
   /// voicing, transformed as needed
-  late final String _voicingString;
+  late final String _voicingStr; // IPA phonemes
+  late final String _approxVoice; // what a US English speaker should pronounce
 
-  /// precompute voicing string representation
-
+  /// constructor, precompute voicing, fragments, approx string representation
   Pronunciation(this.syllables) {
     final syllableList = <Syllable>[];
+    final fragmentList = <String>[];
+    // TODO move leading syllable's coda to trailing as consonant if none
     var s = syllables.first;
+    var f = s.toString();
     for (var next in syllables.skip(1)) {
-      if (s.lastPhoneme != next.firstPhoneme) {
-        syllableList.add(s);
-      } else if (s.coda == Coda.h && next.cons == Cons.h) {
-        // special case i.e. "ah-Ha" => "adh-Ha"
-        syllableList.add(s.diffCoda(Coda.dh));
-      } else {
-        syllableList.add(s.altOpForm);
+      if (s.lastPhoneme == next.firstPhoneme) {
+        s = s.altOpForm;
+        // f = s.toString();
       }
+      syllableList.add(s);
+      fragmentList.add(f);
+      f = "${next.cons == Cons.NIL ? s.coda.shortName : ''}$next";
       s = next;
     }
     syllableList.add(s);
+    fragmentList.add(f);
     voicing = List.unmodifiable(syllableList);
-    _voicingString = voicing.map((s) => s.toString()).join(' ');
+    fragmentSequence = List.unmodifiable(fragmentList);
+    _voicingStr = voicing.map((s) => s.pronunciation).join("");
+    _approxVoice = voicing.map((s) => s.approxVoice).join("-");
   }
 
   @override
@@ -494,7 +634,9 @@ class Pronunciation {
   int get hashCode => IterableEquality<Syllable>().hash(syllables);
 
   @override
-  String toString() => _voicingString;
+  String toString() => _voicingStr;
+
+  String get approxVoice => _approxVoice;
 
   Syllable operator [](int index) => voicing[index];
 
@@ -503,4 +645,7 @@ class Pronunciation {
   Syllable get last => voicing[length - 1];
 
   int get length => syllables.length;
+
+  int get durationMillis =>
+      syllables.fold(0, (sum, s) => s.durationMillis + sum);
 }

@@ -90,14 +90,14 @@ extension BinaryExtension on Binary {
   CodaGroup get coda {
     switch (this) {
       case Binary.Merge:
-        return CodaGroup.kgt;
+        return CodaGroup.PTK;
       case Binary.Over:
-        return CodaGroup.szf;
+        return CodaGroup.SShCh;
       case Binary.Wrap:
-        return CodaGroup.nmp;
+        return CodaGroup.MNR;
       case Binary.Next:
       default:
-        return CodaGroup.hthdh;
+        return CodaGroup.nilFTh;
     }
   }
 }

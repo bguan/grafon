@@ -4,7 +4,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/android.iml" filepath="$PROJECT_DIR$/.idea/modules/android.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/android.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/android.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1063971257/android.url_launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/1063971257/android.url_launcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-932944956/android.audio_session.iml" filepath="$PROJECT_DIR$/.idea/modules/-932944956/android.audio_session.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-304056472/android.google_sign_in.iml" filepath="$PROJECT_DIR$/.idea/modules/-304056472/android.google_sign_in.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-636731319/android.just_audio.iml" filepath="$PROJECT_DIR$/.idea/modules/-636731319/android.just_audio.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-591896032/android.path_provider.iml" filepath="$PROJECT_DIR$/.idea/modules/-591896032/android.path_provider.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-63424836/android.url_launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/-63424836/android.url_launcher.iml" />
     </modules>
   </component>
 </project>

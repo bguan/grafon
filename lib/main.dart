@@ -15,36 +15,89 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import 'package:audio_session/audio_session.dart';
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/texttospeech/v1.dart';
+import 'package:grafon/speech_svc.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'buffer_audio_src.dart';
 import 'grafon_dictionary.dart';
 import 'gram_table_widget.dart';
 import 'word_group_widget.dart';
 
+final GoogleSignIn _googleSignIn = GoogleSignIn(
+  scopes: <String>[TexttospeechApi.cloudPlatformScope],
+);
+
 /// Main Starting Point of the App.
-void main() {
+void main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((r) {
     print('${r.loggerName} ${r.level.name} ${r.time}: ${r.message}');
   });
-  runApp(GrafonApp());
+
+  runApp(
+    MaterialApp(
+      title: 'Grafon',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: GrafonApp(),
+    ),
+  );
 }
 
 /// This widget is the root of Grafon application.
-class GrafonApp extends StatelessWidget {
-  static final log = Logger("GrafonApp");
+class GrafonApp extends StatefulWidget {
+  GrafonApp({Key? key}) : super(key: key);
+
+  @override
+  State createState() => GrafonAppState();
+}
+
+/// The state of the main widget.
+class GrafonAppState extends State<GrafonApp> {
+  static final log = Logger("GrafonAppState");
   static const GITHUB_LINK = 'https://github.com/bguan/grafon';
 
-  Future<void> _initSpeechGen(FlutterTts flutterTts) async {
-    final languages = await flutterTts.getLanguages;
-    log.info("FlutterTts supported languages: $languages");
-    await flutterTts.setLanguage("en-GB");
-    await flutterTts.setSpeechRate(.5);
-    await flutterTts.setPitch(1);
+  final AudioPlayer _player = AudioPlayer();
+
+  TexttospeechApi? _cloudTTS;
+  GoogleSignInAccount? _googleAcct;
+
+  late final SpeechService _speechSvc = SpeechService(_player, _cloudTTS);
+
+  @override
+  void initState() {
+    super.initState();
+    _initAudio();
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _googleAcct = account;
+      });
+      if (_googleAcct != null) {
+        _initTTS();
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  Future<void> _initAudio() async {
+    final session = await AudioSession.instance;
+    await session.configure(AudioSessionConfiguration.speech());
+    // Listen to errors during playback.
+    _player.playbackEventStream.listen((event) {},
+        onError: (Object e, StackTrace stackTrace) {
+      log.warning('Audio error: $e');
+    });
+    _player.setSkipSilenceEnabled(true);
   }
 
   Future<void> _openBrowser(String url) async {
@@ -53,6 +106,54 @@ class GrafonApp extends StatelessWidget {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  Future<void> _initTTS() async {
+    try {
+      _cloudTTS = TexttospeechApi((await _googleSignIn.authenticatedClient())!);
+      _speechSvc.cloudTTS = _cloudTTS;
+      final request = SynthesizeSpeechRequest.fromJson({
+        "input": {
+          "ssml": "<speak>Cloud Text to Speech initialized.</speak>",
+        },
+        "voice": {
+          "languageCode": "en-US",
+          "name": "en-US-Wavenet-E",
+          "ssmlGender": "FEMALE"
+        },
+        "audioConfig": {"audioEncoding": "MP3"}
+      });
+      final response = await _cloudTTS!.text.synthesize(request);
+      final mp3bytes = response.audioContentAsBytes;
+      await _player.setAudioSource(BufferAudioSource(mp3bytes));
+      await _player.play();
+    } catch (e) {
+      log.warning("Error initializing TTS: $e");
+    }
+  }
+
+  Future<void> _signIn() async {
+    try {
+      await _googleSignIn.signIn();
+    } catch (error) {
+      log.warning(error);
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await _googleSignIn.signOut();
+      _googleAcct = null;
+      _speechSvc.cloudTTS = null;
+    } catch (error) {
+      log.warning(error);
+    }
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,36 +168,51 @@ class GrafonApp extends StatelessWidget {
       WordGroupPage(demoGroup),
     ];
 
-    return MaterialApp(
-      title: 'Grafon',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MultiProvider(
-        providers: [
-          Provider<FlutterTts>(create: (_) {
-            final speechGen = FlutterTts();
-            _initSpeechGen(speechGen);
-            return speechGen;
-          })
-        ],
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('Grafon Home'),
-            leading: IconButton(
-              icon: Icon(Icons.help_outline_rounded),
-              onPressed: () => _openBrowser(GITHUB_LINK),
-            ),
+    return MultiProvider(
+      providers: [
+        Provider<AudioPlayer>(create: (_) {
+          return _player;
+        }),
+        Provider<GoogleSignInAccount?>(create: (_) {
+          return _googleAcct;
+        }),
+        Provider<TexttospeechApi?>(create: (_) {
+          return _cloudTTS;
+        }),
+        Provider<SpeechService>(create: (_) {
+          return _speechSvc;
+        })
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Grafon Home'),
+          leading: IconButton(
+            icon: Icon(Icons.help_outline_rounded),
+            onPressed: () => _openBrowser(GITHUB_LINK),
           ),
-          body: SafeArea(
-            child: PageView(
-              scrollDirection: Axis.horizontal,
-              controller: controller,
-              children: [
-                GramTableView(),
-                ...wordViews,
-              ],
-            ),
+          actions: <Widget>[
+            if (_googleAcct == null)
+              IconButton(
+                icon: const Icon(Icons.login),
+                tooltip: 'Login',
+                onPressed: () => _signIn(),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.logout),
+                tooltip: 'Logout',
+                onPressed: () => _signOut(),
+              ),
+          ],
+        ),
+        body: SafeArea(
+          child: PageView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            children: [
+              GramTableView(),
+              ...wordViews,
+            ],
           ),
         ),
       ),

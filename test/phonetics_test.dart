@@ -80,8 +80,8 @@ void main() {
       ...CodaGroup.values.map((cg) => cg.alt),
     ]);
 
-    // ...dh and ...ng are special codas
-    expect(codaFromGroups, Set.of(Coda.values)..removeAll([Coda.dh, Coda.ng]));
+    // ...ng is a special coda
+    expect(codaFromGroups, Set.of(Coda.values)..remove(Coda.ng));
   });
 
   test('Codas except "ng" should cover all CodaGroups', () {
@@ -144,26 +144,26 @@ void main() {
     final aa = Syllable.vv(Vowel.a, Vowel.a);
     expect(a1 == aa, isFalse);
 
-    final ah = Syllable.vc(Vowel.a, Coda.h);
-    expect(a1 == ah, isFalse);
+    final af = Syllable.vc(Vowel.a, Coda.f);
+    expect(a1 == af, isFalse);
 
-    final aah = Syllable.vvc(Vowel.a, Vowel.a, Coda.h);
-    expect(a1 == aah, isFalse);
+    final aaf = Syllable.vvc(Vowel.a, Vowel.a, Coda.f);
+    expect(a1 == aaf, isFalse);
   });
 
   test('Syllable toString works', () {
-    // final a = Syllable.v(Vowel.a);
-    // expect(a.toString(), 'a');
-    // final ba = Syllable(Cons.b, Vowel.a);
-    // expect(ba.toString(), 'ba');
-    // final aa = Syllable.vv(Vowel.a, Vowel.a);
-    // expect(aa.toString(), 'aa');
-    // final ah = Syllable.vc(Vowel.a, Coda.h);
-    // expect(ah.toString(), 'ah');
-    // final aah = Syllable.vvc(Vowel.a, Vowel.a, Coda.h);
-    // expect(aah.toString(), 'aah');
-    // final baah = Syllable(Cons.b, Vowel.a, Vowel.a, Coda.h);
-    // expect(baah.toString(), 'baah');
+    final a = Syllable.v(Vowel.a);
+    expect(a.toString(), 'a');
+    final ba = Syllable(Cons.b, Vowel.a);
+    expect(ba.toString(), 'ba');
+    final aa = Syllable.vv(Vowel.a, Vowel.a);
+    expect(aa.toString(), 'aa');
+    final af = Syllable.vc(Vowel.a, Coda.f);
+    expect(af.toString(), 'af');
+    final aaf = Syllable.vvc(Vowel.a, Vowel.a, Coda.f);
+    expect(aaf.toString(), 'aaf');
+    final baaf = Syllable(Cons.b, Vowel.a, Vowel.a, Coda.f);
+    expect(baaf.toString(), 'baaf');
   });
 
   test('Syllable headForm works', () {
@@ -177,40 +177,40 @@ void main() {
 
   test('Syllable tailOpForm works', () {
     final a = Syllable.v(Vowel.a);
-    final ah = Syllable.vc(Vowel.a, Coda.h);
-    expect(a.tailOpForm, ah);
-    expect(ah.tailOpForm, ah);
+    final af = Syllable.vc(Vowel.a, Coda.f);
+    expect(a.tailOpForm, af);
+    expect(af.tailOpForm, af);
   });
 
   test('Syllable altOpForm works', () {
     final a = Syllable.v(Vowel.a);
-    final ah = Syllable.vc(Vowel.a, Coda.h);
+    final af = Syllable.vc(Vowel.a, Coda.f);
     final ath = Syllable.vc(Vowel.a, Coda.th);
     expect(a.altOpForm, ath);
-    expect(ah.altOpForm, ath);
+    expect(af.altOpForm, ath);
     expect(ath.altOpForm, ath);
   });
 
   test('Syllable firstPhoneme works', () {
     final a = Syllable.v(Vowel.a);
     final ba = Syllable(Cons.b, Vowel.a);
-    final ah = Syllable.vc(Vowel.a, Coda.h);
-    // expect(a.firstPhoneme, 'a');
+    final af = Syllable.vc(Vowel.a, Coda.f);
+    expect(a.firstPhoneme, 'ɑː');
     expect(ba.firstPhoneme, 'b');
-    // expect(ah.firstPhoneme, 'a');
+    expect(af.firstPhoneme, 'ɑː');
   });
 
   test('Syllable lastPhoneme works', () {
     final a = Syllable.v(Vowel.a);
     final ba = Syllable(Cons.b, Vowel.a);
     final bai = Syllable(Cons.b, Vowel.a, Vowel.i);
-    final ah = Syllable.vc(Vowel.a, Coda.h);
+    final af = Syllable.vc(Vowel.a, Coda.f);
     final bais = Syllable(Cons.b, Vowel.a, Vowel.i, Coda.s);
-    // expect(a.lastPhoneme, 'a');
-    // expect(ba.lastPhoneme, 'a');
-    // expect(bai.lastPhoneme, 'i');
-    // expect(bais.lastPhoneme, 's');
-    expect(ah.lastPhoneme, 'h');
+    expect(a.lastPhoneme, 'ɑː');
+    expect(ba.lastPhoneme, 'ɑː');
+    expect(bai.lastPhoneme, 'iː');
+    expect(bais.lastPhoneme, 's');
+    expect(af.lastPhoneme, 'f');
   });
 
   test('Syllable diffXXX works', () {
@@ -243,24 +243,24 @@ void main() {
     final ma = Syllable(Cons.m, Vowel.a);
     final aMa = Pronunciation([a, ma]);
     expect(aMa.voicing, aMa.syllables);
-    //expect(aMa.toString(), 'ama');
+    expect(aMa.toString(), 'ɑːmɑː');
 
-    final aHa = Pronunciation([a, a]);
-    expect(aHa.voicing == aHa.syllables, isFalse);
-    expect(aHa.voicing, [a.diffCoda(Coda.th), a]);
-    // expect(aHa.toString(), 'atha');
+    final aTha = Pronunciation([a, a]);
+    expect(aTha.voicing == aTha.syllables, isFalse);
+    expect(aTha.voicing, [a.diffCoda(Coda.th), a]);
+    expect(aTha.toString(), 'ɑːθɑː');
 
-    final ah = Syllable.vc(Vowel.a, Coda.h);
+    final af = Syllable.vc(Vowel.a, Coda.f);
     final ha = Syllable(Cons.h, Vowel.a);
-    final ahHa = Pronunciation([ah, ha]);
-    expect(ahHa.voicing == ahHa.syllables, isFalse);
-    expect(ahHa.voicing, [ah.diffCoda(Coda.dh), ha]);
-    // expect(ahHa.toString(), 'adhha');
+    final afHa = Pronunciation([af, ha]);
+    expect(afHa.voicing == afHa.syllables, isFalse);
+    expect(afHa.voicing, [af.diffCoda(Coda.f), ha]);
+    expect(afHa.toString(), 'ɑːfhɑː');
 
     final am = Syllable.vc(Vowel.a, Coda.m);
     final amMa = Pronunciation([am, ma]);
     expect(amMa.voicing == amMa.syllables, isFalse);
     expect(amMa.voicing, [am.diffCoda(Coda.m.group.alt), ma]);
-    // expect(amMa.toString(), 'apma');
+    expect(amMa.toString(), 'ɑːɹmɑː');
   });
 }

@@ -20,11 +20,11 @@ library word_group_widget;
 import 'package:charcode/html_entity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 
 import 'grafon_widget.dart';
 import 'grafon_word.dart';
+import 'speech_svc.dart';
 
 /// Widget to render a word group as a page
 class WordGroupPage extends StatelessWidget {
@@ -32,16 +32,9 @@ class WordGroupPage extends StatelessWidget {
 
   WordGroupPage(this.wordGroup);
 
-  Future _speak(FlutterTts speechGen, String voiceText) async {
-    if (voiceText.isNotEmpty) {
-      await speechGen.awaitSpeakCompletion(true);
-      await speechGen.speak(voiceText);
-    }
-  }
-
   @override
   Widget build(BuildContext ctx) {
-    final speechGen = ctx.watch<FlutterTts>();
+    final speechSvc = ctx.watch<SpeechService>();
     final scheme = Theme.of(ctx).colorScheme;
     final titleStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -66,9 +59,14 @@ class WordGroupPage extends StatelessWidget {
       height: 1.2,
       color: scheme.primaryVariant,
       fontSize: 12,
-      fontFamily: "Courier",
+      fontFamily: "Noto",
     );
 
+    final genPronunciationText = (p, [isLines = false]) => [
+          p.fragmentSequence.join("-"),
+          '[$p]',
+          '"${p.approxVoice}"',
+        ].join(isLines ? '\n' : ' ');
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -80,7 +78,7 @@ class WordGroupPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                flex: 3,
+                flex: 1,
                 child: Column(
                   children: [
                     Container(
@@ -99,21 +97,18 @@ class WordGroupPage extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      // color: scheme.background,
                       padding: EdgeInsets.symmetric(vertical: 20),
-                      height: 100,
-                      width: wordGroup.logo.widthAtHeight(60),
+                      height: 120,
+                      width: wordGroup.logo.widthAtHeight(100),
                       child: GestureDetector(
-                        onTap: () => _speak(
-                          speechGen,
-                          "/${wordGroup.logo.pronunciation}/",
-                        ),
+                        onTap: () =>
+                            speechSvc.pronounce(wordGroup.logo.pronunciation),
                         child: GrafonTile(
                           wordGroup.logo.renderPlan,
                           height: 60,
@@ -123,8 +118,12 @@ class WordGroupPage extends StatelessWidget {
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text('"${wordGroup.logo.pronunciation}"',
-                          textAlign: TextAlign.right, style: voicingStyle),
+                      child: Text(
+                        genPronunciationText(
+                            wordGroup.logo.pronunciation, false),
+                        textAlign: TextAlign.right,
+                        style: voicingStyle,
+                      ),
                     ),
                   ],
                 ),
@@ -148,10 +147,7 @@ class WordGroupPage extends StatelessWidget {
                       width: w.widthAtHeight(50) + 30,
                       padding: EdgeInsets.all(15),
                       child: GestureDetector(
-                        onTap: () => _speak(
-                          speechGen,
-                          "/${w.pronunciation}/",
-                        ),
+                        onTap: () => speechSvc.pronounce(w.pronunciation),
                         child: GrafonTile(
                           w.renderPlan,
                           height: 50,
@@ -161,7 +157,7 @@ class WordGroupPage extends StatelessWidget {
                     ),
                     RichText(
                       text: TextSpan(
-                        text: '"${w.pronunciation}"',
+                        text: genPronunciationText(w.pronunciation),
                         style: voicingStyle,
                         children: <TextSpan>[
                           TextSpan(

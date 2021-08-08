@@ -598,21 +598,25 @@ class Pronunciation {
   Pronunciation(this.syllables) {
     final syllableList = <Syllable>[];
     final fragmentList = <String>[];
-    // TODO move leading syllable's coda to trailing as consonant if none
-    var s = syllables.first;
-    var f = s.toString();
+    Syllable prev = syllables.first;
+    Coda codaCarry = Coda.NIL;
     for (var next in syllables.skip(1)) {
-      if (s.lastPhoneme == next.firstPhoneme) {
-        s = s.altOpForm;
-        // f = s.toString();
+      if (prev.lastPhoneme == next.firstPhoneme) {
+        prev = prev.altOpForm;
       }
-      syllableList.add(s);
-      fragmentList.add(f);
-      f = "${next.cons == Cons.NIL ? s.coda.shortName : ''}$next";
-      s = next;
+      syllableList.add(prev);
+      // move leading syllable's coda to head of trailing if none
+      if (next.cons == Cons.NIL) {
+        fragmentList.add("${codaCarry.shortName}${prev.diffCoda(Coda.NIL)}");
+        codaCarry = prev.coda;
+      } else {
+        fragmentList.add("${codaCarry.shortName}$prev");
+        codaCarry = Coda.NIL;
+      }
+      prev = next;
     }
-    syllableList.add(s);
-    fragmentList.add(f);
+    syllableList.add(prev);
+    fragmentList.add("${codaCarry.shortName}$prev");
     voicing = List.unmodifiable(syllableList);
     fragmentSequence = List.unmodifiable(fragmentList);
     _voicingStr = voicing.map((s) => s.pronunciation).join("");

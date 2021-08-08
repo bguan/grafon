@@ -35,6 +35,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.2
   googleapis: ^4.0.0
   just_audio: ^0.9.5
+  dots_indicator: ^2.0.0
 
 dev_dependencies:
   flutter_test:

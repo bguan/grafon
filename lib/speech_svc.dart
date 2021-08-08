@@ -40,15 +40,7 @@ class SpeechService {
     try {
       List<Syllable> syllables = List.from(p.syllables);
       late final audioSrc;
-      if (syllables.length == 1) {
-        audioSrc = AudioSource.uri(
-          Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
-          headers: {
-            'Content-Type': 'audio/mpeg',
-            'Content-Length': '${syllables.first.durationMillis}'
-          },
-        );
-      } else if (_cloudTTS != null) {
+      if (_cloudTTS != null) {
         final request = SynthesizeSpeechRequest.fromJson({
           "input": {
             "ssml":
@@ -64,6 +56,14 @@ class SpeechService {
         final response = await _cloudTTS!.text.synthesize(request);
         final mp3bytes = response.audioContentAsBytes;
         audioSrc = BufferAudioSource(mp3bytes);
+      } else if (syllables.length == 1) {
+        audioSrc = AudioSource.uri(
+          Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
+          headers: {
+            'Content-Type': 'audio/mpeg',
+            'Content-Length': '${syllables.first.durationMillis}'
+          },
+        );
       } else {
         List<AudioSource> sources = [
           for (var i = 0; i < syllables.length; i++)

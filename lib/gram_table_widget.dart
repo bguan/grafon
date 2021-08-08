@@ -64,40 +64,41 @@ class _GramTableViewState extends State<GramTableView> {
     final speechSvc = ctx.watch<SpeechService>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
-    final screenWidth = mediaSize.width;
-    final screenHeight = mediaSize.height;
-    final vPad = 5.0;
-    final hPad = 20.0;
-    final space = 5.0;
-    final inset = 10.0;
-    final dim = min(
-      (screenWidth - 2 * hPad) / (widget.table.numCols + 2),
-      (screenHeight - 2 * vPad) / (widget.table.numRows + 1),
-    );
+    final pageWidth = mediaSize.width;
+    final pageHeight =
+        mediaSize.height - 120; // AppBar and bottom dot indicator
+    final cellWidth = (pageWidth ~/ (widget.table.numCols + 2)).toDouble();
+    final cellHeight = (pageHeight ~/ (widget.table.numRows + 3)).toDouble();
+    final dim =
+        (pageHeight > pageWidth ? min(cellWidth, cellHeight) : cellWidth) - 1;
+    final inset = max(0.15 * dim, 8.0);
+    final space = max(0.05 * dim, 1.0);
+    final hPad =
+        max(pageWidth - dim * (widget.table.numCols + 2), 2) / 2 + space;
+    final vPad =
+        max(pageHeight - dim * (widget.table.numRows + 3), 2) / 2 + space;
 
-    final fontScale = screenWidth / 1000;
-    final fontSizing = (base) => (fontScale * base).clamp(6, 60).toDouble();
+    final fontSizing = (base) => dim * base / 100;
     final textStyle =
         (fontSize, [lineHeight = 1.25, color = Colors.white]) => TextStyle(
               fontWeight: FontWeight.bold,
               height: lineHeight,
               color: color,
-              fontSize: fontSizing(fontSize),
+              fontSize: fontSizing(fontSize).clamp(5, mediaSize.height / 25),
             );
-    final headerStyle = textStyle(18);
-    final rowHeadTextStyle = textStyle(30);
-    final rowTailTextStyle = textStyle(20, 1.5);
-    final unaryFooterStyle = textStyle(18, 1.4);
-    final unarySelectedStyle = textStyle(18, 1.4); //, scheme.primary);
-    final binaryFooterStyle = textStyle(18, 1.4);
-    final binarySelectedStyle = textStyle(18, 1.4); //, scheme.primary);
+    final headerStyle = textStyle(17);
+    final rowHeadTextStyle = textStyle(17);
+    final unaryFooterStyle = textStyle(15, 1.4);
+    final unarySelectedStyle = textStyle(15, 1.4); //, scheme.primary);
+    final binaryFooterStyle = textStyle(15, 1.4);
+    final binarySelectedStyle = textStyle(15, 1.4); //, scheme.primary);
 
     final headerRow = [
       for (var fTxt in [
-        'Face vowel -\nbase, head\nconsonant',
+        'Base head consonant\nface vowel',
         ...Face.values
             .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
-        'Symbol\nName'
+        'Symbol Names',
       ])
         Container(
           child: Center(
@@ -116,7 +117,11 @@ class _GramTableViewState extends State<GramTableView> {
         Container(
           child: Center(
             child: Text(
-              '${m.gram.consPair.base.shortName} ${m.gram.consPair.head.shortName}',
+              [
+                if (m.gram.consPair.base != Cons.NIL)
+                  '${m.gram.consPair.base.shortName}…',
+                '${m.gram.consPair.head.shortName}…',
+              ].join('\n'),
               textAlign: TextAlign.center,
               style: rowHeadTextStyle,
             ),
@@ -169,7 +174,7 @@ class _GramTableViewState extends State<GramTableView> {
             child: Text(
               '${m.shortName}\n${m.quadPeer.shortName}',
               textAlign: TextAlign.center,
-              style: rowTailTextStyle,
+              style: rowHeadTextStyle,
             ),
           ),
           color: scheme.background,
@@ -194,9 +199,9 @@ class _GramTableViewState extends State<GramTableView> {
       Container(
         child: Center(
           child: Text(
-            'Unary\nOperator',
+            'Unary operator',
             textAlign: TextAlign.center,
-            style: rowTailTextStyle,
+            style: rowHeadTextStyle,
           ),
         ),
         color: scheme.primaryVariant,
@@ -222,9 +227,9 @@ class _GramTableViewState extends State<GramTableView> {
       Container(
         child: Center(
           child: Text(
-            'Ending\nVowel',
+            'Vowel extension',
             textAlign: TextAlign.center,
-            style: rowTailTextStyle,
+            style: rowHeadTextStyle,
           ),
         ),
         color: scheme.primaryVariant,
@@ -235,9 +240,9 @@ class _GramTableViewState extends State<GramTableView> {
       Container(
         child: Center(
           child: Text(
-            'Binary\nOperator, Compound',
+            'Binary operator',
             textAlign: TextAlign.center,
-            style: rowTailTextStyle,
+            style: rowHeadTextStyle,
           ),
         ),
         color: scheme.primaryVariant,
@@ -304,9 +309,9 @@ class _GramTableViewState extends State<GramTableView> {
       Container(
         child: Center(
           child: Text(
-            'Ending\nConsonant',
+            'Ending consonant',
             textAlign: TextAlign.center,
-            style: rowTailTextStyle,
+            style: rowHeadTextStyle,
           ),
         ),
         color: scheme.primaryVariant,
@@ -315,20 +320,18 @@ class _GramTableViewState extends State<GramTableView> {
 
     return Container(
       width: dim * (widget.table.numCols + 2) + 2 * hPad,
-      height: dim * (widget.table.numRows + 1) + 2 * vPad,
+      height: dim * (widget.table.numRows + 3) + 2 * vPad,
       padding: EdgeInsets.symmetric(vertical: vPad, horizontal: hPad),
-      child: Center(
-        child: GridView.count(
-          crossAxisCount: widget.table.numCols + 2,
-          crossAxisSpacing: space,
-          mainAxisSpacing: space,
-          children: [
-            ...headerRow,
-            ...gramTable,
-            ...unaryOpRow,
-            ...binaryOpRow,
-          ],
-        ),
+      child: GridView.count(
+        crossAxisCount: widget.table.numCols + 2,
+        crossAxisSpacing: space,
+        mainAxisSpacing: space,
+        children: [
+          ...headerRow,
+          ...gramTable,
+          ...unaryOpRow,
+          ...binaryOpRow,
+        ],
       ),
     );
   }

@@ -16,9 +16,12 @@
 // under the License.
 
 import 'package:audio_session/audio_session.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/texttospeech/v1.dart';
 import 'package:grafon/speech_svc.dart';
@@ -74,9 +77,17 @@ class GrafonAppState extends State<GrafonApp> {
 
   late final SpeechService _speechSvc = SpeechService(_player, _cloudTTS);
 
+  final _controller = PageController(initialPage: 0);
+  double _currentPage = 0;
+
   @override
   void initState() {
     super.initState();
+    _controller.addListener(() {
+      setState(() {
+        _currentPage = _controller.page ?? 0;
+      });
+    });
     _initAudio();
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       setState(() {
@@ -158,8 +169,9 @@ class GrafonAppState extends State<GrafonApp> {
 
   @override
   Widget build(BuildContext ctx) {
-    final controller = PageController(initialPage: 0);
-    final wordViews = [
+    final scheme = Theme.of(ctx).colorScheme;
+    final pages = [
+      GramTableView(),
       WordGroupPage(w),
       WordGroupPage(spiritual),
       WordGroupPage(testGroup),
@@ -185,6 +197,7 @@ class GrafonAppState extends State<GrafonApp> {
       ],
       child: Scaffold(
         appBar: AppBar(
+          toolbarHeight: 40,
           title: Text('Grafon Home'),
           leading: IconButton(
             icon: Icon(Icons.help_outline_rounded),
@@ -208,11 +221,22 @@ class GrafonAppState extends State<GrafonApp> {
         body: SafeArea(
           child: PageView(
             scrollDirection: Axis.horizontal,
-            controller: controller,
-            children: [
-              GramTableView(),
-              ...wordViews,
-            ],
+            controller: _controller,
+            children: pages,
+          ),
+        ),
+        bottomSheet: Container(
+          height: 32,
+          padding: EdgeInsets.all(2),
+          alignment: Alignment.topCenter,
+          color: scheme.primary,
+          child: DotsIndicator(
+            dotsCount: pages.length,
+            position: _currentPage,
+            decorator: DotsDecorator(
+              activeColor: Colors.yellowAccent,
+              color: scheme.background,
+            ),
           ),
         ),
       ),

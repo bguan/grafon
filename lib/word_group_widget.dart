@@ -176,6 +176,7 @@ class WordGroupPage extends StatelessWidget {
                 ),
             ],
           ),
+          Container(height: 50),
         ],
       ),
     );

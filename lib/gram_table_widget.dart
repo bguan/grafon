@@ -16,10 +16,12 @@
 // under the License.
 library gram_table_widget;
 
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -112,6 +114,18 @@ class _GramTableViewState extends State<GramTableView> {
         ),
     ];
 
+    final toSyllable = (m, f, [isHead = false]) {
+      var s = widget.table
+          .atMonoFace(m, f)
+          .syllable
+          .diffEndVowel(_unOp == null ? Vowel.NIL : _unOp!.ending)
+          .diffCoda(_compound
+              ? Coda.ng
+              : (_binOp == null ? Coda.NIL : _binOp!.coda[_codaForm!]));
+      if (isHead) s = s.headForm;
+      return s;
+    };
+
     final gramTable = [
       for (var m in Mono.values) ...[
         Container(
@@ -133,33 +147,12 @@ class _GramTableViewState extends State<GramTableView> {
             padding: EdgeInsets.all(inset),
             child: GestureDetector(
               onTap: () => speechSvc.pronounce(
-                Pronunciation(
-                  [
-                    widget.table
-                        .atMonoFace(m, f)
-                        .syllable
-                        .diffEndVowel(_unOp == null ? Vowel.NIL : _unOp!.ending)
-                        .diffCoda(_compound
-                            ? Coda.ng
-                            : (_binOp == null
-                                ? Coda.NIL
-                                : _binOp!.coda[_codaForm!])),
-                  ],
-                ),
+                Pronunciation([toSyllable(m, f)]),
+                multiStitch: !kIsWeb && Platform.isIOS,
               ),
               onLongPress: () => speechSvc.pronounce(
-                Pronunciation([
-                  widget.table
-                      .atMonoFace(m, f)
-                      .syllable
-                      .headForm
-                      .diffEndVowel(_unOp == null ? Vowel.NIL : _unOp!.ending)
-                      .diffCoda(_compound
-                          ? Coda.ng
-                          : (_binOp == null
-                              ? Coda.NIL
-                              : _binOp!.coda[_codaForm!]))
-                ]),
+                Pronunciation([toSyllable(m, f, true)]),
+                multiStitch: !kIsWeb && Platform.isIOS,
               ),
               child: GrafonTile(
                 widget.table.atMonoFace(m, f).renderPlan,
@@ -169,15 +162,25 @@ class _GramTableViewState extends State<GramTableView> {
             ),
             color: scheme.surface,
           ),
-        Container(
-          child: Center(
-            child: Text(
-              '${m.shortName}\n${m.quadPeer.shortName}',
-              textAlign: TextAlign.center,
-              style: rowHeadTextStyle,
-            ),
+        GestureDetector(
+          onTap: () => speechSvc.pronounce(
+            Pronunciation([for (var f in Face.values) toSyllable(m, f)]),
+            multiStitch: !kIsWeb && Platform.isIOS,
           ),
-          color: scheme.background,
+          onLongPress: () => speechSvc.pronounce(
+            Pronunciation([for (var f in Face.values) toSyllable(m, f, true)]),
+            multiStitch: !kIsWeb && Platform.isIOS,
+          ),
+          child: Container(
+            child: Center(
+              child: Text(
+                '${m.shortName}\n${m.quadPeer.shortName}',
+                textAlign: TextAlign.center,
+                style: rowHeadTextStyle,
+              ),
+            ),
+            color: scheme.background,
+          ),
         ),
       ],
     ];

@@ -17,6 +17,8 @@
 
 library word_group_widget;
 
+import 'dart:io';
+
 import 'package:charcode/html_entity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -107,8 +109,10 @@ class WordGroupPage extends StatelessWidget {
                       height: 120,
                       width: wordGroup.logo.widthAtHeight(100),
                       child: GestureDetector(
-                        onTap: () =>
-                            speechSvc.pronounce(wordGroup.logo.pronunciation),
+                        onTap: () => speechSvc.pronounce(
+                          wordGroup.logo.pronunciation,
+                          multiStitch: Platform.isIOS,
+                        ),
                         child: GrafonTile(
                           wordGroup.logo.renderPlan,
                           height: 60,
@@ -147,7 +151,10 @@ class WordGroupPage extends StatelessWidget {
                       width: w.widthAtHeight(50) + 30,
                       padding: EdgeInsets.all(15),
                       child: GestureDetector(
-                        onTap: () => speechSvc.pronounce(w.pronunciation),
+                        onTap: () => speechSvc.pronounce(
+                          w.pronunciation,
+                          multiStitch: Platform.isIOS,
+                        ),
                         child: GrafonTile(
                           w.renderPlan,
                           height: 50,

@@ -21,6 +21,7 @@ import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sig
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/texttospeech/v1.dart';
@@ -75,7 +76,8 @@ class GrafonAppState extends State<GrafonApp> {
   TexttospeechApi? _cloudTTS;
   GoogleSignInAccount? _googleAcct;
 
-  late final SpeechService _speechSvc = SpeechService(_player, _cloudTTS);
+  late final SpeechService _speechSvc =
+      SpeechService(rootBundle, _player, _cloudTTS);
 
   final _controller = PageController(initialPage: 0);
   double _currentPage = 0;
@@ -108,7 +110,6 @@ class GrafonAppState extends State<GrafonApp> {
         onError: (Object e, StackTrace stackTrace) {
       log.warning('Audio error: $e');
     });
-    _player.setSkipSilenceEnabled(true);
   }
 
   Future<void> _openBrowser(String url) async {

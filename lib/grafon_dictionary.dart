@@ -41,9 +41,13 @@ final _w = WordGroup(
 
 final _testGroup = WordGroup(
   'Test',
-  CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
-      .next(Quads.Arc.left)
-      .next(Quads.Flow.right)),
+  CoreWord(
+    Quads.Line.down
+        .over(Quads.Line.down)
+        .over(Quads.Line.down)
+        .over(Quads.Line.down)
+        .over(Quads.Line.down),
+  ),
   'Test expression rendering...',
   [
     CoreWord(Mono.Dot.shrink()),
@@ -91,7 +95,8 @@ final _demoGroup = WordGroup(
         Quads.Angle.up.over(Quads.Gate.down), "House", "Dwelling, building."),
     CoreWord(
         Mono.Sun.gram.over(Quads.Line.down), "Day", "Sun over land, day time."),
-    CoreWord(Quads.Curve.right.next(Quads.Curve.up), "Grass"),
+    CoreWord(
+        Quads.Curve.right.next(Quads.Line.up).next(Quads.Curve.up), "Grass"),
     CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
     CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
     CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk"),

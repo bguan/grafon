@@ -40,15 +40,17 @@ class SpeechService {
     _cloudTTS = tts;
   }
 
-  Future<void> pronounce(Pronunciation p, {multiStitch = true}) async {
+  Future<void> pronounce(Iterable<Pronunciation> pronunciations,
+      {multiStitch = true}) async {
     try {
-      List<Syllable> syllables = List.from(p.syllables);
-      late final audioSrc;
       if (_cloudTTS != null) {
+        final phonemeMarkups = <String>[
+          for (var p in pronunciations)
+            "<phoneme alphabet='ipa' ph='${Pronunciation(p.syllables)}'>?</phoneme>"
+        ];
         final request = SynthesizeSpeechRequest.fromJson({
           "input": {
-            "ssml":
-                "<speak><phoneme alphabet='ipa' ph='${Pronunciation(syllables)}'>?</phoneme></speak>",
+            "ssml": "<speak>\n${phonemeMarkups.join(', \n')}\n</speak>",
           },
           "voice": {
             "languageCode": "en-US",
@@ -59,43 +61,57 @@ class SpeechService {
         });
         final response = await _cloudTTS!.text.synthesize(request);
         final mp3bytes = response.audioContentAsBytes;
-        audioSrc = BufferAudioSource(mp3bytes);
-      } else if (multiStitch) {
-        final allBytes = <int>[];
-        for (var i = 0; i < syllables.length; i++) {
-          final bytes =
-              await _bundle.load("assets/audios/${p.fragmentSequence[i]}.mp3");
-          allBytes.addAll(
-            trimMP3Frames(
-              bytes.buffer.asUint8List(),
-              0.0,
-              i < syllables.length - 1 ? 0.1 : 0,
-            ),
-          );
-        }
-        audioSrc = BufferAudioSource(allBytes);
-      } else if (syllables.length == 1) {
-        audioSrc = AudioSource.uri(
-          Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
-          headers: {
-            'Content-Type': 'audio/mpeg',
-            'Content-Length': '${syllables.first.durationMillis}'
-          },
-        );
+        await _player.setAudioSource(BufferAudioSource(mp3bytes));
       } else {
-        List<AudioSource> sources = [
-          for (var i = 0; i < syllables.length; i++)
-            AudioSource.uri(
-              Uri.parse("asset:///assets/audios/${p.fragmentSequence[i]}.mp3"),
+        final audios = <AudioSource>[];
+        for (var p in pronunciations) {
+          List<Syllable> syllables = List.from(p.syllables);
+          late final audioSrc;
+          if (multiStitch) {
+            final allBytes = <int>[];
+            for (var i = 0; i < syllables.length; i++) {
+              final bytes = await _bundle
+                  .load("assets/audios/${p.fragmentSequence[i]}.mp3");
+              allBytes.addAll(
+                trimMP3Frames(
+                  bytes.buffer.asUint8List(),
+                  0.0,
+                  i < syllables.length - 1 ? 0.2 : 0,
+                ),
+              );
+            }
+            audioSrc = BufferAudioSource(allBytes);
+          } else if (syllables.length == 1) {
+            audioSrc = AudioSource.uri(
+              Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
               headers: {
                 'Content-Type': 'audio/mpeg',
-                'Content-Length': '${syllables[i].durationMillis}'
+                'Content-Length': '${syllables.first.durationMillis}'
               },
-            ),
-        ];
-        audioSrc = ConcatenatingAudioSource(children: sources);
+            );
+          } else {
+            List<AudioSource> sources = [
+              for (var i = 0; i < syllables.length; i++)
+                AudioSource.uri(
+                  Uri.parse(
+                      "asset:///assets/audios/${p.fragmentSequence[i]}.mp3"),
+                  headers: {
+                    'Content-Type': 'audio/mpeg',
+                    'Content-Length': '${syllables[i].durationMillis}'
+                  },
+                ),
+            ];
+            audioSrc = ConcatenatingAudioSource(children: sources);
+          }
+          audios.add(audioSrc);
+        }
+
+        await _player.setAudioSource(
+          audios.length == 1
+              ? audios.first
+              : ConcatenatingAudioSource(children: audios),
+        );
       }
-      await _player.setAudioSource(audioSrc);
       await _player.play();
     } catch (e) {
       log.warning("Error playing audio: $e");

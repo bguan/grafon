@@ -31,14 +31,16 @@ import 'phonetics.dart';
 /// Word has meaning but not all gram expr is a valid word so it needs a class.
 abstract class GrafonWord {
   final String key;
+  final String title;
   final String description;
 
   Pronunciation get pronunciation;
 
   RenderPlan get renderPlan;
 
-  GrafonWord(this.key, [String? description])
-      : this.description = description ?? '';
+  GrafonWord(this.key, [String? title, String? description])
+      : this.title = title ?? '',
+        this.description = description ?? '';
 
   double widthAtHeight(double devHeight) =>
       renderPlan.calcWidthByHeight(devHeight);
@@ -61,9 +63,9 @@ class CoreWord extends GrafonWord {
   final Pronunciation pronunciation;
   late final RenderPlan renderPlan;
 
-  CoreWord(this.expr, [String? key, String? description])
+  CoreWord(this.expr, [String? title, String? description])
       : this.pronunciation = expr.pronunciation,
-        super(key ?? expr.toString(), description) {
+        super(expr.toString(), title, description) {
     var r = expr.renderPlan;
 
     /// Make sure word rendering is not too narrow or too wide
@@ -102,9 +104,10 @@ class CompoundWord extends GrafonWord {
   late final Pronunciation pronunciation;
   late final RenderPlan renderPlan;
 
-  CompoundWord(this.words, [String? key, String? description])
+  CompoundWord(this.words, [String? title, String? description])
       : super(
-          key ?? words.map((w) => w.toString()).join("$SEPARATOR_SYMBOL"),
+          words.map((w) => w.toString()).join("$SEPARATOR_SYMBOL"),
+          title,
           description,
         ) {
     if (words.length < 2)

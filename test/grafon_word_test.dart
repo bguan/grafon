@@ -78,15 +78,15 @@ void main() {
     final vLine = CoreWord(Quads.Line.up, "line.up");
     final g = WordGroup('Test', circle, '?', [dot, vLine]);
 
-    expect(g.contains("dot"), isTrue);
+    expect(g.contains("Dot"), isTrue);
     expect(g.contains("tod"), isFalse);
     expect(g.values.first, dot);
     expect(g.values.last, vLine);
-    expect(g['dot'], dot);
-    expect(g['line.up'], vLine);
+    expect(g['Dot'], dot);
+    expect(g['Up_Line'], vLine);
     expect(g['nope'], null);
     expect(g.keys.length, 2);
-    expect(g.keys.first, "dot");
-    expect(g.keys.last, "line.up");
+    expect(g.keys.first, "Dot");
+    expect(g.keys.last, "Up_Line");
   });
 }

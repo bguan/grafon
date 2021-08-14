@@ -34,7 +34,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'buffer_audio_src.dart';
 import 'grafon_dictionary.dart';
 import 'gram_table_widget.dart';
-import 'word_group_widget.dart';
+import 'wordgroups_page.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: <String>[TexttospeechApi.cloudPlatformScope],
@@ -130,7 +130,7 @@ class GrafonAppState extends State<GrafonApp> {
         },
         "voice": {
           "languageCode": "en-US",
-          "name": "en-US-Wavenet-E",
+          "name": "en-US-Wavenet-E", //"en-US-Standard-C",
           "ssmlGender": "FEMALE"
         },
         "audioConfig": {"audioEncoding": "MP3"}
@@ -173,12 +173,14 @@ class GrafonAppState extends State<GrafonApp> {
     final scheme = Theme.of(ctx).colorScheme;
     final pages = [
       GramTableView(),
-      WordGroupPage(w),
-      WordGroupPage(spiritual),
-      WordGroupPage(testGroup),
-      WordGroupPage(interpersonalGroup),
-      WordGroupPage(numericGroup),
-      WordGroupPage(demoGroup),
+      WordGroupsPage(
+        "Random Words for Testing...",
+        testWords,
+      ),
+      WordGroupsPage(
+        "Core Words",
+        coreWords,
+      ),
     ];
 
     return MultiProvider(
@@ -227,7 +229,7 @@ class GrafonAppState extends State<GrafonApp> {
           ),
         ),
         bottomSheet: Container(
-          height: 32,
+          height: 38,
           padding: EdgeInsets.all(2),
           alignment: Alignment.topCenter,
           color: scheme.primary,

@@ -33,7 +33,7 @@ extension VowelHelper on Vowel {
       case Vowel.a:
         return 'ɑː';
       case Vowel.e:
-        return 'ə';
+        return 'ɜ:';
       case Vowel.i:
         return 'iː';
       case Vowel.o:

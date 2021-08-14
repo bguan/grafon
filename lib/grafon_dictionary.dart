@@ -21,7 +21,7 @@ library grafon_dictionary;
 import 'grafon_word.dart';
 import 'gram_table.dart';
 
-final w = WordGroup(
+final _w = WordGroup(
     'Edge Cases',
     CoreWord(Mono.Circle.up().merge(Quads.Step.left)),
     'Random tricky edge cases for rendering.', [
@@ -39,7 +39,7 @@ final w = WordGroup(
       .next(Quads.Flow.right)),
 ]);
 
-final testGroup = WordGroup(
+final _testGroup = WordGroup(
   'Test',
   CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
       .next(Quads.Arc.left)
@@ -76,7 +76,51 @@ final testGroup = WordGroup(
   ],
 );
 
-final numericGroup = WordGroup(
+final testWords = [_w, _testGroup];
+
+final _demoGroup = WordGroup(
+  'Demo',
+  CompoundWord([
+    CoreWord(Mono.Circle.wrap(Mono.Dot.gram)),
+    CoreWord(Quads.Arc.left.next(Quads.Flow.right)),
+  ]),
+  'This group is a collection of words that demonstrates the Grafon ' +
+      'system of logo-graphic and phonetic writing to showcase its strength.',
+  [
+    CoreWord(
+        Quads.Angle.up.over(Quads.Gate.down), "House", "Dwelling, building."),
+    CoreWord(
+        Mono.Sun.gram.over(Quads.Line.down), "Day", "Sun over land, day time."),
+    CoreWord(Quads.Curve.right.next(Quads.Curve.up), "Grass"),
+    CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
+    CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
+    CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk"),
+    CoreWord(Quads.Curve.up.merge(Quads.Curve.down), "Leaf"),
+    CoreWord(Quads.Corner.left.shrink().merge(Quads.Line.right), "Wood"),
+    CoreWord(Quads.Angle.up.over(Quads.Arc.down), "Drip"),
+    CoreWord(Mono.Light.wrap(Quads.Zap.down), "White", "Light from lightning."),
+    CoreWord(Mono.Light.wrap(Mono.Sun.gram), "Red", "Light from Sun."),
+    CoreWord(Mono.Light.wrap(Mono.Flower.gram), "Yellow", "Color of flower."),
+    CoreWord(Mono.Light.wrapCluster(Quads.Curve.up.merge(Quads.Curve.down)),
+        "Green", "Color of leaf."),
+    CoreWord(
+        Mono.Light.wrapCluster(
+            Quads.Corner.left.shrink().merge(Quads.Line.right)),
+        "Brown",
+        "Color of wood."),
+    CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
+        "Blue", "Color of water."),
+    CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),
+    CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down), "Heart",
+        "Organ of Love."),
+    CompoundWord(
+        [CoreWord(Mono.Sun.gram), CoreWord(Mono.Circle.over(Quads.Line.up))],
+        "Star-being",
+        "Alien, god?"),
+  ],
+);
+
+final _numericGroup = WordGroup(
   'Numeric',
   CoreWord(Quads.Line.right.over(Quads.Line.right).merge(Quads.Line.up)),
   'Numbers and counting...',
@@ -100,45 +144,44 @@ final numericGroup = WordGroup(
   ],
 );
 
-final interpersonalGroup = WordGroup(
+final _interpersonalGroup = WordGroup(
   'Interpersonal',
   CoreWord(Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.down),
       "Interpersonal-Relationship"),
   'People, pronoun...',
   [
-    CoreWord(Mono.Circle.over(Quads.Line.up), "Person", "Person, Adult."),
+    CoreWord(Mono.Circle.over(Quads.Line.up), "Person", "Adult person."),
     CoreWord(Mono.Dot.over(Quads.Line.up), "Child"),
     CoreWord(Quads.Angle.up.up().merge(Quads.Line.up).over(Mono.Circle.gram),
-        "Man", "Man, adult male."),
-    CoreWord(
-        Mono.Circle.over(Mono.Cross.gram), "Woman", "Woman, adult female."),
+        "Man", "Adult male."),
+    CoreWord(Mono.Circle.over(Mono.Cross.gram), "Woman", "Adult female."),
     CoreWord(Mono.Circle.up().merge(Quads.Step.left), "I",
-        "I, first person singular pronoun."),
+        "First person singular pronoun."),
     CoreWord(Mono.Circle.left().over(Quads.Corner.up), "You",
-        "You, second person singular pronoun."),
-    CoreWord(Mono.Circle.right().over(Quads.Corner.right), "Ze",
-        "He or she, third person singular pronoun."),
+        "Second person singular pronoun."),
+    CoreWord(Mono.Circle.right().over(Quads.Corner.right), "He or She",
+        "Third person singular pronoun."),
     CoreWord(
         Mono.Circle.up()
             .merge(Quads.Step.left)
             .next(Mono.Dot.gram)
             .next(Mono.Dot.gram),
         "We",
-        "We, first person plural pronoun."),
+        "First person plural pronoun."),
     CoreWord(
         Mono.Circle.left()
             .over(Quads.Corner.up)
             .next(Mono.Dot.gram)
             .next(Mono.Dot.gram),
-        "Yous",
-        "You, second person plural pronoun."),
+        "You(s)",
+        "Second person plural pronoun."),
     CoreWord(
         Mono.Circle.right()
             .over(Quads.Corner.right)
             .next(Mono.Dot.gram)
             .next(Mono.Dot.gram),
         "They",
-        "They, third person plural pronoun."),
+        "Third person plural pronoun."),
     CoreWord(Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.up), "Couple"),
     CoreWord(
         Mono.Circle.wrapCluster(
@@ -147,7 +190,7 @@ final interpersonalGroup = WordGroup(
   ],
 );
 
-final spiritual = WordGroup(
+final _spiritual = WordGroup(
     'Spiritual', CoreWord(Mono.Sun.over(Quads.Arc.up)), 'Spiritual.', [
   CoreWord(Mono.Cross.over(Quads.Arc.up)),
   CoreWord(Quads.Triangle.up.merge(Quads.Triangle.down).over(Quads.Arc.up)),
@@ -161,48 +204,4 @@ final spiritual = WordGroup(
       Quads.Arc.right.over(Quads.Arc.right).next(Quads.Flow.left))),
 ]);
 
-final demoGroup = WordGroup(
-  'Demo',
-  CompoundWord([
-    CoreWord(Mono.Circle.wrap(Mono.Dot.gram)),
-    CoreWord(Quads.Arc.left.next(Quads.Flow.right)),
-  ]),
-  'This group is a collection of words that demonstrates the Grafon ' +
-      'system of logo-graphic and phonetic writing to showcase its strength.',
-  [
-    CoreWord(Quads.Angle.up.over(Quads.Gate.down), "House",
-        "House, dwelling, building."),
-    CoreWord(
-        Mono.Sun.gram.over(Quads.Line.down), "Day", "Sun over land, day time."),
-    CoreWord(Quads.Curve.right.next(Quads.Curve.up), "Grass"),
-    CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
-    CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
-    CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk", "Talk, speech."),
-    // CoreWord(Quads.Arc.left.next(Quads.Arc.right), "Leaf"),
-    CoreWord(Quads.Curve.up.merge(Quads.Curve.down), "Leaf"),
-    CoreWord(Quads.Angle.down.shrink().merge(Quads.Line.up), "Wood"),
-    CoreWord(Quads.Corner.left.shrink().merge(Quads.Line.right), "Wood 2"),
-    CoreWord(Quads.Angle.up.over(Quads.Arc.down), "Drip"),
-    CoreWord(Mono.Light.wrap(Quads.Zap.down), "White",
-        "White, light from lightning."),
-    CoreWord(Mono.Light.wrap(Mono.Sun.gram), "Red", "Red, light from Sun."),
-    CoreWord(Mono.Light.wrap(Mono.Flower.gram), "Yellow",
-        "Yellow, light from flower."),
-    CoreWord(Mono.Light.wrapCluster(Quads.Curve.up.merge(Quads.Curve.down)),
-        "Green", "Green, light from leaf."),
-    CoreWord(
-        Mono.Light.wrapCluster(
-            Quads.Corner.left.shrink().merge(Quads.Line.right)),
-        "Brown",
-        "Brown, Color of wood."),
-    CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
-        "Blue", "Blue, light from water."),
-    CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),
-    CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down), "Heart",
-        "Heart, Love."),
-    CompoundWord(
-        [CoreWord(Mono.Sun.gram), CoreWord(Mono.Circle.over(Quads.Line.up))],
-        "Star-being",
-        "Alien, god?"),
-  ],
-);
+final coreWords = [_demoGroup, _numericGroup, _interpersonalGroup, _spiritual];

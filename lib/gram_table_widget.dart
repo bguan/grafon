@@ -147,11 +147,15 @@ class _GramTableViewState extends State<GramTableView> {
             padding: EdgeInsets.all(inset),
             child: GestureDetector(
               onTap: () => speechSvc.pronounce(
-                Pronunciation([toSyllable(m, f)]),
+                [
+                  Pronunciation([toSyllable(m, f)])
+                ],
                 multiStitch: !kIsWeb && Platform.isIOS,
               ),
               onLongPress: () => speechSvc.pronounce(
-                Pronunciation([toSyllable(m, f, true)]),
+                [
+                  Pronunciation([toSyllable(m, f, true)])
+                ],
                 multiStitch: !kIsWeb && Platform.isIOS,
               ),
               child: GrafonTile(
@@ -164,11 +168,15 @@ class _GramTableViewState extends State<GramTableView> {
           ),
         GestureDetector(
           onTap: () => speechSvc.pronounce(
-            Pronunciation([for (var f in Face.values) toSyllable(m, f)]),
+            [
+              for (var f in Face.values) Pronunciation([toSyllable(m, f)])
+            ],
             multiStitch: !kIsWeb && Platform.isIOS,
           ),
           onLongPress: () => speechSvc.pronounce(
-            Pronunciation([for (var f in Face.values) toSyllable(m, f, true)]),
+            [
+              for (var f in Face.values) Pronunciation([toSyllable(m, f, true)])
+            ],
             multiStitch: !kIsWeb && Platform.isIOS,
           ),
           child: Container(
@@ -213,7 +221,9 @@ class _GramTableViewState extends State<GramTableView> {
         GestureDetector(
           onTap: () => setState(() {
             _unOp = (_unOp == u ? null : u);
-            log.info("Toggling Unary operator to $_unOp");
+            log.info(_unOp == null
+                ? "Toggling Unary operator off"
+                : "Toggling Unary operator to $_unOp");
           }),
           child: Container(
             child: Center(
@@ -268,7 +278,9 @@ class _GramTableViewState extends State<GramTableView> {
               }
             }
             _compound = false;
-            log.info("Toggling Binary operator to $_binOp");
+            log.info(_binOp == null
+                ? "Toggling Binary operator off."
+                : "Toggling Binary operator to $_binOp ${_codaForm?.shortName}");
           }),
           child: Container(
             child: Center(

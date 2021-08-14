@@ -58,7 +58,6 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
       height: 1.5,
       color: scheme.primaryVariant,
       fontSize: 20,
-      fontFamily: "Noto",
     );
     final sectionStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -66,7 +65,6 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
       height: 1,
       color: scheme.primaryVariant,
       fontSize: 17,
-      fontFamily: "Noto",
     );
     return SingleChildScrollView(
       child: Column(

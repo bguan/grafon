@@ -49,22 +49,27 @@ dev_dependencies:
 flutter:
 
   fonts:
+    - family: Arimo
+      fonts:
+        - asset: google_fonts/Arimo-VariableFont_wght.ttf
+        - asset: google_fonts/Arimo-Italic-VariableFont_wght.ttf
+          style: italic
     - family: Noto
       fonts:
-        - asset: fonts/NotoSans-Regular.ttf
-        - asset: fonts/NotoSans-Italic.ttf
+        - asset: google_fonts/NotoSans-Regular.ttf
+        - asset: google_fonts/NotoSans-Italic.ttf
           style: italic
-        - asset: fonts/NotoSans-Bold.ttf
+        - asset: google_fonts/NotoSans-Bold.ttf
           weight: 700
-        - asset: fonts/NotoSans-BoldItalic.ttf
+        - asset: google_fonts/NotoSans-BoldItalic.ttf
           style: italic
           weight: 700
-        - asset: fonts/NotoSerif-Regular.ttf
-        - asset: fonts/NotoSerif-Italic.ttf
+        - asset: google_fonts/NotoSerif-Regular.ttf
+        - asset: google_fonts/NotoSerif-Italic.ttf
           style: italic
-        - asset: fonts/NotoSerif-Bold.ttf
+        - asset: google_fonts/NotoSerif-Bold.ttf
           weight: 700
-        - asset: fonts/NotoSerif-BoldItalic.ttf
+        - asset: google_fonts/NotoSerif-BoldItalic.ttf
           style: italic
           weight: 700
 
@@ -77,3 +82,4 @@ flutter:
   assets:
     - assets/audios/
     - assets/images/
+    - google_fonts/

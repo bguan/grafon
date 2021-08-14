@@ -52,6 +52,7 @@ void main() async {
       title: 'Grafon',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'Arimo',
       ),
       home: GrafonApp(),
     ),

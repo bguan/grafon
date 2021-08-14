@@ -57,7 +57,6 @@ class WordGroupWidget extends StatelessWidget {
       height: 1.2,
       color: scheme.primaryVariant,
       fontSize: 13,
-      fontFamily: "Noto",
     );
     final wordTitleStyle = groupDescStyle.copyWith(
       fontSize: 14,
@@ -74,14 +73,12 @@ class WordGroupWidget extends StatelessWidget {
       height: 1.2,
       color: scheme.primaryVariant,
       fontSize: 10,
-      fontFamily: "Noto",
     );
     final tinyLineStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 0.1,
       fontSize: 1,
-      fontFamily: "Noto",
     );
 
     final genVoicing = (Pronunciation p, [bool isLines = false]) => [

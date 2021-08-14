@@ -285,14 +285,16 @@ class _GramTableViewState extends State<GramTableView> {
           child: Container(
             child: Center(
               child: Text(
-                '${b.shortName}\n${b.symbol}\n' +
+                '${b.shortName}\n${b.symbol}' +
                     (_binOp == b && _codaForm != null
-                        ? '(${_codaForm!.shortName}) …${b.coda[_codaForm!].shortName}'
-                        : [
-                            b.coda.base.shortName,
-                            b.coda.tail.shortName,
-                            b.coda.alt.shortName
-                          ].join(' ')),
+                        ? ' (${_codaForm!.shortName})\n…${b.coda[_codaForm!].shortName}'
+                        : '\n…' +
+                            [
+                              if (b.coda.base.shortName.isNotEmpty)
+                                b.coda.base.shortName,
+                              b.coda.tail.shortName,
+                              b.coda.alt.shortName
+                            ].join(', ')),
                 textAlign: TextAlign.center,
                 style: _binOp == b ? binarySelectedStyle : binaryFooterStyle,
               ),

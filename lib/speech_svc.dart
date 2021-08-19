@@ -65,11 +65,14 @@ class SpeechService {
         await _player.setAudioSource(BufferAudioSource(mp3bytes));
       } else {
         final audios = <AudioSource>[];
+        final allBytes = <int>[];
+
+        final silence = await _bundle.load("assets/audios/$SILENCE_MP3");
         for (var p in pronunciations) {
           List<Syllable> syllables = List.from(p.syllables);
           late final audioSrc;
           if (multiStitch) {
-            final allBytes = <int>[];
+            allBytes.addAll(silence.buffer.asUint8List());
             for (var i = 0; i < syllables.length; i++) {
               final bytes = await _bundle
                   .load("assets/audios/${p.fragmentSequence[i]}.mp3");
@@ -83,9 +86,6 @@ class SpeechService {
                 ),
               );
             }
-            final silence = await _bundle.load("assets/audios/$SILENCE_MP3");
-            allBytes.addAll(silence.buffer.asUint8List());
-            audioSrc = BufferAudioSource(allBytes);
           } else if (syllables.length == 1) {
             audioSrc = AudioSource.uri(
               Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
@@ -108,13 +108,15 @@ class SpeechService {
             ];
             audioSrc = ConcatenatingAudioSource(children: sources);
           }
-          audios.add(audioSrc);
+          if (!multiStitch) audios.add(audioSrc);
         }
 
         await _player.setAudioSource(
-          audios.length == 1
-              ? audios.first
-              : ConcatenatingAudioSource(children: audios),
+          multiStitch
+              ? BufferAudioSource(allBytes)
+              : audios.length == 1
+                  ? audios.first
+                  : ConcatenatingAudioSource(children: audios),
         );
       }
       await _player.play();

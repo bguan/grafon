@@ -74,7 +74,8 @@ void main() {
     // Previous don't overlap with Next
     expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
     // Gap is not too big
-    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(0.2));
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax,
+        lessThan(1.1 * RenderPlan.STD_GAP));
   });
 
   test('RenderPlan compounding next operators does not lead to exploding width',
@@ -385,7 +386,8 @@ void main() {
     // Previous don't overlap with Next
     expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
     // Gap is not too big
-    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(20));
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax,
+        lessThan(1.1 * RenderPlan.STD_GAP * devHt));
   });
 
   test('RenderPlan metrics computation works', () {

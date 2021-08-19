@@ -178,7 +178,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                           child: GestureDetector(
                             onTap: () => speechSvc.pronounce(
                               [groups[i].logo.pronunciation],
-                              multiStitch: !kIsWeb && Platform.isIOS,
+                              multiStitch: kIsWeb || Platform.isIOS,
                             ),
                             child: GrafonTile(
                               groups[i].logo.renderPlan,
@@ -294,7 +294,7 @@ class MultiWordWidget extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () => speechSvc.pronounce(
                           [w.pronunciation],
-                          multiStitch: !kIsWeb && Platform.isIOS,
+                          multiStitch: kIsWeb || Platform.isIOS,
                         ),
                         child: GrafonTile(
                           w.renderPlan,

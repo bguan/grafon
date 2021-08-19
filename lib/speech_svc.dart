@@ -30,6 +30,7 @@ import 'phonetics.dart';
 /// Speech Service to play either local or cloud API audio
 class SpeechService {
   static final log = Logger("SpeechService");
+  static const SILENCE_MP3 = "silence-100ms.mp3";
   final AudioPlayer _player;
   final AssetBundle _bundle;
   TexttospeechApi? _cloudTTS;
@@ -76,10 +77,14 @@ class SpeechService {
                 trimMP3Frames(
                   bytes.buffer.asUint8List(),
                   0.0,
-                  i < syllables.length - 1 ? 0.2 : 0,
+                  i >= syllables.length - 1 || syllables[i].coda != Coda.NIL
+                      ? 0
+                      : 0.15,
                 ),
               );
             }
+            final silence = await _bundle.load("assets/audios/$SILENCE_MP3");
+            allBytes.addAll(silence.buffer.asUint8List());
             audioSrc = BufferAudioSource(allBytes);
           } else if (syllables.length == 1) {
             audioSrc = AudioSource.uri(
@@ -146,7 +151,7 @@ class SpeechService {
     if (backTrimRatio <= 0.01) {
       backBytePos = len;
     } else {
-      backBytePos = (len * (1.0 - backTrimRatio)).floor();
+      backBytePos = (len * (1.0 - backTrimRatio)).ceil();
       while (backBytePos >= 0) {
         if (input[backBytePos] == 0x00FF &&
             input[backBytePos + 1] & 0xFFF0 == 0x00F0) {

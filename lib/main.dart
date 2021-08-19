@@ -175,12 +175,12 @@ class GrafonAppState extends State<GrafonApp> {
     final pages = [
       GramTableView(),
       WordGroupsPage(
-        "Random Words for Testing...",
-        testWords,
-      ),
-      WordGroupsPage(
         "Core Words",
         coreWords,
+      ),
+      WordGroupsPage(
+        "Random Words for Testing...",
+        testWords,
       ),
     ];
 

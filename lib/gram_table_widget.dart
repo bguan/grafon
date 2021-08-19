@@ -150,13 +150,13 @@ class _GramTableViewState extends State<GramTableView> {
                 [
                   Pronunciation([toSyllable(m, f)])
                 ],
-                multiStitch: !kIsWeb && Platform.isIOS,
+                multiStitch: kIsWeb || Platform.isIOS,
               ),
               onLongPress: () => speechSvc.pronounce(
                 [
                   Pronunciation([toSyllable(m, f, true)])
                 ],
-                multiStitch: !kIsWeb && Platform.isIOS,
+                multiStitch: kIsWeb || Platform.isIOS,
               ),
               child: GrafonTile(
                 widget.table.atMonoFace(m, f).renderPlan,
@@ -171,13 +171,13 @@ class _GramTableViewState extends State<GramTableView> {
             [
               for (var f in Face.values) Pronunciation([toSyllable(m, f)])
             ],
-            multiStitch: !kIsWeb && Platform.isIOS,
+            multiStitch: kIsWeb || Platform.isIOS,
           ),
           onLongPress: () => speechSvc.pronounce(
             [
               for (var f in Face.values) Pronunciation([toSyllable(m, f, true)])
             ],
-            multiStitch: !kIsWeb && Platform.isIOS,
+            multiStitch: kIsWeb || Platform.isIOS,
           ),
           child: Container(
             child: Center(

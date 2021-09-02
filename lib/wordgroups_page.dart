@@ -15,6 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/// Library of widgets to display groups of related words
 library word_groups_page;
 
 import 'dart:io';
@@ -26,6 +27,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:grafon/constants.dart';
 import 'package:provider/provider.dart';
 
 import 'grafon_widget.dart';
@@ -43,18 +45,18 @@ class WordGroupsPage extends StatefulWidget {
   @override
   _WordGroupsPageState createState() =>
       _WordGroupsPageState(this.title, this.groups);
-}
 
-final _genVoicing = (Pronunciation p, [bool isLines = false]) => [
-      p.fragmentSequence.join(),
-      '[$p]',
-      '"${p.approxVoice}"',
-    ].join(isLines ? '\n' : ' ');
+  static String genVoicing(Pronunciation p, [bool isLines = false]) => [
+        p.fragmentSequence.join('-'),
+        '[$p]',
+        '"${p.approxVoice}"',
+      ].join(isLines ? '\n' : ' ');
+}
 
 class _WordGroupsPageState extends State<WordGroupsPage> {
   static const LOGO_HEIGHT = 50.0;
-  static const WORD_HEIGHT = 50.0;
-  static const MIN_CARD_WIDTH = 190.0;
+  static const WORD_HEIGHT = 60.0;
+  static const MIN_CARD_WIDTH = 200.0;
   static const CARD_GAP = 15.0;
   static const STD_PAD = 10.0;
 
@@ -75,40 +77,50 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final mediaSize = MediaQuery.of(ctx).size;
     final pageWidth = mediaSize.width;
 
+    final sectionScale = pow(.5 * pageWidth / MIN_CARD_WIDTH, .7).toDouble();
+    final numCols = pow(pageWidth ~/ MIN_CARD_WIDTH, .8).ceil();
+
+    final cardWidth =
+        (pageWidth - (numCols + 1) * CARD_GAP - 2 * STD_PAD) / numCols;
+
+    final cardScale = cardWidth / MIN_CARD_WIDTH;
+
     final titleStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontStyle: FontStyle.normal,
       height: 1.5,
       color: scheme.primaryVariant,
-      fontSize: 18,
+      fontSize: 14 * sectionScale,
     );
     final sectionStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 14,
+      fontSize: 11 * sectionScale,
     );
     final groupDescStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 12,
+      fontSize: 10 * sectionScale,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 10,
+      fontSize: 9 * sectionScale,
     );
 
+    double logoHeight = sectionScale * LOGO_HEIGHT;
     double maxLogoWidth = 0;
     for (var g in groups) {
-      maxLogoWidth = max(maxLogoWidth, g.logo.widthAtHeight(LOGO_HEIGHT));
+      maxLogoWidth = max(maxLogoWidth, g.logo.widthAtHeight(logoHeight));
     }
-    final sectionTextWidth = .8 * pageWidth - maxLogoWidth - 3 * STD_PAD;
+    final sectionPad = STD_PAD * sectionScale;
+    final sectionTextWidth = .8 * pageWidth - maxLogoWidth - 4 * sectionPad;
 
     return SingleChildScrollView(
       child: Column(
@@ -117,7 +129,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(STD_PAD),
+            padding: EdgeInsets.all(sectionPad),
             child: Text(title, style: titleStyle),
           ),
           ExpansionPanelList(
@@ -133,7 +145,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                 ExpansionPanel(
                   canTapOnHeader: true,
                   headerBuilder: (ctx, _) => Container(
-                    padding: EdgeInsets.all(STD_PAD),
+                    padding: EdgeInsets.all(sectionPad),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -144,7 +156,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                           children: [
                             Container(
                               width: sectionTextWidth,
-                              padding: EdgeInsets.only(bottom: STD_PAD),
+                              padding: EdgeInsets.only(bottom: sectionPad),
                               child: Text(
                                 groups[i].title,
                                 style: sectionStyle,
@@ -152,9 +164,10 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                             ),
                             Container(
                               width: sectionTextWidth,
-                              padding: EdgeInsets.only(bottom: STD_PAD),
+                              padding: EdgeInsets.only(bottom: sectionPad),
                               child: Text(
-                                _genVoicing(groups[i].logo.pronunciation),
+                                WordGroupsPage.genVoicing(
+                                    groups[i].logo.pronunciation),
                                 style: voicingStyle,
                                 textAlign: TextAlign.start,
                               ),
@@ -164,7 +177,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                               child: Text(
                                 groups[i].description,
                                 style: groupDescStyle,
-                                textAlign: TextAlign.justify,
+                                textAlign: TextAlign.start,
                               ),
                             ),
                           ],
@@ -172,7 +185,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                         Container(
                           alignment: Alignment.centerRight,
                           padding: EdgeInsets.symmetric(
-                            horizontal: STD_PAD,
+                            horizontal: sectionPad,
                             vertical: 0,
                           ),
                           child: GestureDetector(
@@ -182,8 +195,8 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                             ),
                             child: GrafonTile(
                               groups[i].logo.renderPlan,
-                              height: LOGO_HEIGHT,
-                              width: groups[i].logo.widthAtHeight(LOGO_HEIGHT),
+                              height: logoHeight,
+                              width: groups[i].logo.widthAtHeight(logoHeight),
                             ),
                           ),
                         ),
@@ -192,15 +205,17 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                   ),
                   body: MultiWordWidget(
                     groups[i].values,
-                    minCardWidth: MIN_CARD_WIDTH,
-                    stdPad: STD_PAD,
-                    cardGap: CARD_GAP,
-                    wordHeight: WORD_HEIGHT,
+                    cardWidth: cardWidth,
+                    stdPad: STD_PAD * cardScale,
+                    cardGap: CARD_GAP * cardScale,
+                    wordHeight: WORD_HEIGHT * cardScale,
+                    scaleFactor: cardScale,
                   ),
                   isExpanded: _expandedFlag[i],
                 )
             ],
           ),
+          Container(height: FOOTER_HEIGHT + 2 * GRAM_GAP),
         ],
       ),
     );
@@ -211,36 +226,34 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
 class MultiWordWidget extends StatelessWidget {
   final Iterable<GrafonWord> words;
   final double wordHeight;
-  final double minCardWidth;
+  final double cardWidth;
   final double stdPad;
   final double cardGap;
+  final double scaleFactor;
 
   MultiWordWidget(
     this.words, {
-    this.minCardWidth = 0,
+    this.cardWidth = 0,
     this.wordHeight = 50,
     this.cardGap = 20,
     this.stdPad = 10,
+    this.scaleFactor = 1.0,
   });
 
   @override
   Widget build(BuildContext ctx) {
     final speechSvc = ctx.watch<SpeechService>();
     final scheme = Theme.of(ctx).colorScheme;
-    final mediaSize = MediaQuery.of(ctx).size;
-    final pageWidth = mediaSize.width;
-    final cardWidth =
-        2 * minCardWidth > pageWidth ? .6 * pageWidth : minCardWidth;
 
     final wordDescStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 12,
+      fontSize: 12 * scaleFactor,
     );
     final wordTitleStyle = wordDescStyle.copyWith(
-      fontSize: 14,
+      fontSize: 14 * scaleFactor,
       fontWeight: FontWeight.bold,
       height: 1.2,
     );
@@ -249,13 +262,13 @@ class MultiWordWidget extends StatelessWidget {
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 10,
+      fontSize: 10 * scaleFactor,
     );
     final tinyLineStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 0.1,
-      fontSize: 1,
+      fontSize: 1 * scaleFactor,
     );
 
     return Wrap(
@@ -312,7 +325,9 @@ class MultiWordWidget extends StatelessWidget {
                           : cardWidth - stdPad - w.widthAtHeight(wordHeight),
                       padding: EdgeInsets.only(top: stdPad),
                       child: Text(
-                        w.key + '\n\n' + _genVoicing(w.pronunciation),
+                        w.key +
+                            '\n\n' +
+                            WordGroupsPage.genVoicing(w.pronunciation),
                         style: voicingStyle,
                       ),
                     ),

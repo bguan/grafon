@@ -26,32 +26,22 @@ import 'phonetics.dart';
 
 /// enum for each MonoGram
 enum Mono {
+  Empty,
   Dot,
   Cross,
+  Trap,
   Square,
+  Grid,
   X,
   Diamond,
   Light,
   Sun,
+  Blob,
   Circle,
-  Flower,
+  Eye,
   Star,
-  // Blob,
-}
-
-/// enum for each of the QuadGram grouping.
-enum Quads {
-  Line,
-  Corner,
-  Angle,
-  Triangle,
-  Gate,
-  Step,
-  Zap,
-  Arc,
-  Flow,
-  Curve,
-  // Swirl,
+  Flower,
+  Atom,
 }
 
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
@@ -62,6 +52,11 @@ class _MonoHelper {
     return _singleton;
   }
 
+  final emptyPaths = [
+    InvisiDot.anchors([Anchor.NW, Anchor.SW],
+        isFixedAspect: true, minHeight: 1.0, minWidth: 1.0),
+  ];
+
   final dotPaths = [
     PolyDot.anchors([Anchor.O], isFixedAspect: true),
   ];
@@ -69,100 +64,6 @@ class _MonoHelper {
   final crossPaths = [
     PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
     PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true)
-  ];
-
-  final xPaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true)
-  ];
-
-  final diamondPaths = [
-    PolyStraight.anchors([
-      Anchor.N,
-      Anchor.E,
-      Anchor.S,
-      Anchor.W,
-      Anchor.N,
-    ], isFixedAspect: true)
-  ];
-
-  final squarePaths = [
-    PolyStraight.anchors([
-      Anchor.NW,
-      Anchor.NE,
-      Anchor.SE,
-      Anchor.SW,
-      Anchor.NW,
-    ], isFixedAspect: true)
-  ];
-
-  final sunPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
-  ];
-
-  final circlePaths = [
-    PolyCurve.anchors([
-      Anchor.W,
-      Anchor.N,
-      Anchor.E,
-      Anchor.S,
-      Anchor.W,
-      Anchor.N,
-      Anchor.E,
-    ], isFixedAspect: true),
-  ];
-
-  final starPaths = [
-    PolyCurve.anchors([
-      Anchor.N,
-      Anchor.IN,
-      Anchor.IE,
-      Anchor.E,
-    ], isFixedAspect: true),
-    PolyCurve.anchors([
-      Anchor.N,
-      Anchor.IN,
-      Anchor.IW,
-      Anchor.W,
-    ], isFixedAspect: true),
-    PolyCurve.anchors([
-      Anchor.W,
-      Anchor.IW,
-      Anchor.IS,
-      Anchor.S,
-    ], isFixedAspect: true),
-    PolyCurve.anchors([
-      Anchor.E,
-      Anchor.IE,
-      Anchor.IS,
-      Anchor.S,
-    ], isFixedAspect: true),
-  ];
-
-  final blobPaths = [
-    PolyCurve.anchors([
-      Anchor.IW,
-      Anchor.NW,
-      Anchor.IN,
-      Anchor.NE,
-      Anchor.IE,
-      Anchor.SE,
-      Anchor.IS,
-      Anchor.SW,
-      Anchor.IW,
-      Anchor.NW,
-      Anchor.IN,
-    ], isFixedAspect: true)
-  ];
-
-  final lightPaths = [
-    PolyStraight.anchors([Anchor.E, Anchor.IE], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.N, Anchor.IN], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.W, Anchor.IW], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.S, Anchor.IS], isFixedAspect: true),
   ];
 
   final flowerPaths = [
@@ -181,23 +82,203 @@ class _MonoHelper {
     ], isFixedAspect: true),
   ];
 
+  final squarePaths = [
+    PolyStraight.anchors([
+      Anchor.NW,
+      Anchor.NE,
+      Anchor.SE,
+      Anchor.SW,
+      Anchor.NW,
+    ], isFixedAspect: true),
+  ];
+
+  final gridPaths = [
+    PolyExtended.anchors([Anchor.nw, Anchor.sw], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.ne, Anchor.se], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.nw, Anchor.ne], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.sw, Anchor.se], isFixedAspect: true),
+  ];
+
+  final xPaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true)
+  ];
+
+  final diamondPaths = [
+    PolyStraight.anchors([
+      Anchor.N,
+      Anchor.E,
+      Anchor.S,
+      Anchor.W,
+      Anchor.N,
+    ], isFixedAspect: true)
+  ];
+
+  final sunPaths = [
+    PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NE, Anchor.SW], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NW, Anchor.SE], isFixedAspect: true),
+  ];
+
+  final lightPaths = [
+    PolyStraight.anchors([Anchor.NE, Anchor.ne], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.NW, Anchor.nw], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.SW, Anchor.sw], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.SE, Anchor.se], isFixedAspect: true),
+  ];
+
+  final blobPaths = [
+    PolyCurve.anchors([
+      Anchor.w,
+      Anchor.NW,
+      Anchor.n,
+      Anchor.NE,
+      Anchor.e,
+      Anchor.SE,
+      Anchor.s,
+      Anchor.SW,
+      Anchor.w,
+      Anchor.NW,
+      Anchor.n,
+    ], isFixedAspect: true)
+  ];
+
+  final circlePaths = [
+    PolyCurve.anchors([
+      Anchor.W,
+      Anchor.N,
+      Anchor.E,
+      Anchor.S,
+      Anchor.W,
+      Anchor.N,
+      Anchor.E,
+    ], isFixedAspect: true),
+  ];
+
+  final starPaths = [
+    PolyCurve.anchors([
+      Anchor.N,
+      Anchor.n,
+      Anchor.e,
+      Anchor.E,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.N,
+      Anchor.n,
+      Anchor.w,
+      Anchor.W,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.W,
+      Anchor.w,
+      Anchor.s,
+      Anchor.S,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.E,
+      Anchor.e,
+      Anchor.s,
+      Anchor.S,
+    ], isFixedAspect: true),
+  ];
+
+  final eyePaths = [
+    PolyCurve.anchors([
+      Anchor.W,
+      Anchor.N,
+      Anchor.E,
+      Anchor.S,
+      Anchor.W,
+      Anchor.N,
+      Anchor.E,
+    ], isFixedAspect: true),
+    PolyDot.anchors([
+      Anchor.O,
+    ], isFixedAspect: true),
+  ];
+
+  final atomPaths = [
+    PolyCurve.anchors([
+      Anchor.n,
+      Anchor.NW,
+      Anchor.w,
+      Anchor.s,
+      Anchor.SE,
+      Anchor.e,
+      Anchor.n,
+      Anchor.NW,
+      Anchor.w,
+    ], isFixedAspect: true),
+    PolyCurve.anchors([
+      Anchor.n,
+      Anchor.NE,
+      Anchor.e,
+      Anchor.s,
+      Anchor.SW,
+      Anchor.w,
+      Anchor.n,
+      Anchor.NE,
+      Anchor.e,
+    ], isFixedAspect: true),
+  ];
+
+  final trapPaths = [
+    PolyStraight.anchors([
+      Anchor.NW,
+      Anchor.NE,
+      Anchor.SE,
+      Anchor.SW,
+      Anchor.NW,
+    ], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.N, Anchor.n], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.S, Anchor.s], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.E, Anchor.e], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.W, Anchor.w], isFixedAspect: true),
+  ];
+
   late final Map<Mono, MonoGram> enum2mono;
 
   _MonoHelper._internal() {
     enum2mono = Map.unmodifiable({
-      Mono.Dot: MonoGram(dotPaths, ConsPair.h),
-      Mono.Cross: MonoGram(crossPaths, ConsPair.bp),
-      Mono.X: MonoGram(xPaths, ConsPair.gk),
-      Mono.Diamond: MonoGram(diamondPaths, ConsPair.chj),
-      Mono.Square: MonoGram(squarePaths, ConsPair.dt),
-      Mono.Light: MonoGram(lightPaths, ConsPair.sz),
-      Mono.Sun: MonoGram(sunPaths, ConsPair.shzh),
-      Mono.Circle: MonoGram(circlePaths, ConsPair.mn),
-      Mono.Flower: MonoGram(flowerPaths, ConsPair.fv),
-      // Mono.Blob: MonoGram(blobPaths, ConsPair.lr),
-      Mono.Star: MonoGram(starPaths, ConsPair.lr),
+      Mono.Empty: MonoGram(emptyPaths, Cons.NIL),
+      Mono.Dot: MonoGram(dotPaths, Cons.h),
+      Mono.Cross: MonoGram(crossPaths, Cons.b),
+      Mono.Trap: MonoGram(trapPaths, Cons.p),
+      Mono.Square: MonoGram(squarePaths, Cons.d),
+      Mono.Grid: MonoGram(gridPaths, Cons.t),
+      Mono.X: MonoGram(xPaths, Cons.g),
+      Mono.Diamond: MonoGram(diamondPaths, Cons.k),
+      Mono.Sun: MonoGram(sunPaths, Cons.s),
+      Mono.Light: MonoGram(lightPaths, Cons.z),
+      Mono.Blob: MonoGram(blobPaths, Cons.m),
+      Mono.Circle: MonoGram(circlePaths, Cons.n),
+      Mono.Star: MonoGram(starPaths, Cons.l),
+      Mono.Eye: MonoGram(eyePaths, Cons.r),
+      Mono.Atom: MonoGram(atomPaths, Cons.f),
+      Mono.Flower: MonoGram(flowerPaths, Cons.v),
     });
   }
+}
+
+/// enum for each of the QuadGram grouping.
+enum Quads {
+  Line,
+  Dots,
+  Corner,
+  Branch,
+  Gate,
+  Step,
+  Angle,
+  Triangle,
+  Zap,
+  Arrow,
+  Humps,
+  Arc,
+  Swirl,
+  Curve,
+  Drop,
+  Flow,
 }
 
 /// QuadHelper is a singleton to only instantiates QuadGrams only once
@@ -208,20 +289,38 @@ class _QuadHelper {
     return _singleton;
   }
 
-  final cornerPaths = [
-    PolyStraight.anchors([Anchor.SE, Anchor.NE, Anchor.NW]),
-  ];
-
   final linePaths = [
     PolyStraight.anchors([Anchor.NE, Anchor.SW]),
   ];
 
-  final anglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW]),
+  final dotsPaths = [
+    InvisiDot.anchors([
+      Anchor.N,
+      Anchor.NE,
+      Anchor.E,
+      Anchor.SE,
+      Anchor.S,
+      Anchor.SW,
+      Anchor.W,
+      Anchor.NW
+    ]),
+    PolyDot.anchors([Anchor.NE, Anchor.SW]),
   ];
 
-  final trianglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IE, Anchor.SW, Anchor.NW]),
+  final cornerPaths = [
+    PolyStraight.anchors([Anchor.W, Anchor.O, Anchor.S]),
+  ];
+
+  final dropPaths = [
+    PolyCurve.anchors([
+      Anchor.W,
+      Anchor.w,
+      Anchor.ne,
+      Anchor.E,
+      Anchor.se,
+      Anchor.w,
+      Anchor.W,
+    ]),
   ];
 
   final gatePaths = [
@@ -229,11 +328,42 @@ class _QuadHelper {
   ];
 
   final stepPaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.IW, Anchor.IE, Anchor.SE]),
+    PolyStraight.anchors([Anchor.NW, Anchor.w, Anchor.e, Anchor.SE]),
+  ];
+
+  final anglePaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.e, Anchor.SW]),
+  ];
+
+  final trianglePaths = [
+    PolyStraight.anchors([Anchor.NW, Anchor.e, Anchor.SW, Anchor.NW]),
+  ];
+
+  final arrowPaths = [
+    PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.n, Anchor.E], isFixedAspect: true),
+    PolyStraight.anchors([Anchor.s, Anchor.E], isFixedAspect: true),
   ];
 
   final zapPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.IN, Anchor.IS, Anchor.E]),
+    PolyStraight.anchors([Anchor.W, Anchor.n, Anchor.s, Anchor.E]),
+  ];
+
+  final humpsPaths = [
+    PolyCurve.anchors([
+      Anchor.NW,
+      Anchor.N,
+      Anchor.ne,
+      Anchor.O,
+      Anchor.w,
+    ]),
+    PolyCurve.anchors([
+      Anchor.SW,
+      Anchor.S,
+      Anchor.se,
+      Anchor.O,
+      Anchor.w,
+    ]),
   ];
 
   final arcPaths = [
@@ -247,6 +377,27 @@ class _QuadHelper {
     InvisiDot.anchors([Anchor.E])
   ];
 
+  final curvePaths = [
+    PolyCurve.anchors([
+      Anchor.S,
+      Anchor.SW,
+      Anchor.NE,
+      Anchor.E,
+    ]),
+  ];
+
+  final swirlPaths = [
+    PolyCurve.anchors([
+      Anchor.N,
+      Anchor.W,
+      Anchor.S,
+      Anchor.E,
+      Anchor.n,
+      Anchor.O,
+      Anchor.NE,
+    ])
+  ];
+
   final flowPaths = [
     PolyCurve.anchors([
       Anchor.SW,
@@ -256,42 +407,31 @@ class _QuadHelper {
     ])
   ];
 
-  final swirlPaths = [
-    PolyCurve.anchors([
-      Anchor.N,
-      Anchor.W,
-      Anchor.S,
-      Anchor.E,
-      Anchor.IN,
-      Anchor.O,
-      Anchor.NE,
-    ])
-  ];
-
-  final curvePaths = [
-    PolyCurve.anchors([
-      Anchor.W,
-      Anchor.NW,
-      Anchor.SE,
-      Anchor.S,
-    ]),
+  final branchPaths = [
+    PolyStraight.anchors([Anchor.NE, Anchor.O, Anchor.SE]),
+    PolyStraight.anchors([Anchor.W, Anchor.O]),
   ];
 
   late final Map<Quads, QuadGrams> enum2quads;
 
   _QuadHelper._internal() {
     enum2quads = Map.unmodifiable({
-      Quads.Line: SemiRotatingQuads(linePaths, ConsPair.h),
-      Quads.Corner: RotatingQuads(cornerPaths, ConsPair.bp),
-      Quads.Angle: RotatingQuads(anglePaths, ConsPair.gk),
-      Quads.Triangle: RotatingQuads(trianglePaths, ConsPair.chj),
-      Quads.Gate: RotatingQuads(gatePaths, ConsPair.dt),
-      Quads.Step: FlipQuads(stepPaths, ConsPair.sz),
-      Quads.Zap: FlipQuads(zapPaths, ConsPair.shzh),
-      Quads.Arc: RotatingQuads(arcPaths, ConsPair.mn),
-      Quads.Flow: FlipQuads(flowPaths, ConsPair.fv),
-      // Quads.Swirl: DoubleFlipQuads(swirlPaths, ConsPair.lr),
-      Quads.Curve: RotatingQuads(curvePaths, ConsPair.lr, overrideCenter: true),
+      Quads.Line: SemiRotatingQuads(linePaths, Cons.NIL),
+      Quads.Dots: SemiRotatingQuads(dotsPaths, Cons.h),
+      Quads.Corner: RotatingQuads(cornerPaths, Cons.b),
+      Quads.Branch: RotatingQuads(branchPaths, Cons.p),
+      Quads.Gate: RotatingQuads(gatePaths, Cons.d),
+      Quads.Step: FlipQuads(stepPaths, Cons.t),
+      Quads.Angle: RotatingQuads(anglePaths, Cons.g),
+      Quads.Triangle: RotatingQuads(trianglePaths, Cons.k),
+      Quads.Arrow: RotatingQuads(arrowPaths, Cons.s),
+      Quads.Zap: FlipQuads(zapPaths, Cons.z),
+      Quads.Humps: RotatingQuads(humpsPaths, Cons.m),
+      Quads.Arc: RotatingQuads(arcPaths, Cons.n),
+      Quads.Curve: DoubleFlipQuads(curvePaths, Cons.l, recenter: false),
+      Quads.Swirl: DoubleFlipQuads(swirlPaths, Cons.r),
+      Quads.Flow: FlipQuads(flowPaths, Cons.f),
+      Quads.Drop: RotatingQuads(dropPaths, Cons.v),
     });
   }
 }
@@ -303,7 +443,7 @@ extension MonoExtension on Mono {
   Gram get gram => _MonoHelper().enum2mono[this]!;
 
   Quads get quadPeer =>
-      Quads.values.firstWhere((q) => q.grams.consPair == this.gram.consPair);
+      Quads.values.firstWhere((q) => q.grams.cons == this.gram.cons);
 
   UnaryOpExpr shrink() => gram.shrink();
 
@@ -315,27 +455,13 @@ extension MonoExtension on Mono {
 
   UnaryOpExpr right() => gram.right();
 
-  BinaryOpExpr merge(SingleGramExpr single) => gram.merge(single);
+  BinaryOpExpr merge(GrafonExpr e) => gram.merge(e);
 
-  BinaryOpExpr next(SingleGramExpr single) => gram.next(single);
+  BinaryOpExpr next(GrafonExpr e) => gram.next(e);
 
-  /// Put this expression over a single, this above, the single below.
-  BinaryOpExpr over(SingleGramExpr single) => gram.over(single);
+  BinaryOpExpr over(GrafonExpr e) => gram.over(e);
 
-  /// Put this expression around a single, this outside, the single inside.
-  BinaryOpExpr wrap(SingleGramExpr single) => gram.wrap(single);
-
-  /// Merge this expression with a ClusterExpression.
-  BinaryOpExpr mergeCluster(BinaryOpExpr expr) => gram.mergeCluster(expr);
-
-  /// Put this expression before a cluster, this to left, the cluster to right.
-  BinaryOpExpr nextCluster(BinaryOpExpr expr) => gram.nextCluster(expr);
-
-  /// Put this expression over that, this above, the cluster below.
-  BinaryOpExpr overCluster(BinaryOpExpr expr) => gram.overCluster(expr);
-
-  /// Put this expression around that, this outside, the cluster inside.
-  BinaryOpExpr wrapCluster(BinaryOpExpr expr) => gram.wrapCluster(expr);
+  BinaryOpExpr wrap(GrafonExpr e) => gram.wrap(e);
 }
 
 /// extension to map quad enum to its QuadGrams, indexing by Face, & short name.
@@ -353,14 +479,14 @@ extension QuadExtension on Quads {
   Gram get right => grams[Face.Right];
 
   Mono get monoPeer =>
-      Mono.values.firstWhere((m) => m.gram.consPair == this.grams.consPair);
+      Mono.values.firstWhere((m) => m.gram.cons == this.grams.cons);
 
   String get shortName => this.toString().split('.').last;
 }
 
 /// GramTable is a Singleton to implement various Gram lookup efficiently
 class GramTable {
-  final Map<ConsPair, Map<Vowel, Gram>> _gramByConsPairVowel = {};
+  final Map<Cons, Map<Vowel, Gram>> _gramByConsVowel = {};
 
   static final GramTable _singleton = GramTable._internal();
 
@@ -369,10 +495,10 @@ class GramTable {
   }
 
   GramTable._internal() {
-    for (var cons in ConsPair.values) {
-      final mono = Mono.values.firstWhere((m) => m.gram.consPair == cons);
+    for (var cons in Cons.values) {
+      final mono = Mono.values.firstWhere((m) => m.gram.cons == cons);
       final quad = mono.quadPeer;
-      _gramByConsPairVowel[cons] = Map.unmodifiable({
+      _gramByConsVowel[cons] = Map.unmodifiable({
         Face.Center.vowel: mono.gram,
         for (var f in [Face.Right, Face.Up, Face.Left, Face.Down])
           f.vowel: quad[f]
@@ -380,27 +506,25 @@ class GramTable {
     }
   }
 
-  Gram atConsPairVowel(ConsPair cp, Vowel v) => _gramByConsPairVowel[cp]![v]!;
+  Gram atConsVowel(Cons c, Vowel v) => _gramByConsVowel[c]![v]!;
 
-  Gram atConsonantVowel(Cons c, Vowel v) => _gramByConsPairVowel[c.pair]![v]!;
+  Gram atMonoFace(Mono m, Face f) => atConsVowel(m.gram.cons, f.vowel);
 
-  Gram atMonoFace(Mono m, Face f) =>
-      _gramByConsPairVowel[m.gram.consPair]![f.vowel]!;
+  List<Gram> consRow(Cons c) => _gramByConsVowel[c]!.values.toList();
+
+  List<Gram> monoRow(Mono m) => consRow(m.gram.cons);
 
   Gram at(dynamic r, dynamic c) {
     Map<Vowel, Gram> v2g;
-    if (r is ConsPair) {
-      final ConsPair cp = r;
-      v2g = _gramByConsPairVowel[cp]!;
-    } else if (r is Cons) {
+    if (r is Cons) {
       final Cons c = r;
-      v2g = _gramByConsPairVowel[c.pair]!;
+      v2g = _gramByConsVowel[c]!;
     } else if (r is Mono) {
       final Mono m = r;
-      v2g = _gramByConsPairVowel[m.gram.consPair]!;
+      v2g = _gramByConsVowel[m.gram.cons]!;
     } else if (r is Quads) {
       final Quads q = r;
-      v2g = _gramByConsPairVowel[q.grams.consPair]!;
+      v2g = _gramByConsVowel[q.grams.cons]!;
     } else {
       throw UnsupportedError("GramTable do not support lookup with $r");
     }
@@ -424,21 +548,19 @@ class GramTable {
 
   Mono getMonoEnum(Gram g) {
     return g is MonoGram
-        ? Mono.values.firstWhere((m) => m.gram.consPair == g.consPair)
-        : Quads.values
-            .firstWhere((q) => q.grams.consPair == g.consPair)
-            .monoPeer;
+        ? Mono.values.firstWhere((m) => m.gram.cons == g.cons)
+        : Quads.values.firstWhere((q) => q.grams.cons == g.cons).monoPeer;
   }
 
   Mono? getEnumIfMono(Gram g) {
     return g is MonoGram
-        ? Mono.values.firstWhere((m) => m.gram.consPair == g.consPair)
+        ? Mono.values.firstWhere((m) => m.gram.cons == g.cons)
         : null;
   }
 
   Quads? getEnumIfQuad(Gram g) {
     return g is QuadGram
-        ? Quads.values.firstWhere((q) => q.grams.consPair == g.consPair)
+        ? Quads.values.firstWhere((q) => q.grams.cons == g.cons)
         : null;
   }
 }

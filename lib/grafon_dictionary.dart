@@ -21,103 +21,43 @@ library grafon_dictionary;
 import 'grafon_word.dart';
 import 'gram_table.dart';
 
-final _w = WordGroup(
-    'Edge Cases',
-    CoreWord(Mono.Circle.up().merge(Quads.Step.left)),
-    'Random tricky edge cases for rendering.', [
-  CoreWord(Quads.Curve.up.merge(Quads.Curve.down)),
-  CoreWord(Quads.Line.up.merge(Quads.Angle.up.up())),
-  CoreWord(Quads.Arc.left.next(Quads.Flow.right)),
-  CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down)),
-  CoreWord(Quads.Arc.left.next(Quads.Arc.right)),
-  CoreWord(Quads.Angle.up.over(Quads.Arc.down)),
-  CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down)),
-  CoreWord(Mono.Dot.up().merge(Quads.Step.left)),
-  CoreWord(Mono.Dot.left().over(Quads.Corner.up)),
-  CoreWord(Mono.Circle.wrap(Mono.Dot.gram)
-      .next(Quads.Arc.left)
-      .next(Quads.Flow.right)),
-]);
+/// Core Words in dictionary
+final coreWords = [_demoGroup, _numericGroup, _interpersonalGroup, _spiritual];
 
-final _testGroup = WordGroup(
-  'Test',
-  CoreWord(
-    Quads.Line.down
-        .over(Quads.Line.down)
-        .over(Quads.Line.down)
-        .over(Quads.Line.down)
-        .over(Quads.Line.down),
-  ),
-  'Test expression rendering...',
-  [
-    CoreWord(Mono.Dot.shrink()),
-    CoreWord(Mono.Dot.shrink().over(Mono.Square.gram)),
-    CoreWord(Mono.Dot.up()),
-    CoreWord(Mono.Dot.up().over(Mono.Square.gram)),
-    CoreWord(Mono.Dot.down()),
-    CoreWord(Mono.Dot.down().over(Mono.Square.gram)),
-    CoreWord(Mono.Dot.left()),
-    CoreWord(Mono.Dot.left().over(Mono.Square.gram)),
-    CoreWord(Mono.Dot.right()),
-    CoreWord(Mono.Dot.right().over(Mono.Square.gram)),
-    CoreWord(Mono.Circle.next(Quads.Angle.up)),
-    CoreWord(Mono.Circle.next(Quads.Angle.up)),
-    CoreWord(Mono.Circle.over(Quads.Angle.up)),
-    CoreWord(Mono.Circle.merge(Quads.Angle.up)),
-    CoreWord(Mono.Circle.merge(Quads.Angle.up.shrink())),
-    CoreWord(Mono.Circle.merge(Quads.Angle.up.up())),
-    CoreWord(Mono.Circle.merge(Quads.Angle.up.down())),
-    CoreWord(Mono.Circle.merge(Quads.Angle.up.left())),
-    CoreWord(Mono.Circle.merge(Quads.Angle.up.right())),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.up)),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.up.up())),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.up.down())),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.up.left())),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.up.right())),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.up.shrink())),
-    CoreWord(Mono.Circle.wrapCluster(
-        Quads.Angle.up.next(Quads.Angle.up).next(Quads.Angle.up))),
-  ],
-);
-
-final testWords = [_w, _testGroup];
+/// Test Words in dictionary
+final testWords = [_circleGroup, _circleDotGroup, _circleSquareGroup];
 
 final _demoGroup = WordGroup(
   'Demo',
   CompoundWord([
-    CoreWord(Mono.Circle.wrap(Mono.Dot.gram)),
+    CoreWord(Mono.Eye.gram),
     CoreWord(Quads.Arc.left.next(Quads.Flow.right)),
   ]),
-  'This group is a collection of words that demonstrates the Grafon ' +
-      'system of logo-graphic and phonetic writing to showcase its strength.',
+  "A collection of words demonstrating Grafon's logo-graphic & phonetic writing.",
   [
     CoreWord(
         Quads.Angle.up.over(Quads.Gate.down), "House", "Dwelling, building."),
     CoreWord(
         Mono.Sun.gram.over(Quads.Line.down), "Day", "Sun over land, day time."),
     CoreWord(
-        Quads.Curve.right.next(Quads.Line.up).next(Quads.Curve.up), "Grass"),
+        Quads.Curve.down.next(Quads.Line.up).next(Quads.Curve.right), "Grass"),
     CoreWord(Quads.Flow.right.over(Quads.Flow.right), "Water"),
     CoreWord(Quads.Flow.down.next(Quads.Flow.down), "Rain"),
     CoreWord(Quads.Arc.left.next(Quads.Flow.right), "Talk"),
-    CoreWord(Quads.Curve.up.merge(Quads.Curve.down), "Leaf"),
-    CoreWord(Quads.Corner.left.shrink().merge(Quads.Line.right), "Wood"),
-    CoreWord(Quads.Angle.up.over(Quads.Arc.down), "Drip"),
+    CoreWord(Quads.Curve.right.merge(Quads.Curve.left), "Leaf"),
+    CoreWord(Quads.Branch.up, "Wood"),
+    CoreWord(Quads.Drop.down, "Droplet"),
+    CoreWord(Mono.Light.wrap(Mono.Atom.gram), "Radiation", "Light from Atom."),
     CoreWord(Mono.Light.wrap(Quads.Zap.down), "White", "Light from lightning."),
     CoreWord(Mono.Light.wrap(Mono.Sun.gram), "Red", "Light from Sun."),
     CoreWord(Mono.Light.wrap(Mono.Flower.gram), "Yellow", "Color of flower."),
-    CoreWord(Mono.Light.wrapCluster(Quads.Curve.up.merge(Quads.Curve.down)),
+    CoreWord(Mono.Light.wrap(Quads.Curve.right.merge(Quads.Curve.left)),
         "Green", "Color of leaf."),
-    CoreWord(
-        Mono.Light.wrapCluster(
-            Quads.Corner.left.shrink().merge(Quads.Line.right)),
-        "Brown",
-        "Color of wood."),
-    CoreWord(Mono.Light.wrapCluster(Quads.Flow.right.over(Quads.Flow.right)),
-        "Blue", "Color of water."),
-    CoreWord(Mono.Light.wrap(Mono.X.gram), "Black", "Black, no light."),
-    CoreWord(Quads.Arc.up.next(Quads.Arc.up).over(Quads.Angle.down), "Heart",
-        "Organ of Love."),
+    CoreWord(Mono.Light.wrap(Quads.Branch.up), "Brown", "Color of wood."),
+    CoreWord(Mono.Light.wrap(Quads.Flow.right.over(Quads.Flow.right)), "Blue",
+        "Color of water."),
+    CoreWord(Mono.Light.wrap(Mono.Dot.gram), "Black", "Black."),
+    CoreWord(Quads.Humps.up.over(Quads.Angle.down), "Heart", "Organ of Love."),
     CompoundWord(
         [CoreWord(Mono.Sun.gram), CoreWord(Mono.Circle.over(Quads.Line.up))],
         "Star-being",
@@ -127,86 +67,116 @@ final _demoGroup = WordGroup(
 
 final _numericGroup = WordGroup(
   'Numeric',
-  CoreWord(Quads.Line.right.over(Quads.Line.right).merge(Quads.Line.up)),
+  CompoundWord([CoreWord(Mono.Grid.gram), CoreWord(Quads.Step.up)]),
   'Numbers and counting...',
   [
     CoreWord(Mono.Circle.gram, "Zero"),
     CoreWord(Quads.Line.up, "One"),
-    CoreWord(Quads.Corner.right, "Two"),
-    CoreWord(Quads.Gate.down, "Three"),
+    CoreWord(Quads.Angle.down, "Two"),
+    CoreWord(Quads.Triangle.up, "Three"),
     CoreWord(Mono.Square.gram, "Four"),
     CoreWord(Mono.Diamond.merge(Quads.Line.down), "Five"),
     CoreWord(Mono.X.merge(Quads.Line.up), "Six"),
-    CoreWord(Quads.Gate.up.merge(Mono.X.gram), "Seven"),
+    CoreWord(Quads.Gate.down.merge(Mono.X.gram), "Seven"),
     CoreWord(Mono.Diamond.merge(Mono.Cross.gram), "Eight"),
-    CoreWord(Quads.Triangle.down.wrap(Quads.Triangle.up), "Nine"),
+    CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down), "Nine"),
     CoreWord(Mono.Circle.wrap(Quads.Line.up), "Ten",
         "Ten(s), ten to the power of 1."),
-    CoreWord(Mono.Circle.wrap(Quads.Corner.right), "Hundred",
-        "Hundred(s), ten to the power of 2."),
-    CoreWord(Mono.Circle.wrap(Quads.Gate.up), "Thousand",
-        "Thousand(s), ten to the power of 3."),
+    CoreWord(Mono.Circle.wrap(Quads.Angle.down), "Hundred",
+        "Hundred(s), ten squared."),
+    CoreWord(Mono.Circle.wrap(Quads.Triangle.up), "Thousand",
+        "Thousand(s), ten cubed."),
   ],
 );
 
 final _interpersonalGroup = WordGroup(
   'Interpersonal',
-  CoreWord(Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.down),
-      "Interpersonal-Relationship"),
+  CoreWord(Quads.Dots.down.over(Quads.Gate.down), "Interpersonal-Relationship"),
   'People, pronoun...',
   [
     CoreWord(Mono.Circle.over(Quads.Line.up), "Person", "Adult person."),
     CoreWord(Mono.Dot.over(Quads.Line.up), "Child"),
-    CoreWord(Quads.Angle.up.up().merge(Quads.Line.up).over(Mono.Circle.gram),
-        "Man", "Adult male."),
+    CoreWord(Quads.Arrow.up.over(Mono.Circle.gram), "Man", "Adult male."),
     CoreWord(Mono.Circle.over(Mono.Cross.gram), "Woman", "Adult female."),
-    CoreWord(Mono.Circle.up().merge(Quads.Step.left), "I",
+    CoreWord(Mono.Circle.over(Quads.Branch.up), "I",
         "First person singular pronoun."),
     CoreWord(Mono.Circle.left().over(Quads.Corner.up), "You",
         "Second person singular pronoun."),
     CoreWord(Mono.Circle.right().over(Quads.Corner.right), "He or She",
         "Third person singular pronoun."),
-    CoreWord(
-        Mono.Circle.up()
-            .merge(Quads.Step.left)
-            .next(Mono.Dot.gram)
-            .next(Mono.Dot.gram),
-        "We",
-        "First person plural pronoun."),
-    CoreWord(
-        Mono.Circle.left()
-            .over(Quads.Corner.up)
-            .next(Mono.Dot.gram)
-            .next(Mono.Dot.gram),
-        "You(s)",
-        "Second person plural pronoun."),
-    CoreWord(
-        Mono.Circle.right()
-            .over(Quads.Corner.right)
-            .next(Mono.Dot.gram)
-            .next(Mono.Dot.gram),
-        "They",
-        "Third person plural pronoun."),
-    CoreWord(Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.up), "Couple"),
-    CoreWord(
-        Mono.Circle.wrapCluster(
-            Mono.Dot.next(Mono.Dot.gram).over(Quads.Gate.down)),
-        "Family"),
+    CompoundWord([
+      CoreWord(Mono.Circle.over(Quads.Branch.up)),
+      CoreWord(Quads.Dots.down.shrink()),
+    ], "We", "First person plural pronoun."),
+    CompoundWord([
+      CoreWord(Mono.Circle.left().over(Quads.Corner.up)),
+      CoreWord(Quads.Dots.down.shrink()),
+    ], "You(s)", "Second person plural pronoun."),
+    CompoundWord([
+      CoreWord(Mono.Circle.right().over(Quads.Corner.right)),
+      CoreWord(Quads.Dots.down.shrink()),
+    ], "They", "Third person plural pronoun."),
+    CoreWord(Quads.Dots.down.over(Quads.Gate.up), "Couple"),
+    CoreWord(Mono.Circle.wrap(Quads.Dots.down.over(Quads.Gate.down)), "Family"),
   ],
 );
 
 final _spiritual = WordGroup(
-    'Spiritual', CoreWord(Mono.Sun.over(Quads.Arc.up)), 'Spiritual.', [
+    'Religious', CoreWord(Mono.Sun.over(Quads.Arc.up)), 'Religious.', [
   CoreWord(Mono.Cross.over(Quads.Arc.up)),
   CoreWord(Quads.Triangle.up.merge(Quads.Triangle.down).over(Quads.Arc.up)),
   CoreWord(Quads.Step.up.merge(Quads.Step.right).over(Quads.Arc.up)),
-  CoreWord(Quads.Arc.left.next(Mono.Light.shrink()).over(Quads.Arc.up)),
+  CoreWord(Quads.Arc.left.next(Mono.Star.gram).over(Quads.Arc.up)),
   CoreWord(Mono.Circle.merge(Quads.Flow.down).over(Quads.Arc.up)),
   CoreWord(Mono.Square.merge(Mono.Diamond.gram)
       .wrap(Mono.Sun.gram)
       .over(Quads.Arc.up)),
-  CoreWord(Mono.Dot.merge(Quads.Arc.down.shrink()).overCluster(
-      Quads.Arc.right.over(Quads.Arc.right).next(Quads.Flow.left))),
+  CoreWord(Mono.Dot.merge(Quads.Arc.down.shrink())
+      .over(Quads.Humps.right.next(Quads.Flow.left))),
 ]);
 
-final coreWords = [_demoGroup, _numericGroup, _interpersonalGroup, _spiritual];
+final _circleGroup = WordGroup(
+  'Test',
+  CoreWord(Mono.Circle.gram),
+  'Test expression rendering...',
+  [
+    CoreWord(Mono.Circle.right(), "right shift O by Unary"),
+    CoreWord(Mono.Empty.next(Mono.Circle.gram), "right shift O by Empty"),
+    CoreWord(Mono.Circle.left(), "left shift O by Unary"),
+    CoreWord(Mono.Circle.next(Mono.Empty.gram), "left shift O by Empty"),
+    CoreWord(Mono.Circle.up(), "up shift O by Unary"),
+    CoreWord(Mono.Circle.over(Mono.Empty.gram), "up shift O by Empty"),
+    CoreWord(Mono.Circle.down(), "down shift O by Unary"),
+    CoreWord(Mono.Empty.over(Mono.Circle.gram), "down shift O by Empty"),
+    CoreWord(Mono.Circle.shrink(), "shrink O by Unary"),
+    CoreWord(Mono.Empty.wrap(Mono.Circle.gram), "shrink O by Empty"),
+  ],
+);
+
+final _circleDotGroup = WordGroup(
+  'Test',
+  CoreWord(Mono.Dot.wrap(Mono.Circle.gram)),
+  'Test expression rendering...',
+  [
+    CoreWord(Mono.Circle.next(Mono.Dot.gram), "Circle next Dot"),
+    CoreWord(Mono.Dot.next(Mono.Circle.gram), "Dot next Circle"),
+    CoreWord(Mono.Dot.over(Mono.Circle.gram), "Dot over Circle"),
+    CoreWord(Mono.Circle.over(Mono.Dot.gram), "Circle over Dot"),
+    CoreWord(Mono.Circle.wrap(Mono.Dot.gram), "Circle wrap Dot"),
+    CoreWord(Mono.Dot.wrap(Mono.Circle.gram), "Dot wrap Circle"),
+  ],
+);
+
+final _circleSquareGroup = WordGroup(
+  'Test',
+  CoreWord(Mono.Circle.wrap(Mono.Square.gram)),
+  'Test expression rendering...',
+  [
+    CoreWord(Mono.Circle.next(Mono.Square.gram), "Circle next Square"),
+    CoreWord(Mono.Square.next(Mono.Circle.gram), "Square next Circle"),
+    CoreWord(Mono.Square.over(Mono.Circle.gram), "Square over Circle"),
+    CoreWord(Mono.Circle.over(Mono.Square.gram), "Circle over Square"),
+    CoreWord(Mono.Circle.wrap(Mono.Square.gram), "Circle wrap Square"),
+    CoreWord(Mono.Square.wrap(Mono.Circle.gram), "Square wrap Circle"),
+  ],
+);

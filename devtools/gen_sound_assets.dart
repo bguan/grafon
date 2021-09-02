@@ -29,7 +29,7 @@ Future<void> main() async {
     TexttospeechApi.cloudPlatformScope,
   ]);
 
-  final sndAssetDirPath = 'assets/ext'; // 'assets/audios';
+  final sndAssetDirPath = 'assets/audios';
   final sndAssetDir = Directory(sndAssetDirPath);
   if (!sndAssetDir.existsSync()) {
     sndAssetDir.createSync();
@@ -41,7 +41,8 @@ Future<void> main() async {
     final voiceNames = voiceList.voices!.map((v) => v.name);
     print('Received ${voiceNames.length} voices: ' + voiceNames.join(', '));
 
-    var counts = 0;
+    var copyCounts = 0;
+    var genCounts = 0;
 
     Future<SynthesizeSpeechResponse> Function(String ssml) synthesize = (ssml) {
       final request = SynthesizeSpeechRequest.fromJson({
@@ -56,56 +57,46 @@ Future<void> main() async {
       return tts.text.synthesize(request);
     };
 
-    for (var cc in [
-      ...Cons.values.where((c) => c != Cons.NIL && c != Cons.h),
-      Coda.th,
-      Coda.ng,
-    ]) {
+    for (var cc in Cons.values) {
       for (var v in Vowel.values.where((v) => v != Vowel.NIL)) {
         for (var e in Vowel.values) {
           for (var t in Coda.values) {
-            counts++;
-            late final String cn;
-            late final String cp;
-            if (cc is Cons) {
-              cn = cc.shortName;
-              cp = cc.phoneme;
-            } else if (cc is Coda) {
-              cn = cc.shortName;
-              cp = cc.phoneme;
-            } else {
-              continue;
-            }
-
+            final cn =
+                cc is Cons ? cc.shortName : (cc is Coda ? cc.shortName : '');
             final vn = v.shortName;
             final en = e.shortName;
             final tn = t.shortName;
             final s = "$cn$vn$en$tn";
+            final cp = cc is Cons ? cc.phoneme : (cc is Coda ? cc.phoneme : '');
             final vp = v.phoneme;
-            final ep = e.shortPhoneme;
+            final ep = e.phoneme;
             final tp = t.phoneme;
-            final p = e == Vowel.NIL ? "$cp$vp$tp" : "$cp$vp $ep$tp";
-            final ssml = "<phoneme alphabet='ipa' ph='$p'>?</phoneme>.";
-            print(ssml);
+            final p = e == Vowel.NIL ? "$cp$vp$tp" : "$cp$vp,$ep$tp";
 
-            final mp3bytes = (await synthesize(ssml)).audioContentAsBytes;
-            print("Voice response for '$s' is ${mp3bytes.length} bytes.");
+            final archivePath = 'assets/archive/$s.mp3';
             final sndFilePath = '$sndAssetDirPath/$s.mp3';
-            print("About to write to $sndFilePath...");
-            final sndFile = await File(sndFilePath).create();
-            sndFile.writeAsBytesSync(mp3bytes, flush: true);
-            sleep(Duration(milliseconds: 500));
+            final archiveFile = File(archivePath);
+            if (archiveFile.existsSync()) {
+              copyCounts++;
+              print("Found $archivePath, copy to $sndFilePath...");
+              archiveFile.copySync(sndFilePath);
+            } else {
+              genCounts++;
+              final ssml = "<phoneme alphabet='ipa' ph='$p'>?</phoneme>.";
+              print(ssml);
+              final mp3bytes = (await synthesize(ssml)).audioContentAsBytes;
+              print("Voice response for '$s' is ${mp3bytes.length} bytes.");
+              print("About to write to $sndFilePath...");
+              final sndFile = await File(sndFilePath).create();
+              sndFile.writeAsBytesSync(mp3bytes, flush: true);
+              sleep(Duration(milliseconds: 500));
+            }
           }
         }
       }
     }
-    final msg = "$counts sound samples generated.";
+    final msg = "$copyCounts copied, $genCounts sound samples generated.";
     print(msg);
-
-    final summaryFilePath = '$sndAssetDirPath/summary.txt';
-    final summFile = await File(summaryFilePath).create();
-    final summary = '$msg\nVoices:\n' + voiceNames.join('\n');
-    summFile.writeAsStringSync(summary, flush: true);
   } finally {
     httpClient.close();
   }

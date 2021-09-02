@@ -23,12 +23,13 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
+import 'constants.dart';
 import 'expr_render.dart';
 import 'grafon_expr.dart';
 import 'gram_infra.dart';
 import 'phonetics.dart';
 
-/// Word has meaning but not all gram expr is a valid word so it needs a class.
+/// Abstract base class for all Grafon Words to associate meaning to gram expr.
 abstract class GrafonWord {
   final String key;
   final String title;
@@ -56,9 +57,8 @@ abstract class GrafonWord {
   }
 }
 
-/// Core Word
+/// Core Word has only 1 Grafon Expression.
 class CoreWord extends GrafonWord {
-  static const MIN_WIDTH_RATIO = 3 / 4;
   final GrafonExpr expr;
   final Pronunciation pronunciation;
   late final RenderPlan renderPlan;
@@ -92,13 +92,13 @@ class CoreWord extends GrafonWord {
   }
 
   @override
-  String toString() => '$runtimeType($expr)';
+  String toString() => '$expr';
 }
 
-/// Compound Words combines CoreWords into another word.
+/// Compound Words combines CoreWords into another word,
+/// its meaning is made up from the base core words.
 class CompoundWord extends GrafonWord {
-  static const SEPARATOR_SYMBOL = ':';
-  static const PRONUNCIATION_LINK = Coda.ng;
+  static const SEPARATOR_SYMBOL = ' : ';
 
   final Iterable<CoreWord> words;
   late final Pronunciation pronunciation;
@@ -124,25 +124,17 @@ class CompoundWord extends GrafonWord {
     }
     renderPlan = r!;
 
-    List<Syllable> syllables = [];
-    for (var w in words.take(words.length - 1)) {
-      final wsl = w.pronunciation.syllables;
-      syllables.addAll(wsl.take(wsl.length - 1));
-      final last = wsl.last;
-      syllables.add(Syllable(last.cons, last.vowel, last.endVowel, Coda.ng));
-    }
-    syllables.addAll(words.last.pronunciation.syllables);
+    List<Syllable> syllables = [
+      for (var w in words) ...w.pronunciation.syllables
+    ];
     pronunciation = Pronunciation(syllables);
   }
 
   @override
-  String toString() =>
-      '$runtimeType(' +
-      words.map((w) => w.toString()).join("$SEPARATOR_SYMBOL") +
-      ')';
+  String toString() => words.map((w) => w.toString()).join("$SEPARATOR_SYMBOL");
 }
 
-/// A Group of Related Words
+/// A Group of Related Words in some ways.
 class WordGroup {
   String title;
   String description;

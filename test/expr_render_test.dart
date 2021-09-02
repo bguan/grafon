@@ -16,6 +16,7 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/constants.dart';
 import 'package:grafon/expr_render.dart';
 import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/grafon_word.dart';
@@ -35,7 +36,7 @@ void main() {
     expect(dot.vectors, [Vector2(0, 0), Vector2(0, 0)]);
 
     final metricsDot = RenderPlan([dot]);
-    expect(metricsDot.width, RenderPlan.MIN_WIDTH);
+    expect(metricsDot.width, MIN_GRAM_WIDTH);
     expect(metricsDot.center, Vector2(0, 0));
     expect(metricsDot.yMin, 0.0);
     expect(metricsDot.yMax, 0.0);
@@ -46,7 +47,7 @@ void main() {
     expect(vLine.vectors, [Vector2(0, 0.5), Vector2(0, -0.5)]);
 
     final metricsVL = RenderPlan([vLine]);
-    expect(metricsVL.width, RenderPlan.MIN_WIDTH);
+    expect(metricsVL.width, MIN_GRAM_WIDTH);
     expect(metricsVL.center, Vector2(0, 0));
     expect(metricsVL.xMin, 0.0);
     expect(metricsVL.xMax, 0.0);
@@ -75,7 +76,7 @@ void main() {
     expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
     // Gap is not too big
     expect(lines[1].metrics.xMin - lines[0].metrics.xMax,
-        lessThan(1.1 * RenderPlan.STD_GAP));
+        lessThan(1.1 * GRAM_GAP));
   });
 
   test('RenderPlan compounding next operators does not lead to exploding width',
@@ -88,7 +89,7 @@ void main() {
     final exprWth = r.width;
     final exprHt = r.height;
     expect(exprHt, moreOrLessEquals(upHt));
-    expect(exprWth, closeTo(5 * upWth + 4 * RenderPlan.STD_GAP, 0.1));
+    expect(exprWth, closeTo(5 * upWth + 4 * GRAM_GAP, 0.1));
     expect(r.widthRatio, moreOrLessEquals(exprWth / exprHt));
   });
 
@@ -102,7 +103,7 @@ void main() {
     // Previous don't overlap with Next
     expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
     // Gap is not too big
-    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(.2));
+    expect(lines[1].metrics.xMin - lines[0].metrics.xMax, lessThan(.3));
   });
 
   test('RenderPlan over operators leaves gap btw fixed aspect and non-fixed',
@@ -117,7 +118,7 @@ void main() {
     // Previous don't overlap with Next
     expect(m1.yMax, lessThan(m0.yMin));
     // Gap is not too big
-    expect(m0.yMin - m1.yMax, lessThan(.25));
+    expect(m0.yMin - m1.yMax, lessThan(.3));
   });
 
   test('RenderPlan equality, hashcode, toString works', () {
@@ -208,7 +209,7 @@ void main() {
           PolyStraight([Vector2(-.25, .25), Vector2(.25, .25)],
               isFixedAspect: true),
           InvisiDot([Vector2(0, -0.5)], isFixedAspect: true)
-        ], overrideCenter: true));
+        ], recenter: false));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -230,7 +231,7 @@ void main() {
           PolyStraight([Vector2(0, .5), Vector2(0, 0)]),
           PolyStraight([Vector2(-.5, .25), Vector2(.5, .25)]),
           InvisiDot([Vector2(0, -0.5)])
-        ], overrideCenter: true));
+        ], recenter: false));
   });
 
   test('Unary Down operator works', () {
@@ -255,7 +256,7 @@ void main() {
           PolyStraight([Vector2(-.25, -.25), Vector2(.25, -.25)],
               isFixedAspect: true),
           InvisiDot([Vector2(0, 0.5)], isFixedAspect: true)
-        ], overrideCenter: true));
+        ], recenter: false));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -277,7 +278,7 @@ void main() {
           PolyStraight([Vector2(0, 0), Vector2(0, -.5)]),
           PolyStraight([Vector2(-.5, -.25), Vector2(.5, -.25)]),
           InvisiDot([Vector2(0, 0.5)])
-        ], overrideCenter: true));
+        ], recenter: false));
   });
 
   test('Unary Left operator works', () {
@@ -302,7 +303,7 @@ void main() {
               isFixedAspect: true),
           PolyStraight([Vector2(-.5, 0), Vector2(0, 0)], isFixedAspect: true),
           InvisiDot([Vector2(.5, 0)], isFixedAspect: true)
-        ], overrideCenter: true));
+        ], recenter: false));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -324,7 +325,7 @@ void main() {
           PolyStraight([Vector2(-.25, .5), Vector2(-.25, -.5)]),
           PolyStraight([Vector2(-.5, 0), Vector2(0, 0)]),
           InvisiDot([Vector2(.5, 0)])
-        ], overrideCenter: true));
+        ], recenter: false));
   });
 
   test('Unary Right operator works', () {
@@ -349,7 +350,7 @@ void main() {
               isFixedAspect: true),
           PolyStraight([Vector2(0, 0), Vector2(.5, 0)], isFixedAspect: true),
           InvisiDot([Vector2(-.5, 0)], isFixedAspect: true)
-        ], overrideCenter: true));
+        ], recenter: false));
 
     final flexCross = RenderPlan([
       PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
@@ -371,7 +372,7 @@ void main() {
           PolyStraight([Vector2(.25, .5), Vector2(.25, -.5)]),
           PolyStraight([Vector2(0, 0), Vector2(.5, 0)]),
           InvisiDot([Vector2(-.5, 0)])
-        ], overrideCenter: true));
+        ], recenter: false));
   });
 
   test('RenderPlan toDevice works', () {
@@ -387,7 +388,7 @@ void main() {
     expect(lines[0].metrics.xMax, lessThan(lines[1].metrics.xMin));
     // Gap is not too big
     expect(lines[1].metrics.xMin - lines[0].metrics.xMax,
-        lessThan(1.1 * RenderPlan.STD_GAP * devHt));
+        lessThan(1.1 * GRAM_GAP * devHt));
   });
 
   test('RenderPlan metrics computation works', () {

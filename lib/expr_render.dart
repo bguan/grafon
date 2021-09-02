@@ -23,29 +23,28 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math.dart';
 
+import 'constants.dart';
 import 'grafon_expr.dart';
 import 'gram_infra.dart';
 
 /// RenderPlan contains info on rendering each gram expression.
 class RenderPlan {
-  static const STD_DIM = 1.0;
-  static const PEN_WTH_SCALE = 0.05;
-  static const STD_GAP = 0.2;
-  static const MIN_WIDTH = 0.01;
-  static const MIN_HEIGHT = 0.01;
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
   final Iterable<PolyLine> lines;
   late final numPts, numVisiblePts;
-  late final double xMin, yMin, xMax, yMax, xAvg, yAvg, width, height;
+  late final double xMin, yMin, xMax, yMax, xAvg, yAvg;
+  late final double width, height, minWidth, minHeight;
   late final double mass, vMass, hMass;
   late final Vector2 center;
   late final int _hashCode;
 
-  RenderPlan(this.lines, {overrideCenter: false}) {
+  RenderPlan(this.lines, {bool recenter: true}) {
     double xMin = double.maxFinite,
         yMin = double.maxFinite,
         xMax = -double.maxFinite,
         yMax = -double.maxFinite,
+        minWidth = 0,
+        minHeight = 0,
         mass = 0,
         vMass = 0,
         hMass = 0,
@@ -68,6 +67,8 @@ class RenderPlan {
       mass += d.length * PEN_WTH_SCALE;
       hMass += d.dxSum * PEN_WTH_SCALE;
       vMass += d.dySum * PEN_WTH_SCALE;
+      minWidth = max(minWidth, l.metrics.minWidth);
+      minHeight = max(minHeight, l.metrics.minHeight);
     }
 
     this.numPts = num.toInt();
@@ -76,18 +77,18 @@ class RenderPlan {
     this.xMax = quantize(num == 0 ? 0 : xMax);
     this.yMin = quantize(num == 0 ? 0 : yMin);
     this.yMax = quantize(num == 0 ? 0 : yMax);
-    this.xAvg =
-        overrideCenter ? 0 : quantize(xSum == 0 || num == 0 ? 0 : xSum / num);
-    this.yAvg =
-        overrideCenter ? 0 : quantize(ySum == 0 || num == 0 ? 0 : ySum / num);
+    this.xAvg = recenter ? quantize(xSum == 0 || num == 0 ? 0 : xSum / num) : 0;
+    this.yAvg = recenter ? quantize(ySum == 0 || num == 0 ? 0 : ySum / num) : 0;
     this.mass = quantize(max(mass, MIN_MASS));
     this.hMass = quantize(max(hMass, MIN_MASS));
     this.vMass = quantize(max(vMass, MIN_MASS));
-    this.center = overrideCenter
-        ? Vector2(0, 0)
-        : quantizeV2(calcCenter(xMin, yMin, xMax, yMax));
-    this.width = quantize(max(xMax - xMin, MIN_WIDTH));
-    this.height = quantize(max(yMax - yMin, MIN_HEIGHT));
+    this.center = recenter
+        ? quantizeV2(calcCenter(xMin, yMin, xMax, yMax))
+        : Vector2(0, 0);
+    this.width = quantize(max(xMax - xMin, minWidth));
+    this.height = quantize(max(yMax - yMin, minHeight));
+    this.minWidth = this.width;
+    this.minHeight = this.height;
     this._hashCode = lines.fold(mass.hashCode, (h, l) => h << 1 ^ l.hashCode);
   }
 
@@ -151,18 +152,20 @@ class RenderPlan {
     return RenderPlan(newL);
   }
 
-  // Move the center of the render plan to (0,0) if necessary
+  /// Move the center of the render plan to (0,0) if necessary
   RenderPlan reCenter() {
     final c = center;
     return (c == Vector2(0, 0) ? this : shift(-c.x, -c.y));
   }
 
+  /// Relax any fixed aspect lines
   RenderPlan relaxFixedAspect() =>
       RenderPlan(lines.map((l) => l.diffAspect(false)));
 
+  /// Remove all InvisiDots
   RenderPlan noInvisiDots() => RenderPlan(lines.where((l) => l is! InvisiDot));
 
-  /// Merge this with another Render Plan.
+  /// Merge this with another Render Plan
   RenderPlan merge(RenderPlan that) {
     return RenderPlan([...lines, ...that.lines]);
   }
@@ -251,7 +254,7 @@ class RenderPlan {
         ];
         break;
     }
-    return RenderPlan(lines, overrideCenter: true);
+    return RenderPlan(lines, recenter: false);
   }
 
   /// Transform this render plan by unary operation to generate a new render.
@@ -269,7 +272,7 @@ class RenderPlan {
           r1 = r1.scaleHeight(r2.height).reCenter();
         }
         // move 2nd operand to right of 1st
-        return r1.merge(r2.shift(.5 * r1.width + STD_GAP + .5 * r2.width, 0));
+        return r1.merge(r2.shift(.5 * r1.width + GRAM_GAP + .5 * r2.width, 0));
       case Binary.Over:
         r1 = r1.reCenter();
         r2 = r2.reCenter();
@@ -280,12 +283,11 @@ class RenderPlan {
           r1 = r1.scaleWidth(r2.width).reCenter();
         }
         return r1
-            .merge(r2.shift(0, -.5 * r1.height - STD_GAP - .5 * r2.height))
+            .merge(r2.shift(0, -.5 * r1.height - GRAM_GAP - .5 * r2.height))
             .reCenter();
       case Binary.Wrap:
         r1 = r1.reCenter();
         r2 = r2.reCenter();
-        // r1 = r1.noInvisiDots().reCenter();
         final hScale = .5 * r1.height / r2.height;
         r2 = r2.remap((isF, v) => v * hScale).reCenter();
         // if r2 width much more than r1 width, scale r1
@@ -334,9 +336,12 @@ class RenderPlan {
         (isF, v) => Vector2(v.x + devWth / 2, devHt - (v.y + devHt / 2)));
   }
 
-  bool get isWidthPadded => (width - (xMax - xMin)).abs() >= MIN_WIDTH;
+  /// check if a RenderPlan has width padded with empty space
+  bool get isWidthPadded => (width - (xMax - xMin)).abs() >= MIN_GRAM_WIDTH;
 
-  bool get isHeightPadded => (height - (yMax - yMin)).abs() >= MIN_HEIGHT;
+  /// check if a RenderPlan has height padded with empty space
+  bool get isHeightPadded => (height - (yMax - yMin)).abs() >= MIN_GRAM_HEIGHT;
 
+  /// check if a RenderPlan has width or height padded with empty space
   bool get isPadded => isWidthPadded || isHeightPadded;
 }

@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/texttospeech/v1.dart';
+import 'package:grafon/gram_table.dart';
 import 'package:grafon/speech_svc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
@@ -32,15 +33,12 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'buffer_audio_src.dart';
+import 'constants.dart';
 import 'grafon_dictionary.dart';
 import 'gram_table_widget.dart';
 import 'wordgroups_page.dart';
 
-final GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: <String>[TexttospeechApi.cloudPlatformScope],
-);
-
-/// Main Starting Point of the App.
+/// Main Starting Point of the Grafon App.
 void main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((r) {
@@ -59,8 +57,13 @@ void main() async {
   );
 }
 
-/// This widget is the root of Grafon application.
+/// Root widget f Grafon application.
 class GrafonApp extends StatefulWidget {
+  /// google sign-in service as a shared singleton
+  final GoogleSignIn googleSignIn = GoogleSignIn(
+    scopes: <String>[TexttospeechApi.cloudPlatformScope],
+  );
+
   GrafonApp({Key? key}) : super(key: key);
 
   @override
@@ -72,7 +75,8 @@ class GrafonAppState extends State<GrafonApp> {
   static final log = Logger("GrafonAppState");
   static const GITHUB_LINK = 'https://github.com/bguan/grafon';
 
-  final AudioPlayer _player = AudioPlayer();
+  final _player = AudioPlayer();
+  final _gramTable = GramTable();
 
   TexttospeechApi? _cloudTTS;
   GoogleSignInAccount? _googleAcct;
@@ -92,15 +96,16 @@ class GrafonAppState extends State<GrafonApp> {
       });
     });
     _initAudio();
-    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+    widget.googleSignIn.onCurrentUserChanged
+        .listen((GoogleSignInAccount? account) {
       setState(() {
         _googleAcct = account;
+        if (_googleAcct != null) {
+          _initTTS();
+        }
       });
-      if (_googleAcct != null) {
-        _initTTS();
-      }
     });
-    _googleSignIn.signInSilently();
+    widget.googleSignIn.signInSilently();
   }
 
   Future<void> _initAudio() async {
@@ -123,7 +128,8 @@ class GrafonAppState extends State<GrafonApp> {
 
   Future<void> _initTTS() async {
     try {
-      _cloudTTS = TexttospeechApi((await _googleSignIn.authenticatedClient())!);
+      _cloudTTS =
+          TexttospeechApi((await widget.googleSignIn.authenticatedClient())!);
       _speechSvc.cloudTTS = _cloudTTS;
       final request = SynthesizeSpeechRequest.fromJson({
         "input": {
@@ -147,7 +153,7 @@ class GrafonAppState extends State<GrafonApp> {
 
   Future<void> _signIn() async {
     try {
-      await _googleSignIn.signIn();
+      await widget.googleSignIn.signIn();
     } catch (error) {
       log.warning(error);
     }
@@ -155,7 +161,7 @@ class GrafonAppState extends State<GrafonApp> {
 
   Future<void> _signOut() async {
     try {
-      await _googleSignIn.signOut();
+      await widget.googleSignIn.signOut();
       _googleAcct = null;
       _speechSvc.cloudTTS = null;
     } catch (error) {
@@ -172,37 +178,31 @@ class GrafonAppState extends State<GrafonApp> {
   @override
   Widget build(BuildContext ctx) {
     final scheme = Theme.of(ctx).colorScheme;
+    final theme = Theme.of(ctx).textTheme;
     final pages = [
       GramTableView(),
-      WordGroupsPage(
-        "Core Words",
-        coreWords,
-      ),
-      WordGroupsPage(
-        "Random Words for Testing...",
-        testWords,
-      ),
+      WordGroupsPage("Core Words", coreWords),
+      WordGroupsPage("Random Words for Testing...", testWords),
     ];
 
     return MultiProvider(
       providers: [
-        Provider<AudioPlayer>(create: (_) {
-          return _player;
-        }),
-        Provider<GoogleSignInAccount?>(create: (_) {
-          return _googleAcct;
-        }),
-        Provider<TexttospeechApi?>(create: (_) {
-          return _cloudTTS;
-        }),
-        Provider<SpeechService>(create: (_) {
-          return _speechSvc;
-        })
+        Provider<AudioPlayer>(create: (_) => _player),
+        Provider<GoogleSignInAccount?>(create: (_) => _googleAcct),
+        Provider<TexttospeechApi?>(create: (_) => _cloudTTS),
+        Provider<SpeechService>(create: (_) => _speechSvc),
+        Provider<GramTable>(create: (_) => _gramTable),
       ],
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: 40,
-          title: Text('Grafon Home'),
+          toolbarHeight: TOOL_BAR_HEIGHT,
+          title: Text(
+            'Grafon Home',
+            style: theme.headline6?.copyWith(
+              color: scheme.surface,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           leading: IconButton(
             icon: Icon(Icons.help_outline_rounded),
             onPressed: () => _openBrowser(GITHUB_LINK),
@@ -210,13 +210,13 @@ class GrafonAppState extends State<GrafonApp> {
           actions: <Widget>[
             if (_googleAcct == null)
               IconButton(
-                icon: const Icon(Icons.login),
+                icon: Icon(Icons.login),
                 tooltip: 'Login',
                 onPressed: () => _signIn(),
               )
             else
               IconButton(
-                icon: const Icon(Icons.logout),
+                icon: Icon(Icons.logout),
                 tooltip: 'Logout',
                 onPressed: () => _signOut(),
               ),
@@ -230,8 +230,8 @@ class GrafonAppState extends State<GrafonApp> {
           ),
         ),
         bottomSheet: Container(
-          height: 38,
-          padding: EdgeInsets.all(2),
+          height: FOOTER_HEIGHT,
+          padding: EdgeInsets.all(5),
           alignment: Alignment.topCenter,
           color: scheme.primary,
           child: DotsIndicator(

@@ -29,15 +29,15 @@ void main() {
     }
   });
 
-  test('Every Mono has ConsPair', () {
+  test('Every Mono has Cons', () {
     for (final m in Mono.values) {
-      expect(m.gram.consPair, isNotNull);
+      expect(m.gram.cons, isNotNull);
     }
   });
 
-  test('Every ConsPair maps to a Mono', () {
-    for (final cp in ConsPair.values) {
-      expect(Mono.values.firstWhere((m) => m.gram.consPair == cp), isNotNull);
+  test('Every Cons maps to a Mono', () {
+    for (final c in Cons.values) {
+      expect(Mono.values.firstWhere((m) => m.gram.cons == c), isNotNull);
     }
   });
 
@@ -47,34 +47,24 @@ void main() {
     }
   });
 
-  test('Every Quad has ConsPair', () {
+  test('Every Quad has Cons', () {
     for (final q in Quads.values) {
-      expect(q.grams.consPair, isNotNull);
+      expect(q.grams.cons, isNotNull);
     }
   });
 
-  test('Every ConsPair maps to a Quad', () {
-    for (final cp in ConsPair.values) {
-      expect(Quads.values.firstWhere((q) => q.grams.consPair == cp), isNotNull);
+  test('Every Cons maps to a Quad', () {
+    for (final c in Cons.values) {
+      expect(Quads.values.firstWhere((q) => q.grams.cons == c), isNotNull);
     }
   });
 
-  test('GramTable test atConsPairVowel', () {
-    for (final cp in ConsPair.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
-        final gra = GramTable().atConsPairVowel(cp, v);
-
-        expect(gra.consPair, cp);
-        expect(gra.vowel, v);
-      }
-    }
-  });
-
-  test('GramTable test atConsonantVowel', () {
+  test('GramTable test atConsVowel', () {
     for (final c in Cons.values) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
-        final gra = GramTable().atConsonantVowel(c, v);
-        expect(gra.consPair, c.pair);
+        final gra = GramTable().atConsVowel(c, v);
+
+        expect(gra.cons, c);
         expect(gra.vowel, v);
       }
     }
@@ -98,29 +88,16 @@ void main() {
   });
 
   test('GramTable test at dynamics', () {
-    for (final cp in ConsPair.values) {
-      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
-        final gra = GramTable().at(cp, v);
-        expect(gra.consPair, cp);
-        expect(gra.vowel, v);
-      }
-      for (final f in Face.values) {
-        final gra = GramTable().at(cp, f);
-        expect(gra.face, f);
-        expect(gra.consPair, cp);
-      }
-    }
-
     for (final c in Cons.values) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().at(c, v);
-        expect(gra.consPair, c.pair);
+        expect(gra.cons, c);
         expect(gra.vowel, v);
       }
       for (final f in Face.values) {
         final gra = GramTable().at(c, f);
         expect(gra.face, f);
-        expect(gra.consPair, c.pair);
+        expect(gra.cons, c);
       }
     }
 
@@ -139,7 +116,7 @@ void main() {
       }
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().at(m, v);
-        expect(gra.consPair, m.gram.consPair);
+        expect(gra.cons, m.gram.cons);
         expect(gra.vowel, v);
       }
     }
@@ -159,7 +136,7 @@ void main() {
       for (final v in Vowel.values.where((v) => v != Vowel.NIL)) {
         final gra = GramTable().at(q, v);
         if (v.face != Face.Center) {
-          expect(gra.consPair, q[v.face].gram.consPair);
+          expect(gra.cons, q[v.face].gram.cons);
         }
         expect(gra.vowel, v);
       }
@@ -183,8 +160,8 @@ void main() {
     expect(GramTable().numRows, Quads.values.length);
   });
 
-  test('GramTable numRows match num of ConsPair', () {
-    expect(GramTable().numRows, ConsPair.values.length);
+  test('GramTable numRows match num of Cons', () {
+    expect(GramTable().numRows, Cons.values.length);
   });
 
   test('GramTable numCols match num of Vowels', () {
@@ -247,19 +224,19 @@ void main() {
       final BinaryOpExpr b = Mono.Dot.next(Mono.Dot.gram);
       expect(m.next(s).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Next, s.renderPlan));
-      expect(m.nextCluster(b).renderPlan,
+      expect(m.next(b).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Next, b.renderPlan));
       expect(m.merge(s).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Merge, s.renderPlan));
-      expect(m.mergeCluster(b).renderPlan,
+      expect(m.merge(b).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Merge, b.renderPlan));
       expect(m.over(s).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Over, s.renderPlan));
-      expect(m.overCluster(b).renderPlan,
+      expect(m.over(b).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Over, b.renderPlan));
       expect(m.wrap(s).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Wrap, s.renderPlan));
-      expect(m.wrapCluster(b).renderPlan,
+      expect(m.wrap(b).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Wrap, b.renderPlan));
     }
   });

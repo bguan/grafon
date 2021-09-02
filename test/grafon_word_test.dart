@@ -37,14 +37,13 @@ void main() {
     final sun = Mono.Sun.gram; // or star
     final person = Mono.Dot.gram.over(Quads.Line.up);
 
-    final starMan =
-        CompoundWord([CoreWord(sun), CoreWord(person)]); // God? Alien?
-    expect(starMan.toString(),
-        "CompoundWord(CoreWord(Sun):CoreWord(Dot / Up_Line))");
-    List<Syllable> voicing = starMan.pronunciation.voicing;
+    // God? Alien?
+    final starMan = CompoundWord([CoreWord(sun), CoreWord(person)]);
+    expect(starMan.toString(), "Sun : Dot / Up_Line");
+    List<Syllable> voicing = starMan.pronunciation.syllables;
     expect(voicing.length, 3);
-    expect(voicing[0], Syllable.cvc(Cons.sh, Vowel.a, Coda.ng));
-    expect(voicing[1], Syllable.vc(Vowel.a, Coda.s));
+    expect(voicing[0], Syllable(Cons.s, Vowel.a));
+    expect(voicing[1], Syllable.cvc(Cons.h, Vowel.a, Coda.ch));
     expect(voicing[2], Syllable.v(Vowel.i));
   });
 

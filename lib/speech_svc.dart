@@ -15,6 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/// Speech generation service
 library speech_svc;
 
 import 'dart:typed_data';
@@ -30,7 +31,6 @@ import 'phonetics.dart';
 /// Speech Service to play either local or cloud API audio
 class SpeechService {
   static final log = Logger("SpeechService");
-  static const SILENCE_MP3 = "silence-100ms.mp3";
   final AudioPlayer _player;
   final AssetBundle _bundle;
   TexttospeechApi? _cloudTTS;
@@ -67,12 +67,10 @@ class SpeechService {
         final audios = <AudioSource>[];
         final allBytes = <int>[];
 
-        final silence = await _bundle.load("assets/audios/$SILENCE_MP3");
         for (var p in pronunciations) {
           List<Syllable> syllables = List.from(p.syllables);
           late final audioSrc;
           if (multiStitch) {
-            allBytes.addAll(silence.buffer.asUint8List());
             for (var i = 0; i < syllables.length; i++) {
               final bytes = await _bundle
                   .load("assets/audios/${p.fragmentSequence[i]}.mp3");
@@ -81,8 +79,8 @@ class SpeechService {
                   bytes.buffer.asUint8List(),
                   0.0,
                   i >= syllables.length - 1 || syllables[i].coda != Coda.NIL
-                      ? 0
-                      : 0.15,
+                      ? 0.2
+                      : 0.4,
                 ),
               );
             }

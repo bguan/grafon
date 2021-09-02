@@ -27,49 +27,10 @@ import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
-/// Unary Operator can only operate on Gram's
-/// by supplying a transformation as well as ending vowel
-enum Unary { Shrink, Right, Up, Left, Down }
-
-extension UnaryExtension on Unary {
-  String get shortName => this.toString().split('.').last;
-
-  String get symbol {
-    switch (this) {
-      case Unary.Right:
-        return '>';
-      case Unary.Up:
-        return '+';
-      case Unary.Left:
-        return '<';
-      case Unary.Down:
-        return '-';
-      case Unary.Shrink:
-      default:
-        return '!';
-    }
-  }
-
-  Vowel get ending {
-    switch (this) {
-      case Unary.Right:
-        return Face.Right.vowel;
-      case Unary.Up:
-        return Face.Up.vowel;
-      case Unary.Left:
-        return Face.Left.vowel;
-      case Unary.Down:
-        return Face.Down.vowel;
-      case Unary.Shrink:
-      default:
-        return Face.Center.vowel;
-    }
-  }
-}
-
 /// Binary Operator works on a pair of Gram Expression
-enum Binary { Merge, Next, Over, Wrap }
+enum Binary { Next, Merge, Over, Wrap }
 
+/// Extending Binary Enum to associate shortName, symbol and Coda
 extension BinaryExtension on Binary {
   String get shortName => this.toString().split('.').last;
 
@@ -87,17 +48,58 @@ extension BinaryExtension on Binary {
     }
   }
 
-  CodaGroup get coda {
+  Coda get coda {
     switch (this) {
       case Binary.Merge:
-        return CodaGroup.PTK;
+        return Coda.th;
       case Binary.Over:
-        return CodaGroup.SShCh;
+        return Coda.ch;
       case Binary.Wrap:
-        return CodaGroup.MNR;
+        return Coda.ng;
       case Binary.Next:
+        return Coda.sh;
       default:
-        return CodaGroup.nilFTh;
+        return Coda.NIL;
+    }
+  }
+}
+
+/// Unary Operators can only operate on base Grams by transformation
+enum Unary { Shrink, Right, Up, Left, Down }
+
+/// Extending Binary Enum to associate shortName, symbol and vowel extension
+extension UnaryExtension on Unary {
+  String get shortName => this.toString().split('.').last;
+
+  String get symbol {
+    switch (this) {
+      case Unary.Right:
+        return '>';
+      case Unary.Up:
+        return '˄';
+      case Unary.Left:
+        return '<';
+      case Unary.Down:
+        return '˅';
+      case Unary.Shrink:
+      default:
+        return '~';
+    }
+  }
+
+  Vowel get extn {
+    switch (this) {
+      case Unary.Right:
+        return Face.Right.vowel;
+      case Unary.Up:
+        return Face.Up.vowel;
+      case Unary.Left:
+        return Face.Left.vowel;
+      case Unary.Down:
+        return Face.Down.vowel;
+      case Unary.Shrink:
+      default:
+        return Face.Center.vowel;
     }
   }
 }
@@ -119,39 +121,20 @@ abstract class GrafonExpr {
   /// get all grams in expression
   List<Gram> get grams;
 
-  /// Merge this expression with a single.
-  BinaryOpExpr merge(SingleGramExpr single) =>
-      BinaryOpExpr(this, Binary.Merge, single);
+  /// Merge this expression with m.
+  BinaryOpExpr merge(GrafonExpr g) => BinaryOpExpr(this, Binary.Merge, g);
 
-  /// Put this expression before a single, this to left, the single to right.
-  BinaryOpExpr next(SingleGramExpr single) =>
-      BinaryOpExpr(this, Binary.Next, single);
+  /// Put this expression before e, this to left, e to right.
+  BinaryOpExpr next(GrafonExpr g) => BinaryOpExpr(this, Binary.Next, g);
 
-  /// Put this expression over a single, this above, the single below.
-  BinaryOpExpr over(SingleGramExpr single) =>
-      BinaryOpExpr(this, Binary.Over, single);
+  /// Put this expression over e, this above, e below.
+  BinaryOpExpr over(GrafonExpr g) => BinaryOpExpr(this, Binary.Over, g);
 
-  /// Put this expression around a single, this outside, the single inside.
-  BinaryOpExpr wrap(SingleGramExpr single) =>
-      BinaryOpExpr(this, Binary.Wrap, single);
-
-  /// Merge this expression with a ClusterExpression.
-  BinaryOpExpr mergeCluster(BinaryOpExpr expr) =>
-      BinaryOpExpr(this, Binary.Merge, ClusterExpr(expr));
-
-  /// Put this expression before a cluster, this to left, the cluster to right.
-  BinaryOpExpr nextCluster(BinaryOpExpr expr) =>
-      BinaryOpExpr(this, Binary.Next, ClusterExpr(expr));
-
-  /// Put this expression over that, this above, the cluster below.
-  BinaryOpExpr overCluster(BinaryOpExpr expr) =>
-      BinaryOpExpr(this, Binary.Over, ClusterExpr(expr));
-
-  /// Put this expression around that, this outside, the cluster inside.
-  BinaryOpExpr wrapCluster(BinaryOpExpr expr) =>
-      BinaryOpExpr(this, Binary.Wrap, ClusterExpr(expr));
+  /// Put this expression around e, this outside, e inside.
+  BinaryOpExpr wrap(GrafonExpr g) => BinaryOpExpr(this, Binary.Wrap, g);
 }
 
+/// abstract base class for single gram expression i.e. base gram & unary expr
 abstract class SingleGramExpr extends GrafonExpr {
   Gram get gram;
 
@@ -168,10 +151,8 @@ abstract class SingleGramExpr extends GrafonExpr {
   }
 }
 
-abstract class MultiGramExpr extends GrafonExpr {}
-
 /// A Unary Gram Expression applies a Unary Operation on a single Gram.
-/// Use factory methods in Gram instead of calling this constructor directly.
+/// Factory methods exists in Gram instead of calling constructor directly.
 class UnaryOpExpr extends SingleGramExpr {
   final Unary op;
   final Gram gram;
@@ -191,7 +172,7 @@ class UnaryOpExpr extends SingleGramExpr {
           : GramTable().getMonoEnum(gram).shortName);
 
   @override
-  Syllable get syllable => gram.syllable.diffEndVowel(op.ending);
+  Syllable get syllable => gram.syllable.diffExtension(op.extn);
 
   @override
   Pronunciation get pronunciation => Pronunciation([syllable]);
@@ -199,6 +180,9 @@ class UnaryOpExpr extends SingleGramExpr {
   @override
   List<Gram> get grams => [gram];
 }
+
+/// abstract base class for multi gram expr i.e. binary and cluster
+abstract class MultiGramExpr extends GrafonExpr {}
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
 /// Private subclass, use respective factory methods in GramExpression instead.
@@ -220,7 +204,7 @@ class BinaryOpExpr extends MultiGramExpr {
     final p1 = expr1.pronunciation;
     return Pronunciation([
       ...p1.syllables.take(p1.length - 1),
-      p1[p1.length - 1].diffCoda(op.coda.base),
+      p1.last.diffCoda(op.coda),
       ...expr2.pronunciation.syllables,
     ]);
   }
@@ -241,49 +225,39 @@ class BinaryOpExpr extends MultiGramExpr {
   }
 }
 
-/// Cluster Expression binds 2 grams with a binary operator into a single group.
+/// Cluster Expression ties a binary expr into a single group.
 /// Applying special pronunciation to the head gram and the tail op.
 class ClusterExpr extends MultiGramExpr {
-  final BinaryOpExpr binaryExpr;
+  final GrafonExpr subExpr;
   late final renderPlan;
   late final headGram;
   late final tailOp;
   late final pronunciation;
 
-  ClusterExpr(this.binaryExpr) {
-    renderPlan = binaryExpr.renderPlan;
-    final sList = binaryExpr.pronunciation.voicing;
+  ClusterExpr(this.subExpr) {
+    renderPlan = subExpr.renderPlan;
+    final sList = subExpr.pronunciation.syllables;
     pronunciation = Pronunciation([
-      for (var i = 0; i < sList.length; i++)
-        if (i == 0 && i == sList.length - 2) // first is also second last
-          Syllable(
-            sList[i].cons.pair.head,
-            sList[i].vowel,
-            sList[i].endVowel,
-            sList[i].coda.group.tail,
-          )
-        else if (i == 0) // Swap 1st syllable to head form
-          sList[i].diffConsonant(sList[i].cons.pair.head)
-        else if (i == sList.length - 2) // Swap 2nd last syllable to tail form
-          sList[i].diffCoda(sList[i].coda.group.tail)
-        else // other syllable are untouched
-          sList[i],
+      Mono.Empty.gram.syllable.diffCoda(Binary.Merge.coda),
+      ...sList.take(sList.length - 1),
+      sList.last.diffCoda(Binary.Merge.coda),
+      Mono.Empty.gram.syllable,
     ]);
   }
 
   @override
-  String toString() => "(${binaryExpr.toString()})";
+  String toString() => "(${subExpr.toString()})";
 
   @override
-  List<Gram> get grams => binaryExpr.grams;
+  List<Gram> get grams => subExpr.grams;
 
   @override
-  int get hashCode => binaryExpr.hashCode << 1 ^ pronunciation.hashCode;
+  int get hashCode => subExpr.hashCode << 1 ^ pronunciation.hashCode;
 
   @override
   bool operator ==(Object other) {
     if (other is! ClusterExpr) return false;
     ClusterExpr that = other;
-    return binaryExpr == that.binaryExpr && pronunciation == that.pronunciation;
+    return subExpr == that.subExpr && pronunciation == that.pronunciation;
   }
 }

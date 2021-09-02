@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:grafon/expr_render.dart';
 import 'package:vector_math/vector_math.dart' as vm;
 
+import 'constants.dart';
 import 'gram_infra.dart';
 
 /// Class to provide widget rendering of Gram expressions.
@@ -52,7 +53,6 @@ class GrafonTile extends StatelessWidget {
 
 /// The custom painter to provide canvas rendering logic
 class GrafonPainter extends CustomPainter {
-  static const MIN_PEN_WIDTH = 1.0;
   final RenderPlan renderPlan;
   final ColorScheme scheme;
   final bool isDebug;
@@ -63,7 +63,7 @@ class GrafonPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final penWidth = max(size.height * RenderPlan.PEN_WTH_SCALE, MIN_PEN_WIDTH);
+    final penWidth = max(size.height * PEN_WTH_SCALE, MIN_PEN_WIDTH);
 
     final linePaint = Paint()
       ..color = scheme.primary
@@ -74,7 +74,7 @@ class GrafonPainter extends CustomPainter {
 
     final dotPaint = Paint()
       ..color = scheme.primary
-      ..strokeWidth = penWidth
+      ..strokeWidth = DOT_LINE_WTH_RATIO * penWidth
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
@@ -96,14 +96,16 @@ class GrafonPainter extends CustomPainter {
       } else if (l is InvisiDot && isDebug) {
         drawInvisiDot(l, canvas, invisiPaint);
       } else if (l is PolyStraight) {
-        drawPolyLine(l, canvas, linePaint);
+        drawPolyStraight(l, canvas, linePaint);
       } else if (l is PolyCurve) {
         drawPolySpline(l, canvas, linePaint);
+      } else if (l is PolyExtended) {
+        drawPolyExtended(l, canvas, linePaint);
       }
     }
   }
 
-  /// Draw a series of dots at all anchor points
+  /// Draw a series of invisible dots at all anchor points, used as spacers
   void drawInvisiDot(
     InvisiDot l,
     Canvas canvas,
@@ -116,7 +118,7 @@ class GrafonPainter extends CustomPainter {
     }
   }
 
-  /// Draw a series of dots at all anchor points
+  /// Draw a series of visible dots at all anchor points
   void drawPolyDot(
     PolyDot l,
     Canvas canvas,
@@ -130,7 +132,7 @@ class GrafonPainter extends CustomPainter {
   }
 
   /// Draw a series of straight lines connecting all anchor points
-  void drawPolyLine(
+  void drawPolyStraight(
     PolyStraight l,
     Canvas canvas,
     Paint paint,
@@ -145,7 +147,23 @@ class GrafonPainter extends CustomPainter {
     }
   }
 
+  /// Same as PolyStraight except extending beyond the first and last points
+  void drawPolyExtended(
+    PolyExtended l,
+    Canvas canvas,
+    Paint paint,
+  ) {
+    final len = l.numPts;
+    // enter loop once even if len is 1 to draw dots as line of same point
+    for (var i = 0; i < max(1, len - 1); i++) {
+      final pt = l.vectors[i];
+      final nextPt = l.vectors[min(i + 1, len - 1)];
+      canvas.drawLine(toOffset(pt), toOffset(nextPt), paint);
+    }
+  }
+
   /// Draw a series of curves connecting anchor points with smooth gradients.
+  /// First and last anchor points are used only to set direction, not visible.
   void drawPolySpline(
     PolyCurve l,
     Canvas canvas,
@@ -171,7 +189,7 @@ class GrafonPainter extends CustomPainter {
             beg,
             end,
             next,
-            controlType: SplineControlType.Dorminant,
+            controlType: SplineControlType.Dominant,
           );
           path.quadraticBezierTo(ctl.x, ctl.y, ctl.x, ctl.y);
         } else if (end == next) {
@@ -180,7 +198,7 @@ class GrafonPainter extends CustomPainter {
             pre,
             beg,
             end,
-            controlType: SplineControlType.Dorminant,
+            controlType: SplineControlType.Dominant,
           );
           path.quadraticBezierTo(ctl.x, ctl.y, ctl.x, ctl.y);
         } else {
@@ -194,6 +212,8 @@ class GrafonPainter extends CustomPainter {
   }
 
   @override
+
+  /// only repaint if the underlying render plan has changed.
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     if (oldDelegate is! GrafonPainter) return true;
 

@@ -14,6 +14,8 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
+/// Widget library to render GramTable
 library gram_table_widget;
 
 import 'dart:io';
@@ -26,328 +28,272 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
+import 'constants.dart';
 import 'grafon_expr.dart';
 import 'grafon_widget.dart';
-import 'grafon_word.dart';
 import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 import 'speech_svc.dart';
 
-/// Widget that display a GramTable
+/// Widget that display the GramTable and calling speech service onTap
 class GramTableView extends StatefulWidget {
   final Size? size;
-  final GramTable table;
 
-  GramTableView({Key? key, this.size})
-      : table = GramTable(),
-        super(key: key);
+  GramTableView({Key? key, this.size}) : super(key: key);
 
   @override
   _GramTableViewState createState() => _GramTableViewState();
 }
 
 class _GramTableViewState extends State<GramTableView> {
+  static const MIN_GRAM_CLUSTER_WIDTH = 110;
+  static const HEADER_CELL_RATIO = .8;
   static final log = Logger("_GramTableViewState");
 
-  Unary? _unOp;
-  Binary? _binOp;
-  CodaForm? _codaForm;
-  bool _compound = false;
-
-  Unary? get unary => _unOp;
-
-  Binary? get binary => _binOp;
-
-  CodaForm? get codaForm => _codaForm;
+  Unary? _unary;
+  Binary? _binary;
 
   @override
   Widget build(BuildContext ctx) {
     final speechSvc = ctx.watch<SpeechService>();
+    final table = ctx.watch<GramTable>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
-    final pageWidth = mediaSize.width;
+    final inset = min(mediaSize.width, mediaSize.height) / 100;
+    final pageWidth = mediaSize.width - 2 * inset;
     final pageHeight =
-        mediaSize.height - 120; // AppBar and bottom dot indicator
-    final cellWidth = (pageWidth ~/ (widget.table.numCols + 2)).toDouble();
-    final cellHeight = (pageHeight ~/ (widget.table.numRows + 3)).toDouble();
-    final dim =
-        (pageHeight > pageWidth ? min(cellWidth, cellHeight) : cellWidth) - 1;
-    final inset = max(0.15 * dim, 8.0);
-    final space = max(0.05 * dim, 1.0);
-    final hPad =
-        max(pageWidth - dim * (widget.table.numCols + 2), 2) / 2 + space;
-    final vPad =
-        max(pageHeight - dim * (widget.table.numRows + 3), 2) / 2 + space;
-
-    final fontSizing = (base) => dim * base / 100;
-    final textStyle =
-        (fontSize, [lineHeight = 1.25, color = Colors.white]) => TextStyle(
-              fontWeight: FontWeight.bold,
-              height: lineHeight,
-              color: color,
-              fontSize: fontSizing(fontSize).clamp(5, mediaSize.height / 25),
-            );
-    final headerStyle = textStyle(17);
-    final rowHeadTextStyle = textStyle(17);
-    final unaryFooterStyle = textStyle(15, 1.4);
-    final unarySelectedStyle = textStyle(15, 1.4); //, scheme.primary);
-    final binaryFooterStyle = textStyle(15, 1.4);
-    final binarySelectedStyle = textStyle(15, 1.4); //, scheme.primary);
-
-    final headerRow = [
-      for (var fTxt in [
-        'Base head consonant\nface vowel',
-        ...Face.values
-            .map((f) => '${f.shortName}\n\n${f.vowel.shortName.toLowerCase()}'),
-        'Symbol Names',
-      ])
-        Container(
-          child: Center(
-            child: Text(
-              '$fTxt',
-              textAlign: TextAlign.center,
-              style: headerStyle,
-            ),
-          ),
-          color: scheme.secondaryVariant,
-        ),
-    ];
-
-    final toSyllable = (m, f, [isHead = false]) {
-      var s = widget.table
-          .atMonoFace(m, f)
-          .syllable
-          .diffEndVowel(_unOp == null ? Vowel.NIL : _unOp!.ending)
-          .diffCoda(_compound
-              ? Coda.ng
-              : (_binOp == null ? Coda.NIL : _binOp!.coda[_codaForm!]));
-      if (isHead) s = s.headForm;
-      return s;
-    };
-
-    final gramTable = [
-      for (var m in Mono.values) ...[
-        Container(
-          child: Center(
-            child: Text(
-              [
-                if (m.gram.consPair.base != Cons.NIL)
-                  '${m.gram.consPair.base.shortName}…',
-                '${m.gram.consPair.head.shortName}…',
-              ].join('\n'),
-              textAlign: TextAlign.center,
-              style: rowHeadTextStyle,
-            ),
-          ),
-          color: scheme.background,
-        ),
-        for (var f in Face.values)
-          Container(
-            padding: EdgeInsets.all(inset),
-            child: GestureDetector(
-              onTap: () => speechSvc.pronounce(
-                [
-                  Pronunciation([toSyllable(m, f)])
-                ],
-                multiStitch: kIsWeb || Platform.isIOS,
-              ),
-              onLongPress: () => speechSvc.pronounce(
-                [
-                  Pronunciation([toSyllable(m, f, true)])
-                ],
-                multiStitch: kIsWeb || Platform.isIOS,
-              ),
-              child: GrafonTile(
-                widget.table.atMonoFace(m, f).renderPlan,
-                height: dim,
-                width: dim,
-              ),
-            ),
-            color: scheme.surface,
-          ),
-        GestureDetector(
-          onTap: () => speechSvc.pronounce(
-            [
-              for (var f in Face.values) Pronunciation([toSyllable(m, f)])
-            ],
-            multiStitch: kIsWeb || Platform.isIOS,
-          ),
-          onLongPress: () => speechSvc.pronounce(
-            [
-              for (var f in Face.values) Pronunciation([toSyllable(m, f, true)])
-            ],
-            multiStitch: kIsWeb || Platform.isIOS,
-          ),
-          child: Container(
-            child: Center(
-              child: Text(
-                '${m.shortName}\n${m.quadPeer.shortName}',
-                textAlign: TextAlign.center,
-                style: rowHeadTextStyle,
-              ),
-            ),
-            color: scheme.background,
-          ),
-        ),
-      ],
-    ];
-
-    final biBorderCol = _codaForm == CodaForm.base
-        ? Colors.greenAccent
-        : (_codaForm == CodaForm.tail ? Colors.yellow : Colors.pinkAccent);
-    final biBorder = Border.all(color: biBorderCol, width: 4);
-    final uniBorder = Border.all(color: Colors.purpleAccent, width: 4);
-    final uniBorderDeco = BoxDecoration(
-      border: uniBorder,
-      color: scheme.primaryVariant,
+        mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT - 12 * inset;
+    final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH
+        ? 1
+        : (pageWidth > pageHeight && pageWidth > 4 * MIN_GRAM_CLUSTER_WIDTH
+            ? 4
+            : 2);
+    final cellWidth =
+        ((pageWidth - 2 * (5 * numCols + 1) * inset) / (5 * numCols));
+    final cellHeight =
+        ((pageHeight - (2 * inset * (1 + table.numRows / numCols))) /
+            ((1 + HEADER_CELL_RATIO) * (1 + table.numRows / numCols)));
+    final cellDim = min(cellWidth, cellHeight);
+    final allRowWidth =
+        ((cellDim + 2 * inset) * 5 * numCols) + 2 * inset * numCols;
+    final headerHeight = (cellDim * HEADER_CELL_RATIO).clamp(15.0, 50.0);
+    final opHeaderStyle = TextStyle(
+      fontWeight: FontWeight.normal,
+      color: scheme.primary,
+      fontStyle: FontStyle.italic,
+      fontSize: (headerHeight / 3).clamp(5.0, 18.0),
+      backgroundColor: Colors.transparent,
     );
-    final biBorderDeco = BoxDecoration(
-      border: biBorder,
-      color: scheme.primaryVariant,
+    final opTxtStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: (headerHeight / 2.75).clamp(5.0, 20.0),
+      backgroundColor: Colors.transparent,
     );
-    final unaryOpRow = [
-      Container(
-        child: Center(
-          child: Text(
-            'Unary operator',
-            textAlign: TextAlign.center,
-            style: rowHeadTextStyle,
-          ),
-        ),
-        color: scheme.primaryVariant,
-      ),
-      for (var u in Unary.values)
-        GestureDetector(
-          onTap: () => setState(() {
-            _unOp = (_unOp == u ? null : u);
-            log.info(_unOp == null
-                ? "Toggling Unary operator off"
-                : "Toggling Unary operator to $_unOp");
-          }),
-          child: Container(
-            child: Center(
-              child: Text(
-                '${u.shortName}\n${u.symbol}\n…${u.ending.shortName.toLowerCase()}',
-                textAlign: TextAlign.center,
-                style: _unOp != u ? unaryFooterStyle : unarySelectedStyle,
-              ),
-            ),
-            color: _unOp != u ? scheme.primaryVariant : null,
-            decoration: _unOp == u ? uniBorderDeco : null,
-          ),
-        ),
-      Container(
-        child: Center(
-          child: Text(
-            'Vowel extension',
-            textAlign: TextAlign.center,
-            style: rowHeadTextStyle,
-          ),
-        ),
-        color: scheme.primaryVariant,
-      ),
-    ];
 
-    final binaryOpRow = [
-      Container(
-        child: Center(
-          child: Text(
-            'Binary operator',
-            textAlign: TextAlign.center,
-            style: rowHeadTextStyle,
-          ),
-        ),
-        color: scheme.primaryVariant,
-      ),
-      for (var b in Binary.values)
-        GestureDetector(
-          onTap: () => setState(() {
-            if (_binOp != b) {
-              _binOp = b;
-              _codaForm = CodaForm.base;
-            } else {
-              // cycle thru the CodaForms
-              if (_codaForm == CodaForm.alt) {
-                _binOp = null;
-                _codaForm = null;
-              } else if (_codaForm == CodaForm.base) {
-                _codaForm = CodaForm.tail;
-              } else {
-                _codaForm = CodaForm.alt;
-              }
-            }
-            _compound = false;
-            log.info(_binOp == null
-                ? "Toggling Binary operator off."
-                : "Toggling Binary operator to $_binOp ${_codaForm?.shortName}");
-          }),
-          child: Container(
-            child: Center(
-              child: Text(
-                '${b.shortName}\n${b.symbol}' +
-                    (_binOp == b && _codaForm != null
-                        ? ' (${_codaForm!.shortName})\n…${b.coda[_codaForm!].shortName}'
-                        : '\n…' +
-                            [
-                              if (b.coda.base.shortName.isNotEmpty)
-                                b.coda.base.shortName,
-                              b.coda.tail.shortName,
-                              b.coda.alt.shortName
-                            ].join(', ')),
-                textAlign: TextAlign.center,
-                style: _binOp == b ? binarySelectedStyle : binaryFooterStyle,
-              ),
-            ),
-            color: _binOp != b ? scheme.primaryVariant : null,
-            decoration: _binOp == b ? biBorderDeco : null,
-          ),
-        ),
-      GestureDetector(
-        onTap: () => setState(() {
-          _compound = !_compound;
-          _binOp = null;
-          _codaForm = null;
-          log.info("Toggling Compound operator to $_compound");
-        }),
-        child: Container(
-          child: Center(
-            child: Text(
-              'Compound\n${CompoundWord.SEPARATOR_SYMBOL}\n…' +
-                  CompoundWord.PRONUNCIATION_LINK.shortName,
-              textAlign: TextAlign.center,
-              style: _compound ? binarySelectedStyle : binaryFooterStyle,
-            ),
-          ),
-          color: _compound ? null : scheme.primaryVariant,
-          decoration: _compound ? uniBorderDeco : null,
-        ),
-      ),
-      Container(
-        child: Center(
-          child: Text(
-            'Ending consonant',
-            textAlign: TextAlign.center,
-            style: rowHeadTextStyle,
-          ),
-        ),
-        color: scheme.primaryVariant,
-      ),
-    ];
-
-    return Container(
-      width: dim * (widget.table.numCols + 2) + 2 * hPad,
-      height: dim * (widget.table.numRows + 3) + 2 * vPad,
-      padding: EdgeInsets.symmetric(vertical: vPad, horizontal: hPad),
-      child: GridView.count(
-        crossAxisCount: widget.table.numCols + 2,
-        crossAxisSpacing: space,
-        mainAxisSpacing: space,
+    final gramTable = Container(
+      padding: EdgeInsets.all(inset),
+      alignment: Alignment.center,
+      child: Table(
+        defaultColumnWidth: IntrinsicColumnWidth(),
         children: [
-          ...headerRow,
-          ...gramTable,
-          ...unaryOpRow,
-          ...binaryOpRow,
+          for (int ri = 0; ri < table.numRows ~/ numCols; ri++)
+            TableRow(children: [
+              for (int ci = 0; ci < numCols; ci++)
+                GramRowWidget(
+                  Mono.values[ri * numCols + ci],
+                  (List<Gram> gs) async {
+                    final coda = _binary == null ? Coda.NIL : _binary!.coda;
+                    await speechSvc.pronounce(
+                      gs.map((g) => Pronunciation([
+                            _unary == null
+                                ? g.syllable.diffCoda(coda)
+                                : g.syllable
+                                    .diffExtension(_unary!.extn)
+                                    .diffCoda(coda)
+                          ])),
+                      multiStitch: kIsWeb || Platform.isIOS,
+                    );
+                  },
+                  headerHeight: headerHeight,
+                  gramDim: cellDim,
+                  pad: inset,
+                ),
+            ]),
+        ],
+      ),
+    );
+
+    final onUnaryTap = (Unary u) => () => setState(() {
+          _unary = _unary == u ? null : u;
+          log.info("Toggling Unary operator to $_unary");
+        });
+
+    final unaryRow = Wrap(
+      spacing: inset,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          'Unary Ops',
+          textAlign: TextAlign.center,
+          style: opHeaderStyle,
+        ),
+        for (var u in Unary.values)
+          GestureDetector(
+            child: Container(
+              padding: EdgeInsets.all(inset / 2),
+              height: headerHeight,
+              width: allRowWidth / 6,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: _unary == u ? scheme.primary : scheme.background,
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+              ),
+              child: Text(
+                "${u.shortName} ${u.symbol} …${u.extn.shortName}…",
+                textAlign: TextAlign.center,
+                style: opTxtStyle,
+              ),
+            ),
+            onTap: onUnaryTap(u),
+          ),
+      ],
+    );
+
+    final onBinaryTap = (Binary b) => () => setState(() {
+          if (_binary == b) {
+            _binary = null;
+          } else {
+            _binary = b;
+          }
+          log.info(_binary == null
+              ? 'Switch Binary operator off.'
+              : 'Toggling Binary operator to ${_binary!.shortName}.');
+        });
+
+    final codaTxt =
+        (Binary b) => (b.coda.shortName.isEmpty ? '' : ' …${b.coda.shortName}');
+
+    final binaryRow = Wrap(
+      spacing: inset,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          'Binary Ops',
+          textAlign: TextAlign.center,
+          style: opHeaderStyle,
+        ),
+        for (var b in Binary.values)
+          GestureDetector(
+            child: Container(
+              padding: EdgeInsets.all(inset / 2),
+              height: headerHeight,
+              width: allRowWidth / 5,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: _binary == b ? scheme.primary : scheme.background,
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+              ),
+              child: Text(
+                "${b.shortName} ${b.symbol} ${codaTxt(b)}",
+                textAlign: TextAlign.center,
+                style: opTxtStyle,
+              ),
+            ),
+            onTap: onBinaryTap(b),
+          ),
+      ],
+    );
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          gramTable,
+          unaryRow,
+          Container(height: inset),
+          binaryRow,
+          Container(height: TOOL_BAR_HEIGHT + FOOTER_HEIGHT),
+        ],
+      ),
+    );
+  }
+}
+
+typedef SpeechCallBack = void Function(List<Gram>);
+
+/// A widget that renders a row of 5 grams in the same Mono row in Gram Table
+class GramRowWidget extends StatelessWidget {
+  final Mono mono;
+  final SpeechCallBack onTap;
+  final double gramDim;
+  final double headerHeight;
+  final double pad;
+
+  const GramRowWidget(this.mono, this.onTap,
+      {this.gramDim = 50, this.headerHeight = 20, this.pad = 5, Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext ctx) {
+    final scheme = Theme.of(ctx).colorScheme;
+    final table = ctx.watch<GramTable>();
+    final headerTxtStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: (headerHeight / 2.5).clamp(5, 12),
+    );
+    final cons = mono.gram.cons.shortName;
+    final consTxt = cons.isEmpty ? '' : '($cons…)';
+    return Container(
+      padding: EdgeInsets.all(pad / 2),
+      color: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GestureDetector(
+            onTap: () => onTap(table.monoRow(mono)),
+            child: Container(
+              height: headerHeight,
+              color: scheme.primaryVariant,
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.symmetric(horizontal: pad, vertical: pad / 2),
+              child: Text(
+                "${mono.shortName} & ${mono.quadPeer.shortName} $consTxt",
+                style: headerTxtStyle,
+                maxLines: 1,
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var f in Face.values)
+                Container(
+                  padding: EdgeInsets.all(pad),
+                  decoration: BoxDecoration(
+                    color: scheme.surface,
+                    border: Border.all(color: scheme.primaryVariant, width: .2),
+                  ),
+                  child: GestureDetector(
+                    onTap: () => onTap([table.atMonoFace(mono, f)]),
+                    child: GrafonTile(
+                      table.atMonoFace(mono, f).renderPlan,
+                      height: gramDim,
+                      width: gramDim,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );

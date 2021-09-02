@@ -21,6 +21,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/constants.dart';
 import 'package:grafon/expr_render.dart';
 import 'package:grafon/grafon_widget.dart';
 import 'package:grafon/gram_infra.dart';
@@ -70,9 +71,9 @@ class MockCanvas extends Mock implements Canvas {
 void main() {
   testWidgets('GramTile has a CustomPaint for every Gram',
       (WidgetTester tester) async {
-    for (final cp in ConsPair.values) {
+    for (final c in Cons.values) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
-        final gram = GramTable().atConsPairVowel(cp, v);
+        final gram = GramTable().atConsVowel(c, v);
         await tester.pumpWidget(GrafonTile(gram.renderPlan, height: 100));
         expect(find.byType(CustomPaint), findsOneWidget);
         final custPaint = find.byType(CustomPaint).evaluate().first;
@@ -118,8 +119,8 @@ void main() {
 
     expect(c.dx, 50.0);
     expect(c.dy, 50.0);
-    expect(r, 5.0);
-    expect(paint.strokeWidth, size.height * RenderPlan.PEN_WTH_SCALE);
+    expect(r, 7.5);
+    expect(paint.strokeWidth, size.height * DOT_LINE_WTH_RATIO * PEN_WTH_SCALE);
     expect(paint.color.value, scheme.primary.value);
     expect(paint.style, PaintingStyle.fill);
     expect(paint.strokeCap, StrokeCap.round);
@@ -185,7 +186,7 @@ void main() {
         Anchor.S,
         Anchor.S,
       ])
-    ], Face.Up, ConsPair.lr);
+    ], Face.Up, Cons.l);
 
     final painter = GrafonPainter(bezier.renderPlan, scheme: scheme);
     final canvas = MockCanvas();
@@ -201,7 +202,7 @@ void main() {
     final scheme = ColorScheme.fromSwatch();
     final gram = QuadGram([
       PolyStraight.anchors([Anchor.E, Anchor.N])
-    ], Face.Up, ConsPair.h);
+    ], Face.Up, Cons.h);
 
     final p1 = Offset(100, 100);
     final p2 = Offset(0, 0);
@@ -218,7 +219,7 @@ void main() {
 
     final gram = QuadGram([
       PolyCurve.anchors([Anchor.N, Anchor.N, Anchor.S, Anchor.S])
-    ], Face.Up, ConsPair.h);
+    ], Face.Up, Cons.h);
 
     final p1 = Offset(50, 0);
     final p2 = Offset(50, 100);
@@ -237,7 +238,7 @@ void main() {
     final gram = QuadGram([
       PolyStraight.anchors([Anchor.N, Anchor.S]),
       InvisiDot.anchors([Anchor.W])
-    ], Face.Right, ConsPair.lr);
+    ], Face.Right, Cons.l);
 
     final p1 = Offset(75, 0);
     final p2 = Offset(75, 100);

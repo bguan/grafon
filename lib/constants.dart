@@ -17,7 +17,7 @@
 
 /// Constants to be share in multiple pieces of code
 
-const TOOL_BAR_HEIGHT = 35.0;
+const TOOL_BAR_HEIGHT = 30.0;
 const FOOTER_HEIGHT = 35.0;
 
 const MIN_GRAM_WIDTH = 0.01;

@@ -48,7 +48,7 @@ class GramTableView extends StatefulWidget {
 
 class _GramTableViewState extends State<GramTableView> {
   static const MIN_GRAM_CLUSTER_WIDTH = 150;
-  static const MIN_GRAM_CLUSTER_HEIGHT = 350;
+  static const MIN_GRAM_CLUSTER_HEIGHT = 300;
   static const HEADER_CELL_RATIO = 0.8;
   static final log = Logger("_GramTableViewState");
 
@@ -61,7 +61,7 @@ class _GramTableViewState extends State<GramTableView> {
     final table = ctx.watch<GramTable>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
-    final inset = 6.0;
+    final inset = 4.0;
     final pageWidth = mediaSize.width - 9 * inset;
     final pageHeight = mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT;
     final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH ||
@@ -235,7 +235,6 @@ class GramRowWidget extends StatelessWidget {
                 height: headerHeight,
                 decoration: BoxDecoration(
                   color: scheme.primary,
-                  border: Border.all(color: scheme.primary, width: 1),
                 ),
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.all(pad / 2),
@@ -254,17 +253,13 @@ class GramRowWidget extends StatelessWidget {
               children: [
                 for (var f in Face.values)
                   Container(
-                    padding: EdgeInsets.all(pad),
-                    decoration: BoxDecoration(
-                      color: scheme.surface,
-                      border: Border.all(color: scheme.primary, width: 1),
-                    ),
+                    padding: EdgeInsets.all(pad + 0.1 * gramDim),
                     child: GestureDetector(
                       onTap: () => onTap([table.atMonoFace(mono, f)]),
                       child: GrafonTile(
                         table.atMonoFace(mono, f).renderPlan,
-                        height: gramDim,
-                        width: gramDim,
+                        height: 0.8 * gramDim,
+                        width: 0.8 * gramDim,
                       ),
                     ),
                   ),

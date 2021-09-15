@@ -214,22 +214,16 @@ void main() {
 
   test('Mono convenience helper for expression building works', () {
     for (final m in Mono.values) {
-      expect(m.shrink().renderPlan, m.gram.renderPlan.byUnary(Unary.Shrink));
-      expect(m.up().renderPlan, m.gram.renderPlan.byUnary(Unary.Up));
-      expect(m.down().renderPlan, m.gram.renderPlan.byUnary(Unary.Down));
-      expect(m.left().renderPlan, m.gram.renderPlan.byUnary(Unary.Left));
-      expect(m.right().renderPlan, m.gram.renderPlan.byUnary(Unary.Right));
-
-      final SingleGramExpr s = Mono.Dot.gram;
+      final GrafonExpr s = Mono.Dot.gram;
       final BinaryOpExpr b = Mono.Dot.next(Mono.Dot.gram);
       expect(m.next(s).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Next, s.renderPlan));
       expect(m.next(b).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Next, b.renderPlan));
-      expect(m.merge(s).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Merge, s.renderPlan));
-      expect(m.merge(b).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Merge, b.renderPlan));
+      expect(m.mix(s).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Mix, s.renderPlan));
+      expect(m.mix(b).renderPlan,
+          m.gram.renderPlan.byBinary(Binary.Mix, b.renderPlan));
       expect(m.over(s).renderPlan,
           m.gram.renderPlan.byBinary(Binary.Over, s.renderPlan));
       expect(m.over(b).renderPlan,

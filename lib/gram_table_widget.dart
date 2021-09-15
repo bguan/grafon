@@ -47,12 +47,12 @@ class GramTableView extends StatefulWidget {
 }
 
 class _GramTableViewState extends State<GramTableView> {
-  static const MIN_GRAM_CLUSTER_WIDTH = 110;
-  static const HEADER_CELL_RATIO = .8;
+  static const MIN_GRAM_CLUSTER_WIDTH = 150;
+  static const HEADER_CELL_RATIO = 0.8;
   static final log = Logger("_GramTableViewState");
 
-  Unary? _unary;
-  Binary? _binary;
+  var _isAlt = false;
+  var _binary = Binary.Next;
 
   @override
   Widget build(BuildContext ctx) {
@@ -60,59 +60,51 @@ class _GramTableViewState extends State<GramTableView> {
     final table = ctx.watch<GramTable>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
-    final inset = min(mediaSize.width, mediaSize.height) / 100;
-    final pageWidth = mediaSize.width - 2 * inset;
-    final pageHeight =
-        mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT - 12 * inset;
+    final inset = 6.0;
+    final pageWidth = mediaSize.width - 4 * inset;
+    final pageHeight = mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT;
     final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH
         ? 1
         : (pageWidth > pageHeight && pageWidth > 4 * MIN_GRAM_CLUSTER_WIDTH
             ? 4
             : 2);
-    final cellWidth =
-        ((pageWidth - 2 * (5 * numCols + 1) * inset) / (5 * numCols));
-    final cellHeight =
-        ((pageHeight - (2 * inset * (1 + table.numRows / numCols))) /
-            ((1 + HEADER_CELL_RATIO) * (1 + table.numRows / numCols)));
+    final rowWidth = pageWidth / numCols;
+    final rowHeight = pageHeight / (2 + table.numRows / numCols);
+    final cellWidth = (rowWidth - 12 * inset) / 5;
+    final cellHeight = rowHeight / (1 + HEADER_CELL_RATIO) - 1.5 * inset;
     final cellDim = min(cellWidth, cellHeight);
-    final allRowWidth =
-        ((cellDim + 2 * inset) * 5 * numCols) + 2 * inset * numCols;
-    final headerHeight = (cellDim * HEADER_CELL_RATIO).clamp(15.0, 50.0);
+    final headerHeight = cellDim * HEADER_CELL_RATIO;
+    final opButtonHeight = headerHeight * 1.25;
+
     final opHeaderStyle = TextStyle(
       fontWeight: FontWeight.normal,
       color: scheme.primary,
       fontStyle: FontStyle.italic,
-      fontSize: (headerHeight / 3).clamp(5.0, 18.0),
+      fontSize: (headerHeight / 3),
       backgroundColor: Colors.transparent,
     );
     final opTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (headerHeight / 2.75).clamp(5.0, 20.0),
+      fontSize: (headerHeight / 2),
       backgroundColor: Colors.transparent,
     );
 
     final gramTable = Container(
-      padding: EdgeInsets.all(inset),
+      padding: EdgeInsets.all(inset / 2),
       alignment: Alignment.center,
       child: Table(
         defaultColumnWidth: IntrinsicColumnWidth(),
         children: [
-          for (int ri = 0; ri < table.numRows ~/ numCols; ri++)
+          for (int ri = 0; ri < table.numRows / numCols; ri++)
             TableRow(children: [
               for (int ci = 0; ci < numCols; ci++)
                 GramRowWidget(
                   Mono.values[ri * numCols + ci],
                   (List<Gram> gs) async {
-                    final coda = _binary == null ? Coda.NIL : _binary!.coda;
-                    await speechSvc.pronounce(
-                      gs.map((g) => Pronunciation([
-                            _unary == null
-                                ? g.syllable.diffCoda(coda)
-                                : g.syllable
-                                    .diffExtension(_unary!.extn)
-                                    .diffCoda(coda)
-                          ])),
+                    final coda = _isAlt ? _binary.coda.alt : _binary.coda;
+                    speechSvc.pronounce(
+                      gs.map((g) => Pronunciation([g.syllable.diffCoda(coda)])),
                       multiStitch: kIsWeb || Platform.isIOS,
                     );
                   },
@@ -125,62 +117,36 @@ class _GramTableViewState extends State<GramTableView> {
       ),
     );
 
-    final onUnaryTap = (Unary u) => () => setState(() {
-          _unary = _unary == u ? null : u;
-          log.info("Toggling Unary operator to $_unary");
-        });
-
-    final unaryRow = Wrap(
-      spacing: inset,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(
-          'Unary Ops',
-          textAlign: TextAlign.center,
-          style: opHeaderStyle,
-        ),
-        for (var u in Unary.values)
-          GestureDetector(
-            child: Container(
-              padding: EdgeInsets.all(inset / 2),
-              height: headerHeight,
-              width: allRowWidth / 6,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: _unary == u ? scheme.primary : scheme.background,
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-              ),
-              child: Text(
-                "${u.shortName} ${u.symbol} …${u.extn.shortName}…",
-                textAlign: TextAlign.center,
-                style: opTxtStyle,
-              ),
-            ),
-            onTap: onUnaryTap(u),
-          ),
-      ],
-    );
-
     final onBinaryTap = (Binary b) => () => setState(() {
           if (_binary == b) {
-            _binary = null;
+            if (_binary.coda.shortName.isEmpty || _isAlt) {
+              _binary = Binary.Next;
+              _isAlt = false;
+            } else {
+              _isAlt = true;
+            }
           } else {
             _binary = b;
+            _isAlt = false;
           }
-          log.info(_binary == null
-              ? 'Switch Binary operator off.'
-              : 'Toggling Binary operator to ${_binary!.shortName}.');
+          log.finest(
+            'Set binary operator to ${_binary.shortName}'
+            '${_isAlt ? ' (alt)' : ''}',
+          );
         });
 
-    final codaTxt =
-        (Binary b) => (b.coda.shortName.isEmpty ? '' : ' …${b.coda.shortName}');
+    final codaTxt = (Binary b) => b.coda.shortName.isEmpty
+        ? ''
+        : (_binary == b
+            ? (_isAlt ? '…${b.coda.alt.shortName}' : '…${b.coda.shortName}')
+            : '${b.coda.shortName}, ${b.coda.alt.shortName}');
 
     final binaryRow = Wrap(
-      spacing: inset,
+      spacing: 2 * inset,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
-          'Binary Ops',
+          'Operators',
           textAlign: TextAlign.center,
           style: opHeaderStyle,
         ),
@@ -188,11 +154,13 @@ class _GramTableViewState extends State<GramTableView> {
           GestureDetector(
             child: Container(
               padding: EdgeInsets.all(inset / 2),
-              height: headerHeight,
-              width: allRowWidth / 5,
+              height: opButtonHeight,
+              width: pageWidth / (1 + Binary.values.length),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _binary == b ? scheme.primary : scheme.background,
+                color: _binary == b
+                    ? (_isAlt ? scheme.primaryVariant : scheme.primary)
+                    : scheme.background,
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
               child: Text(
@@ -213,10 +181,8 @@ class _GramTableViewState extends State<GramTableView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           gramTable,
-          unaryRow,
           Container(height: inset),
           binaryRow,
-          Container(height: TOOL_BAR_HEIGHT + FOOTER_HEIGHT),
         ],
       ),
     );
@@ -244,57 +210,63 @@ class GramRowWidget extends StatelessWidget {
     final headerTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (headerHeight / 2.5).clamp(5, 12),
+      fontSize: (headerHeight / 3),
     );
     final cons = mono.gram.cons.shortName;
     final consTxt = cons.isEmpty ? '' : '($cons…)';
-    return Container(
-      padding: EdgeInsets.all(pad / 2),
-      color: Colors.transparent,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () => onTap(table.monoRow(mono)),
-            child: Container(
-              height: headerHeight,
-              color: scheme.primaryVariant,
-              alignment: Alignment.centerLeft,
-              padding: EdgeInsets.symmetric(horizontal: pad, vertical: pad / 2),
-              child: Text(
-                "${mono.shortName} & ${mono.quadPeer.shortName} $consTxt",
-                style: headerTxtStyle,
-                maxLines: 1,
-                textAlign: TextAlign.left,
+    return Padding(
+      padding: EdgeInsets.all(pad),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: scheme.primaryVariant, width: 1),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => onTap(table.monoRow(mono)),
+              child: Container(
+                height: headerHeight,
+                color: scheme.primaryVariant,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.all(pad / 2),
+                child: Text(
+                  "${mono.shortName} & ${mono.quadPeer.shortName} $consTxt",
+                  style: headerTxtStyle,
+                  maxLines: 1,
+                  textAlign: TextAlign.left,
+                ),
               ),
             ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var f in Face.values)
-                Container(
-                  padding: EdgeInsets.all(pad),
-                  decoration: BoxDecoration(
-                    color: scheme.surface,
-                    border: Border.all(color: scheme.primaryVariant, width: .2),
-                  ),
-                  child: GestureDetector(
-                    onTap: () => onTap([table.atMonoFace(mono, f)]),
-                    child: GrafonTile(
-                      table.atMonoFace(mono, f).renderPlan,
-                      height: gramDim,
-                      width: gramDim,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var f in Face.values)
+                  Container(
+                    padding: EdgeInsets.all(pad),
+                    decoration: BoxDecoration(
+                      color: scheme.surface,
+                      border:
+                          Border.all(color: scheme.primaryVariant, width: .1),
+                    ),
+                    child: GestureDetector(
+                      onTap: () => onTap([table.atMonoFace(mono, f)]),
+                      child: GrafonTile(
+                        table.atMonoFace(mono, f).renderPlan,
+                        height: gramDim,
+                        width: gramDim,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -35,7 +35,7 @@ abstract class GrafonWord {
   final String title;
   final String description;
 
-  Pronunciation get pronunciation;
+  Iterable<Pronunciation> get pronunciations;
 
   RenderPlan get renderPlan;
 
@@ -60,11 +60,11 @@ abstract class GrafonWord {
 /// Core Word has only 1 Grafon Expression.
 class CoreWord extends GrafonWord {
   final GrafonExpr expr;
-  final Pronunciation pronunciation;
+  final Iterable<Pronunciation> pronunciations;
   late final RenderPlan renderPlan;
 
   CoreWord(this.expr, [String? title, String? description])
-      : this.pronunciation = expr.pronunciation,
+      : this.pronunciations = [expr.pronunciation],
         super(expr.toString(), title, description) {
     var r = expr.renderPlan;
 
@@ -101,7 +101,7 @@ class CompoundWord extends GrafonWord {
   static const SEPARATOR_SYMBOL = ' : ';
 
   final Iterable<CoreWord> words;
-  late final Pronunciation pronunciation;
+  late final Iterable<Pronunciation> pronunciations;
   late final RenderPlan renderPlan;
 
   CompoundWord(this.words, [String? title, String? description])
@@ -120,14 +120,15 @@ class CompoundWord extends GrafonWord {
         r = wr;
         continue;
       }
-      r = r.byBinary(Binary.Next, wr);
+      r = r.byBinary(Binary.Next, wr, gap: COMPOUND_WORD_GAP);
     }
     renderPlan = r!;
 
-    List<Syllable> syllables = [
-      for (var w in words) ...w.pronunciation.syllables
-    ];
-    pronunciation = Pronunciation(syllables);
+    pronunciations = List.unmodifiable(
+      [
+        for (var w in words) ...w.pronunciations,
+      ],
+    );
   }
 
   @override

@@ -24,11 +24,20 @@ import 'package:grafon/phonetics.dart';
 /// Main Starting Point of the gen_sound_assets cmdline devtool.
 /// launch as command line app in IDE with env variable
 /// GOOGLE_APPLICATION_CREDENTIALS=${path to tts-api-creds.json}
+
 Future<void> main() async {
+  const TTS_CONFIG = {
+    "languageCode": "en-US", //"en-AU", //
+    "name": "en-US-Wavenet-H", //"en-AU-Wavenet-A", //
+    "ssmlGender": "FEMALE"
+  };
+
   final httpClient = await clientViaApplicationDefaultCredentials(scopes: [
     TexttospeechApi.cloudPlatformScope,
   ]);
-
+  final speechConfig = TTS_CONFIG;
+  final locale = speechConfig['languageCode'];
+  final sndArchiveDirPath = '/Users/bguan/backup/archive-$locale';
   final sndAssetDirPath = 'assets/audios';
   final sndAssetDir = Directory(sndAssetDirPath);
   if (!sndAssetDir.existsSync()) {
@@ -47,11 +56,7 @@ Future<void> main() async {
     Future<SynthesizeSpeechResponse> Function(String ssml) synthesize = (ssml) {
       final request = SynthesizeSpeechRequest.fromJson({
         "input": {"ssml": "<speak>$ssml</speak>"},
-        "voice": {
-          "languageCode": "en-US",
-          "name": "en-US-Wavenet-E",
-          "ssmlGender": "FEMALE"
-        },
+        "voice": speechConfig,
         "audioConfig": {"audioEncoding": "MP3"}
       });
       return tts.text.synthesize(request);
@@ -59,38 +64,34 @@ Future<void> main() async {
 
     for (var cc in Cons.values) {
       for (var v in Vowel.values.where((v) => v != Vowel.NIL)) {
-        for (var e in Vowel.values) {
-          for (var t in Coda.values) {
-            final cn =
-                cc is Cons ? cc.shortName : (cc is Coda ? cc.shortName : '');
-            final vn = v.shortName;
-            final en = e.shortName;
-            final tn = t.shortName;
-            final s = "$cn$vn$en$tn";
-            final cp = cc is Cons ? cc.phoneme : (cc is Coda ? cc.phoneme : '');
-            final vp = v.phoneme;
-            final ep = e.phoneme;
-            final tp = t.phoneme;
-            final p = e == Vowel.NIL ? "$cp$vp$tp" : "$cp$vp,$ep$tp";
+        for (var t in Coda.values) {
+          final cn =
+              cc is Cons ? cc.shortName : (cc is Coda ? cc.shortName : '');
+          final vn = v.shortName;
+          final tn = t.shortName;
+          final s = "$cn$vn$tn";
+          final cp = cc is Cons ? cc.phoneme : (cc is Coda ? cc.phoneme : '');
+          final vp = v.phoneme;
+          final tp = t.phoneme;
+          final p = "$cp$vp$tp";
 
-            final archivePath = 'assets/archive/$s.mp3';
-            final sndFilePath = '$sndAssetDirPath/$s.mp3';
-            final archiveFile = File(archivePath);
-            if (archiveFile.existsSync()) {
-              copyCounts++;
-              print("Found $archivePath, copy to $sndFilePath...");
-              archiveFile.copySync(sndFilePath);
-            } else {
-              genCounts++;
-              final ssml = "<phoneme alphabet='ipa' ph='$p'>?</phoneme>.";
-              print(ssml);
-              final mp3bytes = (await synthesize(ssml)).audioContentAsBytes;
-              print("Voice response for '$s' is ${mp3bytes.length} bytes.");
-              print("About to write to $sndFilePath...");
-              final sndFile = await File(sndFilePath).create();
-              sndFile.writeAsBytesSync(mp3bytes, flush: true);
-              sleep(Duration(milliseconds: 500));
-            }
+          final archivePath = '$sndArchiveDirPath/$s.mp3';
+          final sndFilePath = '$sndAssetDirPath/$s.mp3';
+          final archiveFile = File(archivePath);
+          if (archiveFile.existsSync()) {
+            copyCounts++;
+            print("Found $archivePath, copy to $sndFilePath...");
+            archiveFile.copySync(sndFilePath);
+          } else {
+            genCounts++;
+            final ssml = "<phoneme alphabet='ipa' ph='$p'>?</phoneme>.";
+            print(ssml);
+            final mp3bytes = (await synthesize(ssml)).audioContentAsBytes;
+            print("Voice response for '$s' is ${mp3bytes.length} bytes.");
+            print("About to write to $sndFilePath...");
+            final sndFile = await File(sndFilePath).create();
+            sndFile.writeAsBytesSync(mp3bytes, flush: true);
+            sleep(Duration(milliseconds: 500));
           }
         }
       }

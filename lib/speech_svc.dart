@@ -31,96 +31,133 @@ import 'phonetics.dart';
 /// Speech Service to play either local or cloud API audio
 class SpeechService {
   static final log = Logger("SpeechService");
+  static const SILENCE_FILE = "_.mp3";
+  static const TTS_CONFIG = {
+    "languageCode": "en-US",
+    "name": "en-US-Wavenet-H",
+    "ssmlGender": "FEMALE"
+  };
+  static const PAUSE_DURATION = Duration(milliseconds: 200);
   final AudioPlayer _player;
   final AssetBundle _bundle;
+  late final BufferAudioSource _silenceAudioSrc;
   TexttospeechApi? _cloudTTS;
 
-  SpeechService(this._bundle, this._player, [this._cloudTTS]);
+  SpeechService(this._bundle, this._player, [this._cloudTTS]) {
+    _loadSilenceAudio();
+  }
+
+  Future<void> _loadSilenceAudio() async {
+    final bytes = await _bundle.load("assets/audios/$SILENCE_FILE");
+    _silenceAudioSrc = BufferAudioSource(bytes.buffer.asUint8List());
+  }
 
   set cloudTTS(TexttospeechApi? tts) {
     _cloudTTS = tts;
   }
 
-  Future<void> pronounce(Iterable<Pronunciation> pronunciations,
-      {multiStitch = true}) async {
+  void pronounce(Iterable<Pronunciation> pronunciations, {multiStitch = true}) {
     try {
       if (_cloudTTS != null) {
-        final phonemeMarkups = <String>[
-          for (var p in pronunciations)
-            "<phoneme alphabet='ipa' ph='${Pronunciation(p.syllables)}'>?</phoneme>"
-        ];
-        final request = SynthesizeSpeechRequest.fromJson({
-          "input": {
-            "ssml": "<speak>\n${phonemeMarkups.join(', \n')}\n</speak>",
-          },
-          "voice": {
-            "languageCode": "en-US",
-            "name": "en-US-Wavenet-H",
-            "ssmlGender": "FEMALE"
-          },
-          "audioConfig": {"audioEncoding": "MP3"}
-        });
-        final response = await _cloudTTS!.text.synthesize(request);
-        final mp3bytes = response.audioContentAsBytes;
-        await _player.setAudioSource(BufferAudioSource(mp3bytes));
+        _pronounceViaTTS(pronunciations);
       } else {
-        final audios = <AudioSource>[];
-        final allBytes = <int>[];
-
-        for (var p in pronunciations) {
-          List<Syllable> syllables = List.from(p.syllables);
-          late final audioSrc;
-          if (multiStitch) {
-            for (var i = 0; i < syllables.length; i++) {
-              final bytes = await _bundle
-                  .load("assets/audios/${p.fragmentSequence[i]}.mp3");
-              allBytes.addAll(
-                trimMP3Frames(
-                  bytes.buffer.asUint8List(),
-                  0.0,
-                  i >= syllables.length - 1 || syllables[i].coda != Coda.NIL
-                      ? 0.2
-                      : 0.4,
-                ),
-              );
-            }
-          } else if (syllables.length == 1) {
-            audioSrc = AudioSource.uri(
-              Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
-              headers: {
-                'Content-Type': 'audio/mpeg',
-                'Content-Length': '${syllables.first.durationMillis}'
-              },
-            );
-          } else {
-            List<AudioSource> sources = [
-              for (var i = 0; i < syllables.length; i++)
-                AudioSource.uri(
-                  Uri.parse(
-                      "asset:///assets/audios/${p.fragmentSequence[i]}.mp3"),
-                  headers: {
-                    'Content-Type': 'audio/mpeg',
-                    'Content-Length': '${syllables[i].durationMillis}'
-                  },
-                ),
-            ];
-            audioSrc = ConcatenatingAudioSource(children: sources);
-          }
-          if (!multiStitch) audios.add(audioSrc);
-        }
-
-        await _player.setAudioSource(
-          multiStitch
-              ? BufferAudioSource(allBytes)
-              : audios.length == 1
-                  ? audios.first
-                  : ConcatenatingAudioSource(children: audios),
-        );
+        _pronounceAsFragments(pronunciations, multiStitch);
       }
-      await _player.play();
     } catch (e) {
       log.warning("Error playing audio: $e");
     }
+  }
+
+  Future<void> _pronounceAsFragments(
+      Iterable<Pronunciation> pronunciations, multiStitch) async {
+    final audios = <AudioSource>[];
+    for (var p in pronunciations) {
+      List<Syllable> syllables = List.from(p.syllables);
+      if (multiStitch) {
+        final allBytes = <int>[];
+        for (var i = 0; i < syllables.length; i++) {
+          final s = syllables[i];
+          if (!s.isSilence) {
+            final bytes = await _bundle
+                .load("assets/audios/${p.fragmentSequence[i]}.mp3");
+            allBytes.addAll(
+              trimMP3Frames(
+                bytes.buffer.asUint8List(),
+                0.0,
+                i >= syllables.length - 1 || syllables[i].coda != Coda.NIL
+                    ? 0.1
+                    : 0.2,
+              ),
+            );
+          }
+        }
+        audios.add(BufferAudioSource(allBytes));
+        audios.add(_silenceAudioSrc);
+      } else if (syllables.length == 1 && !syllables.first.isSilence) {
+        audios.add(
+          AudioSource.uri(
+            Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
+            headers: {
+              'Content-Type': 'audio/mpeg',
+              'Content-Length': '${syllables.first.durationMillis}'
+            },
+          ),
+        );
+      } else {
+        List<AudioSource> sources = [
+          for (var i = 0; i < p.fragmentSequence.length; i++)
+            if (!syllables[i].isSilence)
+              AudioSource.uri(
+                Uri.parse(
+                    "asset:///assets/audios/${p.fragmentSequence[i]}.mp3"),
+                headers: {
+                  'Content-Type': 'audio/mpeg',
+                  'Content-Length': '${syllables[i].durationMillis}'
+                },
+              ),
+        ];
+        audios.add(ConcatenatingAudioSource(children: sources));
+        audios.add(_silenceAudioSrc);
+      }
+    }
+
+    await _player.setAudioSource(
+      audios.length < 2
+          ? audios.first
+          : ConcatenatingAudioSource(children: audios),
+    );
+    await _player.play();
+  }
+
+  Future<void> _pronounceViaTTS(Iterable<Pronunciation> pronunciations) async {
+    String phonemeMarkup(String s) =>
+        "<phoneme alphabet='ipa' ph='$s'>.</phoneme><break strength='weak'/>";
+
+    final phonemeMarkups = <String>[];
+
+    for (var p in pronunciations) {
+      final phonemes = StringBuffer();
+      for (var i = 0; i < p.phonemes.length; i++) {
+        if (p.phonemes[i].isEmpty) {
+          phonemeMarkups.add(phonemeMarkup(phonemes.toString()));
+          phonemes.clear();
+        } else {
+          phonemes.write(p.phonemes[i]);
+        }
+      }
+      final remainder = phonemes.toString();
+      if (remainder.isNotEmpty) phonemeMarkups.add(phonemeMarkup(remainder));
+    }
+    final ssml = "<speak>\n${phonemeMarkups.join('\n')}</speak>";
+    final request = SynthesizeSpeechRequest.fromJson({
+      "input": {"ssml": ssml},
+      "voice": TTS_CONFIG,
+      "audioConfig": {"audioEncoding": "MP3"}
+    });
+    final response = await _cloudTTS!.text.synthesize(request);
+    final mp3bytes = response.audioContentAsBytes;
+    await _player.setAudioSource(BufferAudioSource(mp3bytes));
+    await _player.play();
   }
 
   /// trim by ratio from beginning and end of a MP3 bytes along frame boundaries

@@ -46,18 +46,42 @@ class WordGroupsPage extends StatefulWidget {
   _WordGroupsPageState createState() =>
       _WordGroupsPageState(this.title, this.groups);
 
-  static String genVoicing(Pronunciation p, [bool isLines = false]) => [
-        p.fragmentSequence.join('-'),
-        '[$p]',
-        '"${p.approxVoice}"',
-      ].join(isLines ? '\n' : ' ');
+  static String genVoicingLabel(
+    Iterable<Pronunciation> ps, [
+    bool isLines = false,
+  ]) {
+    if (ps.isEmpty) return "";
+
+    final fragStr = StringBuffer();
+    final phonemeStr = StringBuffer();
+    final approxStr = StringBuffer();
+    fragStr.write(ps.first.fragmentSequence.join('-'));
+    phonemeStr.write(ps.first.phonemes);
+    approxStr.write(ps.first.approxVoice);
+    for (var p in ps.skip(1)) {
+      fragStr
+        ..write(' ')
+        ..write(p.fragmentSequence.join('-'));
+      phonemeStr
+        ..write(' ')
+        ..write(p.phonemes);
+      approxStr
+        ..write(' ')
+        ..write(p.approxVoice);
+    }
+    return [
+      fragStr.toString(),
+      '[$phonemeStr]',
+      '"$approxStr"',
+    ].join(isLines ? '\n' : ' ');
+  }
 }
 
 class _WordGroupsPageState extends State<WordGroupsPage> {
   static const LOGO_HEIGHT = 50.0;
-  static const WORD_HEIGHT = 60.0;
+  static const WORD_HEIGHT = 50.0;
   static const MIN_CARD_WIDTH = 200.0;
-  static const CARD_GAP = 15.0;
+  static const CARD_GAP = 10.0;
   static const STD_PAD = 10.0;
 
   final String title;
@@ -166,8 +190,9 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                               width: sectionTextWidth,
                               padding: EdgeInsets.only(bottom: sectionPad),
                               child: Text(
-                                WordGroupsPage.genVoicing(
-                                    groups[i].logo.pronunciation),
+                                WordGroupsPage.genVoicingLabel(
+                                  groups[i].logo.pronunciations,
+                                ),
                                 style: voicingStyle,
                                 textAlign: TextAlign.start,
                               ),
@@ -184,13 +209,10 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                         ),
                         Container(
                           alignment: Alignment.centerRight,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: sectionPad,
-                            vertical: 0,
-                          ),
+                          padding: EdgeInsets.all(sectionPad),
                           child: GestureDetector(
                             onTap: () => speechSvc.pronounce(
-                              [groups[i].logo.pronunciation],
+                              groups[i].logo.pronunciations,
                               multiStitch: kIsWeb || Platform.isIOS,
                             ),
                             child: GrafonTile(
@@ -250,19 +272,19 @@ class MultiWordWidget extends StatelessWidget {
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 12 * scaleFactor,
+      fontSize: 13 * scaleFactor,
     );
     final wordTitleStyle = wordDescStyle.copyWith(
-      fontSize: 14 * scaleFactor,
       fontWeight: FontWeight.bold,
       height: 1.2,
+      fontSize: 14 * scaleFactor,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 10 * scaleFactor,
+      fontSize: 12 * scaleFactor,
     );
     final tinyLineStyle = TextStyle(
       fontWeight: FontWeight.normal,
@@ -277,7 +299,7 @@ class MultiWordWidget extends StatelessWidget {
       children: <Widget>[
         for (var w in words)
           Container(
-            width: cardWidth,
+            width: max(cardWidth, w.widthAtHeight(wordHeight)),
             alignment: Alignment.topLeft,
             child: RichText(
               textAlign: TextAlign.left,
@@ -297,16 +319,12 @@ class MultiWordWidget extends StatelessWidget {
                   WidgetSpan(
                     alignment: PlaceholderAlignment.top,
                     child: Container(
-                      padding: EdgeInsets.only(
-                        top: stdPad,
-                        right: stdPad,
-                        bottom: stdPad,
-                      ),
+                      padding: EdgeInsets.all(stdPad),
                       height: wordHeight + stdPad,
                       width: w.widthAtHeight(wordHeight) + stdPad,
                       child: GestureDetector(
                         onTap: () => speechSvc.pronounce(
-                          [w.pronunciation],
+                          w.pronunciations,
                           multiStitch: kIsWeb || Platform.isIOS,
                         ),
                         child: GrafonTile(
@@ -327,7 +345,7 @@ class MultiWordWidget extends StatelessWidget {
                       child: Text(
                         w.key +
                             '\n\n' +
-                            WordGroupsPage.genVoicing(w.pronunciation),
+                            WordGroupsPage.genVoicingLabel(w.pronunciations),
                         style: voicingStyle,
                       ),
                     ),

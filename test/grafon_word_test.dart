@@ -40,11 +40,17 @@ void main() {
     // God? Alien?
     final starMan = CompoundWord([CoreWord(sun), CoreWord(person)]);
     expect(starMan.toString(), "Sun : Dot / Up_Line");
-    List<Syllable> voicing = starMan.pronunciation.syllables;
-    expect(voicing.length, 3);
-    expect(voicing[0], Syllable(Cons.s, Vowel.a));
-    expect(voicing[1], Syllable.cvc(Cons.h, Vowel.a, Coda.ch));
-    expect(voicing[2], Syllable.v(Vowel.i));
+    final ps = starMan.pronunciations.toList();
+    expect(ps.length, 2);
+
+    List<Syllable> v1 = ps[0].syllables;
+    expect(v1.length, 1);
+    expect(v1.first, Syllable(Cons.s, Vowel.a));
+
+    List<Syllable> v2 = ps[1].syllables;
+    expect(v2.length, 2);
+    expect(v2[0], Syllable.cvc(Cons.h, Vowel.a, Coda.s));
+    expect(v2[1], Syllable.v(Vowel.i));
   });
 
   test("Word equality and hashcode works", () {
@@ -63,7 +69,7 @@ void main() {
     final g11 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
         [CoreWord(Mono.Dot.gram)]);
     final g2 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
-        [CoreWord(Mono.Dot.gram), CoreWord(Mono.Dot.shrink())]);
+        [CoreWord(Mono.Dot.gram), CoreWord(Mono.Dot.mix(Mono.Empty.gram))]);
 
     expect(g1, g1);
     expect(g1, g11);

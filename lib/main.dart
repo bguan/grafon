@@ -44,7 +44,6 @@ void main() async {
   Logger.root.onRecord.listen((r) {
     print('${r.loggerName} ${r.level.name} ${r.time}: ${r.message}');
   });
-
   runApp(
     MaterialApp(
       title: 'Grafon',
@@ -184,6 +183,41 @@ class GrafonAppState extends State<GrafonApp> {
       WordGroupsPage("Core Words", coreWords),
       WordGroupsPage("Random Words for Testing...", testWords),
     ];
+    final inset = 5.0;
+    final animDuration = Duration(milliseconds: 200);
+    final scrollCurve = Curves.ease;
+
+    final leftButton = IconButton(
+      icon: Icon(Icons.arrow_left),
+      iconSize: FOOTER_HEIGHT / 2,
+      padding: EdgeInsets.all(0),
+      color: Colors.white,
+      disabledColor: Colors.grey,
+      onPressed: () =>
+          _controller.previousPage(duration: animDuration, curve: scrollCurve),
+    );
+
+    final rightButton = IconButton(
+      icon: Icon(Icons.arrow_right),
+      iconSize: FOOTER_HEIGHT / 2,
+      padding: EdgeInsets.all(0),
+      color: Colors.white,
+      disabledColor: Colors.grey,
+      onPressed: () =>
+          _controller.nextPage(duration: animDuration, curve: scrollCurve),
+    );
+
+    final pageDots = Container(
+      padding: EdgeInsets.only(top: inset),
+      child: DotsIndicator(
+        dotsCount: pages.length,
+        position: _currentPage,
+        decorator: DotsDecorator(
+          activeColor: Colors.white,
+          color: scheme.background,
+        ),
+      ),
+    );
 
     return MultiProvider(
       providers: [
@@ -231,16 +265,17 @@ class GrafonAppState extends State<GrafonApp> {
         ),
         bottomSheet: Container(
           height: FOOTER_HEIGHT,
-          padding: EdgeInsets.all(5),
+          padding: EdgeInsets.all(inset),
           alignment: Alignment.topCenter,
           color: scheme.primary,
-          child: DotsIndicator(
-            dotsCount: pages.length,
-            position: _currentPage,
-            decorator: DotsDecorator(
-              activeColor: Colors.yellowAccent,
-              color: scheme.background,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              leftButton,
+              pageDots,
+              rightButton,
+            ],
           ),
         ),
       ),

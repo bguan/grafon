@@ -30,11 +30,11 @@ dependencies:
   tuple: ^2.0.0
   mockito: ^5.0.3
   url_launcher: ^6.0.3
-  provider: ^5.0.0
+  provider: ^6.0.0
   logging: ^1.0.1
   extension_google_sign_in_as_googleapis_auth: ^2.0.2
-  googleapis: ^4.0.0
-  just_audio: ^0.9.5
+  googleapis: ^5.0.0
+  just_audio: ^0.9.10
   dots_indicator: ^2.0.0
 
 dev_dependencies:

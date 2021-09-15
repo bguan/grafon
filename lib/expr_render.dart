@@ -30,15 +30,17 @@ import 'gram_infra.dart';
 /// RenderPlan contains info on rendering each gram expression.
 class RenderPlan {
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
-  final Iterable<PolyLine> lines;
+  late final Iterable<PolyLine> lines;
   late final numPts, numVisiblePts;
   late final double xMin, yMin, xMax, yMax, xAvg, yAvg;
   late final double width, height, minWidth, minHeight;
   late final double mass, vMass, hMass;
   late final Vector2 center;
-  late final int _hashCode;
+  late final int hashCode;
+  late final bool isFixedAspect;
 
-  RenderPlan(this.lines, {bool recenter: true}) {
+  RenderPlan(Iterable<PolyLine> lines, {bool recenter: true}) {
+    bool isFA = false;
     double xMin = double.maxFinite,
         yMin = double.maxFinite,
         xMax = -double.maxFinite,
@@ -53,7 +55,9 @@ class RenderPlan {
         num = 0,
         numVis = 0;
 
+    // the whole render is fixed aspect if any lines is fixed aspect
     for (final l in lines) {
+      isFA = isFA || l.isFixedAspect;
       final m = l.metrics;
       final d = l.lengthDim;
       xMin = min(xMin, m.xMin);
@@ -71,6 +75,9 @@ class RenderPlan {
       minHeight = max(minHeight, l.metrics.minHeight);
     }
 
+    this.isFixedAspect = isFA;
+    this.lines =
+        List.unmodifiable(lines.map((PolyLine l) => l.diffAspect(isFA)));
     this.numPts = num.toInt();
     this.numVisiblePts = numVis.toInt();
     this.xMin = quantize(num == 0 ? 0 : xMin);
@@ -89,11 +96,13 @@ class RenderPlan {
     this.height = quantize(max(yMax - yMin, minHeight));
     this.minWidth = this.width;
     this.minHeight = this.height;
-    this._hashCode = lines.fold(mass.hashCode, (h, l) => h << 1 ^ l.hashCode);
+    this.hashCode =
+        lines.fold(mass.hashCode, (int h, l) => h << 1 ^ l.hashCode);
   }
 
-  @override
-  int get hashCode => _hashCode;
+  double get maxHeight => max(height, minHeight);
+
+  double get maxWidth => max(width, minWidth);
 
   @override
   bool operator ==(Object other) {
@@ -159,14 +168,21 @@ class RenderPlan {
   }
 
   /// Relax any fixed aspect lines
-  RenderPlan relaxFixedAspect() =>
-      RenderPlan(lines.map((l) => l.diffAspect(false)));
+  RenderPlan relaxFixedAspect() => diffAspect(false);
+
+  /// Enforce all fixed aspect lines
+  RenderPlan enforceFixedAspect() => diffAspect(true);
+
+  RenderPlan diffAspect(bool isFixedAspect) =>
+      this.isFixedAspect == isFixedAspect
+          ? this
+          : RenderPlan(lines.map((l) => l.diffAspect(isFixedAspect)));
 
   /// Remove all InvisiDots
   RenderPlan noInvisiDots() => RenderPlan(lines.where((l) => l is! InvisiDot));
 
-  /// Merge this with another Render Plan
-  RenderPlan merge(RenderPlan that) {
+  /// Mix this with another Render Plan
+  RenderPlan mix(RenderPlan that) {
     return RenderPlan([...lines, ...that.lines]);
   }
 
@@ -183,8 +199,10 @@ class RenderPlan {
       final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
       newR = RenderPlan([
         ...this.lines,
-        InvisiDot([Vector2(cx, cy - hNew / 2), Vector2(cx, cy + hNew / 2)],
-            isFixedAspect: fix),
+        InvisiDot(
+          [Vector2(cx, cy - hNew / 2), Vector2(cx, cy + hNew / 2)],
+          isFixedAspect: fix,
+        ),
       ]);
     }
 
@@ -213,107 +231,64 @@ class RenderPlan {
   }
 
   /// Transform this render plan by unary operation to generate a new render.
-  RenderPlan byUnary(Unary op) {
-    final fix = this.lines.fold(true, (bool f, l) => f && l.isFixedAspect);
-    late final List<PolyLine> lines;
-    switch (op) {
-      case Unary.Up: // shift align w top, InvisiDot at bottom to keep height
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
-        lines = [
-          ...shrunk.shift(0, .5 - shrunk.yMax).lines,
-          InvisiDot([Vector2(0, -.5)], isFixedAspect: fix)
-        ];
-        break;
-      case Unary.Down: // shift align w bottom, InvisiDot at top to keep height
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
-        lines = [
-          ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
-          InvisiDot([Vector2(0, .5)], isFixedAspect: fix)
-        ];
-        break;
-      case Unary.Left: // shift align w left, InvisiDot at right to keep width
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
-        lines = [
-          ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
-          InvisiDot([Vector2(.5, 0)], isFixedAspect: fix)
-        ];
-        break;
-      case Unary.Right: // shift align w right, keep width w InvisiDot at left
-        final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
-        lines = [
-          ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
-          InvisiDot([Vector2(-.5, 0)], isFixedAspect: fix)
-        ];
-        break;
-      case Unary.Shrink: // extending all sides to former min max
-      default:
-        final shrunk = remap((isF, v) => v / 2);
-        lines = [
-          ...shrunk.lines,
-          InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)], isFixedAspect: fix)
-        ];
-        break;
-    }
-    return RenderPlan(lines, recenter: false);
-  }
-
-  /// Transform this render plan by unary operation to generate a new render.
-  RenderPlan byBinary(Binary op, RenderPlan that) {
+  RenderPlan byBinary(Binary op, RenderPlan that, {gap: GRAM_GAP}) {
     var r1 = this;
     var r2 = that;
+    final isFA = this.isFixedAspect || that.isFixedAspect;
     switch (op) {
       case Binary.Next:
-        r1 = r1.reCenter();
-        r2 = r2.reCenter();
+        r1 = r1.reCenter().diffAspect(isFA);
+        r2 = r2.reCenter().diffAspect(isFA);
         // align the heights of r1 or r2 to the taller height
-        if ((r1.height / r2.height) > 1.2) {
-          r2 = r2.scaleHeight(r1.height).reCenter();
-        } else if ((r2.height / r1.height) > 1.2) {
-          r1 = r1.scaleHeight(r2.height).reCenter();
+        if ((r1.maxHeight / r2.maxHeight) > 1.2) {
+          r2 = r2.scaleHeight(r1.maxHeight).reCenter();
+        } else if ((r2.maxHeight / r1.maxHeight) > 1.2) {
+          r1 = r1.scaleHeight(r2.maxHeight).reCenter();
         }
         // move 2nd operand to right of 1st
-        return r1.merge(r2.shift(.5 * r1.width + GRAM_GAP + .5 * r2.width, 0));
+        return r1.mix(r2.shift(.5 * r1.maxWidth + gap + .5 * r2.maxWidth, 0));
       case Binary.Over:
         r1 = r1.reCenter();
         r2 = r2.reCenter();
         // align the widths of r1 or r2 to the wider width
-        if ((r1.width / r2.width) > 1.2) {
-          r2 = r2.scaleWidth(r1.width).reCenter();
-        } else if ((r2.width / r1.width) > 1.2) {
-          r1 = r1.scaleWidth(r2.width).reCenter();
+        if ((r1.maxWidth / r2.maxWidth) > 1.2) {
+          r2 = r2.scaleWidth(r1.maxWidth).reCenter();
+        } else if ((r2.maxWidth / r1.maxWidth) > 1.2) {
+          r1 = r1.scaleWidth(r2.maxWidth).reCenter();
         }
         return r1
-            .merge(r2.shift(0, -.5 * r1.height - GRAM_GAP - .5 * r2.height))
+            .mix(r2.shift(0, -.5 * r1.maxHeight - gap - .5 * r2.maxHeight))
             .reCenter();
       case Binary.Wrap:
         r1 = r1.reCenter();
         r2 = r2.reCenter();
-        final hScale = .5 * r1.height / r2.height;
+        final hScale = sqrt(gap) * r1.maxHeight / r2.maxHeight;
         r2 = r2.remap((isF, v) => v * hScale).reCenter();
         // if r2 width much more than r1 width, scale r1
-        if (r2.width > .5 * r1.width) {
-          r1 = r1.relaxFixedAspect().scaleWidth(2 * r2.width).reCenter();
+        if (r2.maxWidth > .5 * r1.maxWidth) {
+          r1 = r1.scaleWidth(2 * r2.maxWidth).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);
-        return r1.merge(r2).reCenter();
-      case Binary.Merge:
+        return r1.mix(r2).reCenter();
+      case Binary.Mix:
       default:
         // scale heights of r1 or r2 to taller height if too short
-        if ((r1.height / r2.height) > 1.5) {
-          r2 = r2.scaleHeight(r1.height).reCenter();
-        } else if ((r2.height / r1.height) > 1.5) {
-          r1 = r1.scaleHeight(r2.height).reCenter();
+        if ((r1.maxHeight / r2.maxHeight) > 1.5) {
+          r2 = r2.scaleHeight(r1.maxHeight).reCenter();
+        } else if ((r2.maxHeight / r1.maxHeight) > 1.5) {
+          r1 = r1.scaleHeight(r2.maxHeight).reCenter();
         }
         // scale widths of r1 or r2 to wider width if too narrow
-        if (r1.width > r2.width && r2.width / r1.width < .5) {
-          r2 = r2.scaleWidth(r1.width).reCenter();
-        } else if (r2.width > r1.width && r1.width / r2.width < .5) {
-          r1 = r1.scaleWidth(r2.width).reCenter();
+        if (r1.maxWidth > r2.maxWidth && r2.maxWidth / r1.maxWidth < .5) {
+          r2 = r2.scaleWidth(r1.maxWidth).reCenter();
+        } else if (r2.maxWidth > r1.maxWidth &&
+            r1.maxWidth / r2.maxWidth < .5) {
+          r1 = r1.scaleWidth(r2.maxWidth).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);
-        return r1.merge(r2).reCenter();
+        return r1.mix(r2).reCenter();
     }
   }
 

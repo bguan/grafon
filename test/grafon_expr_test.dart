@@ -23,20 +23,6 @@ import 'package:grafon/phonetics.dart';
 
 /// Unit Tests for Expressions
 void main() {
-  test('Unary symbol should all be unique', () {
-    final symbolsFromUnary = Set.of([
-      ...Unary.values.map((u) => u.symbol),
-    ]);
-    expect(symbolsFromUnary.length, Unary.values.length);
-  });
-
-  test('Unary shortName should all be unique', () {
-    final namesFromUnary = Set.of([
-      ...Unary.values.map((u) => u.shortName),
-    ]);
-    expect(namesFromUnary.length, Unary.values.length);
-  });
-
   test('Binary symbol should all be unique', () {
     final symbolsFromBinary = Set.of([
       ...Binary.values.map((b) => b.symbol),
@@ -49,13 +35,6 @@ void main() {
       ...Binary.values.map((b) => b.shortName),
     ]);
     expect(namesFromBinary.length, Binary.values.length);
-  });
-
-  test('Unary ending should all be unique', () {
-    final endingsFromUnary = Set.of([
-      ...Unary.values.map((u) => u.extn),
-    ]);
-    expect(endingsFromUnary.length, Unary.values.length);
   });
 
   test('Binary ending should all be unique', () {
@@ -86,7 +65,7 @@ void main() {
     expect(cross.width, moreOrLessEquals(1.0));
     expect(cross.height, moreOrLessEquals(1.0));
 
-    final x = Quads.Line.right.merge(Quads.Line.left);
+    final x = Quads.Line.right.mix(Quads.Line.left);
     expect(x.lines.length, 2);
     expect(x.lines.first, PolyStraight.anchors([Anchor.NE, Anchor.SW]));
   });
@@ -103,101 +82,10 @@ void main() {
     }
   });
 
-  test('UnaryExpr grams property works', () {
-    for (final m in Mono.values) {
-      for (final f in Face.values) {
-        final g = GramTable().atMonoFace(m, f);
-        expect(g.shrink().grams.length, 1);
-        expect(g.shrink().grams.first, g);
-        expect(g.up().grams.length, 1);
-        expect(g.up().grams.first, g);
-        expect(g.down().grams.length, 1);
-        expect(g.down().grams.first, g);
-        expect(g.left().grams.length, 1);
-        expect(g.left().grams.first, g);
-        expect(g.right().grams.length, 1);
-        expect(g.right().grams.first, g);
-      }
-    }
-  });
-
-  test('UnaryExpr to String is correct', () {
-    for (final m in Mono.values) {
-      for (final f in Face.values) {
-        final g = GramTable().atMonoFace(m, f);
-        expect(g.shrink().toString(), Unary.Shrink.symbol + g.toString());
-        expect(g.up().toString(), Unary.Up.symbol + g.toString());
-        expect(g.down().toString(), Unary.Down.symbol + g.toString());
-        expect(g.left().toString(), Unary.Left.symbol + g.toString());
-        expect(g.right().toString(), Unary.Right.symbol + g.toString());
-      }
-    }
-  });
-
-  test('UnaryExpr pronunciation is correct', () {
-    for (final m in Mono.values) {
-      for (final f in Face.values) {
-        final g = GramTable().atMonoFace(m, f);
-        expect(
-          g.shrink().pronunciation.first,
-          g.pronunciation.first.diffExtension(Unary.Shrink.extn),
-        );
-        expect(
-          g.up().pronunciation.first,
-          g.pronunciation.first.diffExtension(Unary.Up.extn),
-        );
-        expect(
-          g.down().pronunciation.first,
-          g.pronunciation.first.diffExtension(Unary.Down.extn),
-        );
-        expect(
-          g.left().pronunciation.first,
-          g.pronunciation.first.diffExtension(Unary.Left.extn),
-        );
-        expect(
-          g.right().pronunciation.first,
-          g.pronunciation.first.diffExtension(Unary.Right.extn),
-        );
-      }
-    }
-  });
-
-  test('SingleGram toString and pronunciation is correct', () {
-    final sun = Mono.Sun.gram;
-    expect(sun.toString(), "Sun");
-    expect(sun.pronunciation.length, 1);
-    expect(sun.pronunciation.first, Syllable(Cons.s, Vowel.a));
-
-    final sunTiny = sun.shrink();
-    expect(sunTiny.toString(), "~Sun");
-    expect(sunTiny.pronunciation.length, 1);
-    expect(sunTiny.pronunciation.first, Syllable(Cons.s, Vowel.a, Vowel.a));
-
-    final sunUp = sun.up();
-    expect(sunUp.toString(), "˄Sun");
-    expect(sunUp.pronunciation.length, 1);
-    expect(sunUp.pronunciation.first, Syllable(Cons.s, Vowel.a, Vowel.i));
-
-    final sunDown = sun.down();
-    expect(sunDown.toString(), "˅Sun");
-    expect(sunDown.pronunciation.length, 1);
-    expect(sunDown.pronunciation.first, Syllable(Cons.s, Vowel.a, Vowel.u));
-
-    final sunLeft = sun.left();
-    expect(sunLeft.toString(), "<Sun");
-    expect(sunLeft.pronunciation.length, 1);
-    expect(sunLeft.pronunciation.first, Syllable(Cons.s, Vowel.a, Vowel.o));
-
-    final sunRight = sun.right();
-    expect(sunRight.toString(), ">Sun");
-    expect(sunRight.pronunciation.length, 1);
-    expect(sunRight.pronunciation.first, Syllable(Cons.s, Vowel.a, Vowel.e));
-  });
-
   test('merge() grams, toString & pronunciation is correct', () {
     final x = Mono.X.gram;
     final hLine = Quads.Line.down;
-    final six = x.merge(hLine);
+    final six = x.mix(hLine);
 
     expect(six.grams.length, 2);
     expect(six.grams.first, x);
@@ -205,11 +93,11 @@ void main() {
 
     expect(six.toString(), "X * Down_Line");
     expect(six.pronunciation.length, 2);
-    expect(six.pronunciation.first, Syllable.cvc(Cons.g, Vowel.a, Coda.th));
+    expect(six.pronunciation.first, Syllable.cvc(Cons.g, Vowel.a, Coda.k));
     expect(six.pronunciation.last, Syllable.v(Vowel.u));
 
     final vLine = Quads.Line.up;
-    final hash = vLine.next(vLine).merge(ClusterExpr(hLine.over(hLine)));
+    final hash = vLine.next(vLine).mix(ClusterExpr(hLine.over(hLine)));
 
     expect(hash.grams.length, 4);
     expect(hash.grams[0], vLine);
@@ -219,11 +107,11 @@ void main() {
 
     expect(hash.toString(), "Up_Line . Up_Line * (Down_Line / Down_Line)");
     expect(hash.pronunciation.length, 6);
-    expect(hash.pronunciation[0], Syllable.vc(Vowel.i, Coda.sh));
-    expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.th));
-    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.th));
-    expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.ch));
-    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.th));
+    expect(hash.pronunciation[0], Syllable.v(Vowel.i));
+    expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.k));
+    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.k));
+    expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.s));
+    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.k));
     expect(hash.pronunciation[5], Syllable.v(Vowel.a));
   });
 
@@ -238,9 +126,9 @@ void main() {
 
     expect(child.toString(), "Dot / Up_Line");
     expect(child.pronunciation.length, 2);
-    expect(child.pronunciation.first, Syllable.cvc(Cons.h, Vowel.a, Coda.ch));
+    expect(child.pronunciation.first, Syllable.cvc(Cons.h, Vowel.a, Coda.s));
     expect(child.pronunciation.last, Syllable.v(Vowel.i));
-    expect(child.pronunciation.toString(), 'hɑːʧ.iː');
+    expect(child.pronunciation.toString(), 'hɑːʃ.iː');
 
     final cornerDown = Quads.Corner.down;
     final cornerLeft = Quads.Corner.left;
@@ -253,12 +141,12 @@ void main() {
 
     expect(feet.toString(), "Dot / (Down_Corner . Left_Corner)");
     expect(feet.pronunciation.length, 5);
-    expect(feet.pronunciation[0], Syllable.cvc(Cons.h, Vowel.a, Coda.ch));
-    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.th));
-    expect(feet.pronunciation[2], Syllable.cvc(Cons.b, Vowel.u, Coda.sh));
-    expect(feet.pronunciation[3], Syllable.cvc(Cons.b, Vowel.o, Coda.th));
+    expect(feet.pronunciation[0], Syllable.cvc(Cons.h, Vowel.a, Coda.s));
+    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
+    expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.u));
+    expect(feet.pronunciation[3], Syllable.cvc(Cons.b, Vowel.o, Coda.k));
     expect(feet.pronunciation[4], Syllable.v(Vowel.a));
-    expect(feet.pronunciation.toString(), 'hɑːʧ.ɑːθ.buːʃ.bɔːθ.ɑː');
+    expect(feet.pronunciation.toString(), 'hɑːʃ.ɑːk.buː.bɔːʧ.ɑː');
   });
 
   test('next() grams, toString & pronunciation is correct', () {
@@ -272,7 +160,7 @@ void main() {
 
     expect(talk.toString(), "Left_Arc . Right_Flow");
     expect(talk.pronunciation.length, 2);
-    expect(talk.pronunciation.first, Syllable.cvc(Cons.n, Vowel.o, Coda.sh));
+    expect(talk.pronunciation.first, Syllable(Cons.n, Vowel.o));
     expect(talk.pronunciation.last, Syllable(Cons.f, Vowel.e));
 
     final rSlash = Quads.Line.right;
@@ -286,13 +174,13 @@ void main() {
 
     expect(shout.toString(), "Left_Arc . (Right_Line / Left_Line)");
     expect(shout.pronunciation.length, 5);
-    expect(shout.pronunciation[0], Syllable.cvc(Cons.n, Vowel.o, Coda.sh));
-    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.th));
-    expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.ch));
-    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.th));
+    expect(shout.pronunciation[0], Syllable(Cons.n, Vowel.o));
+    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
+    expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.s));
+    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.k));
     expect(shout.pronunciation[4], Syllable.v(Vowel.a));
 
-    expect(shout.pronunciation.toString(), 'nɔːʃ.ɑːθ.ɜːʧ.ɔːθ.ɑː');
+    expect(shout.pronunciation.toString(), 'nɔː.ɑːʧ.ɜːʃ.ɔːʧ.ɑː');
   });
 
   test('wrap() grams, toString & pronunciation is correct', () {
@@ -306,9 +194,9 @@ void main() {
 
     expect(eye.toString(), "Circle @ Dot");
     expect(eye.pronunciation.length, 2);
-    expect(eye.pronunciation.first, Syllable.cvc(Cons.n, Vowel.a, Coda.ng));
+    expect(eye.pronunciation.first, Syllable.cvc(Cons.n, Vowel.a, Coda.n));
     expect(eye.pronunciation.last, Syllable(Cons.h, Vowel.a));
-    expect(eye.pronunciation.toString(), 'nɑːŋ.hɑː');
+    expect(eye.pronunciation.toString(), 'nɑːn.hɑː');
 
     final gateDown = Quads.Gate.down;
     final family = circle.wrap(ClusterExpr(dot.next(dot).over(gateDown)));
@@ -321,34 +209,28 @@ void main() {
 
     expect(family.toString(), "Circle @ (Dot . Dot / Down_Gate)");
     expect(family.pronunciation.length, 6);
-    expect(family.pronunciation[0], Syllable.cvc(Cons.n, Vowel.a, Coda.ng));
-    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.th));
-    expect(family.pronunciation[2], Syllable.cvc(Cons.h, Vowel.a, Coda.sh));
-    expect(family.pronunciation[3], Syllable.cvc(Cons.h, Vowel.a, Coda.ch));
-    expect(family.pronunciation[4], Syllable.cvc(Cons.d, Vowel.u, Coda.th));
+    expect(family.pronunciation[0], Syllable.cvc(Cons.n, Vowel.a, Coda.n));
+    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
+    expect(family.pronunciation[2], Syllable(Cons.h, Vowel.a));
+    expect(family.pronunciation[3], Syllable.cvc(Cons.h, Vowel.a, Coda.s));
+    expect(family.pronunciation[4], Syllable.cvc(Cons.d, Vowel.u, Coda.k));
     expect(family.pronunciation[5], Syllable.v(Vowel.a));
-    expect(family.pronunciation.toString(), 'nɑːŋ.ɑːθ.hɑːʃ.hɑːʧ.duːθ.ɑː');
+    expect(family.pronunciation.toString(), 'nɑːŋ.ɑːk.hɑː.hɑːs.duːʧ.ɑː');
   });
 
   test('test SingleExpr equality and hashcode works', () {
     final table = GramTable();
     for (final m1 in Mono.values) {
       for (final f1 in Face.values) {
-        final g1 = table.atMonoFace(m1, f1);
-        for (final u1 in [null, ...Unary.values]) {
-          final e1 = u1 == null ? g1 : UnaryOpExpr(u1, g1);
-          for (final m2 in Mono.values) {
-            for (final f2 in Face.values) {
-              final g2 = table.atMonoFace(m2, f2);
-              for (final u2 in [null, ...Unary.values]) {
-                final e2 = u2 == null ? g2 : UnaryOpExpr(u2, g2);
-                if (m1 == m2 && f1 == f2 && u1 == u2) {
-                  expect(e1, e2);
-                  expect(e1.hashCode, e2.hashCode);
-                } else {
-                  expect(e1 == e2, isFalse);
-                }
-              }
+        final e1 = table.atMonoFace(m1, f1);
+        for (final m2 in Mono.values) {
+          for (final f2 in Face.values) {
+            final e2 = table.atMonoFace(m2, f2);
+            if (m1 == m2 && f1 == f2) {
+              expect(e1, e2);
+              expect(e1.hashCode, e2.hashCode);
+            } else {
+              expect(e1 == e2, isFalse);
             }
           }
         }

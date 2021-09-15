@@ -28,7 +28,7 @@ import 'gram_table.dart';
 import 'phonetics.dart';
 
 /// Binary Operator works on a pair of Gram Expression
-enum Binary { Next, Merge, Over, Wrap }
+enum Binary { Next, Mix, Over, Wrap }
 
 /// Extending Binary Enum to associate shortName, symbol and Coda
 extension BinaryExtension on Binary {
@@ -40,7 +40,7 @@ extension BinaryExtension on Binary {
         return '/';
       case Binary.Wrap:
         return '@';
-      case Binary.Merge:
+      case Binary.Mix:
         return '*';
       case Binary.Next:
       default:
@@ -50,56 +50,15 @@ extension BinaryExtension on Binary {
 
   Coda get coda {
     switch (this) {
-      case Binary.Merge:
-        return Coda.th;
+      case Binary.Mix:
+        return Coda.k;
       case Binary.Over:
-        return Coda.ch;
+        return Coda.s;
       case Binary.Wrap:
-        return Coda.ng;
+        return Coda.n;
       case Binary.Next:
-        return Coda.sh;
       default:
         return Coda.NIL;
-    }
-  }
-}
-
-/// Unary Operators can only operate on base Grams by transformation
-enum Unary { Shrink, Right, Up, Left, Down }
-
-/// Extending Binary Enum to associate shortName, symbol and vowel extension
-extension UnaryExtension on Unary {
-  String get shortName => this.toString().split('.').last;
-
-  String get symbol {
-    switch (this) {
-      case Unary.Right:
-        return '>';
-      case Unary.Up:
-        return '˄';
-      case Unary.Left:
-        return '<';
-      case Unary.Down:
-        return '˅';
-      case Unary.Shrink:
-      default:
-        return '~';
-    }
-  }
-
-  Vowel get extn {
-    switch (this) {
-      case Unary.Right:
-        return Face.Right.vowel;
-      case Unary.Up:
-        return Face.Up.vowel;
-      case Unary.Left:
-        return Face.Left.vowel;
-      case Unary.Down:
-        return Face.Down.vowel;
-      case Unary.Shrink:
-      default:
-        return Face.Center.vowel;
     }
   }
 }
@@ -121,8 +80,8 @@ abstract class GrafonExpr {
   /// get all grams in expression
   List<Gram> get grams;
 
-  /// Merge this expression with m.
-  BinaryOpExpr merge(GrafonExpr g) => BinaryOpExpr(this, Binary.Merge, g);
+  /// Mix this expression with m.
+  BinaryOpExpr mix(GrafonExpr g) => BinaryOpExpr(this, Binary.Mix, g);
 
   /// Put this expression before e, this to left, e to right.
   BinaryOpExpr next(GrafonExpr g) => BinaryOpExpr(this, Binary.Next, g);
@@ -134,59 +93,9 @@ abstract class GrafonExpr {
   BinaryOpExpr wrap(GrafonExpr g) => BinaryOpExpr(this, Binary.Wrap, g);
 }
 
-/// abstract base class for single gram expression i.e. base gram & unary expr
-abstract class SingleGramExpr extends GrafonExpr {
-  Gram get gram;
-
-  Syllable get syllable;
-
-  @override
-  int get hashCode => gram.hashCode ^ syllable.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! SingleGramExpr) return false;
-    SingleGramExpr that = other;
-    return gram == that.gram && syllable == that.syllable;
-  }
-}
-
-/// A Unary Gram Expression applies a Unary Operation on a single Gram.
-/// Factory methods exists in Gram instead of calling constructor directly.
-class UnaryOpExpr extends SingleGramExpr {
-  final Unary op;
-  final Gram gram;
-  late final renderPlan;
-
-  UnaryOpExpr(this.op, this.gram) {
-    renderPlan = gram.renderPlan.byUnary(op);
-  }
-
-  @override
-  String toString() =>
-      op.symbol +
-      (gram is QuadGram
-          ? gram.face.shortName +
-              '_' +
-              GramTable().getEnumIfQuad(gram)!.shortName
-          : GramTable().getMonoEnum(gram).shortName);
-
-  @override
-  Syllable get syllable => gram.syllable.diffExtension(op.extn);
-
-  @override
-  Pronunciation get pronunciation => Pronunciation([syllable]);
-
-  @override
-  List<Gram> get grams => [gram];
-}
-
-/// abstract base class for multi gram expr i.e. binary and cluster
-abstract class MultiGramExpr extends GrafonExpr {}
-
 /// BinaryExpr applies a Binary operation on a 2 expressions.
 /// Private subclass, use respective factory methods in GramExpression instead.
-class BinaryOpExpr extends MultiGramExpr {
+class BinaryOpExpr extends GrafonExpr {
   final GrafonExpr expr1;
   final Binary op;
   final GrafonExpr expr2;
@@ -227,7 +136,7 @@ class BinaryOpExpr extends MultiGramExpr {
 
 /// Cluster Expression ties a binary expr into a single group.
 /// Applying special pronunciation to the head gram and the tail op.
-class ClusterExpr extends MultiGramExpr {
+class ClusterExpr extends GrafonExpr {
   final GrafonExpr subExpr;
   late final renderPlan;
   late final headGram;
@@ -238,9 +147,9 @@ class ClusterExpr extends MultiGramExpr {
     renderPlan = subExpr.renderPlan;
     final sList = subExpr.pronunciation.syllables;
     pronunciation = Pronunciation([
-      Mono.Empty.gram.syllable.diffCoda(Binary.Merge.coda),
+      Mono.Empty.gram.syllable.diffCoda(Binary.Mix.coda),
       ...sList.take(sList.length - 1),
-      sList.last.diffCoda(Binary.Merge.coda),
+      sList.last.diffCoda(Binary.Mix.coda),
       Mono.Empty.gram.syllable,
     ]);
   }

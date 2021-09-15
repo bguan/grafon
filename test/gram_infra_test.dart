@@ -18,7 +18,6 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/gram_infra.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/phonetics.dart';
@@ -1042,11 +1041,9 @@ void main() {
     for (final m in Mono.values) {
       for (final f in Face.values) {
         final g = table.atMonoFace(m, f);
-        for (final uop in [null, ...Unary.values]) {
-          final expr = uop == null ? g : UnaryOpExpr(uop, g);
-          expect(expr.gram, g);
-          expect(expr.grams, [g]);
-        }
+        final expr = g;
+        expect(expr.gram, g);
+        expect(expr.grams, [g]);
       }
     }
   });

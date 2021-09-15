@@ -20,6 +20,8 @@
 /// Each column is associated with a Face, shares the same vowel.
 library gram_table;
 
+import 'package:grafon/constants.dart';
+
 import 'grafon_expr.dart';
 import 'gram_infra.dart';
 import 'phonetics.dart';
@@ -29,7 +31,7 @@ enum Mono {
   Empty,
   Dot,
   Cross,
-  Trap,
+  Lock,
   Square,
   Grid,
   X,
@@ -53,12 +55,25 @@ class _MonoHelper {
   }
 
   final emptyPaths = [
-    InvisiDot.anchors([Anchor.NW, Anchor.SW],
-        isFixedAspect: true, minHeight: 1.0, minWidth: 1.0),
+    InvisiDot.anchors(
+      [
+        Anchor.N,
+        Anchor.S,
+        Anchor.E,
+        Anchor.W,
+      ],
+      minHeight: GRAM_DIM,
+      minWidth: GRAM_DIM,
+    ),
   ];
 
   final dotPaths = [
-    PolyDot.anchors([Anchor.O], isFixedAspect: true),
+    PolyDot.anchors([Anchor.O]),
+    InvisiDot.anchors(
+      [],
+      minHeight: GRAM_GAP,
+      minWidth: GRAM_GAP,
+    ),
   ];
 
   final crossPaths = [
@@ -83,13 +98,16 @@ class _MonoHelper {
   ];
 
   final squarePaths = [
-    PolyStraight.anchors([
-      Anchor.NW,
-      Anchor.NE,
-      Anchor.SE,
-      Anchor.SW,
-      Anchor.NW,
-    ], isFixedAspect: true),
+    PolyStraight.anchors(
+      [
+        Anchor.NW,
+        Anchor.NE,
+        Anchor.SE,
+        Anchor.SW,
+        Anchor.NW,
+      ],
+      isFixedAspect: true,
+    ),
   ];
 
   final gridPaths = [
@@ -223,7 +241,7 @@ class _MonoHelper {
     ], isFixedAspect: true),
   ];
 
-  final trapPaths = [
+  final lockPaths = [
     PolyStraight.anchors([
       Anchor.NW,
       Anchor.NE,
@@ -244,7 +262,7 @@ class _MonoHelper {
       Mono.Empty: MonoGram(emptyPaths, Cons.NIL),
       Mono.Dot: MonoGram(dotPaths, Cons.h),
       Mono.Cross: MonoGram(crossPaths, Cons.b),
-      Mono.Trap: MonoGram(trapPaths, Cons.p),
+      Mono.Lock: MonoGram(lockPaths, Cons.p),
       Mono.Square: MonoGram(squarePaths, Cons.d),
       Mono.Grid: MonoGram(gridPaths, Cons.t),
       Mono.X: MonoGram(xPaths, Cons.g),
@@ -294,17 +312,8 @@ class _QuadHelper {
   ];
 
   final dotsPaths = [
-    InvisiDot.anchors([
-      Anchor.N,
-      Anchor.NE,
-      Anchor.E,
-      Anchor.SE,
-      Anchor.S,
-      Anchor.SW,
-      Anchor.W,
-      Anchor.NW
-    ]),
-    PolyDot.anchors([Anchor.NE, Anchor.SW]),
+    InvisiDot.anchors([], minWidth: GRAM_DIM, minHeight: GRAM_DIM),
+    PolyDot.anchors([Anchor.ne, Anchor.sw]),
   ];
 
   final cornerPaths = [
@@ -332,11 +341,16 @@ class _QuadHelper {
   ];
 
   final anglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.e, Anchor.SW]),
+    PolyStraight.anchors(
+      [Anchor.NW, Anchor.e, Anchor.SW],
+      isZeroAvg: true, // this hack allows pretty mix of angle in squares & gate
+    ),
   ];
 
   final trianglePaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.e, Anchor.SW, Anchor.NW]),
+    PolyStraight.anchors(
+      [Anchor.NW, Anchor.e, Anchor.SW, Anchor.NW],
+    ),
   ];
 
   final arrowPaths = [
@@ -408,8 +422,7 @@ class _QuadHelper {
   ];
 
   final branchPaths = [
-    PolyStraight.anchors([Anchor.NE, Anchor.O, Anchor.SE]),
-    PolyStraight.anchors([Anchor.W, Anchor.O]),
+    PolyStraight.anchors([Anchor.NE, Anchor.O, Anchor.w, Anchor.O, Anchor.SE]),
   ];
 
   late final Map<Quads, QuadGrams> enum2quads;
@@ -445,6 +458,7 @@ extension MonoExtension on Mono {
   Quads get quadPeer =>
       Quads.values.firstWhere((q) => q.grams.cons == this.gram.cons);
 
+/*888888
   UnaryOpExpr shrink() => gram.shrink();
 
   UnaryOpExpr up() => gram.up();
@@ -454,8 +468,9 @@ extension MonoExtension on Mono {
   UnaryOpExpr left() => gram.left();
 
   UnaryOpExpr right() => gram.right();
+  */
 
-  BinaryOpExpr merge(GrafonExpr e) => gram.merge(e);
+  BinaryOpExpr mix(GrafonExpr e) => gram.mix(e);
 
   BinaryOpExpr next(GrafonExpr e) => gram.next(e);
 

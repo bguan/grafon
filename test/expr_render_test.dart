@@ -109,7 +109,7 @@ void main() {
   test('RenderPlan over operators leaves gap btw fixed aspect and non-fixed',
       () {
     final r = Mono.Dot.over(Quads.Line.up).renderPlan;
-    final lines = r.lines.toList();
+    final lines = r.lines.where((e) => !(e is InvisiDot)).toList();
     expect(lines.length, 2);
     final m0 = lines[0].metrics;
     final m1 = lines[1].metrics;
@@ -118,13 +118,18 @@ void main() {
     // Previous don't overlap with Next
     expect(m1.yMax, lessThan(m0.yMin));
     // Gap is not too big
-    expect(m0.yMin - m1.yMax, lessThan(.3));
+    expect(m0.yMin - m1.yMax, lessThan(.5));
   });
 
   test('RenderPlan equality, hashcode, toString works', () {
     final dot = Mono.Dot.gram.renderPlan;
     final dotPlan = RenderPlan([
-      PolyDot.anchors([Anchor.O], isFixedAspect: true)
+      PolyDot.anchors([Anchor.O]),
+      InvisiDot.anchors(
+        [],
+        minHeight: GRAM_GAP,
+        minWidth: GRAM_GAP,
+      ),
     ]);
     final circle = Mono.Circle.gram.renderPlan;
 
@@ -161,218 +166,6 @@ void main() {
     expect(cp.vMass, 0.1);
     expect(cp.hMass, 0.1);
     expect(cp.area, moreOrLessEquals(1.0));
-  });
-
-  test('Unary Shrink operator works', () {
-    final cross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S]),
-      PolyStraight.anchors([Anchor.W, Anchor.E]),
-    ]);
-
-    final shrinkCross = cross.byUnary(Unary.Shrink);
-    final filtered =
-        RenderPlan(shrinkCross.lines.where((l) => l is! InvisiDot));
-
-    expect(cross.width > filtered.width, isTrue);
-    expect(cross.height > filtered.height, isTrue);
-    expect(shrinkCross.width > filtered.width, isTrue);
-    expect(shrinkCross.height > filtered.height, isTrue);
-
-    expect(
-        shrinkCross,
-        RenderPlan([
-          PolyStraight([Vector2(0, .25), Vector2(0, -.25)]),
-          PolyStraight([Vector2(-.25, 0), Vector2(.25, 0)]),
-          InvisiDot([Vector2(-0.5, -0.5), Vector2(0.5, 0.5)])
-        ]));
-  });
-
-  test('Unary Up operator works', () {
-    final fixedCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
-    ]);
-
-    final upFixedCross = fixedCross.byUnary(Unary.Up);
-    final fixedFiltered =
-        RenderPlan(upFixedCross.lines.where((l) => l is! InvisiDot));
-
-    expect(fixedCross.width > fixedFiltered.width, isTrue);
-    expect(fixedCross.height > fixedFiltered.height, isTrue);
-    expect(upFixedCross.width, fixedFiltered.width);
-    expect(upFixedCross.height > fixedFiltered.height, isTrue);
-
-    expect(
-        upFixedCross,
-        RenderPlan([
-          PolyStraight([Vector2(0, .5), Vector2(0, 0)], isFixedAspect: true),
-          PolyStraight([Vector2(-.25, .25), Vector2(.25, .25)],
-              isFixedAspect: true),
-          InvisiDot([Vector2(0, -0.5)], isFixedAspect: true)
-        ], recenter: false));
-
-    final flexCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
-    ]);
-
-    final upFlexCross = flexCross.byUnary(Unary.Up);
-    final filteredUp =
-        RenderPlan(upFlexCross.lines.where((l) => l is! InvisiDot));
-
-    expect(filteredUp.width, flexCross.width);
-    expect(flexCross.height > filteredUp.height, isTrue);
-    expect(upFlexCross.width, filteredUp.width);
-    expect(upFlexCross.height > filteredUp.height, isTrue);
-
-    expect(
-        upFlexCross,
-        RenderPlan([
-          PolyStraight([Vector2(0, .5), Vector2(0, 0)]),
-          PolyStraight([Vector2(-.5, .25), Vector2(.5, .25)]),
-          InvisiDot([Vector2(0, -0.5)])
-        ], recenter: false));
-  });
-
-  test('Unary Down operator works', () {
-    final fixedCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
-    ]);
-
-    final downFixedCross = fixedCross.byUnary(Unary.Down);
-    final fixedFiltered =
-        RenderPlan(downFixedCross.lines.where((l) => l is! InvisiDot));
-
-    expect(fixedCross.width > fixedFiltered.width, isTrue);
-    expect(fixedCross.height > fixedFiltered.height, isTrue);
-    expect(downFixedCross.width, fixedFiltered.width);
-    expect(downFixedCross.height > fixedFiltered.height, isTrue);
-
-    expect(
-        downFixedCross,
-        RenderPlan([
-          PolyStraight([Vector2(0, 0), Vector2(0, -.5)], isFixedAspect: true),
-          PolyStraight([Vector2(-.25, -.25), Vector2(.25, -.25)],
-              isFixedAspect: true),
-          InvisiDot([Vector2(0, 0.5)], isFixedAspect: true)
-        ], recenter: false));
-
-    final flexCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
-    ]);
-
-    final downFlexCross = flexCross.byUnary(Unary.Down);
-    final filteredDown =
-        RenderPlan(downFlexCross.lines.where((l) => l is! InvisiDot));
-
-    expect(filteredDown.width, flexCross.width);
-    expect(flexCross.height > filteredDown.height, isTrue);
-    expect(downFlexCross.width, filteredDown.width);
-    expect(downFlexCross.height > filteredDown.height, isTrue);
-
-    expect(
-        downFlexCross,
-        RenderPlan([
-          PolyStraight([Vector2(0, 0), Vector2(0, -.5)]),
-          PolyStraight([Vector2(-.5, -.25), Vector2(.5, -.25)]),
-          InvisiDot([Vector2(0, 0.5)])
-        ], recenter: false));
-  });
-
-  test('Unary Left operator works', () {
-    final fixedCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
-    ]);
-
-    final leftFixedCross = fixedCross.byUnary(Unary.Left);
-    final fixedFiltered =
-        RenderPlan(leftFixedCross.lines.where((l) => l is! InvisiDot));
-
-    expect(fixedCross.width > fixedFiltered.width, isTrue);
-    expect(fixedCross.height > fixedFiltered.height, isTrue);
-    expect(leftFixedCross.width > fixedFiltered.width, isTrue);
-    expect(leftFixedCross.height, fixedFiltered.height);
-
-    expect(
-        leftFixedCross,
-        RenderPlan([
-          PolyStraight([Vector2(-.25, .25), Vector2(-.25, -.25)],
-              isFixedAspect: true),
-          PolyStraight([Vector2(-.5, 0), Vector2(0, 0)], isFixedAspect: true),
-          InvisiDot([Vector2(.5, 0)], isFixedAspect: true)
-        ], recenter: false));
-
-    final flexCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
-    ]);
-
-    final leftFlexCross = flexCross.byUnary(Unary.Left);
-    final filteredLeft =
-        RenderPlan(leftFlexCross.lines.where((l) => l is! InvisiDot));
-
-    expect(flexCross.width > filteredLeft.width, isTrue);
-    expect(filteredLeft.height, flexCross.height);
-    expect(leftFlexCross.width > filteredLeft.width, isTrue);
-    expect(leftFlexCross.height, filteredLeft.height);
-
-    expect(
-        leftFlexCross,
-        RenderPlan([
-          PolyStraight([Vector2(-.25, .5), Vector2(-.25, -.5)]),
-          PolyStraight([Vector2(-.5, 0), Vector2(0, 0)]),
-          InvisiDot([Vector2(.5, 0)])
-        ], recenter: false));
-  });
-
-  test('Unary Right operator works', () {
-    final fixedCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: true),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: true),
-    ]);
-
-    final rightFixedCross = fixedCross.byUnary(Unary.Right);
-    final fixedFiltered =
-        RenderPlan(rightFixedCross.lines.where((l) => l is! InvisiDot));
-
-    expect(fixedCross.width > fixedFiltered.width, isTrue);
-    expect(fixedCross.height > fixedFiltered.height, isTrue);
-    expect(rightFixedCross.width > fixedFiltered.width, isTrue);
-    expect(rightFixedCross.height, fixedFiltered.height);
-
-    expect(
-        rightFixedCross,
-        RenderPlan([
-          PolyStraight([Vector2(.25, .25), Vector2(.25, -.25)],
-              isFixedAspect: true),
-          PolyStraight([Vector2(0, 0), Vector2(.5, 0)], isFixedAspect: true),
-          InvisiDot([Vector2(-.5, 0)], isFixedAspect: true)
-        ], recenter: false));
-
-    final flexCross = RenderPlan([
-      PolyStraight.anchors([Anchor.N, Anchor.S], isFixedAspect: false),
-      PolyStraight.anchors([Anchor.W, Anchor.E], isFixedAspect: false),
-    ]);
-
-    final rightFlexCross = flexCross.byUnary(Unary.Right);
-    final filtered =
-        RenderPlan(rightFlexCross.lines.where((l) => l is! InvisiDot));
-
-    expect(flexCross.width > filtered.width, isTrue);
-    expect(filtered.height, flexCross.height);
-    expect(rightFlexCross.width > filtered.width, isTrue);
-    expect(rightFlexCross.height, filtered.height);
-
-    expect(
-        rightFlexCross,
-        RenderPlan([
-          PolyStraight([Vector2(.25, .5), Vector2(.25, -.5)]),
-          PolyStraight([Vector2(0, 0), Vector2(.5, 0)]),
-          InvisiDot([Vector2(-.5, 0)])
-        ], recenter: false));
   });
 
   test('RenderPlan toDevice works', () {
@@ -444,28 +237,22 @@ void main() {
     final table = GramTable();
     for (final m1 in Mono.values) {
       for (final f1 in [Face.Center, Face.Right]) {
-        final g1 = table.atMonoFace(m1, f1);
-        for (final uop1 in [null, Unary.Shrink, Unary.Up, Unary.Left]) {
-          final expr1 = uop1 == null ? g1 : UnaryOpExpr(uop1, g1);
-          for (final bop in [null, ...Binary.values]) {
-            final exprs = <GrafonExpr>[];
-            if (bop == null) {
-              exprs.add(expr1);
-            } else {
-              for (final m2 in Mono.values) {
-                for (final f2 in [Face.Center, Face.Down]) {
-                  final g2 = table.atMonoFace(m2, f2);
-                  for (final uop2 in [null, Unary.Down, Unary.Right]) {
-                    final expr2 = uop2 == null ? g2 : UnaryOpExpr(uop2, g2);
-                    exprs.add(BinaryOpExpr(expr1, bop, expr2));
-                  }
-                }
+        final expr1 = table.atMonoFace(m1, f1);
+        for (final bop in [null, ...Binary.values]) {
+          final exprs = <GrafonExpr>[];
+          if (bop == null) {
+            exprs.add(expr1);
+          } else {
+            for (final m2 in Mono.values) {
+              for (final f2 in [Face.Center, Face.Down]) {
+                final expr2 = table.atMonoFace(m2, f2);
+                exprs.add(BinaryOpExpr(expr1, bop, expr2));
               }
             }
-            for (var e in exprs) {
-              final render = e.renderPlan;
-              expect(render.mass > 0, isTrue);
-            }
+          }
+          for (var e in exprs) {
+            final render = e.renderPlan;
+            expect(render.mass > 0, isTrue);
           }
         }
       }

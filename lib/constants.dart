@@ -17,8 +17,8 @@
 
 /// Constants to be share in multiple pieces of code
 
-const TOOL_BAR_HEIGHT = 40.0;
-const FOOTER_HEIGHT = 40.0;
+const TOOL_BAR_HEIGHT = 35.0;
+const FOOTER_HEIGHT = 35.0;
 
 const MIN_GRAM_WIDTH = 0.01;
 const MIN_GRAM_HEIGHT = 0.01;
@@ -29,6 +29,6 @@ const COMPOUND_WORD_GAP = GRAM_DIM / 2;
 const FLOAT_DECIMALS = 2;
 const PEN_WTH_SCALE = 0.05;
 const DOT_LINE_WTH_RATIO = 1.5;
-const GRAM_GAP = 0.25;
+const GRAM_GAP = 0.2;
 const MIN_PEN_WIDTH = 1.0;
 const MIN_WIDTH_RATIO = 3 / 4;

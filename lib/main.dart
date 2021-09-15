@@ -235,16 +235,19 @@ class GrafonAppState extends State<GrafonApp> {
             style: theme.headline6?.copyWith(
               color: scheme.surface,
               fontWeight: FontWeight.bold,
+              fontSize: TOOL_BAR_HEIGHT / 2,
             ),
           ),
           leading: IconButton(
             icon: Icon(Icons.help_outline_rounded),
+            iconSize: TOOL_BAR_HEIGHT / 2,
             onPressed: () => _openBrowser(GITHUB_LINK),
           ),
           actions: <Widget>[
             if (_googleAcct == null)
               IconButton(
                 icon: Icon(Icons.login),
+                iconSize: TOOL_BAR_HEIGHT / 2,
                 tooltip: 'Login',
                 onPressed: () => _signIn(),
               )

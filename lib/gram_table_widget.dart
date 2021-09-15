@@ -48,6 +48,7 @@ class GramTableView extends StatefulWidget {
 
 class _GramTableViewState extends State<GramTableView> {
   static const MIN_GRAM_CLUSTER_WIDTH = 150;
+  static const MIN_GRAM_CLUSTER_HEIGHT = 350;
   static const HEADER_CELL_RATIO = 0.8;
   static final log = Logger("_GramTableViewState");
 
@@ -61,9 +62,10 @@ class _GramTableViewState extends State<GramTableView> {
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
     final inset = 6.0;
-    final pageWidth = mediaSize.width - 4 * inset;
+    final pageWidth = mediaSize.width - 9 * inset;
     final pageHeight = mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT;
-    final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH
+    final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH ||
+            pageHeight < MIN_GRAM_CLUSTER_HEIGHT
         ? 1
         : (pageWidth > pageHeight && pageWidth > 4 * MIN_GRAM_CLUSTER_WIDTH
             ? 4
@@ -72,21 +74,21 @@ class _GramTableViewState extends State<GramTableView> {
     final rowHeight = pageHeight / (2 + table.numRows / numCols);
     final cellWidth = (rowWidth - 12 * inset) / 5;
     final cellHeight = rowHeight / (1 + HEADER_CELL_RATIO) - 1.5 * inset;
-    final cellDim = min(cellWidth, cellHeight);
+    final cellDim = numCols == 1 ? cellWidth : min(cellWidth, cellHeight);
     final headerHeight = cellDim * HEADER_CELL_RATIO;
-    final opButtonHeight = headerHeight * 1.25;
+    final opButtonHeight = min(FOOTER_HEIGHT, headerHeight);
 
     final opHeaderStyle = TextStyle(
       fontWeight: FontWeight.normal,
       color: scheme.primary,
       fontStyle: FontStyle.italic,
-      fontSize: (headerHeight / 3),
+      fontSize: (opButtonHeight / 3),
       backgroundColor: Colors.transparent,
     );
     final opTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (headerHeight / 2),
+      fontSize: (opButtonHeight / 2.5),
       backgroundColor: Colors.transparent,
     );
 
@@ -155,7 +157,7 @@ class _GramTableViewState extends State<GramTableView> {
             child: Container(
               padding: EdgeInsets.all(inset / 2),
               height: opButtonHeight,
-              width: pageWidth / (1 + Binary.values.length),
+              width: pageWidth / (1.5 + Binary.values.length),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: _binary == b
@@ -183,6 +185,7 @@ class _GramTableViewState extends State<GramTableView> {
           gramTable,
           Container(height: inset),
           binaryRow,
+          Container(height: FOOTER_HEIGHT + inset),
         ],
       ),
     );
@@ -219,7 +222,7 @@ class GramRowWidget extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.transparent,
-          border: Border.all(color: scheme.primaryVariant, width: 1),
+          border: Border.all(color: scheme.primary, width: 1),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -230,7 +233,10 @@ class GramRowWidget extends StatelessWidget {
               onTap: () => onTap(table.monoRow(mono)),
               child: Container(
                 height: headerHeight,
-                color: scheme.primaryVariant,
+                decoration: BoxDecoration(
+                  color: scheme.primary,
+                  border: Border.all(color: scheme.primary, width: 1),
+                ),
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.all(pad / 2),
                 child: Text(
@@ -251,8 +257,7 @@ class GramRowWidget extends StatelessWidget {
                     padding: EdgeInsets.all(pad),
                     decoration: BoxDecoration(
                       color: scheme.surface,
-                      border:
-                          Border.all(color: scheme.primaryVariant, width: .1),
+                      border: Border.all(color: scheme.primary, width: 1),
                     ),
                     child: GestureDetector(
                       onTap: () => onTap([table.atMonoFace(mono, f)]),

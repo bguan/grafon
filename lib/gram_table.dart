@@ -312,7 +312,7 @@ class _QuadHelper {
   ];
 
   final dotsPaths = [
-    InvisiDot.anchors([], minWidth: GRAM_DIM, minHeight: GRAM_DIM),
+    InvisiDot.anchors([], minWidth: GRAM_DIM / 2, minHeight: GRAM_DIM / 2),
     PolyDot.anchors([Anchor.ne, Anchor.sw]),
   ];
 

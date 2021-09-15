@@ -80,7 +80,7 @@ class WordGroupsPage extends StatefulWidget {
 class _WordGroupsPageState extends State<WordGroupsPage> {
   static const LOGO_HEIGHT = 50.0;
   static const WORD_HEIGHT = 50.0;
-  static const MIN_CARD_WIDTH = 350.0;
+  static const MIN_CARD_WIDTH = 300.0;
   static const CARD_GAP = 10.0;
   static const STD_PAD = 10.0;
 

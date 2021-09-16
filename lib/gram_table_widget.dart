@@ -235,6 +235,7 @@ class GramRowWidget extends StatelessWidget {
                 height: headerHeight,
                 decoration: BoxDecoration(
                   color: scheme.primary,
+                  border: Border.all(color: scheme.primary, width: 1),
                 ),
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.all(pad / 2),

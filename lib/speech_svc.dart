@@ -31,7 +31,7 @@ import 'phonetics.dart';
 /// Speech Service to play either local or cloud API audio
 class SpeechService {
   static final log = Logger("SpeechService");
-  static const SILENCE_FILE = "_.mp3";
+  static const SILENCE_FILE = "silence.mp3";
   static const TTS_CONFIG = {
     "languageCode": "en-US",
     "name": "en-US-Wavenet-H",

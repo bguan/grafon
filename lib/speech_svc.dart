@@ -85,8 +85,8 @@ class SpeechService {
                 bytes.buffer.asUint8List(),
                 0.0,
                 i >= syllables.length - 1 || syllables[i].coda != Coda.NIL
-                    ? 0.1
-                    : 0.2,
+                    ? 0.0
+                    : 0.1,
               ),
             );
           }

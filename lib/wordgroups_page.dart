@@ -78,11 +78,11 @@ class WordGroupsPage extends StatefulWidget {
 }
 
 class _WordGroupsPageState extends State<WordGroupsPage> {
-  static const LOGO_HEIGHT = 50.0;
-  static const WORD_HEIGHT = 50.0;
-  static const MIN_CARD_WIDTH = 280.0;
-  static const CARD_GAP = 6.0;
-  static const STD_PAD = 6.0;
+  static const LOGO_HEIGHT = 60.0;
+  static const WORD_HEIGHT = 60.0;
+  static const MIN_CARD_WIDTH = 300.0;
+  static const CARD_GAP = 10.0;
+  static const STD_PAD = 10.0;
 
   final String title;
   final List<WordGroup> groups;
@@ -209,7 +209,8 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                         ),
                         Container(
                           alignment: Alignment.centerRight,
-                          padding: EdgeInsets.all(sectionPad),
+                          padding:
+                              EdgeInsets.all(sectionPad + 0.1 * logoHeight),
                           child: GestureDetector(
                             onTap: () => speechSvc.pronounce(
                               groups[i].logo.pronunciations,
@@ -217,8 +218,10 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                             ),
                             child: GrafonTile(
                               groups[i].logo.renderPlan,
-                              height: logoHeight,
-                              width: groups[i].logo.widthAtHeight(logoHeight),
+                              height: 0.8 * logoHeight,
+                              width: groups[i]
+                                  .logo
+                                  .widthAtHeight(0.8 * logoHeight),
                             ),
                           ),
                         ),
@@ -319,7 +322,7 @@ class MultiWordWidget extends StatelessWidget {
                   WidgetSpan(
                     alignment: PlaceholderAlignment.top,
                     child: Container(
-                      padding: EdgeInsets.all(stdPad),
+                      padding: EdgeInsets.all(stdPad + 0.1 * wordHeight),
                       height: wordHeight + stdPad,
                       width: w.widthAtHeight(wordHeight) + stdPad,
                       child: GestureDetector(
@@ -329,8 +332,8 @@ class MultiWordWidget extends StatelessWidget {
                         ),
                         child: GrafonTile(
                           w.renderPlan,
-                          height: wordHeight,
-                          width: w.widthAtHeight(wordHeight),
+                          height: 0.8 * wordHeight,
+                          width: w.widthAtHeight(0.8 * wordHeight),
                         ),
                       ),
                     ),

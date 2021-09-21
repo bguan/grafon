@@ -271,7 +271,7 @@ void main() {
 
     expect(lineNOIDotS == lineNO, isFalse);
     expect(lineNOIDotS.noInvisiDots(), lineNO);
-    expect(lineNOIDotS.height, 1);
-    expect(lineNOIDotS.noInvisiDots().height, .5);
+    expect(lineNOIDotS.height, 0.5);
+    expect(lineNOIDotS.noInvisiDots().height, 0.5);
   });
 }

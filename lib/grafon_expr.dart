@@ -102,7 +102,39 @@ class BinaryOpExpr extends GrafonExpr {
   late final renderPlan;
 
   BinaryOpExpr(this.expr1, this.op, this.expr2) {
-    renderPlan = expr1.renderPlan.byBinary(op, expr2.renderPlan);
+    if (expr1 == Mono.Empty.gram && expr2 == Mono.Empty.gram) {
+      renderPlan = Mono.Empty.gram.renderPlan;
+    } else if (expr1 == Mono.Empty.gram) {
+      switch (op) {
+        case Binary.Next:
+          renderPlan = expr2.renderPlan.right();
+          break;
+        case Binary.Over:
+          renderPlan = expr2.renderPlan.down();
+          break;
+        case Binary.Wrap:
+          renderPlan = expr2.renderPlan.shrink();
+          break;
+        case Binary.Mix:
+        default:
+          renderPlan = expr2.renderPlan;
+      }
+    } else if (expr2 == Mono.Empty.gram) {
+      switch (op) {
+        case Binary.Next:
+          renderPlan = expr1.renderPlan.left();
+          break;
+        case Binary.Over:
+          renderPlan = expr1.renderPlan.up();
+          break;
+        case Binary.Wrap:
+        case Binary.Mix:
+        default:
+          renderPlan = expr1.renderPlan;
+      }
+    } else {
+      renderPlan = expr1.renderPlan.byBinary(op, expr2.renderPlan);
+    }
   }
 
   @override

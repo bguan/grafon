@@ -990,12 +990,12 @@ void main() {
     expect(dFlipSwirlHA[Face.Left].face, Face.Left);
     expect(dFlipSwirlHA[Face.Left].vowel, Face.Left.vowel);
     expect(dFlipSwirlHA[Face.Left].cons, Cons.h);
-    expect(dFlipSwirlHA[Face.Left].lines, vFlip(hFlip(swirlPaths)));
+    expect(dFlipSwirlHA[Face.Left].lines, hFlip(swirlPaths));
 
     expect(dFlipSwirlHA[Face.Down].face, Face.Down);
     expect(dFlipSwirlHA[Face.Down].vowel, Face.Down.vowel);
     expect(dFlipSwirlHA[Face.Down].cons, Cons.h);
-    expect(dFlipSwirlHA[Face.Down].lines, hFlip(swirlPaths));
+    expect(dFlipSwirlHA[Face.Down].lines, hFlip(vFlip(swirlPaths)));
   });
 
   test('test PolyCurve degenerate control pts', () {

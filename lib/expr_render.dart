@@ -230,6 +230,70 @@ class RenderPlan {
     return newR;
   }
 
+  /// Transform this render plan by shifting it up
+  RenderPlan up() {
+    late final List<PolyLine> lines;
+    // shift align w top, InvisiDot at bottom to keep height
+    final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
+    lines = [
+      ...shrunk.shift(0, .5 - shrunk.yMax).lines,
+      InvisiDot([Vector2(0, -.5)])
+    ];
+
+    return RenderPlan(lines, recenter: false);
+  }
+
+  /// Transform this render plan by shifting it down
+  RenderPlan down() {
+    late final List<PolyLine> lines;
+    // shift align w bottom, InvisiDot at top to keep height
+    final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
+    lines = [
+      ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
+      InvisiDot([Vector2(0, .5)])
+    ];
+
+    return RenderPlan(lines, recenter: false);
+  }
+
+  /// Transform this render plan by shifting it left
+  RenderPlan left() {
+    late final List<PolyLine> lines;
+    // shift align w left, InvisiDot at right to keep width
+    final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
+    lines = [
+      ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
+      InvisiDot([Vector2(.5, 0)])
+    ];
+
+    return RenderPlan(lines, recenter: false);
+  }
+
+  /// Transform this render plan by shifting it right
+  RenderPlan right() {
+    late final List<PolyLine> lines;
+    // shift align w right, keep width w InvisiDot at left
+    final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
+    lines = [
+      ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
+      InvisiDot([Vector2(-.5, 0)])
+    ];
+
+    return RenderPlan(lines, recenter: false);
+  }
+
+  /// Transform this render plan by shrinking it padding with space
+  RenderPlan shrink() {
+    late final List<PolyLine> lines;
+    // extending all sides to former min max
+    final shrunk = remap((isF, v) => v / 2);
+    lines = [
+      ...shrunk.lines,
+      InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)])
+    ];
+    return RenderPlan(lines, recenter: false);
+  }
+
   /// Transform this render plan by unary operation to generate a new render.
   RenderPlan byBinary(Binary op, RenderPlan that, {gap: GRAM_GAP}) {
     var r1 = this;
@@ -248,8 +312,8 @@ class RenderPlan {
         // move 2nd operand to right of 1st
         return r1.mix(r2.shift(.5 * r1.maxWidth + gap + .5 * r2.maxWidth, 0));
       case Binary.Over:
-        r1 = r1.reCenter();
-        r2 = r2.reCenter();
+        r1 = r1.reCenter().diffAspect(isFA);
+        r2 = r2.reCenter().diffAspect(isFA);
         // align the widths of r1 or r2 to the wider width
         if ((r1.maxWidth / r2.maxWidth) > 1.2) {
           r2 = r2.scaleWidth(r1.maxWidth).reCenter();
@@ -260,8 +324,8 @@ class RenderPlan {
             .mix(r2.shift(0, -.5 * r1.maxHeight - gap - .5 * r2.maxHeight))
             .reCenter();
       case Binary.Wrap:
-        r1 = r1.reCenter();
-        r2 = r2.reCenter();
+        r1 = r1.reCenter().diffAspect(isFA);
+        r2 = r2.reCenter().diffAspect(isFA);
         final hScale = sqrt(gap) * r1.maxHeight / r2.maxHeight;
         r2 = r2.remap((isF, v) => v * hScale).reCenter();
         // if r2 width much more than r1 width, scale r1

@@ -31,7 +31,7 @@ enum Mono {
   Empty,
   Dot,
   Cross,
-  Lock,
+  Hex,
   Square,
   Grid,
   X,
@@ -54,17 +54,8 @@ class _MonoHelper {
     return _singleton;
   }
 
-  final emptyPaths = [
-    InvisiDot.anchors(
-      [
-        Anchor.N,
-        Anchor.S,
-        Anchor.E,
-        Anchor.W,
-      ],
-      minHeight: GRAM_DIM,
-      minWidth: GRAM_DIM,
-    ),
+  final emptyPaths = <PolyLine>[
+    InvisiDot.anchors([], minHeight: GRAM_GAP, minWidth: GRAM_GAP)
   ];
 
   final dotPaths = [
@@ -111,10 +102,10 @@ class _MonoHelper {
   ];
 
   final gridPaths = [
-    PolyExtended.anchors([Anchor.nw, Anchor.sw], isFixedAspect: true),
-    PolyExtended.anchors([Anchor.ne, Anchor.se], isFixedAspect: true),
-    PolyExtended.anchors([Anchor.nw, Anchor.ne], isFixedAspect: true),
-    PolyExtended.anchors([Anchor.sw, Anchor.se], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.NW, Anchor.SW], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.NE, Anchor.SE], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.NW, Anchor.NE], isFixedAspect: true),
+    PolyExtended.anchors([Anchor.SW, Anchor.SE], isFixedAspect: true),
   ];
 
   final xPaths = [
@@ -241,18 +232,16 @@ class _MonoHelper {
     ], isFixedAspect: true),
   ];
 
-  final lockPaths = [
+  final hexPaths = [
     PolyStraight.anchors([
-      Anchor.NW,
-      Anchor.NE,
-      Anchor.SE,
-      Anchor.SW,
-      Anchor.NW,
-    ], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.N, Anchor.n], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.S, Anchor.s], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.E, Anchor.e], isFixedAspect: true),
-    PolyStraight.anchors([Anchor.W, Anchor.w], isFixedAspect: true),
+      Anchor.W,
+      Anchor.nw,
+      Anchor.ne,
+      Anchor.E,
+      Anchor.se,
+      Anchor.sw,
+      Anchor.W,
+    ]),
   ];
 
   late final Map<Mono, MonoGram> enum2mono;
@@ -262,7 +251,7 @@ class _MonoHelper {
       Mono.Empty: MonoGram(emptyPaths, Cons.NIL),
       Mono.Dot: MonoGram(dotPaths, Cons.h),
       Mono.Cross: MonoGram(crossPaths, Cons.b),
-      Mono.Lock: MonoGram(lockPaths, Cons.p),
+      Mono.Hex: MonoGram(hexPaths, Cons.p),
       Mono.Square: MonoGram(squarePaths, Cons.d),
       Mono.Grid: MonoGram(gridPaths, Cons.t),
       Mono.X: MonoGram(xPaths, Cons.g),
@@ -313,7 +302,7 @@ class _QuadHelper {
 
   final dotsPaths = [
     InvisiDot.anchors([], minWidth: GRAM_GAP, minHeight: GRAM_GAP),
-    PolyDot.anchors([Anchor.ne, Anchor.sw]),
+    PolyDot.anchors([Anchor.NE, Anchor.SW]),
   ];
 
   final cornerPaths = [
@@ -457,18 +446,6 @@ extension MonoExtension on Mono {
 
   Quads get quadPeer =>
       Quads.values.firstWhere((q) => q.grams.cons == this.gram.cons);
-
-/*888888
-  UnaryOpExpr shrink() => gram.shrink();
-
-  UnaryOpExpr up() => gram.up();
-
-  UnaryOpExpr down() => gram.down();
-
-  UnaryOpExpr left() => gram.left();
-
-  UnaryOpExpr right() => gram.right();
-  */
 
   BinaryOpExpr mix(GrafonExpr e) => gram.mix(e);
 

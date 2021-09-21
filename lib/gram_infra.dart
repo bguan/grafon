@@ -504,7 +504,7 @@ class InvisiDot extends PolyLine {
           isZeroAvg: isZeroAvg,
         ) {
     metrics = LineMetrics.ofPoints(
-      vectors,
+      <Vector2>[],
       minWidth: minWidth,
       minHeight: minHeight,
       isZeroAvg: isZeroAvg,
@@ -1034,14 +1034,14 @@ class FlipQuads extends QuadGrams {
 /// In DoubleFlipRow:
 /// Right paths are flipped vertically to make up Path;
 /// Left paths are obtained by flipping right path horizontally;
-/// Down paths are obtained by vertically flipping Left paths.
+/// Down paths are obtained by flipping up paths horizontally.
 class DoubleFlipQuads extends QuadGrams {
   DoubleFlipQuads(List<PolyLine> r, Cons cons, {recenter: true})
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => vFlip(r);
 
-  static List<PolyLine> r2l(List<PolyLine> r) => vFlip(hFlip(r));
+  static List<PolyLine> r2l(List<PolyLine> r) => hFlip(r);
 
-  static List<PolyLine> r2d(List<PolyLine> r) => hFlip(r);
+  static List<PolyLine> r2d(List<PolyLine> r) => hFlip(r2u(r));
 }

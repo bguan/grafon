@@ -213,7 +213,7 @@ void main() {
   });
 
   test('Mono convenience helper for expression building works', () {
-    for (final m in Mono.values) {
+    for (final m in Mono.values.where((e) => e != Mono.Empty)) {
       final GrafonExpr s = Mono.Dot.gram;
       final BinaryOpExpr b = Mono.Dot.next(Mono.Dot.gram);
       expect(m.next(s).renderPlan,

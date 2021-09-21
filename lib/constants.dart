@@ -24,7 +24,7 @@ const MIN_GRAM_WIDTH = 0.01;
 const MIN_GRAM_HEIGHT = 0.01;
 
 const GRAM_DIM = 1.0;
-const COMPOUND_WORD_GAP = GRAM_DIM / 2;
+const COMPOUND_WORD_GAP = 0.5;
 
 const FLOAT_DECIMALS = 2;
 const PEN_WTH_SCALE = 0.05;

@@ -35,11 +35,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'buffer_audio_src.dart';
 import 'constants.dart';
 import 'grafon_dictionary.dart';
+import 'grafon_widget.dart';
+import 'grafon_word.dart';
 import 'gram_table_widget.dart';
 import 'wordgroups_page.dart';
 
 /// Main Starting Point of the Grafon App.
 void main() async {
+  final debug = false;
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((r) {
     print('${r.loggerName} ${r.level.name} ${r.time}: ${r.message}');
@@ -51,9 +54,24 @@ void main() async {
         primarySwatch: Colors.blue,
         fontFamily: 'Arimo',
       ),
-      home: GrafonApp(),
+      home: debug ? TestApp() : GrafonApp(),
     ),
   );
+}
+
+class TestApp extends StatelessWidget {
+  const TestApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final test = CompoundWord([
+      CoreWord(Mono.Dot.next(Mono.Empty.gram).over(Quads.Corner.up)),
+      CoreWord(Quads.Dots.down),
+    ]);
+    return Center(
+      child: GrafonTile(test.renderPlan, height: 100),
+    );
+  }
 }
 
 /// Root widget f Grafon application.

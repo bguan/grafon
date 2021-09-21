@@ -40,7 +40,8 @@ class SpeechService {
   static const PAUSE_DURATION = Duration(milliseconds: 200);
   final AudioPlayer _player;
   final AssetBundle _bundle;
-  late final BufferAudioSource _silenceAudioSrc;
+  late final AudioSource _silenceAudioFileSrc;
+  late final BufferAudioSource _silenceAudioBufferSrc;
   TexttospeechApi? _cloudTTS;
 
   SpeechService(this._bundle, this._player, [this._cloudTTS]) {
@@ -49,7 +50,11 @@ class SpeechService {
 
   Future<void> _loadSilenceAudio() async {
     final bytes = await _bundle.load("assets/audios/$SILENCE_FILE");
-    _silenceAudioSrc = BufferAudioSource(bytes.buffer.asUint8List());
+    _silenceAudioBufferSrc = BufferAudioSource(bytes.buffer.asUint8List());
+    _silenceAudioFileSrc = AudioSource.uri(
+      Uri.parse("asset:///assets/audios/$SILENCE_FILE"),
+      headers: {'Content-Type': 'audio/mpeg', 'Content-Length': '200'},
+    );
   }
 
   set cloudTTS(TexttospeechApi? tts) {
@@ -92,7 +97,7 @@ class SpeechService {
           }
         }
         audios.add(BufferAudioSource(allBytes));
-        audios.add(_silenceAudioSrc);
+        audios.add(_silenceAudioBufferSrc);
       } else if (syllables.length == 1 && !syllables.first.isSilence) {
         audios.add(
           AudioSource.uri(
@@ -103,6 +108,7 @@ class SpeechService {
             },
           ),
         );
+        audios.add(_silenceAudioFileSrc);
       } else {
         List<AudioSource> sources = [
           for (var i = 0; i < p.fragmentSequence.length; i++)
@@ -117,7 +123,7 @@ class SpeechService {
               ),
         ];
         audios.add(ConcatenatingAudioSource(children: sources));
-        audios.add(_silenceAudioSrc);
+        audios.add(_silenceAudioFileSrc);
       }
     }
 

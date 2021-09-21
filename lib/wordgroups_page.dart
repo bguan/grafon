@@ -101,9 +101,8 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final mediaSize = MediaQuery.of(ctx).size;
     final pageWidth = mediaSize.width;
 
-    final sectionScale = pow(.5 * pageWidth / MIN_CARD_WIDTH, .7).toDouble();
+    final sectionScale = pow(.35 * pageWidth / MIN_CARD_WIDTH, .7).toDouble();
     final numCols = pow(pageWidth ~/ MIN_CARD_WIDTH, .7).ceil();
-    // final numCols = (pageWidth / MIN_CARD_WIDTH).floor() + 1;
 
     final cardWidth =
         (pageWidth - (numCols + 1) * CARD_GAP - 2 * STD_PAD) / numCols;

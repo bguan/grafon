@@ -32,12 +32,12 @@ jobs:
         run: flutter test --coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2 # was v1
+        uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/lcov.info
 
       - name: Publish Flutter Web App
-        uses: bluefireteam/flutter-gh-pages@v7 # was erickzanardo/flutter-gh-pages@v3
+        uses: bluefireteam/flutter-gh-pages@v7
         with:
           webRenderer: html

@@ -80,8 +80,8 @@ class WordGroupsPage extends StatefulWidget {
 class _WordGroupsPageState extends State<WordGroupsPage> {
   static const LOGO_HEIGHT = 60.0;
   static const WORD_HEIGHT = 60.0;
-  static const MIN_CARD_WIDTH = 300.0;
-  static const CARD_GAP = 10.0;
+  static const MIN_CARD_WIDTH = 150.0;
+  static const CARD_GAP = 15.0;
   static const STD_PAD = 10.0;
 
   final String title;
@@ -102,7 +102,8 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final pageWidth = mediaSize.width;
 
     final sectionScale = pow(.5 * pageWidth / MIN_CARD_WIDTH, .7).toDouble();
-    final numCols = (pageWidth / MIN_CARD_WIDTH).floor() + 1;
+    final numCols = pow(pageWidth ~/ MIN_CARD_WIDTH, .7).ceil();
+    // final numCols = (pageWidth / MIN_CARD_WIDTH).floor() + 1;
 
     final cardWidth =
         (pageWidth - (numCols + 1) * CARD_GAP - 2 * STD_PAD) / numCols;

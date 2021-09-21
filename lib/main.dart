@@ -272,6 +272,7 @@ class GrafonAppState extends State<GrafonApp> {
             else
               IconButton(
                 icon: Icon(Icons.logout),
+                iconSize: TOOL_BAR_HEIGHT / 2,
                 tooltip: 'Logout',
                 onPressed: () => _signOut(),
               ),

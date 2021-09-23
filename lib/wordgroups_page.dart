@@ -275,19 +275,19 @@ class MultiWordWidget extends StatelessWidget {
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 13 * scaleFactor,
+      fontSize: 10 * scaleFactor,
     );
     final wordTitleStyle = wordDescStyle.copyWith(
       fontWeight: FontWeight.bold,
       height: 1.2,
-      fontSize: 14 * scaleFactor,
+      fontSize: 9 * scaleFactor,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 12 * scaleFactor,
+      fontSize: 8 * scaleFactor,
     );
     final tinyLineStyle = TextStyle(
       fontWeight: FontWeight.normal,
@@ -296,68 +296,72 @@ class MultiWordWidget extends StatelessWidget {
       fontSize: 1 * scaleFactor,
     );
 
-    return Wrap(
-      spacing: cardGap,
-      runSpacing: cardGap,
-      children: <Widget>[
-        for (var w in words)
-          Container(
-            width: max(cardWidth, w.widthAtHeight(wordHeight)),
-            alignment: Alignment.topLeft,
-            child: RichText(
-              textAlign: TextAlign.left,
-              text: TextSpan(
-                text: "${w.title}${w.description.isEmpty ? '\n' : ''}",
-                style: w.title.isEmpty && w.description.isEmpty
-                    ? tinyLineStyle
-                    : wordTitleStyle,
-                children: <InlineSpan>[
-                  TextSpan(
-                    text:
-                        w.description.isNotEmpty ? " - ${w.description}\n" : "",
-                    style: w.title.isEmpty && w.description.isEmpty
-                        ? tinyLineStyle
-                        : wordDescStyle,
-                  ),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.top,
-                    child: Container(
-                      padding: EdgeInsets.all(stdPad + 0.1 * wordHeight),
-                      height: wordHeight + stdPad,
-                      width: w.widthAtHeight(wordHeight) + stdPad,
-                      child: GestureDetector(
-                        onTap: () => speechSvc.pronounce(
-                          w.pronunciations,
-                          multiStitch: kIsWeb || Platform.isIOS,
-                        ),
-                        child: GrafonTile(
-                          w.renderPlan,
-                          height: 0.8 * wordHeight,
-                          width: w.widthAtHeight(0.8 * wordHeight),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: stdPad),
+      child: Wrap(
+        spacing: cardGap,
+        runSpacing: cardGap,
+        children: <Widget>[
+          for (var w in words)
+            Container(
+              width: max(cardWidth, w.widthAtHeight(wordHeight)),
+              alignment: Alignment.topLeft,
+              child: RichText(
+                textAlign: TextAlign.left,
+                text: TextSpan(
+                  text: "${w.title}${w.description.isEmpty ? '\n' : ''}",
+                  style: w.title.isEmpty && w.description.isEmpty
+                      ? tinyLineStyle
+                      : wordTitleStyle,
+                  children: <InlineSpan>[
+                    TextSpan(
+                      text: w.description.isNotEmpty
+                          ? " - ${w.description}\n"
+                          : "",
+                      style: w.title.isEmpty && w.description.isEmpty
+                          ? tinyLineStyle
+                          : wordDescStyle,
+                    ),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.top,
+                      child: Container(
+                        padding: EdgeInsets.all(stdPad + 0.1 * wordHeight),
+                        height: wordHeight + stdPad,
+                        width: w.widthAtHeight(wordHeight) + stdPad,
+                        child: GestureDetector(
+                          onTap: () => speechSvc.pronounce(
+                            w.pronunciations,
+                            multiStitch: kIsWeb || Platform.isIOS,
+                          ),
+                          child: GrafonTile(
+                            w.renderPlan,
+                            height: 0.8 * wordHeight,
+                            width: w.widthAtHeight(0.8 * wordHeight),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.top,
-                    child: Container(
-                      width: w.widthAtHeight(wordHeight) > cardWidth / 2
-                          ? cardWidth
-                          : cardWidth - stdPad - w.widthAtHeight(wordHeight),
-                      padding: EdgeInsets.only(top: stdPad),
-                      child: Text(
-                        w.key +
-                            '\n\n' +
-                            WordGroupsPage.genVoicingLabel(w.pronunciations),
-                        style: voicingStyle,
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.top,
+                      child: Container(
+                        width: w.widthAtHeight(wordHeight) > cardWidth / 2
+                            ? cardWidth
+                            : cardWidth - stdPad - w.widthAtHeight(wordHeight),
+                        padding: EdgeInsets.only(top: stdPad),
+                        child: Text(
+                          w.key +
+                              '\n\n' +
+                              WordGroupsPage.genVoicingLabel(w.pronunciations),
+                          style: voicingStyle,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

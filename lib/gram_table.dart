@@ -306,7 +306,7 @@ class _QuadHelper {
   ];
 
   final cornerPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.O, Anchor.S]),
+    PolyStraight.anchors([Anchor.S, Anchor.O, Anchor.E]),
   ];
 
   final dropPaths = [
@@ -326,7 +326,7 @@ class _QuadHelper {
   ];
 
   final stepPaths = [
-    PolyStraight.anchors([Anchor.NW, Anchor.w, Anchor.e, Anchor.SE]),
+    PolyStraight.anchors([Anchor.SW, Anchor.w, Anchor.e, Anchor.NE]),
   ];
 
   final anglePaths = [
@@ -349,7 +349,7 @@ class _QuadHelper {
   ];
 
   final zapPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.n, Anchor.s, Anchor.E]),
+    PolyStraight.anchors([Anchor.W, Anchor.s, Anchor.n, Anchor.E]),
   ];
 
   final humpsPaths = [
@@ -391,13 +391,13 @@ class _QuadHelper {
 
   final swirlPaths = [
     PolyCurve.anchors([
-      Anchor.N,
-      Anchor.W,
       Anchor.S,
+      Anchor.W,
+      Anchor.N,
       Anchor.E,
-      Anchor.n,
+      Anchor.s,
       Anchor.O,
-      Anchor.NE,
+      Anchor.SE,
     ])
   ];
 
@@ -411,7 +411,9 @@ class _QuadHelper {
   ];
 
   final branchPaths = [
-    PolyStraight.anchors([Anchor.NE, Anchor.O, Anchor.w, Anchor.O, Anchor.SE]),
+    PolyStraight.anchors(
+      [Anchor.NE, Anchor.O, Anchor.w, Anchor.O, Anchor.SE],
+    ),
   ];
 
   late final Map<Quads, QuadGrams> enum2quads;
@@ -420,19 +422,19 @@ class _QuadHelper {
     enum2quads = Map.unmodifiable({
       Quads.Line: SemiRotatingQuads(linePaths, Cons.NIL),
       Quads.Dots: SemiRotatingQuads(dotsPaths, Cons.h),
-      Quads.Corner: RotatingQuads(cornerPaths, Cons.b),
+      Quads.Corner: FlipQuads(cornerPaths, Cons.b),
       Quads.Branch: RotatingQuads(branchPaths, Cons.p),
       Quads.Gate: RotatingQuads(gatePaths, Cons.d),
-      Quads.Step: FlipQuads(stepPaths, Cons.t),
+      Quads.Step: RotaFlipQuads(stepPaths, Cons.t),
       Quads.Angle: RotatingQuads(anglePaths, Cons.g),
       Quads.Triangle: RotatingQuads(trianglePaths, Cons.k),
       Quads.Arrow: RotatingQuads(arrowPaths, Cons.s),
-      Quads.Zap: FlipQuads(zapPaths, Cons.z),
+      Quads.Zap: RotaFlipQuads(zapPaths, Cons.z),
       Quads.Humps: RotatingQuads(humpsPaths, Cons.m),
       Quads.Arc: RotatingQuads(arcPaths, Cons.n),
-      Quads.Curve: DoubleFlipQuads(curvePaths, Cons.l, recenter: false),
-      Quads.Swirl: DoubleFlipQuads(swirlPaths, Cons.r),
-      Quads.Flow: FlipQuads(flowPaths, Cons.f),
+      Quads.Curve: FlipQuads(curvePaths, Cons.l, recenter: false),
+      Quads.Swirl: RotaFlipQuads(swirlPaths, Cons.r),
+      Quads.Flow: RotaFlipQuads(flowPaths, Cons.f),
       Quads.Drop: RotatingQuads(dropPaths, Cons.v),
     });
   }

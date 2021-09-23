@@ -1018,30 +1018,30 @@ class SemiRotatingQuads extends QuadGrams {
 
 /// In FlipRow:
 /// Right paths are flipped horizontally to make Left Path;
-/// Up paths are obtained by rotating Right paths by 90';
-/// Down paths are obtained by vertically flipping Up paths.
+/// Up paths are obtained by flipping horizontally then vertically;
+/// Down paths are obtained by horizontal flipping Up paths.
 class FlipQuads extends QuadGrams {
   FlipQuads(List<PolyLine> r, Cons cons, {recenter: true})
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
 
-  static List<PolyLine> r2u(List<PolyLine> r) => turn(r);
-
-  static List<PolyLine> r2l(List<PolyLine> r) => hFlip(r);
-
-  static List<PolyLine> r2d(List<PolyLine> r) => vFlip(r2u(r));
-}
-
-/// In DoubleFlipRow:
-/// Right paths are flipped vertically to make up Path;
-/// Left paths are obtained by flipping right path horizontally;
-/// Down paths are obtained by flipping up paths horizontally.
-class DoubleFlipQuads extends QuadGrams {
-  DoubleFlipQuads(List<PolyLine> r, Cons cons, {recenter: true})
-      : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
-
-  static List<PolyLine> r2u(List<PolyLine> r) => vFlip(r);
+  static List<PolyLine> r2u(List<PolyLine> r) => vFlip(hFlip(r));
 
   static List<PolyLine> r2l(List<PolyLine> r) => hFlip(r);
 
   static List<PolyLine> r2d(List<PolyLine> r) => hFlip(r2u(r));
+}
+
+/// In RotaRow:
+/// Right paths are flipped horizontally to make Left Path;
+/// Up paths are obtained by rotating Right paths by 90' then hFlip;
+/// Down paths are obtained by vertically flipping Up paths.
+class RotaFlipQuads extends QuadGrams {
+  RotaFlipQuads(List<PolyLine> r, Cons cons, {recenter: true})
+      : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
+
+  static List<PolyLine> r2u(List<PolyLine> r) => hFlip(turn(r));
+
+  static List<PolyLine> r2l(List<PolyLine> r) => hFlip(r);
+
+  static List<PolyLine> r2d(List<PolyLine> r) => vFlip(r2u(r));
 }

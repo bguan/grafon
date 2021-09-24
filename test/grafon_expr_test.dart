@@ -76,7 +76,7 @@ void main() {
         final g = GramTable().atConsVowel(c, v);
         expect(
           g.pronunciation.first,
-          Syllable(c, v, Vowel.NIL, Coda.NIL),
+          Syllable(c, v, Coda.NIL),
         );
       }
     }
@@ -93,7 +93,7 @@ void main() {
 
     expect(six.toString(), "X * Down_Line");
     expect(six.pronunciation.length, 2);
-    expect(six.pronunciation.first, Syllable.cvc(Cons.g, Vowel.a, Coda.k));
+    expect(six.pronunciation.first, Syllable(Cons.g, Vowel.a, Coda.k));
     expect(six.pronunciation.last, Syllable.v(Vowel.u));
 
     final vLine = Quads.Line.up;
@@ -126,7 +126,7 @@ void main() {
 
     expect(child.toString(), "Dot / Up_Line");
     expect(child.pronunciation.length, 2);
-    expect(child.pronunciation.first, Syllable.cvc(Cons.h, Vowel.a, Coda.s));
+    expect(child.pronunciation.first, Syllable(Cons.h, Vowel.a, Coda.s));
     expect(child.pronunciation.last, Syllable.v(Vowel.i));
     expect(child.pronunciation.toString(), 'hɑːʃ.iː');
 
@@ -141,10 +141,10 @@ void main() {
 
     expect(feet.toString(), "Dot / (Down_Corner . Left_Corner)");
     expect(feet.pronunciation.length, 5);
-    expect(feet.pronunciation[0], Syllable.cvc(Cons.h, Vowel.a, Coda.s));
+    expect(feet.pronunciation[0], Syllable(Cons.h, Vowel.a, Coda.s));
     expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
     expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.u));
-    expect(feet.pronunciation[3], Syllable.cvc(Cons.b, Vowel.o, Coda.k));
+    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o, Coda.k));
     expect(feet.pronunciation[4], Syllable.v(Vowel.a));
     expect(feet.pronunciation.toString(), 'hɑːʃ.ɑːk.buː.bɔːʧ.ɑː');
   });
@@ -194,7 +194,7 @@ void main() {
 
     expect(eye.toString(), "Circle @ Dot");
     expect(eye.pronunciation.length, 2);
-    expect(eye.pronunciation.first, Syllable.cvc(Cons.n, Vowel.a, Coda.n));
+    expect(eye.pronunciation.first, Syllable(Cons.n, Vowel.a, Coda.n));
     expect(eye.pronunciation.last, Syllable(Cons.h, Vowel.a));
     expect(eye.pronunciation.toString(), 'nɑːn.hɑː');
 
@@ -209,11 +209,11 @@ void main() {
 
     expect(family.toString(), "Circle @ (Dot . Dot / Down_Gate)");
     expect(family.pronunciation.length, 6);
-    expect(family.pronunciation[0], Syllable.cvc(Cons.n, Vowel.a, Coda.n));
+    expect(family.pronunciation[0], Syllable(Cons.n, Vowel.a, Coda.n));
     expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
     expect(family.pronunciation[2], Syllable(Cons.h, Vowel.a));
-    expect(family.pronunciation[3], Syllable.cvc(Cons.h, Vowel.a, Coda.s));
-    expect(family.pronunciation[4], Syllable.cvc(Cons.d, Vowel.u, Coda.k));
+    expect(family.pronunciation[3], Syllable(Cons.h, Vowel.a, Coda.s));
+    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u, Coda.k));
     expect(family.pronunciation[5], Syllable.v(Vowel.a));
     expect(family.pronunciation.toString(), 'nɑːŋ.ɑːk.hɑː.hɑːs.duːʧ.ɑː');
   });

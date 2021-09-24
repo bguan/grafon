@@ -30,6 +30,7 @@ import 'gram_infra.dart';
 /// RenderPlan contains info on rendering each gram expression.
 class RenderPlan {
   static const MIN_MASS = 2 * PEN_WTH_SCALE * 2 * PEN_WTH_SCALE;
+  static const UNARY_SHIFT_FACTOR = 0.35;
   late final Iterable<PolyLine> lines;
   late final numPts, numVisiblePts;
   late final double xMin, yMin, xMax, yMax, xAvg, yAvg;
@@ -236,8 +237,8 @@ class RenderPlan {
     // shift align w top, InvisiDot at bottom to keep height
     final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
     lines = [
-      ...shrunk.shift(0, .5 - shrunk.yMax).lines,
-      InvisiDot([Vector2(0, -.5)])
+      ...shrunk.shift(0, UNARY_SHIFT_FACTOR - shrunk.yMax).lines,
+      InvisiDot([Vector2(0, -UNARY_SHIFT_FACTOR)])
     ];
 
     return RenderPlan(lines, recenter: false);
@@ -249,8 +250,8 @@ class RenderPlan {
     // shift align w bottom, InvisiDot at top to keep height
     final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x, v.y / 2));
     lines = [
-      ...shrunk.shift(0, -.5 - shrunk.yMin).lines,
-      InvisiDot([Vector2(0, .5)])
+      ...shrunk.shift(0, -UNARY_SHIFT_FACTOR - shrunk.yMin).lines,
+      InvisiDot([Vector2(0, UNARY_SHIFT_FACTOR)])
     ];
 
     return RenderPlan(lines, recenter: false);
@@ -262,8 +263,8 @@ class RenderPlan {
     // shift align w left, InvisiDot at right to keep width
     final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
     lines = [
-      ...shrunk.shift(-.5 - shrunk.xMin, 0).lines,
-      InvisiDot([Vector2(.5, 0)])
+      ...shrunk.shift(-UNARY_SHIFT_FACTOR - shrunk.xMin, 0).lines,
+      InvisiDot([Vector2(UNARY_SHIFT_FACTOR, 0)])
     ];
 
     return RenderPlan(lines, recenter: false);
@@ -275,8 +276,8 @@ class RenderPlan {
     // shift align w right, keep width w InvisiDot at left
     final shrunk = remap((isF, v) => isF ? v / 2 : Vector2(v.x / 2, v.y));
     lines = [
-      ...shrunk.shift(.5 - shrunk.xMax, 0).lines,
-      InvisiDot([Vector2(-.5, 0)])
+      ...shrunk.shift(UNARY_SHIFT_FACTOR - shrunk.xMax, 0).lines,
+      InvisiDot([Vector2(-UNARY_SHIFT_FACTOR, 0)])
     ];
 
     return RenderPlan(lines, recenter: false);
@@ -289,7 +290,10 @@ class RenderPlan {
     final shrunk = remap((isF, v) => v / 2);
     lines = [
       ...shrunk.lines,
-      InvisiDot([Vector2(-.5, -.5), Vector2(.5, .5)])
+      InvisiDot([
+        Vector2(-UNARY_SHIFT_FACTOR, -UNARY_SHIFT_FACTOR),
+        Vector2(UNARY_SHIFT_FACTOR, UNARY_SHIFT_FACTOR),
+      ])
     ];
     return RenderPlan(lines, recenter: false);
   }

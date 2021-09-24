@@ -64,10 +64,7 @@ class TestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final test = CompoundWord([
-      CoreWord(Mono.Dot.next(Mono.Empty.gram).over(Quads.Corner.up)),
-      CoreWord(Quads.Dots.down),
-    ]);
+    final test = CoreWord(Quads.Triangle.up.mix(Quads.Branch.down));
     return Center(
       child: GrafonTile(test.renderPlan, height: 100),
     );

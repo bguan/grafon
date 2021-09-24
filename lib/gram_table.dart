@@ -301,8 +301,12 @@ class _QuadHelper {
   ];
 
   final dotsPaths = [
-    InvisiDot.anchors([], minWidth: GRAM_GAP, minHeight: GRAM_GAP),
-    PolyDot.anchors([Anchor.NE, Anchor.SW]),
+    InvisiDot.anchors(
+      [],
+      minHeight: GRAM_GAP / 2,
+      minWidth: GRAM_GAP / 2,
+    ),
+    PolyDot.anchors([Anchor.ne, Anchor.sw]),
   ];
 
   final cornerPaths = [
@@ -349,7 +353,9 @@ class _QuadHelper {
   ];
 
   final zapPaths = [
-    PolyStraight.anchors([Anchor.W, Anchor.s, Anchor.n, Anchor.E]),
+    PolyStraight(
+      [Anchor.W / 1, Anchor.S / 2, Anchor.N / 2, Anchor.E / 0.8],
+    ),
   ];
 
   final humpsPaths = [
@@ -411,8 +417,14 @@ class _QuadHelper {
   ];
 
   final branchPaths = [
-    PolyStraight.anchors(
-      [Anchor.NE, Anchor.O, Anchor.w, Anchor.O, Anchor.SE],
+    PolyStraight(
+      [
+        Anchor.NE * 1,
+        Anchor.E * 0.233, // calibrated to align it nicely in triangle
+        Anchor.w * 1,
+        Anchor.E * 0.233, // calibrated to align it nicely in triangle
+        Anchor.SE * 1
+      ],
     ),
   ];
 

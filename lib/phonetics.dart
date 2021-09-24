@@ -112,7 +112,7 @@ extension ConsonantHelper on Cons {
       case Cons.l:
         return 'l';
       case Cons.r:
-        return 'ɹ';
+        return 'r';
       case Cons.m:
         return 'm';
       case Cons.n:
@@ -186,28 +186,17 @@ class Syllable {
   static const SILENCE = const Syllable(Cons.NIL, Vowel.NIL);
   final Cons cons;
   final Vowel vowel;
-  final Vowel ext;
   final Coda coda;
 
-  const Syllable(this.cons, this.vowel,
-      [this.ext = Vowel.NIL, this.coda = Coda.NIL]);
+  const Syllable(this.cons, this.vowel, [this.coda = Coda.NIL]);
 
   Syllable.v(this.vowel)
       : cons = Cons.NIL,
-        ext = Vowel.NIL,
         coda = Coda.NIL;
 
-  Syllable.vc(this.vowel, this.coda)
-      : cons = Cons.NIL,
-        ext = Vowel.NIL;
+  Syllable.vc(this.vowel, this.coda) : cons = Cons.NIL;
 
-  Syllable.vv(this.vowel, this.ext)
-      : cons = Cons.NIL,
-        coda = Coda.NIL;
-
-  Syllable.vvc(this.vowel, this.ext, this.coda) : cons = Cons.NIL;
-
-  Syllable.cvc(this.cons, this.vowel, this.coda) : ext = Vowel.NIL;
+  Syllable.vvc(this.vowel, this.coda) : cons = Cons.NIL;
 
   @override
   bool operator ==(Object other) {
@@ -217,19 +206,16 @@ class Syllable {
 
     return this.cons == that.cons &&
         this.vowel == that.vowel &&
-        this.ext == that.ext &&
         this.coda == that.coda;
   }
 
   @override
-  int get hashCode =>
-      cons.hashCode ^ vowel.hashCode ^ ext.hashCode ^ coda.hashCode;
+  int get hashCode => cons.hashCode ^ vowel.hashCode ^ coda.hashCode;
 
   @override
   String toString() => [
         cons.shortName,
         vowel.shortName,
-        ext.shortName,
         coda.shortName,
       ].join();
 
@@ -240,90 +226,63 @@ class Syllable {
   String get pronunciation => [
         cons.phoneme,
         vowel.phoneme,
-        ext == Vowel.NIL ? '' : 'ˌ${ext.phoneme}',
         coda.phoneme,
       ].join();
 
   int get durationMillis =>
       (cons != Cons.NIL ? CONS_MILLIS : 0) +
       VOWEL_MILLIS +
-      (ext != Vowel.NIL ? EXT_MILLIS : 0) +
       (coda != Coda.NIL ? CODA_MILLIS : 0);
 
   String get approxVoice {
     // Hack to get TTS working
-    final v = vowel.approxVoice;
-    final e = ext.approxVoice;
 
     StringBuffer s = StringBuffer();
 
-    if (cons == Cons.NIL && vowel == Vowel.a && ext == Vowel.u) {
+    if (cons == Cons.NIL && vowel == Vowel.a) {
       s.write('ah-');
     } else if (cons == Cons.g && vowel == Vowel.i) {
       s.write('ghee');
-      if (e != '') s.write('-');
     } else if (cons == Cons.g && vowel == Vowel.e) {
       s.write('gher');
-      if (e != '') s.write('-');
     } else if (cons == Cons.f && vowel == Vowel.e) {
       s.write('fur');
-      if (e != '') s.write('-');
     } else if (cons == Cons.m && vowel == Vowel.e) {
       s.write('mur');
-      if (e != '') s.write('-');
     } else if (cons == Cons.z && vowel == Vowel.e) {
       s.write('zur');
-      if (e != '') s.write('-');
     } else if (cons == Cons.n && vowel == Vowel.e) {
       s.write('nur');
-      if (e != '') s.write('-');
     } else if (cons == Cons.n && vowel == Vowel.i) {
       s.write('ni');
-      if (e != '') s.write('-');
     } else if (cons == Cons.r && vowel == Vowel.e) {
       s.write('rhur');
-      if (e != '') s.write('-');
     } else if (cons == Cons.r && vowel == Vowel.o) {
       s.write('raw');
-      if (e != '') s.write('-');
     } else if (cons == Cons.s && vowel == Vowel.a) {
       s.write('sah');
-      if (e != '') s.write('-');
     } else {
       if (cons != Cons.NIL) s.write(cons.approxVoice);
-      if (ext == Vowel.NIL) {
-        s.write(vowel.approxVoice);
-      } else if (vowel == ext) {
-        s.writeAll([v.length < 2 ? v : v.substring(0, v.length - 1), '-']);
-      } else {
-        s.writeAll([v.length < 2 ? v : v.substring(0, v.length - 1), 'h', '-']);
-      }
+      s.write(vowel.approxVoice);
     }
 
-    s.write(ext.approxVoice);
-    if ((cons == Cons.NIL && vowel == Vowel.a && ext == Vowel.a) ||
-        (cons == Cons.s && vowel == Vowel.e)) {
-      s.write("'");
-    }
     s.write(coda.approxVoice);
     return s.toString();
   }
 
   /// make a syllable based on another with a different consonant
-  Syllable diffConsonant(Cons c) => Syllable(c, vowel, ext, coda);
+  Syllable diffConsonant(Cons c) => Syllable(c, vowel, coda);
 
   /// make a syllable based on another with a different vowel
-  Syllable diffVowel(Vowel v) => Syllable(cons, v, ext, coda);
+  Syllable diffVowel(Vowel v) => Syllable(cons, v, coda);
 
   /// make a syllable based on another with a different vowel extension
-  Syllable diffExtension(Vowel e) => Syllable(cons, vowel, e, coda);
+  Syllable diffExtension(Vowel e) => Syllable(cons, vowel, coda);
 
   /// make a syllable based on another with a different end consonant
-  Syllable diffCoda(Coda c) => Syllable(cons, vowel, ext, c);
+  Syllable diffCoda(Coda c) => Syllable(cons, vowel, c);
 
-  String get lastPhoneme => (coda != Coda.NIL)
-      ? coda.phoneme
-      : (ext != Vowel.NIL ? ext.phoneme : vowel.phoneme);
+  String get lastPhoneme => (coda != Coda.NIL) ? coda.phoneme : vowel.phoneme;
 
   String get firstPhoneme => (cons != Cons.NIL) ? cons.phoneme : vowel.phoneme;
 }

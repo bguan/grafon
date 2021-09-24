@@ -77,16 +77,16 @@ final _numericGroup = WordGroup(
   [
     CoreWord(Mono.Circle.gram, "Zero"),
     CoreWord(Quads.Line.up, "One"),
-    CoreWord(Quads.Angle.down, "Two"),
+    CoreWord(Quads.Corner.left, "Two"),
     CoreWord(Quads.Triangle.up, "Three"),
     CoreWord(Mono.Square.gram, "Four"),
     CoreWord(Mono.Diamond.mix(Quads.Line.up), "Five"),
-    CoreWord(Quads.Gate.down.mix(Quads.Angle.down), "Six"),
+    CoreWord(Quads.Triangle.up.mix(Quads.Branch.down), "Six"),
     CoreWord(Mono.Square.mix(Quads.Angle.down), "Seven"),
     CoreWord(Mono.Diamond.mix(Mono.Cross.gram), "Eight"),
     CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down), "Nine"),
     CoreWord(Mono.Circle.wrap(Quads.Line.up), "Ten", "Ten to the power of 1."),
-    CoreWord(Mono.Circle.wrap(Quads.Angle.down), "Hundred", "Ten squared."),
+    CoreWord(Mono.Circle.wrap(Quads.Corner.left), "Hundred", "Ten squared."),
     CoreWord(Mono.Circle.wrap(Quads.Triangle.up), "Thousand", "Ten cubed."),
     CompoundWord(
       [
@@ -171,11 +171,11 @@ final _randomGroup = WordGroup(
     CompoundWord([
       CoreWord(Mono.Circle.gram, "Zero"),
       CoreWord(Quads.Line.up, "One"),
-      CoreWord(Quads.Angle.down, "Two"),
+      CoreWord(Quads.Corner.left, "Two"),
       CoreWord(Quads.Triangle.up, "Three"),
       CoreWord(Mono.Square.gram, "Four"),
       CoreWord(Mono.Diamond.mix(Quads.Line.up), "Five"),
-      CoreWord(Quads.Gate.up.mix(Quads.Angle.up), "Six"),
+      CoreWord(Quads.Triangle.up.mix(Quads.Branch.down), "Six"),
       CoreWord(Mono.Square.mix(Quads.Angle.down), "Seven"),
       CoreWord(Mono.Diamond.mix(Mono.Cross.gram), "Eight"),
       CoreWord(Quads.Triangle.up.wrap(Quads.Triangle.down), "Nine"),

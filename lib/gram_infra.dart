@@ -154,6 +154,18 @@ extension AnchorHelper on Anchor {
 
   double get y => this.vector.y;
 
+  Vector2 operator *(double multiplier) {
+    final p = this.polar;
+    final newP = Polar(angle: p.angle, length: p.length * multiplier);
+    return newP.vector;
+  }
+
+  Vector2 operator /(double divisor) {
+    final p = this.polar;
+    final newP = Polar(angle: p.angle, length: p.length / divisor);
+    return newP.vector;
+  }
+
   static Anchor? findAnchor(Vector2 v) {
     final qv = quantizeV2(v);
     for (final a in Anchor.values) {

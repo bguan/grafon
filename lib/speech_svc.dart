@@ -33,26 +33,29 @@ class SpeechService {
   static final log = Logger("SpeechService");
   static const SILENCE_FILE = "silence.mp3";
   static const TTS_CONFIG = {
-    "languageCode": "en-US",
-    "name": "en-US-Wavenet-H",
+    "languageCode": "en-GB", //"en-US", //
+    "name": "en-GB-Wavenet-A", //"en-US-Wavenet-H", //
     "ssmlGender": "FEMALE"
   };
   static const PAUSE_DURATION = Duration(milliseconds: 200);
   final AudioPlayer _player;
   final AssetBundle _bundle;
+  late final String locale;
   late final AudioSource _silenceAudioFileSrc;
   late final BufferAudioSource _silenceAudioBufferSrc;
   TexttospeechApi? _cloudTTS;
 
   SpeechService(this._bundle, this._player, [this._cloudTTS]) {
+    final speechConfig = TTS_CONFIG;
+    locale = speechConfig['languageCode']!;
     _loadSilenceAudio();
   }
 
   Future<void> _loadSilenceAudio() async {
-    final bytes = await _bundle.load("assets/audios/$SILENCE_FILE");
+    final bytes = await _bundle.load("assets/$locale-audios/$SILENCE_FILE");
     _silenceAudioBufferSrc = BufferAudioSource(bytes.buffer.asUint8List());
     _silenceAudioFileSrc = AudioSource.uri(
-      Uri.parse("asset:///assets/audios/$SILENCE_FILE"),
+      Uri.parse("asset:///assets/$locale-audios/$SILENCE_FILE"),
       headers: {'Content-Type': 'audio/mpeg', 'Content-Length': '200'},
     );
   }
@@ -84,14 +87,14 @@ class SpeechService {
           final s = syllables[i];
           if (!s.isSilence) {
             final bytes = await _bundle
-                .load("assets/audios/${p.fragmentSequence[i]}.mp3");
+                .load("assets/$locale-audios/${p.fragmentSequence[i]}.mp3");
             allBytes.addAll(
               trimMP3Frames(
                 bytes.buffer.asUint8List(),
                 0.0,
                 i >= syllables.length - 1 || syllables[i].coda != Coda.NIL
-                    ? 0.0
-                    : 0.1,
+                    ? 0.05
+                    : 0.3,
               ),
             );
           }
@@ -101,7 +104,7 @@ class SpeechService {
       } else if (syllables.length == 1 && !syllables.first.isSilence) {
         audios.add(
           AudioSource.uri(
-            Uri.parse("asset:///assets/audios/${syllables.first}.mp3"),
+            Uri.parse("asset:///assets/$locale-audios/${syllables.first}.mp3"),
             headers: {
               'Content-Type': 'audio/mpeg',
               'Content-Length': '${syllables.first.durationMillis}'
@@ -115,7 +118,7 @@ class SpeechService {
             if (!syllables[i].isSilence)
               AudioSource.uri(
                 Uri.parse(
-                    "asset:///assets/audios/${p.fragmentSequence[i]}.mp3"),
+                    "asset:///assets/$locale-audios/${p.fragmentSequence[i]}.mp3"),
                 headers: {
                   'Content-Type': 'audio/mpeg',
                   'Content-Length': '${syllables[i].durationMillis}'

@@ -27,8 +27,8 @@ import 'package:grafon/phonetics.dart';
 
 Future<void> main() async {
   const TTS_CONFIG = {
-    "languageCode": "en-US", //"en-AU", //
-    "name": "en-US-Wavenet-H", //"en-AU-Wavenet-A", //
+    "languageCode": "en-GB", //"en-US", //"en-AU", //
+    "name": "en-GB-Wavenet-A", //"en-US-Wavenet-H", //"en-AU-Wavenet-A", //
     "ssmlGender": "FEMALE"
   };
 
@@ -38,7 +38,7 @@ Future<void> main() async {
   final speechConfig = TTS_CONFIG;
   final locale = speechConfig['languageCode'];
   final sndArchiveDirPath = '/Users/bguan/backup/archive-$locale';
-  final sndAssetDirPath = 'assets/audios';
+  final sndAssetDirPath = 'assets/$locale-audios';
   final sndAssetDir = Directory(sndAssetDirPath);
   if (!sndAssetDir.existsSync()) {
     sndAssetDir.createSync();

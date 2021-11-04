@@ -30,3 +30,4 @@ doc/api/
 .idea/
 /lib/generated/*
 /lib/generated/l10n.dart
+/lib/generated/intl/*.dart

@@ -29,6 +29,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'constants.dart';
+import 'generated/l10n.dart';
 import 'grafon_expr.dart';
 import 'grafon_widget.dart';
 import 'gram_infra.dart';
@@ -53,16 +54,17 @@ class _GramTableViewState extends State<GramTableView> {
   static final log = Logger("_GramTableViewState");
 
   var _isAlt = false;
-  var _binary = Binary.Next;
+  var _binary = Op.Next;
 
   @override
   Widget build(BuildContext ctx) {
+    final l10n = S.of(ctx);
     final speechSvc = ctx.watch<SpeechService>();
     final table = ctx.watch<GramTable>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
     final inset = 4.0;
-    final pageWidth = mediaSize.width - 9 * inset;
+    final pageWidth = mediaSize.width;
     final pageHeight = mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT;
     final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH ||
             pageHeight < MIN_GRAM_CLUSTER_HEIGHT
@@ -71,8 +73,8 @@ class _GramTableViewState extends State<GramTableView> {
             ? 4
             : 2);
     final rowWidth = pageWidth / numCols;
-    final rowHeight = pageHeight / (2 + table.numRows / numCols);
-    final cellWidth = (rowWidth - 12 * inset) / 5;
+    final rowHeight = pageHeight / (1.5 + table.numRows / numCols);
+    final cellWidth = (rowWidth - 14 * inset) / 5;
     final cellHeight = rowHeight / (1 + HEADER_CELL_RATIO) - 1.5 * inset;
     final cellDim = numCols == 1 ? cellWidth : min(cellWidth, cellHeight);
     final headerHeight = cellDim * HEADER_CELL_RATIO;
@@ -103,7 +105,7 @@ class _GramTableViewState extends State<GramTableView> {
               for (int ci = 0; ci < numCols; ci++)
                 GramRowWidget(
                   Mono.values[ri * numCols + ci],
-                  (List<Gram> gs) async {
+                      (List<Gram> gs) async {
                     final coda = _isAlt ? _binary.coda.alt : _binary.coda;
                     speechSvc.pronounce(
                       gs.map((g) => Pronunciation([g.syllable.diffCoda(coda)])),
@@ -119,10 +121,10 @@ class _GramTableViewState extends State<GramTableView> {
       ),
     );
 
-    final onBinaryTap = (Binary b) => () => setState(() {
+    final onBinaryTap = (Op b) => () => setState(() {
           if (_binary == b) {
             if (_binary.coda.shortName.isEmpty || _isAlt) {
-              _binary = Binary.Next;
+              _binary = Op.Next;
               _isAlt = false;
             } else {
               _isAlt = true;
@@ -137,27 +139,33 @@ class _GramTableViewState extends State<GramTableView> {
           );
         });
 
-    final codaTxt = (Binary b) => b.coda.shortName.isEmpty
+    final codaTxt = (Op b) => b.coda.shortName.isEmpty
         ? ''
         : (_binary == b
             ? (_isAlt ? '…${b.coda.alt.shortName}' : '…${b.coda.shortName}')
             : '${b.coda.shortName}, ${b.coda.alt.shortName}');
 
-    final binaryRow = Wrap(
+    final opLabel = (Op b) {
+      final codas = codaTxt(b);
+      return l10n.page_gram_table_op_label(
+          l10n.common_op_name(b), b.symbol, codas);
+    };
+
+    final opRow = Wrap(
       spacing: 2 * inset,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
-          'Operators',
+          l10n.page_gram_table_operators,
           textAlign: TextAlign.center,
           style: opHeaderStyle,
         ),
-        for (var b in Binary.values)
+        for (var b in Op.values)
           GestureDetector(
             child: Container(
               padding: EdgeInsets.all(inset / 2),
               height: opButtonHeight,
-              width: pageWidth / (1.5 + Binary.values.length),
+              width: pageWidth / (1.5 + Op.values.length),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: _binary == b
@@ -166,7 +174,7 @@ class _GramTableViewState extends State<GramTableView> {
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
               child: Text(
-                "${b.shortName} ${b.symbol} ${codaTxt(b)}",
+                opLabel(b),
                 textAlign: TextAlign.center,
                 style: opTxtStyle,
               ),
@@ -178,13 +186,13 @@ class _GramTableViewState extends State<GramTableView> {
 
     return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           gramTable,
           Container(height: inset),
-          binaryRow,
+          opRow,
           Container(height: FOOTER_HEIGHT + inset),
         ],
       ),
@@ -208,6 +216,7 @@ class GramRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
+    final l10n = S.of(ctx);
     final scheme = Theme.of(ctx).colorScheme;
     final table = ctx.watch<GramTable>();
     final headerTxtStyle = TextStyle(
@@ -216,7 +225,8 @@ class GramRowWidget extends StatelessWidget {
       fontSize: (headerHeight / 3),
     );
     final cons = mono.gram.cons.shortName;
-    final consTxt = cons.isEmpty ? '' : '($cons…)';
+    final monoName = l10n.common_mono_name(mono.shortName);
+    final quadName = l10n.common_quad_name(mono.quadPeer.shortName);
     return Padding(
       padding: EdgeInsets.all(pad),
       child: Container(
@@ -227,7 +237,7 @@ class GramRowWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
               onTap: () => onTap(table.monoRow(mono)),
@@ -240,7 +250,7 @@ class GramRowWidget extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.all(pad / 2),
                 child: Text(
-                  "${mono.shortName} & ${mono.quadPeer.shortName} $consTxt",
+                  l10n.page_gram_table_row_header(monoName, quadName, cons),
                   style: headerTxtStyle,
                   maxLines: 1,
                   textAlign: TextAlign.left,

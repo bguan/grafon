@@ -29,7 +29,7 @@ void main() {
   });
 
   test("CompoundWord symbol is different from all Binary operator symbols", () {
-    final symbols = Binary.values.map((bin) => bin.symbol);
+    final symbols = Op.values.map((bin) => bin.symbol);
     expect(symbols.contains(CompoundWord.SEPARATOR_SYMBOL), isFalse);
   });
 

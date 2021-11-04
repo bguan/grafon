@@ -25,23 +25,23 @@ import 'package:grafon/phonetics.dart';
 void main() {
   test('Binary symbol should all be unique', () {
     final symbolsFromBinary = Set.of([
-      ...Binary.values.map((b) => b.symbol),
+      ...Op.values.map((b) => b.symbol),
     ]);
-    expect(symbolsFromBinary.length, Binary.values.length);
+    expect(symbolsFromBinary.length, Op.values.length);
   });
 
   test('Binary shortName should all be unique', () {
     final namesFromBinary = Set.of([
-      ...Binary.values.map((b) => b.shortName),
+      ...Op.values.map((b) => b.shortName),
     ]);
-    expect(namesFromBinary.length, Binary.values.length);
+    expect(namesFromBinary.length, Op.values.length);
   });
 
   test('Binary ending should all be unique', () {
     final endingsFromBinary = Set.of([
-      ...Binary.values.map((b) => b.coda),
+      ...Op.values.map((b) => b.coda),
     ]);
-    expect(endingsFromBinary.length, Binary.values.length);
+    expect(endingsFromBinary.length, Op.values.length);
   });
 
   test('SingleGram to String matches gram equivalent', () {

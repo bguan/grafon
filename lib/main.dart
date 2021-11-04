@@ -23,6 +23,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/texttospeech/v1.dart';
 import 'package:grafon/gram_table.dart';
@@ -34,6 +35,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'buffer_audio_src.dart';
 import 'constants.dart';
+import 'generated/l10n.dart';
 import 'grafon_dictionary.dart';
 import 'grafon_widget.dart';
 import 'grafon_word.dart';
@@ -55,6 +57,13 @@ void main() async {
         fontFamily: 'Arimo',
       ),
       home: debug ? TestApp() : GrafonApp(),
+      localizationsDelegates: [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
     ),
   );
 }
@@ -142,16 +151,24 @@ class GrafonAppState extends State<GrafonApp> {
 
   Future<void> _initTTS() async {
     try {
+      final locale = Localizations.localeOf(context);
+      final localeTag = locale.toLanguageTag();
+      final langTTS = LANG_TAG_TO_TTS_VOICE.containsKey(localeTag)
+          ? localeTag
+          : DEFAULT_LANG_TAG;
+      final voiceTTS = LANG_TAG_TO_TTS_VOICE[langTTS];
+      final l10n = S.of(context);
+
       _cloudTTS =
           TexttospeechApi((await widget.googleSignIn.authenticatedClient())!);
       _speechSvc.cloudTTS = _cloudTTS;
       final request = SynthesizeSpeechRequest.fromJson({
         "input": {
-          "ssml": "<speak>Cloud Text to Speech initialized.</speak>",
+          "ssml": "<speak>${l10n.app_TTS_enabled_msg}</speak>",
         },
         "voice": {
-          "languageCode": "en-US",
-          "name": "en-US-Wavenet-E", //"en-US-Standard-C",
+          "languageCode": langTTS,
+          "name": voiceTTS,
           "ssmlGender": "FEMALE"
         },
         "audioConfig": {"audioEncoding": "MP3"}
@@ -191,12 +208,13 @@ class GrafonAppState extends State<GrafonApp> {
 
   @override
   Widget build(BuildContext ctx) {
+    final l10n = S.of(ctx);
     final scheme = Theme.of(ctx).colorScheme;
     final theme = Theme.of(ctx).textTheme;
     final pages = [
       GramTableView(),
-      WordGroupsPage("Core Words", coreWords),
-      WordGroupsPage("Random Words for Testing...", testWords),
+      WordGroupsPage(l10n.page_core_words_title, coreWords),
+      WordGroupsPage(l10n.page_random_words_title, testWords),
     ];
     final inset = 5.0;
     final animDuration = Duration(milliseconds: 200);
@@ -246,7 +264,7 @@ class GrafonAppState extends State<GrafonApp> {
         appBar: AppBar(
           toolbarHeight: TOOL_BAR_HEIGHT,
           title: Text(
-            'Grafon Home',
+            l10n.app_title,
             style: theme.headline6?.copyWith(
               color: scheme.surface,
               fontWeight: FontWeight.bold,
@@ -263,14 +281,14 @@ class GrafonAppState extends State<GrafonApp> {
               IconButton(
                 icon: Icon(Icons.login),
                 iconSize: TOOL_BAR_HEIGHT / 2,
-                tooltip: 'Login',
+                tooltip: l10n.app_login_tooltip,
                 onPressed: () => _signIn(),
               )
             else
               IconButton(
                 icon: Icon(Icons.logout),
                 iconSize: TOOL_BAR_HEIGHT / 2,
-                tooltip: 'Logout',
+                tooltip: l10n.app_logout_tooltip,
                 onPressed: () => _signOut(),
               ),
           ],

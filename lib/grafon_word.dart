@@ -120,7 +120,7 @@ class CompoundWord extends GrafonWord {
         r = wr;
         continue;
       }
-      r = r.byBinary(Binary.Next, wr, gap: COMPOUND_WORD_GAP);
+      r = r.byBinary(Op.Next, wr, gap: COMPOUND_WORD_GAP);
     }
     renderPlan = r!;
 

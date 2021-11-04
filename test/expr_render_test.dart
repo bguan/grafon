@@ -238,7 +238,7 @@ void main() {
     for (final m1 in Mono.values) {
       for (final f1 in [Face.Center, Face.Right]) {
         final expr1 = table.atMonoFace(m1, f1);
-        for (final bop in [null, ...Binary.values]) {
+        for (final bop in [null, ...Op.values]) {
           final exprs = <GrafonExpr>[];
           if (bop == null) {
             exprs.add(expr1);

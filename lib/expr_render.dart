@@ -299,12 +299,12 @@ class RenderPlan {
   }
 
   /// Transform this render plan by unary operation to generate a new render.
-  RenderPlan byBinary(Binary op, RenderPlan that, {gap: GRAM_GAP}) {
+  RenderPlan byBinary(Op op, RenderPlan that, {gap: GRAM_GAP}) {
     var r1 = this;
     var r2 = that;
     final isFA = this.isFixedAspect || that.isFixedAspect;
     switch (op) {
-      case Binary.Next:
+      case Op.Next:
         r1 = r1.reCenter().diffAspect(isFA);
         r2 = r2.reCenter().diffAspect(isFA);
         // align the heights of r1 or r2 to the taller height
@@ -315,7 +315,7 @@ class RenderPlan {
         }
         // move 2nd operand to right of 1st
         return r1.mix(r2.shift(.5 * r1.maxWidth + gap + .5 * r2.maxWidth, 0));
-      case Binary.Over:
+      case Op.Over:
         r1 = r1.reCenter().diffAspect(isFA);
         r2 = r2.reCenter().diffAspect(isFA);
         // align the widths of r1 or r2 to the wider width
@@ -327,7 +327,7 @@ class RenderPlan {
         return r1
             .mix(r2.shift(0, -.5 * r1.maxHeight - gap - .5 * r2.maxHeight))
             .reCenter();
-      case Binary.Wrap:
+      case Op.Wrap:
         r1 = r1.reCenter().diffAspect(isFA);
         r2 = r2.reCenter().diffAspect(isFA);
         final hScale = sqrt(gap) * r1.maxHeight / r2.maxHeight;
@@ -339,7 +339,7 @@ class RenderPlan {
         // align r2's avg(x,y) to r1's avg(x,y)
         r2 = r2.shift(r1.xAvg - r2.xAvg, r1.yAvg - r2.yAvg);
         return r1.mix(r2).reCenter();
-      case Binary.Mix:
+      case Op.Mix:
       default:
         // scale heights of r1 or r2 to taller height if too short
         if ((r1.maxHeight / r2.maxHeight) > 1.5) {

@@ -81,7 +81,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
   static const LOGO_HEIGHT = 60.0;
   static const WORD_HEIGHT = 60.0;
   static const MIN_CARD_WIDTH = 150.0;
-  static const CARD_GAP = 15.0;
+  static const CARD_GAP = 10.0;
   static const STD_PAD = 10.0;
 
   final String title;
@@ -102,7 +102,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final pageWidth = mediaSize.width;
 
     final sectionScale = pow(.35 * pageWidth / MIN_CARD_WIDTH, .7).toDouble();
-    final numCols = pow(pageWidth ~/ MIN_CARD_WIDTH, .7).ceil();
+    final numCols = pow(pageWidth ~/ MIN_CARD_WIDTH, .9).ceil();
 
     final cardWidth =
         (pageWidth - (numCols + 1) * CARD_GAP - 2 * STD_PAD) / numCols;
@@ -149,8 +149,8 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             padding: EdgeInsets.all(sectionPad),
@@ -172,7 +172,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                     padding: EdgeInsets.all(sectionPad),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Column(
@@ -280,14 +280,14 @@ class MultiWordWidget extends StatelessWidget {
     final wordTitleStyle = wordDescStyle.copyWith(
       fontWeight: FontWeight.bold,
       height: 1.2,
-      fontSize: 9 * scaleFactor,
+      fontSize: 10 * scaleFactor,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 8 * scaleFactor,
+      fontSize: 9 * scaleFactor,
     );
     final tinyLineStyle = TextStyle(
       fontWeight: FontWeight.normal,
@@ -335,8 +335,8 @@ class MultiWordWidget extends StatelessWidget {
                           ),
                           child: GrafonTile(
                             w.renderPlan,
-                            height: 0.8 * wordHeight,
-                            width: w.widthAtHeight(0.8 * wordHeight),
+                            height: wordHeight,
+                            width: w.widthAtHeight(wordHeight),
                           ),
                         ),
                       ),
@@ -344,13 +344,13 @@ class MultiWordWidget extends StatelessWidget {
                     WidgetSpan(
                       alignment: PlaceholderAlignment.top,
                       child: Container(
-                        width: w.widthAtHeight(wordHeight) > cardWidth / 2
+                        width: w.widthAtHeight(wordHeight) > cardWidth * .5
                             ? cardWidth
                             : cardWidth - stdPad - w.widthAtHeight(wordHeight),
                         padding: EdgeInsets.only(top: stdPad),
                         child: Text(
                           w.key +
-                              '\n\n' +
+                              '\n' +
                               WordGroupsPage.genVoicingLabel(w.pronunciations),
                           style: voicingStyle,
                         ),

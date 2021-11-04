@@ -188,15 +188,10 @@ final _circleGroup = WordGroup(
   CoreWord(Mono.Circle.gram),
   'Test expression rendering...',
   [
-    // CoreWord(Mono.Circle.right(), "right shift O by Unary"),
     CoreWord(Mono.Empty.next(Mono.Circle.gram), "right shift O by Empty"),
-    // CoreWord(Mono.Circle.left(), "left shift O by Unary"),
     CoreWord(Mono.Circle.next(Mono.Empty.gram), "left shift O by Empty"),
-    // CoreWord(Mono.Circle.up(), "up shift O by Unary"),
     CoreWord(Mono.Circle.over(Mono.Empty.gram), "up shift O by Empty"),
-    // CoreWord(Mono.Circle.down(), "down shift O by Unary"),
     CoreWord(Mono.Empty.over(Mono.Circle.gram), "down shift O by Empty"),
-    // CoreWord(Mono.Circle.shrink(), "shrink O by Unary"),
     CoreWord(Mono.Empty.wrap(Mono.Circle.gram), "shrink O by Empty"),
   ],
 );

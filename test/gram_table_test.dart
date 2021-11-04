@@ -217,21 +217,21 @@ void main() {
       final GrafonExpr s = Mono.Dot.gram;
       final BinaryOpExpr b = Mono.Dot.next(Mono.Dot.gram);
       expect(m.next(s).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Next, s.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Next, s.renderPlan));
       expect(m.next(b).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Next, b.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Next, b.renderPlan));
       expect(m.mix(s).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Mix, s.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Mix, s.renderPlan));
       expect(m.mix(b).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Mix, b.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Mix, b.renderPlan));
       expect(m.over(s).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Over, s.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Over, s.renderPlan));
       expect(m.over(b).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Over, b.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Over, b.renderPlan));
       expect(m.wrap(s).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Wrap, s.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Wrap, s.renderPlan));
       expect(m.wrap(b).renderPlan,
-          m.gram.renderPlan.byBinary(Binary.Wrap, b.renderPlan));
+          m.gram.renderPlan.byBinary(Op.Wrap, b.renderPlan));
     }
   });
 }

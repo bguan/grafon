@@ -354,7 +354,7 @@ class _QuadHelper {
 
   final zapPaths = [
     PolyStraight(
-      [Anchor.W / 1, Anchor.S / 2, Anchor.N / 2, Anchor.E / 0.8],
+      [Anchor.W / 1, Anchor.s / 1, Anchor.n / 1, Anchor.E * 1.2],
     ),
   ];
 

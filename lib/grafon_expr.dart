@@ -28,21 +28,21 @@ import 'gram_table.dart';
 import 'phonetics.dart';
 
 /// Binary Operator works on a pair of Gram Expression
-enum Binary { Next, Mix, Over, Wrap }
+enum Op { Next, Mix, Over, Wrap }
 
-/// Extending Binary Enum to associate shortName, symbol and Coda
-extension BinaryExtension on Binary {
+/// Extending Op Enum to associate shortName, symbol and Coda
+extension OpExtension on Op {
   String get shortName => this.toString().split('.').last;
 
   String get symbol {
     switch (this) {
-      case Binary.Over:
+      case Op.Over:
         return '/';
-      case Binary.Wrap:
+      case Op.Wrap:
         return '@';
-      case Binary.Mix:
+      case Op.Mix:
         return '*';
-      case Binary.Next:
+      case Op.Next:
       default:
         return '.';
     }
@@ -50,13 +50,13 @@ extension BinaryExtension on Binary {
 
   Coda get coda {
     switch (this) {
-      case Binary.Mix:
+      case Op.Mix:
         return Coda.k;
-      case Binary.Over:
+      case Op.Over:
         return Coda.s;
-      case Binary.Wrap:
+      case Op.Wrap:
         return Coda.n;
-      case Binary.Next:
+      case Op.Next:
       default:
         return Coda.NIL;
     }
@@ -81,23 +81,23 @@ abstract class GrafonExpr {
   List<Gram> get grams;
 
   /// Mix this expression with m.
-  BinaryOpExpr mix(GrafonExpr g) => BinaryOpExpr(this, Binary.Mix, g);
+  BinaryOpExpr mix(GrafonExpr g) => BinaryOpExpr(this, Op.Mix, g);
 
   /// Put this expression before e, this to left, e to right.
-  BinaryOpExpr next(GrafonExpr g) => BinaryOpExpr(this, Binary.Next, g);
+  BinaryOpExpr next(GrafonExpr g) => BinaryOpExpr(this, Op.Next, g);
 
   /// Put this expression over e, this above, e below.
-  BinaryOpExpr over(GrafonExpr g) => BinaryOpExpr(this, Binary.Over, g);
+  BinaryOpExpr over(GrafonExpr g) => BinaryOpExpr(this, Op.Over, g);
 
   /// Put this expression around e, this outside, e inside.
-  BinaryOpExpr wrap(GrafonExpr g) => BinaryOpExpr(this, Binary.Wrap, g);
+  BinaryOpExpr wrap(GrafonExpr g) => BinaryOpExpr(this, Op.Wrap, g);
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
 /// Private subclass, use respective factory methods in GramExpression instead.
 class BinaryOpExpr extends GrafonExpr {
   final GrafonExpr expr1;
-  final Binary op;
+  final Op op;
   final GrafonExpr expr2;
   late final renderPlan;
 
@@ -106,29 +106,29 @@ class BinaryOpExpr extends GrafonExpr {
       renderPlan = Mono.Empty.gram.renderPlan;
     } else if (expr1 == Mono.Empty.gram) {
       switch (op) {
-        case Binary.Next:
+        case Op.Next:
           renderPlan = expr2.renderPlan.right();
           break;
-        case Binary.Over:
+        case Op.Over:
           renderPlan = expr2.renderPlan.down();
           break;
-        case Binary.Wrap:
+        case Op.Wrap:
           renderPlan = expr2.renderPlan.shrink();
           break;
-        case Binary.Mix:
+        case Op.Mix:
         default:
           renderPlan = expr2.renderPlan;
       }
     } else if (expr2 == Mono.Empty.gram) {
       switch (op) {
-        case Binary.Next:
+        case Op.Next:
           renderPlan = expr1.renderPlan.left();
           break;
-        case Binary.Over:
+        case Op.Over:
           renderPlan = expr1.renderPlan.up();
           break;
-        case Binary.Wrap:
-        case Binary.Mix:
+        case Op.Wrap:
+        case Op.Mix:
         default:
           renderPlan = expr1.renderPlan;
       }
@@ -179,9 +179,9 @@ class ClusterExpr extends GrafonExpr {
     renderPlan = subExpr.renderPlan;
     final sList = subExpr.pronunciation.syllables;
     pronunciation = Pronunciation([
-      Mono.Empty.gram.syllable.diffCoda(Binary.Mix.coda),
+      Mono.Empty.gram.syllable.diffCoda(Op.Mix.coda),
       ...sList.take(sList.length - 1),
-      sList.last.diffCoda(Binary.Mix.coda),
+      sList.last.diffCoda(Op.Mix.coda),
       Mono.Empty.gram.syllable,
     ]);
   }

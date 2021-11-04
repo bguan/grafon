@@ -23,6 +23,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.17.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -33,7 +36,7 @@ dependencies:
   provider: ^6.0.0
   logging: ^1.0.1
   extension_google_sign_in_as_googleapis_auth: ^2.0.2
-  googleapis: ^5.0.0
+  googleapis: ^6.0.0
   just_audio: ^0.9.10
   dots_indicator: ^2.0.0
 
@@ -47,7 +50,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+  generate: true
   fonts:
     - family: Arimo
       fonts:
@@ -84,3 +87,7 @@ flutter:
     - assets/en-GB-audios/
     - assets/images/
     - google_fonts/
+flutter_intl:
+  enabled: true
+  localizely:
+    project_id: b28269eb-a47c-424c-972b-af7ba440672a

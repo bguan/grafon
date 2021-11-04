@@ -73,7 +73,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "${monoName} & ${quadName} (${consonant}...)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "app_TTS_enabled_msg": MessageLookupByLibrary.simpleMessage(
             "Cloud Text to Speech initialized."),

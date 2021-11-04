@@ -73,7 +73,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "${monoName} 与 ${quadName} (${consonant}...)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "app_TTS_enabled_msg":
             MessageLookupByLibrary.simpleMessage("云端发音系统已启动."),

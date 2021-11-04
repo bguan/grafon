@@ -105,7 +105,7 @@ class _GramTableViewState extends State<GramTableView> {
               for (int ci = 0; ci < numCols; ci++)
                 GramRowWidget(
                   Mono.values[ri * numCols + ci],
-                      (List<Gram> gs) async {
+                  (List<Gram> gs) async {
                     final coda = _isAlt ? _binary.coda.alt : _binary.coda;
                     speechSvc.pronounce(
                       gs.map((g) => Pronunciation([g.syllable.diffCoda(coda)])),

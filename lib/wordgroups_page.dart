@@ -55,13 +55,13 @@ class WordGroupsPage extends StatefulWidget {
     final fragStr = StringBuffer();
     final phonemeStr = StringBuffer();
     final approxStr = StringBuffer();
-    fragStr.write(ps.first.fragmentSequence.join('-'));
+    fragStr.write(ps.first.fragmentSequence.join());
     phonemeStr.write(ps.first.phonemes);
     approxStr.write(ps.first.approxVoice);
     for (var p in ps.skip(1)) {
       fragStr
         ..write(' ')
-        ..write(p.fragmentSequence.join('-'));
+        ..write(p.fragmentSequence.join());
       phonemeStr
         ..write(' ')
         ..write(p.phonemes);
@@ -78,11 +78,11 @@ class WordGroupsPage extends StatefulWidget {
 }
 
 class _WordGroupsPageState extends State<WordGroupsPage> {
-  static const LOGO_HEIGHT = 60.0;
-  static const WORD_HEIGHT = 60.0;
+  static const LOGO_HEIGHT_SCALE = .1;
+  static const WORD_HEIGHT_SCALE = .09;
   static const MIN_CARD_WIDTH = 150.0;
-  static const CARD_GAP = 10.0;
-  static const STD_PAD = 10.0;
+  static const CARD_GAP_SCALE = .05;
+  static const STD_PAD = 8.0;
 
   final String title;
   final List<WordGroup> groups;
@@ -100,12 +100,13 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = MediaQuery.of(ctx).size;
     final pageWidth = mediaSize.width;
+    final cardGap = CARD_GAP_SCALE * pageWidth;
 
-    final sectionScale = pow(.35 * pageWidth / MIN_CARD_WIDTH, .7).toDouble();
-    final numCols = pow(pageWidth ~/ MIN_CARD_WIDTH, .9).ceil();
+    final sectionScale = pow(.35 * pageWidth / MIN_CARD_WIDTH, .5).toDouble();
+    final numCols = pow(pageWidth / MIN_CARD_WIDTH, .7).floor();
 
     final cardWidth =
-        (pageWidth - (numCols + 1) * CARD_GAP - 2 * STD_PAD) / numCols;
+        (pageWidth - (numCols + 1) * cardGap - 2 * STD_PAD) / numCols;
 
     final cardScale = cardWidth / MIN_CARD_WIDTH;
 
@@ -114,37 +115,37 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
       fontStyle: FontStyle.normal,
       height: 1.5,
       color: scheme.primaryVariant,
-      fontSize: 14 * sectionScale,
+      fontSize: 18 * sectionScale,
     );
     final sectionStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 11 * sectionScale,
+      fontSize: 16 * sectionScale,
     );
     final groupDescStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 10 * sectionScale,
+      fontSize: 14 * sectionScale,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 9 * sectionScale,
+      fontSize: 12 * sectionScale,
     );
 
-    double logoHeight = sectionScale * LOGO_HEIGHT;
+    final logoHeight = sectionScale * LOGO_HEIGHT_SCALE * mediaSize.height;
     double maxLogoWidth = 0;
     for (var g in groups) {
       maxLogoWidth = max(maxLogoWidth, g.logo.widthAtHeight(logoHeight));
     }
     final sectionPad = STD_PAD * sectionScale;
-    final sectionTextWidth = .8 * pageWidth - maxLogoWidth - 4 * sectionPad;
+    final sectionTextWidth = .85 * pageWidth - maxLogoWidth - 4 * sectionPad;
 
     return SingleChildScrollView(
       child: Column(
@@ -172,7 +173,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                     padding: EdgeInsets.all(sectionPad),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Column(
@@ -232,8 +233,9 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                     groups[i].values,
                     cardWidth: cardWidth,
                     stdPad: STD_PAD * cardScale,
-                    cardGap: CARD_GAP * cardScale,
-                    wordHeight: WORD_HEIGHT * cardScale,
+                    cardGap: cardGap * cardScale,
+                    wordHeight:
+                        WORD_HEIGHT_SCALE * mediaSize.height * cardScale,
                     scaleFactor: cardScale,
                   ),
                   isExpanded: _expandedFlag[i],
@@ -275,19 +277,19 @@ class MultiWordWidget extends StatelessWidget {
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 10 * scaleFactor,
+      fontSize: 12 * scaleFactor,
     );
     final wordTitleStyle = wordDescStyle.copyWith(
       fontWeight: FontWeight.bold,
       height: 1.2,
-      fontSize: 10 * scaleFactor,
+      fontSize: 14 * scaleFactor,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 9 * scaleFactor,
+      fontSize: 10 * scaleFactor,
     );
     final tinyLineStyle = TextStyle(
       fontWeight: FontWeight.normal,

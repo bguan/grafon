@@ -84,13 +84,13 @@ class _GramTableViewState extends State<GramTableView> {
       fontWeight: FontWeight.normal,
       color: scheme.primary,
       fontStyle: FontStyle.italic,
-      fontSize: (opButtonHeight / 3),
+      fontSize: (opButtonHeight / 2),
       backgroundColor: Colors.transparent,
     );
     final opTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (opButtonHeight / 2.5),
+      fontSize: (opButtonHeight / 2.2),
       backgroundColor: Colors.transparent,
     );
 
@@ -152,7 +152,7 @@ class _GramTableViewState extends State<GramTableView> {
     };
 
     final opRow = Wrap(
-      spacing: 2 * inset,
+      spacing: 1.5 * inset,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
@@ -163,7 +163,7 @@ class _GramTableViewState extends State<GramTableView> {
         for (var b in Op.values)
           GestureDetector(
             child: Container(
-              padding: EdgeInsets.all(inset / 2),
+              padding: EdgeInsets.all(inset / 3),
               height: opButtonHeight,
               width: pageWidth / (1.5 + Op.values.length),
               alignment: Alignment.center,
@@ -222,7 +222,7 @@ class GramRowWidget extends StatelessWidget {
     final headerTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (headerHeight / 3),
+      fontSize: (headerHeight / 2),
     );
     final cons = mono.gram.cons.shortName;
     final monoName = l10n.common_mono_name(mono.shortName);

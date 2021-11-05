@@ -1,5 +1,5 @@
 {
-    "app_title": "形声语主页",
+    "app_title": "形声语",
     "app_login_tooltip": "登录",
     "app_logout_tooltip": "退出",
     "app_TTS_enabled_msg": "云端发音系统已启动.",
@@ -13,7 +13,7 @@
             }
         }
     },
-    "common_quad_name": "{quad, select, Line {线} Dots {双点} Corner {角头} Branch {分叉} Gate {门} Step {梯} Angle {尖角} Triangle {三角} Zap {电} Arrow {箭} Humps {双峰} Arc {回弯} Swirl {卷} Curve {拐弯} Drop {滴} Flow {流} other {???}}",
+    "common_quad_name": "{quad, select, Line {线} Dots {双点} Corner {角头} Branch {分叉} Gate {门} Step {梯} Angle {尖角} Triangle {三角} Zap {电} Arrow {箭} Humps {双峰} Arc {弯} Swirl {卷} Curve {拐} Drop {滴} Flow {流} other {???}}",
     "@common_quad_name": {
         "type": "text",
         "placeholders": {
@@ -34,7 +34,7 @@
         }
     },
     "page_gram_table_operators": "组合",
-    "page_gram_table_row_header": "{monoName} 与 {quadName} ({consonant}...)",
+    "page_gram_table_row_header": "{monoName}, {quadName} ({consonant}...)",
     "@page_gram_table_row_header": {
         "type": "text",
         "placeholders": {

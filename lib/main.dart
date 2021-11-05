@@ -268,7 +268,7 @@ class GrafonAppState extends State<GrafonApp> {
             style: theme.headline6?.copyWith(
               color: scheme.surface,
               fontWeight: FontWeight.bold,
-              fontSize: TOOL_BAR_HEIGHT / 2,
+              fontSize: TOOL_BAR_HEIGHT / 1.5,
             ),
           ),
           leading: IconButton(

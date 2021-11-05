@@ -28,6 +28,3 @@ doc/api/
 # OS misc unrelated
 .DS_Store
 .idea/
-/lib/generated/*
-/lib/generated/l10n.dart
-/lib/generated/intl/*.dart

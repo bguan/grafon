@@ -28,9 +28,6 @@ jobs:
       - name: Pull dependencies
         run: flutter pub get
 
-      - name: Generate l10n code
-        run: flutter gen-l10n
-
       - name: Test app
         run: flutter test --coverage
 

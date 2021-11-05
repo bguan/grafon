@@ -33,8 +33,8 @@ const GRAM_GAP = 0.2;
 const MIN_PEN_WIDTH = 1.0;
 const MIN_WIDTH_RATIO = 3 / 4;
 
-const DEFAULT_LANG_TAG = "en-US";
+const DEFAULT_LANG_TAG = "en";
 const LANG_TAG_TO_TTS_VOICE = {
-  "en-US": "en-US-Wavenet-E",
-  "zh-CN": "cmn-CN-Wavenet-D",
+  "en": "en-US-Wavenet-E",
+  "zh": "cmn-CN-Wavenet-D",
 };

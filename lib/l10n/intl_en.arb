@@ -1,76 +1,83 @@
 {
-    "app_title": "Grafon Home",
-    "app_login_tooltip": "Login",
-    "app_logout_tooltip": "Logout",
-    "app_TTS_enabled_msg": "Cloud Text to Speech initialized.",
-    "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}",
-    "@common_mono_name": {
-        "type": "text",
-        "placeholders": {
-            "mono": {
-                "example": "Empty",
-                "description": "Name of Monogram"
-            }
-        }
-    },
-    "common_quad_name": "{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Humps {Humps} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Flow {Flow} other {???}}",
-    "@common_quad_name": {
-        "type": "text",
-        "placeholders": {
-            "quad": {
-                "example": "Line",
-                "description": "Name of Quadgram"
-            }
-        }
-    },
-    "common_op_name": "{op, select, Next {Next} Mix {Mix} Over {Over} Wrap {Wrap} other {???}}",
-    "@common_op_name": {
-        "type": "text",
-        "placeholders": {
-            "op": {
-                "example": "Next",
-                "description": "Name of Operator"
-            }
-        }
-    },
-    "page_gram_table_operators": "Operators",
-    "page_gram_table_row_header": "{monoName} & {quadName} ({consonant}...)",
-    "@page_gram_table_row_header": {
-        "type": "text",
-        "placeholders": {
-            "monoName": {
-                "example": "Empty",
-                "description": "Name of Monogram in a Gram Row"
-            },
-            "quadName": {
-                "example": "Line",
-                "description": "Name of Quadgram in a Gram Row"
-            },
-            "consonant": {
-                "example": "B",
-                "description": "Consonant for a Gram Row"
-            }
-        }
-    },
-    "page_gram_table_op_label": "{opName} {opSymbol} {codas}",
-    "@page_gram_table_op_label": {
-        "type": "text",
-        "placeholders": {
-            "opName": {
-                "example": "Wrap",
-                "description": "Name of operator"
-            },
-            "opSymbol": {
-                "example": "+",
-                "description": "Symbol of operator"
-            },
-            "codas": {
-                "example": "...n, ...ng",
-                "description": "Optional coda for gram left of operator"
-            }
-        }
-    },
-    "page_core_words_title": "Core Words",
-    "page_random_words_title": "Random Words (for Testing)",
-    "@@locale": "en"
+  "@@locale": "en",
+  "app_login_tooltip": "Login",
+  "@app_login_tooltip": {},
+  "app_logout_tooltip": "Logout",
+  "@app_logout_tooltip": {},
+  "app_title": "Grafon Home",
+  "@app_title": {},
+  "app_TTS_enabled_msg": "Cloud Text to Speech initialized.",
+  "@app_TTS_enabled_msg": {},
+  "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}",
+  "@common_mono_name": {
+    "type": "text",
+    "placeholders": {
+      "mono": {
+        "description": "Name of Monogram",
+        "example": "Empty"
+      }
+    }
+  },
+  "common_op_name": "{op, select, Next {Next} Mix {Mix} Over {Over} Wrap {Wrap} other {???}}",
+  "@common_op_name": {
+    "type": "text",
+    "placeholders": {
+      "op": {
+        "description": "Name of Operator",
+        "example": "Next"
+      }
+    }
+  },
+  "common_quad_name": "{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Humps {Humps} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Flow {Flow} other {???}}",
+  "@common_quad_name": {
+    "type": "text",
+    "placeholders": {
+      "quad": {
+        "description": "Name of Quadgram",
+        "example": "Line"
+      }
+    }
+  },
+  "page_core_words_title": "Core Words",
+  "@page_core_words_title": {},
+  "page_gram_table_operators": "Operators",
+  "@page_gram_table_operators": {},
+  "page_gram_table_op_label": "{opName} {opSymbol} {codas}",
+  "@page_gram_table_op_label": {
+    "type": "text",
+    "placeholders": {
+      "opName": {
+        "description": "Name of operator",
+        "example": "Wrap"
+      },
+      "opSymbol": {
+        "description": "Symbol of operator",
+        "example": "+"
+      },
+      "codas": {
+        "description": "Optional coda for gram left of operator",
+        "example": "...n, ...ng"
+      }
+    }
+  },
+  "page_gram_table_row_header": "{monoName} & {quadName} ({consonant}...)",
+  "@page_gram_table_row_header": {
+    "type": "text",
+    "placeholders": {
+      "monoName": {
+        "description": "Name of Monogram in a Gram Row",
+        "example": "Empty"
+      },
+      "quadName": {
+        "description": "Name of Quadgram in a Gram Row",
+        "example": "Line"
+      },
+      "consonant": {
+        "description": "Consonant for a Gram Row",
+        "example": "B"
+      }
+    }
+  },
+  "page_random_words_title": "Random Words (for Testing)",
+  "@page_random_words_title": {}
 }

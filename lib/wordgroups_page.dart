@@ -78,8 +78,8 @@ class WordGroupsPage extends StatefulWidget {
 }
 
 class _WordGroupsPageState extends State<WordGroupsPage> {
-  static const LOGO_HEIGHT_SCALE = .1;
-  static const WORD_HEIGHT_SCALE = .09;
+  static const LOGO_HEIGHT_SCALE = .08;
+  static const WORD_HEIGHT_SCALE = .08;
   static const MIN_CARD_WIDTH = 150.0;
   static const CARD_GAP_SCALE = .05;
   static const STD_PAD = 8.0;
@@ -103,7 +103,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final cardGap = CARD_GAP_SCALE * pageWidth;
 
     final sectionScale = pow(.35 * pageWidth / MIN_CARD_WIDTH, .5).toDouble();
-    final numCols = pow(pageWidth / MIN_CARD_WIDTH, .7).floor();
+    final numCols = pow(pageWidth / MIN_CARD_WIDTH, .9).floor();
 
     final cardWidth =
         (pageWidth - (numCols + 1) * cardGap - 2 * STD_PAD) / numCols;
@@ -122,30 +122,32 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 16 * sectionScale,
+      fontSize: 14 * sectionScale,
     );
     final groupDescStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 14 * sectionScale,
+      fontSize: 12 * sectionScale,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
       color: scheme.primaryVariant,
-      fontSize: 12 * sectionScale,
+      fontSize: 10 * sectionScale,
     );
 
-    final logoHeight = sectionScale * LOGO_HEIGHT_SCALE * mediaSize.height;
+    final logoHeight = sectionScale *
+        LOGO_HEIGHT_SCALE *
+        max(mediaSize.height, mediaSize.width);
     double maxLogoWidth = 0;
     for (var g in groups) {
       maxLogoWidth = max(maxLogoWidth, g.logo.widthAtHeight(logoHeight));
     }
     final sectionPad = STD_PAD * sectionScale;
-    final sectionTextWidth = .85 * pageWidth - maxLogoWidth - 4 * sectionPad;
+    final sectionTextWidth = .8 * pageWidth - maxLogoWidth - 4 * sectionPad;
 
     return SingleChildScrollView(
       child: Column(
@@ -232,10 +234,10 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
                   body: MultiWordWidget(
                     groups[i].values,
                     cardWidth: cardWidth,
-                    stdPad: STD_PAD * cardScale,
-                    cardGap: cardGap * cardScale,
-                    wordHeight:
-                        WORD_HEIGHT_SCALE * mediaSize.height * cardScale,
+                    stdPad: STD_PAD,
+                    cardGap: cardGap,
+                    wordHeight: WORD_HEIGHT_SCALE *
+                        max(mediaSize.height, mediaSize.width),
                     scaleFactor: cardScale,
                   ),
                   isExpanded: _expandedFlag[i],

@@ -19,6 +19,9 @@
 library phonetics;
 
 import 'package:collection/collection.dart';
+import 'package:enum_to_string/enum_to_string.dart';
+
+import 'grafon_expr.dart';
 
 /// Basic vowels for the language. Can be combined into diphthong.
 enum Vowel { NIL, a, e, i, o, u }
@@ -26,7 +29,7 @@ enum Vowel { NIL, a, e, i, o, u }
 /// Extending Vowel to tie to phoneme and approximate voicing
 extension VowelHelper on Vowel {
   String get shortName =>
-      this == Vowel.NIL ? '' : this.toString().split('.').last;
+      this == Vowel.NIL ? '' : EnumToString.convertToString(this);
 
   /// IPA phoneme
   String get phoneme {
@@ -69,18 +72,22 @@ extension VowelHelper on Vowel {
 }
 
 /// Consonants at the beginning of a syllable.
-enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s }
+enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s, j, ch }
 
 /// Extension to map Consonant to the Pair and provide short name
 extension ConsonantHelper on Cons {
   String get shortName =>
-      this == Cons.NIL ? '' : this.toString().split('.').last;
+      this == Cons.NIL ? '' : EnumToString.convertToString(this);
 
   /// IPA Phoneme
   String get phoneme {
     switch (this) {
       case Cons.r:
         return 'ɹ';
+      case Cons.j:
+        return 'ʤ';
+      case Cons.ch:
+        return 'ʧ';
       case Cons.NIL:
         return '';
       default:
@@ -91,88 +98,65 @@ extension ConsonantHelper on Cons {
   /// hack to approximate intended voicing for english speakers
   String get approxVoice {
     switch (this) {
-      case Cons.h:
-        return 'h';
-      case Cons.b:
-        return 'b';
-      case Cons.p:
-        return 'p';
-      case Cons.d:
-        return 'd';
-      case Cons.t:
-        return 't';
-      case Cons.f:
-        return 'f';
-      case Cons.v:
-        return 'v';
-      case Cons.g:
-        return 'g';
-      case Cons.k:
-        return 'k';
-      case Cons.l:
-        return 'l';
-      case Cons.r:
-        return 'r';
-      case Cons.m:
-        return 'm';
-      case Cons.n:
-        return 'n';
-      case Cons.s:
-        return 's';
-      case Cons.z:
-        return 'z';
       case Cons.NIL:
-      default:
         return '';
+      default:
+        return this.shortName;
     }
   }
 }
 
 /// Coda is the ending consonant at the end of a syllable
-enum Coda { NIL, s, k, n, sh, ch, ng }
+enum Coda { NIL, sh, ng, m, n }
 
 /// Helper to map coda to get the group that its associated with and phoneme
 extension CodaHelper on Coda {
   String get shortName =>
-      this == Coda.NIL ? '' : this.toString().split('.').last;
+      this == Coda.NIL ? '' : EnumToString.convertToString(this);
 
   /// IPA Phoneme for base case
   String get phoneme {
     switch (this) {
-      case Coda.k:
-        return 'k';
-      case Coda.s:
-        return 's';
-      case Coda.n:
-        return 'n';
-      case Coda.ch:
-        return 'ʧ';
+      case Coda.NIL:
+        return '';
       case Coda.sh:
         return 'ʃ';
       case Coda.ng:
         return 'ŋ';
       default:
-        return '';
+        return this.shortName;
     }
   }
 
   /// approximate intended voicing for english speakers
   String get approxVoice => shortName;
 
-  bool get isAlt => this == Coda.ch || this == Coda.sh || this == Coda.ng;
+  bool get isAlt => this == Coda.n;
 
   bool get isBase => !this.isAlt;
 
+  bool get hasAlt => isAlt || this.alt != this;
+
   Coda get alt {
     switch (this) {
-      case Coda.k:
-        return Coda.ch;
-      case Coda.s:
-        return Coda.sh;
-      case Coda.n:
-        return Coda.ng;
+      case Coda.m:
+        return Coda.n;
       default:
         return this;
+    }
+  }
+
+  Op get op {
+    switch (this) {
+      case Coda.sh:
+        return Op.Mix;
+      case Coda.ng:
+        return Op.Over;
+      case Coda.m:
+      case Coda.n:
+        return Op.Wrap;
+      default:
+        return Op.Next;
     }
   }
 }

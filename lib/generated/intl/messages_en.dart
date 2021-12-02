@@ -8,6 +8,7 @@
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
 // ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
+// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -19,11 +20,20 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(mono) => "${Intl.select(mono, {
+  static String m0(face) => "${Intl.select(face, {
+            'Center': 'Center',
+            'Right': 'Right',
+            'Up': 'Up',
+            'Left': 'Left',
+            'Down': 'Down',
+            'other': '???',
+          })}";
+
+  static String m1(mono) => "${Intl.select(mono, {
             'Empty': 'Empty',
             'Dot': 'Dot',
             'Cross': 'Cross',
-            'Hex': 'Hex',
+            'Flake': 'Flake',
             'Square': 'Square',
             'Grid': 'Grid',
             'X': 'X',
@@ -36,10 +46,12 @@ class MessageLookup extends MessageLookupByLibrary {
             'Star': 'Star',
             'Flower': 'Flower',
             'Atom': 'Atom',
+            'Infinity': 'Infinity',
+            'Octo': 'Octo',
             'other': '???',
           })}";
 
-  static String m1(op) => "${Intl.select(op, {
+  static String m2(op) => "${Intl.select(op, {
             'Next': 'Next',
             'Mix': 'Mix',
             'Over': 'Over',
@@ -47,7 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m2(quad) => "${Intl.select(quad, {
+  static String m3(quad) => "${Intl.select(quad, {
             'Line': 'Line',
             'Dots': 'Dots',
             'Corner': 'Corner',
@@ -58,37 +70,40 @@ class MessageLookup extends MessageLookupByLibrary {
             'Triangle': 'Triangle',
             'Zap': 'Zap',
             'Arrow': 'Arrow',
-            'Humps': 'Humps',
+            'Bow': 'Bow',
             'Arc': 'Arc',
             'Swirl': 'Swirl',
             'Curve': 'Curve',
             'Drop': 'Drop',
-            'Flow': 'Flow',
+            'Wave': 'Wave',
+            'Knot': 'Knot',
+            'Cover': 'Cover',
             'other': '???',
           })}";
 
-  static String m3(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
+  static String m4(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
 
-  static String m4(monoName, quadName, consonant) =>
+  static String m5(monoName, quadName, consonant) =>
       "${monoName} & ${quadName} (${consonant}...)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+  static Map<String, Function> _notInlinedMessages(_) =>
+      <String, Function>{
         "app_TTS_enabled_msg": MessageLookupByLibrary.simpleMessage(
             "Cloud Text to Speech initialized."),
         "app_login_tooltip": MessageLookupByLibrary.simpleMessage("Login"),
         "app_logout_tooltip": MessageLookupByLibrary.simpleMessage("Logout"),
-        "app_title": MessageLookupByLibrary.simpleMessage("Grafon Home"),
-        "common_mono_name": m0,
-        "common_op_name": m1,
-        "common_quad_name": m2,
+        "app_title": MessageLookupByLibrary.simpleMessage("Grafon Language"),
+        "common_face_name": m0,
+        "common_mono_name": m1,
+        "common_op_name": m2,
+        "common_quad_name": m3,
         "page_core_words_title":
             MessageLookupByLibrary.simpleMessage("Core Words"),
-        "page_gram_table_op_label": m3,
+        "page_gram_table_op_label": m4,
         "page_gram_table_operators":
-            MessageLookupByLibrary.simpleMessage("Operators"),
-        "page_gram_table_row_header": m4,
+            MessageLookupByLibrary.simpleMessage("Combo"),
+        "page_gram_table_row_header": m5,
         "page_random_words_title":
             MessageLookupByLibrary.simpleMessage("Random Words (for Testing)")
       };

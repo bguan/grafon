@@ -342,16 +342,16 @@ class RenderPlan {
       case Op.Mix:
       default:
         // scale heights of r1 or r2 to taller height if too short
-        if ((r1.maxHeight / r2.maxHeight) > 1.5) {
+        if ((r1.maxHeight / r2.maxHeight) > 2) {
           r2 = r2.scaleHeight(r1.maxHeight).reCenter();
-        } else if ((r2.maxHeight / r1.maxHeight) > 1.5) {
+        } else if ((r2.maxHeight / r1.maxHeight) > 2) {
           r1 = r1.scaleHeight(r2.maxHeight).reCenter();
         }
         // scale widths of r1 or r2 to wider width if too narrow
-        if (r1.maxWidth > r2.maxWidth && r2.maxWidth / r1.maxWidth < .5) {
+        if (r1.maxWidth > r2.maxWidth && r2.maxWidth / r1.maxWidth < .25) {
           r2 = r2.scaleWidth(r1.maxWidth).reCenter();
         } else if (r2.maxWidth > r1.maxWidth &&
-            r1.maxWidth / r2.maxWidth < .5) {
+            r1.maxWidth / r2.maxWidth < .25) {
           r1 = r1.scaleWidth(r2.maxWidth).reCenter();
         }
         // align r2's avg(x,y) to r1's avg(x,y)
@@ -361,7 +361,10 @@ class RenderPlan {
   }
 
   /// compute flex rendering width by adjusting raw width
-  double calcWidthByHeight(double devHeight) => widthRatio * devHeight;
+  double calcWidthByHeight(double devHeight) => devHeight * widthRatio;
+
+  /// compute flex rendering width by adjusting raw height
+  double calcHeightByWidth(double devWidth) => devWidth / widthRatio;
 
   /// Transform this render plan by a function that remap points
   RenderPlan remap(Vector2 f(bool isFixed, Vector2 v)) => RenderPlan(lines

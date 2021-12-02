@@ -37,7 +37,7 @@ Future<void> main() async {
   ]);
   final speechConfig = TTS_CONFIG;
   final locale = speechConfig['languageCode'];
-  final sndArchiveDirPath = '/Users/bguan/backup/archive-$locale';
+  final sndArchiveDirPath = 'assets/$locale-audios';
   final sndAssetDirPath = 'assets/$locale-audios';
   final sndAssetDir = Directory(sndAssetDirPath);
   if (!sndAssetDir.existsSync()) {

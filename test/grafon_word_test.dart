@@ -16,21 +16,23 @@
 // under the License.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:grafon/constants.dart';
 import 'package:grafon/grafon_expr.dart';
 import 'package:grafon/grafon_word.dart';
 import 'package:grafon/gram_table.dart';
+import 'package:grafon/localized_string.dart';
 import 'package:grafon/phonetics.dart';
 
 /// Unit Tests for Expressions
 void main() {
   test("CompoundWord throws exception when insufficient words", () {
-    expect(() => CompoundWord([CoreWord(Mono.Sun.gram)]),
+    expect(() => CompoundWord.def([CoreWord.def(Mono.Sun.gram)]),
         throwsA(isA<ArgumentError>()));
   });
 
   test("CompoundWord symbol is different from all Binary operator symbols", () {
     final symbols = Op.values.map((bin) => bin.symbol);
-    expect(symbols.contains(CompoundWord.SEPARATOR_SYMBOL), isFalse);
+    expect(symbols.contains(COMPOUND_SEP), isFalse);
   });
 
   test("CompoundWord pronunciation", () {
@@ -38,7 +40,7 @@ void main() {
     final person = Mono.Dot.gram.over(Quads.Line.up);
 
     // God? Alien?
-    final starMan = CompoundWord([CoreWord(sun), CoreWord(person)]);
+    final starMan = CompoundWord.def([CoreWord.def(sun), CoreWord.def(person)]);
     expect(starMan.toString(), "Sun : Dot / Up_Line");
     final ps = starMan.pronunciations.toList();
     expect(ps.length, 2);
@@ -49,14 +51,14 @@ void main() {
 
     List<Syllable> v2 = ps[1].syllables;
     expect(v2.length, 2);
-    expect(v2[0], Syllable(Cons.h, Vowel.a, Coda.s));
+    expect(v2[0], Syllable(Cons.h, Vowel.a, Coda.ng));
     expect(v2[1], Syllable.v(Vowel.i));
   });
 
   test("Word equality and hashcode works", () {
-    final dot1 = CoreWord(Mono.Dot.gram);
-    final dot2 = CoreWord(Mono.Dot.gram);
-    final circle = CoreWord(Mono.Circle.gram);
+    final dot1 = CoreWord.def(Mono.Dot.gram);
+    final dot2 = CoreWord.def(Mono.Dot.gram);
+    final circle = CoreWord.def(Mono.Circle.gram);
     expect(dot1, dot1);
     expect(dot1, dot2);
     expect(dot1.hashCode, dot2.hashCode);
@@ -64,12 +66,27 @@ void main() {
   });
 
   test("WordGroup equality and hashcode", () {
-    final g1 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
-        [CoreWord(Mono.Dot.gram)]);
-    final g11 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
-        [CoreWord(Mono.Dot.gram)]);
-    final g2 = WordGroup('Test', CoreWord(Mono.Circle.gram), 'Test...',
-        [CoreWord(Mono.Dot.gram), CoreWord(Mono.Dot.mix(Mono.Empty.gram))]);
+    final g1 = WordGroup(
+      LocStr.def('Test'),
+      CoreWord.def(Mono.Circle.gram),
+      LocStr.def('Test...'),
+      [CoreWord.def(Mono.Dot.gram)],
+    );
+    final g11 = WordGroup(
+      LocStr.def('Test'),
+      CoreWord.def(Mono.Circle.gram),
+      LocStr.def('Test...'),
+      [CoreWord.def(Mono.Dot.gram)],
+    );
+    final g2 = WordGroup(
+      LocStr.def('Test'),
+      CoreWord.def(Mono.Circle.gram),
+      LocStr.def('Test...'),
+      [
+        CoreWord.def(Mono.Dot.gram),
+        CoreWord.def(Mono.Dot.mix(Mono.Empty.gram))
+      ],
+    );
 
     expect(g1, g1);
     expect(g1, g11);
@@ -78,10 +95,11 @@ void main() {
   });
 
   test("WordGroup keys and contains", () {
-    final circle = CoreWord(Mono.Circle.gram);
-    final dot = CoreWord(Mono.Dot.gram, "dot");
-    final vLine = CoreWord(Quads.Line.up, "line.up");
-    final g = WordGroup('Test', circle, '?', [dot, vLine]);
+    final circle = CoreWord.def(Mono.Circle.gram);
+    final dot = CoreWord.def(Mono.Dot.gram, "dot");
+    final vLine = CoreWord.def(Quads.Line.up, "line.up");
+    final g =
+        WordGroup(LocStr.def('Test'), circle, LocStr.def('?'), [dot, vLine]);
 
     expect(g.contains("Dot"), isTrue);
     expect(g.contains("tod"), isFalse);

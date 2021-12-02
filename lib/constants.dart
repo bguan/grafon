@@ -14,11 +14,13 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import 'dart:ui';
 
 /// Constants to be share in multiple pieces of code
 
+const DEF_FONT = 'Arimo';
 const TOOL_BAR_HEIGHT = 30.0;
-const FOOTER_HEIGHT = 35.0;
+const FOOTER_HEIGHT = 30.0;
 
 const MIN_GRAM_WIDTH = 0.01;
 const MIN_GRAM_HEIGHT = 0.01;
@@ -32,9 +34,27 @@ const DOT_LINE_WTH_RATIO = 1.5;
 const GRAM_GAP = 0.2;
 const MIN_PEN_WIDTH = 1.0;
 const MIN_WIDTH_RATIO = 3 / 4;
-
-const DEFAULT_LANG_TAG = "en";
+const QUAD_FACE_SEP = ' ';
+const COMPOUND_SEP = ':';
+const DEF_LANG_TAG = "en";
+const DEF_COUNTRY_CODE = "US";
 const LANG_TAG_TO_TTS_VOICE = {
   "en": "en-US-Wavenet-E",
   "zh": "cmn-CN-Wavenet-D",
 };
+
+const DEF_LOCALE = Locale.fromSubtags(languageCode: DEF_LANG_TAG);
+
+const EN = Locale.fromSubtags(languageCode: "en");
+
+const EN_US = Locale.fromSubtags(
+  languageCode: "en",
+  countryCode: "US",
+);
+
+const ZH = Locale.fromSubtags(languageCode: "zh");
+
+const ZH_CN = Locale.fromSubtags(
+  languageCode: "zh",
+  countryCode: "CN",
+);

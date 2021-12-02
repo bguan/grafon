@@ -36,9 +36,11 @@ dependencies:
   provider: ^6.0.0
   logging: ^1.0.1
   extension_google_sign_in_as_googleapis_auth: ^2.0.2
-  googleapis: ^6.0.0
+  googleapis: ^7.0.0
   just_audio: ^0.9.10
   dots_indicator: ^2.0.0
+  petitparser: ^4.4.0
+  enum_to_string: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +89,7 @@ flutter:
     - assets/en-GB-audios/
     - assets/images/
     - google_fonts/
+
 flutter_intl:
   enabled: true
   localizely:

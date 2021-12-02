@@ -4,17 +4,27 @@
   "@app_login_tooltip": {},
   "app_logout_tooltip": "Logout",
   "@app_logout_tooltip": {},
-  "app_title": "Grafon Home",
+  "app_title": "Grafon Language",
   "@app_title": {},
   "app_TTS_enabled_msg": "Cloud Text to Speech initialized.",
   "@app_TTS_enabled_msg": {},
-  "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}",
+  "common_face_name": "{face, select, Center {Center} Right {Right} Up {Up} Left {Left} Down {Down} other {???}}",
+  "@common_face_name": {
+    "type": "text",
+    "placeholders": {
+      "face": {
+        "description": "Name of Face",
+        "example": "Up"
+      }
+    }
+  },
+  "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Flake {Flake} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} Infinity {Infinity} Octo {Octo} other {???}}",
   "@common_mono_name": {
     "type": "text",
     "placeholders": {
       "mono": {
         "description": "Name of Monogram",
-        "example": "Empty"
+        "example": "Square"
       }
     }
   },
@@ -28,7 +38,7 @@
       }
     }
   },
-  "common_quad_name": "{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Humps {Humps} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Flow {Flow} other {???}}",
+  "common_quad_name": "{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Bow {Bow} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Wave {Wave} Knot {Knot} Cover {Cover} other {???}}",
   "@common_quad_name": {
     "type": "text",
     "placeholders": {
@@ -40,7 +50,7 @@
   },
   "page_core_words_title": "Core Words",
   "@page_core_words_title": {},
-  "page_gram_table_operators": "Operators",
+  "page_gram_table_operators": "Combo",
   "@page_gram_table_operators": {},
   "page_gram_table_op_label": "{opName} {opSymbol} {codas}",
   "@page_gram_table_op_label": {

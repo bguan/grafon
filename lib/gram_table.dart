@@ -20,7 +20,9 @@
 /// Each column is associated with a Face, shares the same vowel.
 library gram_table;
 
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:grafon/constants.dart';
+import 'package:vector_math/vector_math.dart';
 
 import 'grafon_expr.dart';
 import 'gram_infra.dart';
@@ -31,7 +33,7 @@ enum Mono {
   Empty,
   Dot,
   Cross,
-  Hex,
+  Flake,
   Square,
   Grid,
   X,
@@ -44,6 +46,8 @@ enum Mono {
   Star,
   Flower,
   Atom,
+  Infinity,
+  Octo,
 }
 
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
@@ -232,16 +236,47 @@ class _MonoHelper {
     ], isFixedAspect: true),
   ];
 
-  final hexPaths = [
-    PolyStraight.anchors([
+  final flakePaths = [
+    PolyStraight([
+      Vector2(0, .5),
+      Vector2(0, -.5),
+    ]),
+    PolyStraight([
+      Vector2(-.4, .3),
+      Vector2(.4, -.3),
+    ]),
+    PolyStraight([
+      Vector2(.4, .3),
+      Vector2(-.4, -.3),
+    ]),
+  ];
+
+  final infinityPaths = [
+    PolyCurve.anchors([
+      Anchor.S,
       Anchor.W,
       Anchor.nw,
-      Anchor.ne,
-      Anchor.E,
       Anchor.se,
+      Anchor.E,
+      Anchor.ne,
       Anchor.sw,
       Anchor.W,
-    ]),
+      Anchor.N
+    ], isFixedAspect: true),
+  ];
+
+  final octoPaths = [
+    PolyStraight([
+      Vector2(-.2, -.5),
+      Vector2(0.2, -.5),
+      Vector2(0.5, -.2),
+      Vector2(0.5, 0.2),
+      Vector2(0.2, 0.5),
+      Vector2(-.2, 0.5),
+      Vector2(-.5, 0.2),
+      Vector2(-.5, -.2),
+      Vector2(-.2, -.5),
+    ], isFixedAspect: true),
   ];
 
   late final Map<Mono, MonoGram> enum2mono;
@@ -251,7 +286,7 @@ class _MonoHelper {
       Mono.Empty: MonoGram(emptyPaths, Cons.NIL),
       Mono.Dot: MonoGram(dotPaths, Cons.h),
       Mono.Cross: MonoGram(crossPaths, Cons.b),
-      Mono.Hex: MonoGram(hexPaths, Cons.p),
+      Mono.Flake: MonoGram(flakePaths, Cons.p),
       Mono.Square: MonoGram(squarePaths, Cons.d),
       Mono.Grid: MonoGram(gridPaths, Cons.t),
       Mono.X: MonoGram(xPaths, Cons.g),
@@ -264,6 +299,8 @@ class _MonoHelper {
       Mono.Eye: MonoGram(eyePaths, Cons.r),
       Mono.Atom: MonoGram(atomPaths, Cons.f),
       Mono.Flower: MonoGram(flowerPaths, Cons.v),
+      Mono.Infinity: MonoGram(infinityPaths, Cons.j),
+      Mono.Octo: MonoGram(octoPaths, Cons.ch),
     });
   }
 }
@@ -280,12 +317,14 @@ enum Quads {
   Triangle,
   Zap,
   Arrow,
-  Humps,
+  Bow,
   Arc,
   Swirl,
   Curve,
   Drop,
-  Flow,
+  Wave,
+  Knot,
+  Cover,
 }
 
 /// QuadHelper is a singleton to only instantiates QuadGrams only once
@@ -354,11 +393,11 @@ class _QuadHelper {
 
   final zapPaths = [
     PolyStraight(
-      [Anchor.W / 1, Anchor.s / 1, Anchor.n / 1, Anchor.E * 1.2],
+      [Anchor.W * 1, Anchor.S * .4, Anchor.N * .4, Anchor.E * 1],
     ),
   ];
 
-  final humpsPaths = [
+  final bowPaths = [
     PolyCurve.anchors([
       Anchor.NW,
       Anchor.N,
@@ -407,7 +446,7 @@ class _QuadHelper {
     ])
   ];
 
-  final flowPaths = [
+  final wavePaths = [
     PolyCurve.anchors([
       Anchor.SW,
       Anchor.W,
@@ -428,6 +467,31 @@ class _QuadHelper {
     ),
   ];
 
+  final knotPaths = [
+    PolyCurve.anchors(
+      [
+        Anchor.NW,
+        Anchor.nw,
+        Anchor.se,
+        Anchor.E,
+        Anchor.ne,
+        Anchor.sw,
+        Anchor.SW,
+      ],
+    ),
+  ];
+
+  final coverPaths = [
+    PolyStraight(
+      [
+        Vector2(-.3, .5),
+        Vector2(.2, .3),
+        Vector2(.2, -.3),
+        Vector2(-.3, -.5),
+      ],
+    ),
+  ];
+
   late final Map<Quads, QuadGrams> enum2quads;
 
   _QuadHelper._internal() {
@@ -442,19 +506,21 @@ class _QuadHelper {
       Quads.Triangle: RotatingQuads(trianglePaths, Cons.k),
       Quads.Arrow: RotatingQuads(arrowPaths, Cons.s),
       Quads.Zap: RotaFlipQuads(zapPaths, Cons.z),
-      Quads.Humps: RotatingQuads(humpsPaths, Cons.m),
+      Quads.Bow: RotatingQuads(bowPaths, Cons.m),
       Quads.Arc: RotatingQuads(arcPaths, Cons.n),
       Quads.Curve: FlipQuads(curvePaths, Cons.l, recenter: false),
       Quads.Swirl: RotaFlipQuads(swirlPaths, Cons.r),
-      Quads.Flow: RotaFlipQuads(flowPaths, Cons.f),
+      Quads.Wave: RotaFlipQuads(wavePaths, Cons.f),
       Quads.Drop: RotatingQuads(dropPaths, Cons.v),
+      Quads.Knot: RotatingQuads(knotPaths, Cons.j),
+      Quads.Cover: RotatingQuads(coverPaths, Cons.ch),
     });
   }
 }
 
 /// Map a MonoGram to each Mono enum, its QuadGrams peer, and shortname.
 extension MonoExtension on Mono {
-  String get shortName => this.toString().split('.').last;
+  String get shortName => EnumToString.convertToString(this);
 
   Gram get gram => _MonoHelper().enum2mono[this]!;
 
@@ -487,7 +553,7 @@ extension QuadExtension on Quads {
   Mono get monoPeer =>
       Mono.values.firstWhere((m) => m.gram.cons == this.grams.cons);
 
-  String get shortName => this.toString().split('.').last;
+  String get shortName => EnumToString.convertToString(this);
 }
 
 /// GramTable is a Singleton to implement various Gram lookup efficiently

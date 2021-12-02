@@ -25,26 +25,33 @@ import 'package:vector_math/vector_math.dart';
 
 import 'constants.dart';
 import 'expr_render.dart';
+import 'generated/l10n.dart';
 import 'grafon_expr.dart';
 import 'gram_infra.dart';
+import 'localized_string.dart';
 import 'phonetics.dart';
 
 /// Abstract base class for all Grafon Words to associate meaning to gram expr.
 abstract class GrafonWord {
   final String key;
-  final String title;
-  final String description;
+  final LocStr locTitle;
+  final LocStr locDescription;
 
   Iterable<Pronunciation> get pronunciations;
 
   RenderPlan get renderPlan;
 
-  GrafonWord(this.key, [String? title, String? description])
-      : this.title = title ?? '',
-        this.description = description ?? '';
+  GrafonWord.def(this.key, [String? title, String? description])
+      : this.locTitle = LocStr.def(title ?? ''),
+        this.locDescription = LocStr.def(description ?? '');
 
-  double widthAtHeight(double devHeight) =>
-      renderPlan.calcWidthByHeight(devHeight);
+  GrafonWord(this.key, LocStrs loc2TitleDesc)
+      : this.locTitle = loc2TitleDesc ^ 0,
+        this.locDescription = loc2TitleDesc ^ 1;
+
+  double widthAtHeight(double height) => renderPlan.calcWidthByHeight(height);
+
+  double heightAtWidth(double width) => renderPlan.calcHeightByWidth(width);
 
   @override
   int get hashCode => key.hashCode;
@@ -55,6 +62,8 @@ abstract class GrafonWord {
     GrafonWord that = other;
     return key == that.key;
   }
+
+  String localizeExpr(S l10n);
 }
 
 /// Core Word has only 1 Grafon Expression.
@@ -63,12 +72,8 @@ class CoreWord extends GrafonWord {
   final Iterable<Pronunciation> pronunciations;
   late final RenderPlan renderPlan;
 
-  CoreWord(this.expr, [String? title, String? description])
-      : this.pronunciations = [expr.pronunciation],
-        super(expr.toString(), title, description) {
-    var r = expr.renderPlan;
-
-    /// Make sure word rendering is not too narrow or too wide
+  /// Make sure word rendering is not too narrow or too wide
+  static RenderPlan normalize(RenderPlan r) {
     if ((MIN_WIDTH_RATIO - r.widthRatio) > 0.1 ||
         r.widthRatio > 2 * MIN_WIDTH_RATIO) {
       final s = (r.widthRatio < MIN_WIDTH_RATIO
@@ -88,28 +93,34 @@ class CoreWord extends GrafonWord {
         ]);
       }
     }
-    renderPlan = r;
+    return r;
   }
+
+  CoreWord.def(this.expr, [String? title, String? description])
+      : this.pronunciations = [expr.pronunciation],
+        renderPlan = normalize(expr.renderPlan),
+        super.def(expr.toString(), title, description);
+
+  CoreWord(this.expr, LocStrs loc2TitleDesc)
+      : this.pronunciations = [expr.pronunciation],
+        renderPlan = normalize(expr.renderPlan),
+        super(expr.toString(), loc2TitleDesc);
 
   @override
   String toString() => '$expr';
+
+  @override
+  String localizeExpr(S l10n) => expr.localize(l10n);
 }
 
 /// Compound Words combines CoreWords into another word,
 /// its meaning is made up from the base core words.
 class CompoundWord extends GrafonWord {
-  static const SEPARATOR_SYMBOL = ' : ';
-
   final Iterable<CoreWord> words;
-  late final Iterable<Pronunciation> pronunciations;
+  late final List<Pronunciation> pronunciations;
   late final RenderPlan renderPlan;
 
-  CompoundWord(this.words, [String? title, String? description])
-      : super(
-          words.map((w) => w.toString()).join("$SEPARATOR_SYMBOL"),
-          title,
-          description,
-        ) {
+  static RenderPlan words2Plan(Iterable<CoreWord> words) {
     if (words.length < 2)
       throw ArgumentError('Minimum 2 words; only ${words.length} given.');
 
@@ -122,29 +133,66 @@ class CompoundWord extends GrafonWord {
       }
       r = r.byBinary(Op.Next, wr, gap: COMPOUND_WORD_GAP);
     }
-    renderPlan = r!;
 
-    pronunciations = List.unmodifiable(
-      [
-        for (var w in words) ...w.pronunciations,
-      ],
-    );
+    return r!;
   }
 
+  static List<Pronunciation> words2Voice(Iterable<CoreWord> words) =>
+      List.unmodifiable(
+        [
+          for (var w in words) ...w.pronunciations,
+        ],
+      );
+
+  CompoundWord.def(this.words, [String? title, String? description])
+      : renderPlan = words2Plan(words),
+        pronunciations = words2Voice(words),
+        super.def(
+          words.map((w) => w.toString()).join("$COMPOUND_SEP"),
+          title,
+          description,
+        );
+
+  CompoundWord(this.words, LocStrs loc2TitleDesc)
+      : renderPlan = words2Plan(words),
+        pronunciations = words2Voice(words),
+        super(
+          words.map((w) => w.toString()).join(" $COMPOUND_SEP "),
+          loc2TitleDesc,
+        );
+
   @override
-  String toString() => words.map((w) => w.toString()).join("$SEPARATOR_SYMBOL");
+  String toString() => words.map((w) => w.toString()).join(" $COMPOUND_SEP ");
+
+  @override
+  String localizeExpr(S l10n) =>
+      words.map((w) => w.localizeExpr(l10n)).join(" $COMPOUND_SEP ");
 }
 
 /// A Group of Related Words in some ways.
 class WordGroup {
-  String title;
-  String description;
+  LocStr title;
+  LocStr description;
   GrafonWord logo;
   Map<String, GrafonWord> _key2word;
 
   WordGroup(
-      this.title, this.logo, this.description, Iterable<GrafonWord> entries)
-      : this._key2word = {
+    this.title,
+    this.logo,
+    this.description,
+    Iterable<GrafonWord> entries,
+  ) : this._key2word = {
+          for (var e in entries) e.key: e,
+        };
+
+  WordGroup.def(
+    String title,
+    this.logo,
+    String description,
+    Iterable<GrafonWord> entries,
+  )   : this.title = LocStr.def(title),
+        this.description = LocStr.def(description),
+        this._key2word = {
           for (var e in entries) e.key: e,
         };
 

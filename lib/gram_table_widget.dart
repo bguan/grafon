@@ -48,9 +48,11 @@ class GramTableView extends StatefulWidget {
 }
 
 class _GramTableViewState extends State<GramTableView> {
-  static const MIN_GRAM_CLUSTER_WIDTH = 150;
-  static const MIN_GRAM_CLUSTER_HEIGHT = 300;
-  static const HEADER_CELL_RATIO = 0.8;
+  static const MIN_CLUSTER_WIDE_WTH = 150;
+  static const MIN_CLUSTER_TALL_WTH = 200;
+  static const HDR_CLUSTER_HGT_RATIO = 0.35;
+  static const HDR_CLUSTER_WTH_RATIO = 0.25;
+  static const INSET = 3.0;
   static final log = Logger("_GramTableViewState");
 
   var _isAlt = false;
@@ -63,70 +65,65 @@ class _GramTableViewState extends State<GramTableView> {
     final table = ctx.watch<GramTable>();
     final scheme = Theme.of(ctx).colorScheme;
     final mediaSize = (widget.size ?? MediaQuery.of(ctx).size);
-    final inset = 4.0;
-    final pageWidth = mediaSize.width;
-    final pageHeight = mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT;
-    final numCols = pageWidth < MIN_GRAM_CLUSTER_WIDTH ||
-            pageHeight < MIN_GRAM_CLUSTER_HEIGHT
+    final isPortrait = mediaSize.width < mediaSize.height;
+    final pageWth = (kIsWeb ? .95 : (isPortrait ? 1 : .85)) * mediaSize.width;
+    final pageHgt = (kIsWeb ? .95 : (isPortrait ? .9 : 1)) *
+        (mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT);
+    final isTinyDev = pageWth < MIN_CLUSTER_WIDE_WTH;
+    bool isWide =
+        pageWth > (MIN_CLUSTER_TALL_WTH / MIN_CLUSTER_WIDE_WTH) * pageHgt;
+    final minClusterWth = isWide ? MIN_CLUSTER_WIDE_WTH : MIN_CLUSTER_TALL_WTH;
+    final numCols = isTinyDev
         ? 1
-        : (pageWidth > pageHeight && pageWidth > 4 * MIN_GRAM_CLUSTER_WIDTH
-            ? 4
-            : 2);
-    final rowWidth = pageWidth / numCols;
-    final rowHeight = pageHeight / (1.5 + table.numRows / numCols);
-    final cellWidth = (rowWidth - 14 * inset) / 5;
-    final cellHeight = rowHeight / (1 + HEADER_CELL_RATIO) - 1.5 * inset;
-    final cellDim = numCols == 1 ? cellWidth : min(cellWidth, cellHeight);
-    final headerHeight = cellDim * HEADER_CELL_RATIO;
-    final opButtonHeight = min(FOOTER_HEIGHT, headerHeight);
+        : (pageWth > 7 * minClusterWth && pageWth > 3 * pageHgt
+            ? 6
+            : (pageWth > 3 * minClusterWth ? 3 : 2));
 
+    // if packing many columns per row, always use tall settings
+    if (numCols > 5) {
+      isWide = false;
+    }
+
+    final numRows = (table.numRows / numCols).ceil() + 1; // extra bottom space
+    final maxClusterWth = (pageWth - 2 * (numCols + 1) * INSET) / numCols;
+    final maxClusterHgt = isTinyDev
+        ? pageHgt / 2
+        : (pageHgt - 2 * (numRows + 1) * INSET) / numRows;
+    final cellWth = (isWide ? 1 - HDR_CLUSTER_WTH_RATIO : 1) *
+        (maxClusterWth - 10 * INSET) /
+        5;
+    final cellHgt =
+        (isWide ? 1 : 1 - HDR_CLUSTER_HGT_RATIO) * (maxClusterHgt - 2 * INSET);
+    final cellDim = min(cellWth, cellHgt);
+    final clusterWth = 5 *
+        (cellDim + 2 * INSET) *
+        (isWide ? 1 / (1 - HDR_CLUSTER_WTH_RATIO) : 1);
+    final clusterHgt =
+        (cellDim + 2 * INSET) * (isWide ? 1 : 1 / (1 - HDR_CLUSTER_HGT_RATIO));
+    final hdrWth = clusterWth * HDR_CLUSTER_WTH_RATIO;
+    final hdrHgt = clusterHgt * HDR_CLUSTER_HGT_RATIO;
+    final opBtnWth = min(200.0,
+        (clusterWth * numCols + 2 * numCols * INSET) / (1 + Op.values.length));
+    final opBtnHgt = min(50.0, cellDim * .8);
     final opHeaderStyle = TextStyle(
       fontWeight: FontWeight.normal,
       color: scheme.primary,
       fontStyle: FontStyle.italic,
-      fontSize: (opButtonHeight / 2),
+      fontSize: opBtnHgt * (isWide ? .5 : .35),
       backgroundColor: Colors.transparent,
     );
     final opTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (opButtonHeight / 2.2),
+      fontSize: opBtnHgt * (isWide ? .5 : .35),
       backgroundColor: Colors.transparent,
-    );
-
-    final gramTable = Container(
-      padding: EdgeInsets.all(inset / 2),
-      alignment: Alignment.center,
-      child: Table(
-        defaultColumnWidth: IntrinsicColumnWidth(),
-        children: [
-          for (int ri = 0; ri < table.numRows / numCols; ri++)
-            TableRow(children: [
-              for (int ci = 0; ci < numCols; ci++)
-                GramRowWidget(
-                  Mono.values[ri * numCols + ci],
-                  (List<Gram> gs) async {
-                    final coda = _isAlt ? _binary.coda.alt : _binary.coda;
-                    speechSvc.pronounce(
-                      gs.map((g) => Pronunciation([g.syllable.diffCoda(coda)])),
-                      multiStitch: kIsWeb || Platform.isIOS,
-                    );
-                  },
-                  headerHeight: headerHeight,
-                  gramDim: cellDim,
-                  pad: inset,
-                ),
-            ]),
-        ],
-      ),
     );
 
     final onBinaryTap = (Op b) => () => setState(() {
           if (_binary == b) {
             if (_binary.coda.shortName.isEmpty || _isAlt) {
-              _binary = Op.Next;
               _isAlt = false;
-            } else {
+            } else if (b.coda.hasAlt) {
               _isAlt = true;
             }
           } else {
@@ -143,7 +140,9 @@ class _GramTableViewState extends State<GramTableView> {
         ? ''
         : (_binary == b
             ? (_isAlt ? '…${b.coda.alt.shortName}' : '…${b.coda.shortName}')
-            : '${b.coda.shortName}, ${b.coda.alt.shortName}');
+            : (b.coda.hasAlt
+                ? '${b.coda.shortName}, ${b.coda.alt.shortName}'
+                : b.coda.shortName));
 
     final opLabel = (Op b) {
       final codas = codaTxt(b);
@@ -152,8 +151,10 @@ class _GramTableViewState extends State<GramTableView> {
     };
 
     final opRow = Wrap(
-      spacing: 1.5 * inset,
+      spacing: 2 * INSET,
+      runSpacing: 2 * INSET,
       crossAxisAlignment: WrapCrossAlignment.center,
+      alignment: WrapAlignment.center,
       children: [
         Text(
           l10n.page_gram_table_operators,
@@ -163,9 +164,9 @@ class _GramTableViewState extends State<GramTableView> {
         for (var b in Op.values)
           GestureDetector(
             child: Container(
-              padding: EdgeInsets.all(inset / 3),
-              height: opButtonHeight,
-              width: pageWidth / (1.5 + Op.values.length),
+              padding: EdgeInsets.all(INSET / 2),
+              height: opBtnHgt,
+              width: opBtnWth,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: _binary == b
@@ -177,11 +178,44 @@ class _GramTableViewState extends State<GramTableView> {
                 opLabel(b),
                 textAlign: TextAlign.center,
                 style: opTxtStyle,
+                maxLines: 2,
               ),
             ),
             onTap: onBinaryTap(b),
           ),
       ],
+    );
+
+    final gramTable = Container(
+      padding: EdgeInsets.all(INSET / 2),
+      alignment: Alignment.center,
+      child: Table(
+        defaultColumnWidth: IntrinsicColumnWidth(),
+        children: [
+          for (int ri = 0; ri < numCols * table.numRows; ri++)
+            TableRow(children: [
+              for (int ci = 0; ci < numCols; ci++)
+                if (ri * numCols + ci < table.numRows)
+                  GramClusterWidget(
+                    Mono.values[ri * numCols + ci],
+                    (List<Gram> gs) async {
+                      final coda = _isAlt ? _binary.coda.alt : _binary.coda;
+                      speechSvc.pronounce(
+                        gs.map(
+                            (g) => Pronunciation([g.syllable.diffCoda(coda)])),
+                        multiStitch: kIsWeb || Platform.isIOS,
+                      );
+                    },
+                    isWide: isWide,
+                    gramDim: cellDim,
+                    headerDim: isWide ? hdrWth : hdrHgt,
+                    pad: INSET,
+                  )
+                else
+                  Container(),
+            ]),
+        ],
+      ),
     );
 
     return SingleChildScrollView(
@@ -191,9 +225,8 @@ class _GramTableViewState extends State<GramTableView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           gramTable,
-          Container(height: inset),
+          Container(height: INSET),
           opRow,
-          Container(height: FOOTER_HEIGHT + inset),
         ],
       ),
     );
@@ -203,15 +236,20 @@ class _GramTableViewState extends State<GramTableView> {
 typedef SpeechCallBack = void Function(List<Gram>);
 
 /// A widget that renders a row of 5 grams in the same Mono row in Gram Table
-class GramRowWidget extends StatelessWidget {
+class GramClusterWidget extends StatelessWidget {
   final Mono mono;
   final SpeechCallBack onTap;
   final double gramDim;
-  final double headerHeight;
+  final double headerDim;
+  final bool isWide;
   final double pad;
 
-  const GramRowWidget(this.mono, this.onTap,
-      {this.gramDim = 50, this.headerHeight = 20, this.pad = 5, Key? key})
+  const GramClusterWidget(this.mono, this.onTap,
+      {this.isWide = false,
+      this.gramDim = 50,
+      this.headerDim = 20,
+      this.pad = 5,
+      Key? key})
       : super(key: key);
 
   @override
@@ -222,11 +260,14 @@ class GramRowWidget extends StatelessWidget {
     final headerTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: (headerHeight / 2),
+      fontSize: gramDim * .3,
+      height: isWide ? 1.2 : 1.0,
     );
     final cons = mono.gram.cons.shortName;
     final monoName = l10n.common_mono_name(mono.shortName);
     final quadName = l10n.common_quad_name(mono.quadPeer.shortName);
+    final wideHdrPad = EdgeInsets.fromLTRB(pad / 2, pad / 2, 2 * pad, pad / 2);
+    final tallHdrPad = EdgeInsets.all(pad / 2);
     return Padding(
       padding: EdgeInsets.all(pad),
       child: Container(
@@ -234,33 +275,35 @@ class GramRowWidget extends StatelessWidget {
           color: Colors.transparent,
           border: Border.all(color: scheme.primary, width: 1),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Flex(
+          direction: isWide ? Axis.horizontal : Axis.vertical,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
               onTap: () => onTap(table.monoRow(mono)),
               child: Container(
-                height: headerHeight,
+                height: isWide ? gramDim + 2 * pad : headerDim,
+                width: isWide ? headerDim : 5 * (gramDim + 2 * pad),
                 decoration: BoxDecoration(
                   color: scheme.primary,
                   border: Border.all(color: scheme.primary, width: 1),
                 ),
                 alignment: Alignment.centerLeft,
-                padding: EdgeInsets.all(pad / 2),
+                padding: isWide ? wideHdrPad : tallHdrPad,
                 child: Text(
                   l10n.page_gram_table_row_header(monoName, quadName, cons),
                   style: headerTxtStyle,
-                  maxLines: 1,
-                  textAlign: TextAlign.left,
+                  maxLines: 2,
+                  textAlign: isWide ? TextAlign.right : TextAlign.left,
                 ),
               ),
             ),
             Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 for (var f in Face.values)
                   Container(

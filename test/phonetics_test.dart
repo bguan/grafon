@@ -56,7 +56,7 @@ void main() {
     final ba = Syllable(Cons.b, Vowel.a);
     expect(a1 == ba, isFalse);
 
-    final ash = Syllable.vc(Vowel.a, Coda.s);
+    final ash = Syllable.vc(Vowel.a, Coda.sh);
     expect(a1 == ash, isFalse);
   });
 
@@ -65,16 +65,16 @@ void main() {
     expect(a.toString(), 'a');
     final ba = Syllable(Cons.b, Vowel.a);
     expect(ba.toString(), 'ba');
-    final as = Syllable.vc(Vowel.a, Coda.s);
-    expect(as.toString(), 'as');
-    final bas = Syllable(Cons.b, Vowel.a, Coda.s);
-    expect(bas.toString(), 'bas');
+    final ash = Syllable.vc(Vowel.a, Coda.sh);
+    expect(ash.toString(), 'ash');
+    final bash = Syllable(Cons.b, Vowel.a, Coda.sh);
+    expect(bash.toString(), 'bash');
   });
 
   test('Syllable firstPhoneme works', () {
     final a = Syllable.v(Vowel.a);
     final ba = Syllable(Cons.b, Vowel.a);
-    final ash = Syllable.vc(Vowel.a, Coda.s);
+    final ash = Syllable.vc(Vowel.a, Coda.sh);
     expect(a.firstPhoneme, 'ɑː');
     expect(ba.firstPhoneme, 'b');
     expect(ash.firstPhoneme, 'ɑː');
@@ -83,20 +83,20 @@ void main() {
   test('Syllable lastPhoneme works', () {
     final a = Syllable.v(Vowel.a);
     final ba = Syllable(Cons.b, Vowel.a);
-    final as = Syllable.vc(Vowel.a, Coda.s);
-    final bas = Syllable(Cons.b, Vowel.a, Coda.s);
+    final ash = Syllable.vc(Vowel.a, Coda.sh);
+    final bash = Syllable(Cons.b, Vowel.a, Coda.sh);
     expect(a.lastPhoneme, 'ɑː');
     expect(ba.lastPhoneme, 'ɑː');
-    expect(bas.lastPhoneme, 's');
-    expect(as.lastPhoneme, 's');
+    expect(bash.lastPhoneme, 'ʃ');
+    expect(ash.lastPhoneme, 'ʃ');
   });
 
   test('Syllable diffXXX works', () {
-    final bas = Syllable(Cons.b, Vowel.a, Coda.s);
-    expect(bas.diffConsonant(Cons.p), Syllable(Cons.p, Vowel.a, Coda.s));
-    expect(bas.diffVowel(Vowel.o), Syllable(Cons.b, Vowel.o, Coda.s));
-    expect(bas.diffExtension(Vowel.u), Syllable(Cons.b, Vowel.a, Coda.s));
-    expect(bas.diffCoda(Coda.n), Syllable(Cons.b, Vowel.a, Coda.n));
+    final bash = Syllable(Cons.b, Vowel.a, Coda.sh);
+    expect(bash.diffConsonant(Cons.p), Syllable(Cons.p, Vowel.a, Coda.sh));
+    expect(bash.diffVowel(Vowel.o), Syllable(Cons.b, Vowel.o, Coda.sh));
+    expect(bash.diffExtension(Vowel.u), Syllable(Cons.b, Vowel.a, Coda.sh));
+    expect(bash.diffCoda(Coda.n), Syllable(Cons.b, Vowel.a, Coda.n));
   });
 
   test('Pronunciation equality works', () {
@@ -123,13 +123,13 @@ void main() {
     final aA = Pronunciation([a, a]);
     expect(aA.toString(), 'ɑː.ɑː');
 
-    final as = Syllable.vc(Vowel.a, Coda.s);
+    final ash = Syllable.vc(Vowel.a, Coda.sh);
     final ha = Syllable(Cons.h, Vowel.a);
-    final asHa = Pronunciation([as, ha]);
-    expect(asHa.toString(), 'ɑːs.hɑː');
+    final ashHa = Pronunciation([ash, ha]);
+    expect(ashHa.toString(), 'ɑːʃ.hɑː');
 
-    final ak = Syllable.vc(Vowel.a, Coda.k);
-    final akNa = Pronunciation([ak, na]);
-    expect(akNa.toString(), 'ɑːk.nɑː');
+    final am = Syllable.vc(Vowel.a, Coda.m);
+    final amNa = Pronunciation([am, na]);
+    expect(amNa.toString(), 'ɑːm.nɑː');
   });
 }

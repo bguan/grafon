@@ -93,7 +93,7 @@ void main() {
 
     expect(six.toString(), "X * Down_Line");
     expect(six.pronunciation.length, 2);
-    expect(six.pronunciation.first, Syllable(Cons.g, Vowel.a, Coda.k));
+    expect(six.pronunciation.first, Syllable(Cons.g, Vowel.a, Coda.sh));
     expect(six.pronunciation.last, Syllable.v(Vowel.u));
 
     final vLine = Quads.Line.up;
@@ -105,13 +105,13 @@ void main() {
     expect(hash.grams[2], hLine);
     expect(hash.grams[3], hLine);
 
-    expect(hash.toString(), "Up_Line . Up_Line * (Down_Line / Down_Line)");
+    expect(hash.toString(), "Up_Line + Up_Line * (Down_Line / Down_Line)");
     expect(hash.pronunciation.length, 6);
     expect(hash.pronunciation[0], Syllable.v(Vowel.i));
-    expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.k));
-    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.k));
-    expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.s));
-    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.k));
+    expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.sh));
+    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.sh));
+    expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.ng));
+    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.sh));
     expect(hash.pronunciation[5], Syllable.v(Vowel.a));
   });
 
@@ -126,9 +126,9 @@ void main() {
 
     expect(child.toString(), "Dot / Up_Line");
     expect(child.pronunciation.length, 2);
-    expect(child.pronunciation.first, Syllable(Cons.h, Vowel.a, Coda.s));
+    expect(child.pronunciation.first, Syllable(Cons.h, Vowel.a, Coda.ng));
     expect(child.pronunciation.last, Syllable.v(Vowel.i));
-    expect(child.pronunciation.toString(), 'hɑːʃ.iː');
+    expect(child.pronunciation.toString(), 'hɑːŋ.iː');
 
     final cornerDown = Quads.Corner.down;
     final cornerLeft = Quads.Corner.left;
@@ -139,26 +139,26 @@ void main() {
     expect(feet.grams[1], cornerDown);
     expect(feet.grams[2], cornerLeft);
 
-    expect(feet.toString(), "Dot / (Down_Corner . Left_Corner)");
+    expect(feet.toString(), "Dot / (Down_Corner + Left_Corner)");
     expect(feet.pronunciation.length, 5);
-    expect(feet.pronunciation[0], Syllable(Cons.h, Vowel.a, Coda.s));
-    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
+    expect(feet.pronunciation[0], Syllable(Cons.h, Vowel.a, Coda.ng));
+    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.sh));
     expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.u));
-    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o, Coda.k));
+    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o, Coda.sh));
     expect(feet.pronunciation[4], Syllable.v(Vowel.a));
-    expect(feet.pronunciation.toString(), 'hɑːʃ.ɑːk.buː.bɔːʧ.ɑː');
+    expect(feet.pronunciation.toString(), 'hɑːŋ.ɑːʃ.buː.bɔːʃ.ɑː');
   });
 
   test('next() grams, toString & pronunciation is correct', () {
     final lArc = Quads.Arc.left;
-    final rFlow = Quads.Flow.right;
+    final rFlow = Quads.Wave.right;
     final talk = lArc.next(rFlow);
 
     expect(talk.grams.length, 2);
     expect(talk.grams[0], lArc);
     expect(talk.grams[1], rFlow);
 
-    expect(talk.toString(), "Left_Arc . Right_Flow");
+    expect(talk.toString(), "Left_Arc + Right_Wave");
     expect(talk.pronunciation.length, 2);
     expect(talk.pronunciation.first, Syllable(Cons.n, Vowel.o));
     expect(talk.pronunciation.last, Syllable(Cons.f, Vowel.e));
@@ -172,15 +172,15 @@ void main() {
     expect(shout.grams[1], rSlash);
     expect(shout.grams[2], bSlash);
 
-    expect(shout.toString(), "Left_Arc . (Right_Line / Left_Line)");
+    expect(shout.toString(), "Left_Arc + (Right_Line / Left_Line)");
     expect(shout.pronunciation.length, 5);
     expect(shout.pronunciation[0], Syllable(Cons.n, Vowel.o));
-    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
-    expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.s));
-    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.k));
+    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.sh));
+    expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.ng));
+    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.sh));
     expect(shout.pronunciation[4], Syllable.v(Vowel.a));
 
-    expect(shout.pronunciation.toString(), 'nɔː.ɑːʧ.ɜːʃ.ɔːʧ.ɑː');
+    expect(shout.pronunciation.toString(), 'nɔː.ɑːʃ.ɜːŋ.ɔːʃ.ɑː');
   });
 
   test('wrap() grams, toString & pronunciation is correct', () {
@@ -194,9 +194,9 @@ void main() {
 
     expect(eye.toString(), "Circle @ Dot");
     expect(eye.pronunciation.length, 2);
-    expect(eye.pronunciation.first, Syllable(Cons.n, Vowel.a, Coda.n));
+    expect(eye.pronunciation.first, Syllable(Cons.n, Vowel.a, Coda.m));
     expect(eye.pronunciation.last, Syllable(Cons.h, Vowel.a));
-    expect(eye.pronunciation.toString(), 'nɑːn.hɑː');
+    expect(eye.pronunciation.toString(), 'nɑːm.hɑː');
 
     final gateDown = Quads.Gate.down;
     final family = circle.wrap(ClusterExpr(dot.next(dot).over(gateDown)));
@@ -207,15 +207,15 @@ void main() {
     expect(family.grams[2], dot);
     expect(family.grams[3], gateDown);
 
-    expect(family.toString(), "Circle @ (Dot . Dot / Down_Gate)");
+    expect(family.toString(), "Circle @ (Dot + Dot / Down_Gate)");
     expect(family.pronunciation.length, 6);
-    expect(family.pronunciation[0], Syllable(Cons.n, Vowel.a, Coda.n));
-    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.k));
+    expect(family.pronunciation[0], Syllable(Cons.n, Vowel.a, Coda.m));
+    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.sh));
     expect(family.pronunciation[2], Syllable(Cons.h, Vowel.a));
-    expect(family.pronunciation[3], Syllable(Cons.h, Vowel.a, Coda.s));
-    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u, Coda.k));
+    expect(family.pronunciation[3], Syllable(Cons.h, Vowel.a, Coda.ng));
+    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u, Coda.sh));
     expect(family.pronunciation[5], Syllable.v(Vowel.a));
-    expect(family.pronunciation.toString(), 'nɑːŋ.ɑːk.hɑː.hɑːs.duːʧ.ɑː');
+    expect(family.pronunciation.toString(), 'nɑːn.ɑːʃ.hɑː.hɑːŋ.duːʃ.ɑː');
   });
 
   test('test SingleExpr equality and hashcode works', () {

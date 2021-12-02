@@ -28,6 +28,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/texttospeech/v1.dart';
 import 'package:grafon/gram_table.dart';
 import 'package:grafon/speech_svc.dart';
+// import 'package:intl/intl_browser.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +41,7 @@ import 'grafon_dictionary.dart';
 import 'grafon_widget.dart';
 import 'grafon_word.dart';
 import 'gram_table_widget.dart';
-import 'wordgroups_page.dart';
+import 'word_groups_page.dart';
 
 /// Main Starting Point of the Grafon App.
 void main() async {
@@ -49,12 +50,13 @@ void main() async {
   Logger.root.onRecord.listen((r) {
     print('${r.loggerName} ${r.level.name} ${r.time}: ${r.message}');
   });
+  // findSystemLocale(); if web
   runApp(
     MaterialApp(
       title: 'Grafon',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: 'Arimo',
+        fontFamily: DEF_FONT,
       ),
       home: debug ? TestApp() : GrafonApp(),
       localizationsDelegates: [
@@ -73,7 +75,7 @@ class TestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final test = CoreWord(Quads.Triangle.up.mix(Quads.Branch.down));
+    final test = CoreWord.def(Quads.Triangle.up.mix(Quads.Branch.down));
     return Center(
       child: GrafonTile(test.renderPlan, height: 100),
     );
@@ -155,7 +157,7 @@ class GrafonAppState extends State<GrafonApp> {
       final localeTag = locale.toLanguageTag();
       final langTTS = LANG_TAG_TO_TTS_VOICE.containsKey(localeTag)
           ? localeTag
-          : DEFAULT_LANG_TAG;
+          : DEF_LANG_TAG;
       final voiceTTS = LANG_TAG_TO_TTS_VOICE[langTTS];
       final l10n = S.of(context);
 
@@ -268,7 +270,7 @@ class GrafonAppState extends State<GrafonApp> {
             style: theme.headline6?.copyWith(
               color: scheme.surface,
               fontWeight: FontWeight.bold,
-              fontSize: TOOL_BAR_HEIGHT / 1.5,
+              fontSize: TOOL_BAR_HEIGHT / 1.6,
             ),
           ),
           leading: IconButton(
@@ -302,7 +304,7 @@ class GrafonAppState extends State<GrafonApp> {
         ),
         bottomSheet: Container(
           height: FOOTER_HEIGHT,
-          padding: EdgeInsets.all(inset),
+          padding: EdgeInsets.symmetric(vertical: 0, horizontal: inset),
           alignment: Alignment.topCenter,
           color: scheme.primary,
           child: Row(

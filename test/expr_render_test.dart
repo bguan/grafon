@@ -169,7 +169,7 @@ void main() {
   });
 
   test('RenderPlan toDevice works', () {
-    final word = CoreWord(Quads.Arc.left.next(Quads.Arc.right));
+    final word = CoreWord.def(Quads.Arc.left.next(Quads.Arc.right));
     final devHt = 100.0;
     final devWth = word.widthAtHeight(devHt);
     final r = word.renderPlan.toDevice(devHt, devWth);

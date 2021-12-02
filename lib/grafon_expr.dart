@@ -20,19 +20,21 @@
 /// library for expression
 library grafon_expr;
 
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:vector_math/vector_math.dart';
 
 import 'expr_render.dart';
+import 'generated/l10n.dart';
 import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
 /// Binary Operator works on a pair of Gram Expression
-enum Op { Next, Mix, Over, Wrap }
+enum Op { Mix, Next, Over, Wrap }
 
 /// Extending Op Enum to associate shortName, symbol and Coda
 extension OpExtension on Op {
-  String get shortName => this.toString().split('.').last;
+  String get shortName => EnumToString.convertToString(this);
 
   String get symbol {
     switch (this) {
@@ -44,18 +46,18 @@ extension OpExtension on Op {
         return '*';
       case Op.Next:
       default:
-        return '.';
+      return '+';
     }
   }
 
   Coda get coda {
     switch (this) {
       case Op.Mix:
-        return Coda.k;
+        return Coda.sh;
       case Op.Over:
-        return Coda.s;
+        return Coda.ng;
       case Op.Wrap:
-        return Coda.n;
+        return Coda.m;
       case Op.Next:
       default:
         return Coda.NIL;
@@ -91,6 +93,9 @@ abstract class GrafonExpr {
 
   /// Put this expression around e, this outside, e inside.
   BinaryOpExpr wrap(GrafonExpr g) => BinaryOpExpr(this, Op.Wrap, g);
+
+  /// generate a localized text string for the expression
+  String localize(S l10n);
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
@@ -141,6 +146,10 @@ class BinaryOpExpr extends GrafonExpr {
   String toString() => "$expr1 ${op.symbol} $expr2";
 
   @override
+  String localize(S l10n) =>
+      "${expr1.localize(l10n)} ${op.symbol} ${expr2.localize(l10n)}";
+
+  @override
   Pronunciation get pronunciation {
     final p1 = expr1.pronunciation;
     return Pronunciation([
@@ -188,6 +197,9 @@ class ClusterExpr extends GrafonExpr {
 
   @override
   String toString() => "(${subExpr.toString()})";
+
+  @override
+  String localize(S l10n) => "(${subExpr.localize(l10n)})";
 
   @override
   List<Gram> get grams => subExpr.grams;

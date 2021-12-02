@@ -71,10 +71,10 @@ class S {
     );
   }
 
-  /// `Grafon Home`
+  /// `Grafon Language`
   String get app_title {
     return Intl.message(
-      'Grafon Home',
+      'Grafon Language',
       name: 'app_title',
       desc: '',
       args: [],
@@ -91,7 +91,25 @@ class S {
     );
   }
 
-  /// `{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}`
+  /// `{face, select, Center {Center} Right {Right} Up {Up} Left {Left} Down {Down} other {???}}`
+  String common_face_name(Object face) {
+    return Intl.select(
+      face,
+      {
+        'Center': 'Center',
+        'Right': 'Right',
+        'Up': 'Up',
+        'Left': 'Left',
+        'Down': 'Down',
+        'other': '???',
+      },
+      name: 'common_face_name',
+      desc: '',
+      args: [face],
+    );
+  }
+
+  /// `{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Flake {Flake} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} Infinity {Infinity} Octo {Octo} other {???}}`
   String common_mono_name(Object mono) {
     return Intl.select(
       mono,
@@ -99,7 +117,7 @@ class S {
         'Empty': 'Empty',
         'Dot': 'Dot',
         'Cross': 'Cross',
-        'Hex': 'Hex',
+        'Flake': 'Flake',
         'Square': 'Square',
         'Grid': 'Grid',
         'X': 'X',
@@ -112,6 +130,8 @@ class S {
         'Star': 'Star',
         'Flower': 'Flower',
         'Atom': 'Atom',
+        'Infinity': 'Infinity',
+        'Octo': 'Octo',
         'other': '???',
       },
       name: 'common_mono_name',
@@ -137,7 +157,7 @@ class S {
     );
   }
 
-  /// `{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Humps {Humps} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Flow {Flow} other {???}}`
+  /// `{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Bow {Bow} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Wave {Wave} Knot {Knot} Cover {Cover} other {???}}`
   String common_quad_name(Object quad) {
     return Intl.select(
       quad,
@@ -152,12 +172,14 @@ class S {
         'Triangle': 'Triangle',
         'Zap': 'Zap',
         'Arrow': 'Arrow',
-        'Humps': 'Humps',
+        'Bow': 'Bow',
         'Arc': 'Arc',
         'Swirl': 'Swirl',
         'Curve': 'Curve',
         'Drop': 'Drop',
-        'Flow': 'Flow',
+        'Wave': 'Wave',
+        'Knot': 'Knot',
+        'Cover': 'Cover',
         'other': '???',
       },
       name: 'common_quad_name',
@@ -176,10 +198,10 @@ class S {
     );
   }
 
-  /// `Operators`
+  /// `Combo`
   String get page_gram_table_operators {
     return Intl.message(
-      'Operators',
+      'Combo',
       name: 'page_gram_table_operators',
       desc: '',
       args: [],
@@ -231,10 +253,8 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
 
   @override
   bool isSupported(Locale locale) => _isSupported(locale);
-
   @override
   Future<S> load(Locale locale) => S.load(locale);
-
   @override
   bool shouldReload(AppLocalizationDelegate old) => false;
 

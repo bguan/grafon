@@ -24,10 +24,12 @@ library gram_infra;
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:vector_math/vector_math.dart';
 
 import 'constants.dart';
 import 'expr_render.dart';
+import 'generated/l10n.dart';
 import 'grafon_expr.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
@@ -180,7 +182,7 @@ enum Face { Center, Right, Up, Left, Down }
 
 /// Extending Face enum to map to a Vowel
 extension FaceHelper on Face {
-  String get shortName => this.toString().split('.').last;
+  String get shortName => EnumToString.convertToString(this);
 
   static const List<Face> directionals = const [
     Face.Right,
@@ -448,15 +450,15 @@ class PolyDot extends PolyLine {
 
   PolyDot(
     Iterable<Vector2> vs, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
   })  : metrics = LineMetrics.ofPoints(vs),
         super(vs, isFixedAspect: isFixedAspect, isZeroAvg: isZeroAvg);
 
   PolyDot.anchors(
     List<Anchor> anchors, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
   }) : super(List.unmodifiable(anchors.map((a) => a.vector)),
             isFixedAspect: isFixedAspect) {
     metrics = LineMetrics.ofPoints(vectors);
@@ -488,8 +490,8 @@ class InvisiDot extends PolyLine {
 
   InvisiDot(
     Iterable<Vector2> vs, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
     this.minWidth: MIN_GRAM_WIDTH,
     this.minHeight: MIN_GRAM_HEIGHT,
   })  : metrics = LineMetrics.ofPoints(
@@ -506,8 +508,8 @@ class InvisiDot extends PolyLine {
 
   InvisiDot.anchors(
     List<Anchor> anchors, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
     this.minWidth: MIN_GRAM_WIDTH,
     this.minHeight: MIN_GRAM_HEIGHT,
   }) : super(
@@ -561,8 +563,8 @@ class PolyStraight extends PolyLine {
 
   PolyStraight(
     Iterable<Vector2> vs, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
   })  : metrics = LineMetrics.ofPoints(vs, isZeroAvg: isZeroAvg),
         lengthDim = calcLengthDim(vs),
         super(
@@ -573,8 +575,8 @@ class PolyStraight extends PolyLine {
 
   PolyStraight.anchors(
     List<Anchor> anchors, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
   }) : super(
           List.unmodifiable(anchors.map((a) => a.vector)),
           isFixedAspect: isFixedAspect,
@@ -644,8 +646,8 @@ class PolyExtended extends PolyStraight {
 
   PolyExtended(
     Iterable<Vector2> vs, {
-    isFixedAspect = false,
-    isZeroAvg: false,
+    bool isFixedAspect = false,
+    bool isZeroAvg: false,
   }) : super(
           extend(vs),
           isFixedAspect: isFixedAspect,
@@ -654,8 +656,8 @@ class PolyExtended extends PolyStraight {
 
   PolyExtended.anchors(
     List<Anchor> anchors, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
   }) : super(
           extend(anchors.map((a) => a.vector)),
           isFixedAspect: isFixedAspect,
@@ -711,8 +713,8 @@ class PolyCurve extends PolyLine {
 
   PolyCurve(
     Iterable<Vector2> vs, {
-    isFixedAspect = false,
-    isZeroAvg: false,
+    bool isFixedAspect = false,
+    bool isZeroAvg: false,
   }) : super(
           vs,
           isFixedAspect: isFixedAspect,
@@ -728,8 +730,8 @@ class PolyCurve extends PolyLine {
 
   PolyCurve.anchors(
     List<Anchor> anchors, {
-    isFixedAspect = false,
-    isZeroAvg = false,
+    bool isFixedAspect = false,
+    bool isZeroAvg = false,
   }) : super(
           List.unmodifiable(anchors.map((a) => a.vector)),
           isFixedAspect: isFixedAspect,
@@ -896,6 +898,13 @@ abstract class Gram extends GrafonExpr {
   String toString() => this is QuadGram
       ? face.shortName + '_' + GramTable().getEnumIfQuad(this)!.shortName
       : GramTable().getMonoEnum(this).shortName;
+
+  @override
+  String localize(S l10n) => this is QuadGram
+      ? l10n.common_face_name(face.shortName) +
+          QUAD_FACE_SEP +
+          l10n.common_quad_name(GramTable().getEnumIfQuad(this)!.shortName)
+      : l10n.common_mono_name(GramTable().getMonoEnum(this).shortName);
 
   Syllable get syllable => Syllable(cons, vowel);
 

@@ -160,7 +160,7 @@ void main() {
       Mono.Circle.gram,
       ...Quads.Arc.grams.all,
       Mono.Flower.gram,
-      ...Quads.Flow.grams.all,
+      ...Quads.Wave.grams.all,
       // ...Quads.Swirl.grams.all,
     ];
     for (var gram in splineGrams) {

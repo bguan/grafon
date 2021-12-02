@@ -46,7 +46,7 @@ extension OpExtension on Op {
         return '*';
       case Op.Next:
       default:
-      return '+';
+        return '+';
     }
   }
 

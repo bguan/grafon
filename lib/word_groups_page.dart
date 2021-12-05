@@ -109,7 +109,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final sectionTextScale = isWide ? .75 : .65;
 
     final sectionScale = isWide ? 1.25 : 1.0;
-    final numCols = min(4, (pageWidth / MIN_CARD_WIDTH).floor());
+    final numCols = min(6, (pageWidth / MIN_CARD_WIDTH).floor());
 
     final cardWidth = (.9 * pageWidth - (numCols + 1) * cardGap) / numCols;
     final anchorWord =

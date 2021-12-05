@@ -84,7 +84,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m4(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
 
   static String m5(monoName, quadName, consonant) =>
-      "${monoName} & ${quadName} (${consonant}...)";
+      "${monoName}, ${quadName} (${consonant}...)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{

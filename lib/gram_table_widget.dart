@@ -71,7 +71,7 @@ class _GramTableViewState extends State<GramTableView> {
         (mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT);
     final isTinyDev = pageWth < MIN_CLUSTER_WIDE_WTH;
     bool isWide =
-        pageWth > (MIN_CLUSTER_TALL_WTH / MIN_CLUSTER_WIDE_WTH) * pageHgt;
+        pageWth > 1.5 * (MIN_CLUSTER_TALL_WTH / MIN_CLUSTER_WIDE_WTH) * pageHgt;
     final minClusterWth = isWide ? MIN_CLUSTER_WIDE_WTH : MIN_CLUSTER_TALL_WTH;
     final numCols = isTinyDev
         ? 1
@@ -260,16 +260,17 @@ class GramClusterWidget extends StatelessWidget {
     final headerTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: gramDim * .3,
+      fontSize: gramDim * (isWide ? .28 : .3),
       height: isWide ? 1.2 : 1.0,
     );
     final cons = mono.gram.cons.shortName;
     final monoName = l10n.common_mono_name(mono.shortName);
     final quadName = l10n.common_quad_name(mono.quadPeer.shortName);
-    final wideHdrPad = EdgeInsets.fromLTRB(pad / 2, pad / 2, 2 * pad, pad / 2);
+    final wideHdrPad = EdgeInsets.fromLTRB(pad / 2, pad / 4, 2 * pad, pad / 4);
     final tallHdrPad = EdgeInsets.all(pad / 2);
     return Padding(
-      padding: EdgeInsets.all(pad),
+      padding: EdgeInsets.symmetric(
+          horizontal: pad, vertical: isWide ? pad / 4 : pad),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.transparent,
@@ -295,7 +296,8 @@ class GramClusterWidget extends StatelessWidget {
                 child: Text(
                   l10n.page_gram_table_row_header(monoName, quadName, cons),
                   style: headerTxtStyle,
-                  maxLines: 2,
+                  maxLines: 3,
+                  softWrap: true,
                   textAlign: isWide ? TextAlign.right : TextAlign.left,
                 ),
               ),

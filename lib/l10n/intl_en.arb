@@ -70,7 +70,7 @@
       }
     }
   },
-  "page_gram_table_row_header": "{monoName} & {quadName} ({consonant}...)",
+  "page_gram_table_row_header": "{monoName}, {quadName} ({consonant}...)",
   "@page_gram_table_row_header": {
     "type": "text",
     "placeholders": {

@@ -219,11 +219,11 @@ class S {
     );
   }
 
-  /// `{monoName} & {quadName} ({consonant}...)`
+  /// `{monoName}, {quadName} ({consonant}...)`
   String page_gram_table_row_header(
       Object monoName, Object quadName, Object consonant) {
     return Intl.message(
-      '$monoName & $quadName ($consonant...)',
+      '$monoName, $quadName ($consonant...)',
       name: 'page_gram_table_row_header',
       desc: '',
       args: [monoName, quadName, consonant],

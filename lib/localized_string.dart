@@ -5,6 +5,22 @@ import 'package:flutter/cupertino.dart';
 
 import 'constants.dart';
 
+const DEF_LOCALE = Locale.fromSubtags(languageCode: DEF_LANG_TAG);
+
+const EN = Locale.fromSubtags(languageCode: "en");
+
+const EN_US = Locale.fromSubtags(
+  languageCode: "en",
+  countryCode: "US",
+);
+
+const ZH = Locale.fromSubtags(languageCode: "zh");
+
+const ZH_CN = Locale.fromSubtags(
+  languageCode: "zh",
+  countryCode: "CN",
+);
+
 /// Extending Locale with fallback computation
 extension LocaleHelper on Locale {
   Locale get fallback => this == EN_US

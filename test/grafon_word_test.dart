@@ -51,7 +51,7 @@ void main() {
 
     List<Syllable> v2 = ps[1].syllables;
     expect(v2.length, 2);
-    expect(v2[0], Syllable(Cons.h, Vowel.a, Coda.ng));
+    expect(v2[0], Syllable(Cons.h, Vowel.a, Coda.sh));
     expect(v2[1], Syllable.v(Vowel.i));
   });
 

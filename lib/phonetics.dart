@@ -21,8 +21,6 @@ library phonetics;
 import 'package:collection/collection.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 
-import 'grafon_expr.dart';
-
 /// Basic vowels for the language. Can be combined into diphthong.
 enum Vowel { NIL, a, e, i, o, u }
 
@@ -72,7 +70,7 @@ extension VowelHelper on Vowel {
 }
 
 /// Consonants at the beginning of a syllable.
-enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s, j, ch }
+enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s }
 
 /// Extension to map Consonant to the Pair and provide short name
 extension ConsonantHelper on Cons {
@@ -84,10 +82,6 @@ extension ConsonantHelper on Cons {
     switch (this) {
       case Cons.r:
         return 'ɹ';
-      case Cons.j:
-        return 'ʤ';
-      case Cons.ch:
-        return 'ʧ';
       case Cons.NIL:
         return '';
       default:
@@ -107,7 +101,7 @@ extension ConsonantHelper on Cons {
 }
 
 /// Coda is the ending consonant at the end of a syllable
-enum Coda { NIL, sh, ng, m, n }
+enum Coda { NIL, ch, sh, ng }
 
 /// Helper to map coda to get the group that its associated with and phoneme
 extension CodaHelper on Coda {
@@ -119,6 +113,8 @@ extension CodaHelper on Coda {
     switch (this) {
       case Coda.NIL:
         return '';
+      case Coda.ch:
+        return 'ʧ';
       case Coda.sh:
         return 'ʃ';
       case Coda.ng:
@@ -130,35 +126,6 @@ extension CodaHelper on Coda {
 
   /// approximate intended voicing for english speakers
   String get approxVoice => shortName;
-
-  bool get isAlt => this == Coda.n;
-
-  bool get isBase => !this.isAlt;
-
-  bool get hasAlt => isAlt || this.alt != this;
-
-  Coda get alt {
-    switch (this) {
-      case Coda.m:
-        return Coda.n;
-      default:
-        return this;
-    }
-  }
-
-  Op get op {
-    switch (this) {
-      case Coda.sh:
-        return Op.Mix;
-      case Coda.ng:
-        return Op.Over;
-      case Coda.m:
-      case Coda.n:
-        return Op.Wrap;
-      default:
-        return Op.Next;
-    }
-  }
 }
 
 /// Class to handle Syllable and its manipulation
@@ -291,16 +258,7 @@ class Pronunciation {
 
     for (int i = 0; i < syllables.length; i++) {
       final cur = syllables[i];
-      late final bool altCoda;
-      if (i == syllables.length - 1) {
-        // no more syllables to follow
-        altCoda = false;
-      } else {
-        final next = syllables[i + 1];
-        altCoda =
-            cur.coda.shortName == next.cons.shortName || next.cons == Cons.NIL;
-      }
-      final syllable = altCoda ? cur.diffCoda(cur.coda.alt) : cur;
+      final syllable = cur;
       fragmentList.add(syllable.shortName);
       phonemeList.add(syllable.pronunciation);
       approxList.add(syllable.approxVoice);

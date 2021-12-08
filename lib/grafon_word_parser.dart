@@ -19,90 +19,120 @@
 library grafon_word_parser;
 
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:petitparser/debug.dart';
 import 'package:petitparser/petitparser.dart';
 
 import 'grafon_expr.dart';
-import 'grafon_word.dart';
 import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
 /// Parser for GrafonWords i.e. from pronunciation string to GrafonWord
 class GrafonParser {
-  final _gTab = GramTable();
+  static const DEBUG = false;
 
-  Parser<Cons> consonant() {
-    final consPat =
-        Cons.values.where((c) => c != Cons.NIL).map((c) => c.shortName).join();
-    return pattern(consPat)
-        .map((s) => EnumToString.fromString(Cons.values, s)!);
-  }
+  late final Parser<GrafonExpr> parser;
 
-  Parser<Vowel> vowel() {
-    final vowelPat = Vowel.values
-        .where((v) => v != Vowel.NIL)
-        .map((v) => v.shortName)
-        .join();
-    return pattern(vowelPat)
-        .map((s) => EnumToString.fromString(Vowel.values, s)!);
-  }
+  GrafonParser() {
+    final gTab = GramTable();
 
-  Parser<Coda> coda() {
-    final codaPat =
-        Coda.values.where((c) => c != Coda.NIL).map((c) => c.shortName).join();
-    return pattern(codaPat)
-        .map((s) => EnumToString.fromString(Coda.values, s)!);
-  }
+    final Parser<Cons> consonant = ChoiceParser(
+      Cons.values
+          .where((c) => c != Cons.NIL)
+          .map((c) => stringIgnoreCase(c.shortName)),
+    ).map((s) => EnumToString.fromString(Cons.values, s)!);
 
-  Parser<Syllable> syllable() {
-    return (consonant().optional() & vowel() & coda().optional()).map((l) {
-      if (l.length == 1) {
-        return Syllable.v(l[0]);
-      } else if (l.length == 3) {
-        return Syllable(l[0], l[1], l[2]);
-      } else if (l[0] is Vowel) {
-        return Syllable.vc(l[0], l[1]);
-      } else {
-        return Syllable(l[0], l[1]);
-      }
-    });
-  }
+    final Parser<Vowel> vowel = ChoiceParser(
+      Vowel.values
+          .where((v) => v != Vowel.NIL)
+          .map((v) => stringIgnoreCase(v.shortName)),
+    ).map((s) => EnumToString.fromString(Vowel.values, s)!);
 
-  Parser<Syllable> emptyMix() {
-    return pattern(
-      Mono.Empty.gram.pronunciation.syllables[0].vowel.shortName,
-    ).map((_) => Mono.Empty.gram.pronunciation.syllables[0]);
-  }
+    final Parser<Gram> empty =
+        pattern(Mono.Empty.gram.pronunciation.syllables[0].vowel.shortName)
+            .map((_) => Mono.Empty.gram);
 
-  Parser<Op> mix() {
-    return pattern(Op.Mix.coda.shortName).map((_) => Op.Mix);
-  }
+    final opCodaParsers = (Op op) {
+      return (op.coda.shortName.isEmpty
+              ? EpsilonParser("")
+              : stringIgnoreCase(op.coda.shortName))
+          .map((_) => op);
+    };
 
-  Parser<Op> next() {
-    return pattern(Op.Next.coda.shortName).map((_) => Op.Next);
-  }
+    final Parser<Op> mix = opCodaParsers(Op.Mix);
 
-  Parser<Op> over() {
-    return pattern(Op.Over.coda.shortName).map((_) => Op.Over);
-  }
+    final Parser<Op> next = opCodaParsers(Op.Next);
 
-  Parser<Op> wrap() {
-    return pattern(Op.Wrap.coda.shortName).map((_) => Op.Wrap);
-  }
+    final Parser<Op> over = opCodaParsers(Op.Over);
 
-  Parser<Gram> gram() {
-    return (consonant().optional() & vowel()).map(
-      (l) => _gTab.atConsVowel(
+    final Parser<Op> wrap = opCodaParsers(Op.Wrap);
+
+    final Parser<GrafonExpr> gram = (consonant.optional() & vowel).map((l) {
+      l.removeWhere((e) => e == null);
+      return gTab.atConsVowel(
         l.length == 1 ? Cons.NIL : l[0],
         l[l.length == 1 ? 0 : 1],
-      ),
+      );
+    });
+
+    final expr = undefined<GrafonExpr>();
+
+    final Parser<GrafonExpr> cluster = (empty & mix & expr & mix & empty).map(
+      (l) => ClusterExpr(l[2]),
     );
+
+    final Parser<GrafonExpr> term = ChoiceParser([gram, cluster]);
+
+    final termCombiner = (List l, Op op) {
+      var expr = l.first;
+      var tail = l.skip(1);
+      for (var opTerm in tail) {
+        if (opTerm is! Iterable) {
+          throw FormatException("Invalid parse of termCombiner: $l");
+        }
+
+        if (opTerm.isEmpty) continue;
+
+        if (opTerm.first is! Iterable ||
+            opTerm.first.isEmpty ||
+            opTerm.first.first != op) {
+          throw FormatException("Invalid parse of termCombiner: $l");
+        }
+
+        final nextTerm = opTerm.first.skip(1).first;
+        if (nextTerm is! GrafonExpr) {
+          throw FormatException(
+              "Unexpected next term in termCombiner: $nextTerm");
+        }
+        expr = BinaryOpExpr(expr, op, nextTerm);
+      }
+      return expr;
+    };
+
+    final Parser<GrafonExpr> mixes = (term & (mix & term).star()).map(
+      (l) => termCombiner(l, Op.Mix),
+    );
+
+    final Parser<GrafonExpr> series = (mixes & (next & mixes).star()).map(
+      (l) => termCombiner(l, Op.Next),
+    );
+
+    final Parser<GrafonExpr> stacks = (series & (over & series).star()).map(
+      (l) => termCombiner(l, Op.Over),
+    );
+
+    final Parser<GrafonExpr> wraps = (stacks & (wrap & stacks).star()).map(
+      (l) => termCombiner(l, Op.Wrap),
+    );
+
+    expr.set(ChoiceParser([wraps, stacks, series, mixes, term]));
+    parser = DEBUG ? progress(resolve(expr.end())) : resolve(expr.end());
   }
 
-  GrafonWord? parse(String voicing) {
-    // final mixing = undefined();
-    // final nexting = undefined();
-    // final covering = undefined();
-    // final wrapping = undefined();
+  GrafonExpr parse(String input) {
+    Result<GrafonExpr> res = parser.parse(input);
+    if (res.isSuccess) return res.value;
+
+    throw FormatException(res.message);
   }
 }

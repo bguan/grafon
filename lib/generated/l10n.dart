@@ -109,7 +109,7 @@ class S {
     );
   }
 
-  /// `{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Flake {Flake} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} Infinity {Infinity} Octo {Octo} other {???}}`
+  /// `{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}`
   String common_mono_name(Object mono) {
     return Intl.select(
       mono,
@@ -117,7 +117,7 @@ class S {
         'Empty': 'Empty',
         'Dot': 'Dot',
         'Cross': 'Cross',
-        'Flake': 'Flake',
+        'Hex': 'Hex',
         'Square': 'Square',
         'Grid': 'Grid',
         'X': 'X',
@@ -130,8 +130,6 @@ class S {
         'Star': 'Star',
         'Flower': 'Flower',
         'Atom': 'Atom',
-        'Infinity': 'Infinity',
-        'Octo': 'Octo',
         'other': '???',
       },
       name: 'common_mono_name',
@@ -157,7 +155,7 @@ class S {
     );
   }
 
-  /// `{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Bow {Bow} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Wave {Wave} Knot {Knot} Cover {Cover} other {???}}`
+  /// `{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Bow {Bow} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Wave {Wave} other {???}}`
   String common_quad_name(Object quad) {
     return Intl.select(
       quad,
@@ -178,8 +176,6 @@ class S {
         'Curve': 'Curve',
         'Drop': 'Drop',
         'Wave': 'Wave',
-        'Knot': 'Knot',
-        'Cover': 'Cover',
         'other': '???',
       },
       name: 'common_quad_name',

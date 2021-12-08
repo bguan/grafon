@@ -53,11 +53,11 @@ extension OpExtension on Op {
   Coda get coda {
     switch (this) {
       case Op.Mix:
-        return Coda.sh;
+        return Coda.ch;
       case Op.Over:
-        return Coda.ng;
+        return Coda.sh;
       case Op.Wrap:
-        return Coda.m;
+        return Coda.ng;
       case Op.Next:
       default:
         return Coda.NIL;

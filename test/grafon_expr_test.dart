@@ -93,7 +93,7 @@ void main() {
 
     expect(six.toString(), "X * Down_Line");
     expect(six.pronunciation.length, 2);
-    expect(six.pronunciation.first, Syllable(Cons.g, Vowel.a, Coda.sh));
+    expect(six.pronunciation.first, Syllable(Cons.g, Vowel.a, Coda.ch));
     expect(six.pronunciation.last, Syllable.v(Vowel.u));
 
     final vLine = Quads.Line.up;
@@ -108,10 +108,10 @@ void main() {
     expect(hash.toString(), "Up_Line + Up_Line * (Down_Line / Down_Line)");
     expect(hash.pronunciation.length, 6);
     expect(hash.pronunciation[0], Syllable.v(Vowel.i));
-    expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.sh));
-    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.sh));
-    expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.ng));
-    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.sh));
+    expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.ch));
+    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.ch));
+    expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.sh));
+    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.ch));
     expect(hash.pronunciation[5], Syllable.v(Vowel.a));
   });
 
@@ -126,9 +126,9 @@ void main() {
 
     expect(child.toString(), "Dot / Up_Line");
     expect(child.pronunciation.length, 2);
-    expect(child.pronunciation.first, Syllable(Cons.h, Vowel.a, Coda.ng));
+    expect(child.pronunciation.first, Syllable(Cons.h, Vowel.a, Coda.sh));
     expect(child.pronunciation.last, Syllable.v(Vowel.i));
-    expect(child.pronunciation.toString(), 'hɑːŋ.iː');
+    expect(child.pronunciation.toString(), 'hɑːʃ.iː');
 
     final cornerDown = Quads.Corner.down;
     final cornerLeft = Quads.Corner.left;
@@ -141,12 +141,12 @@ void main() {
 
     expect(feet.toString(), "Dot / (Down_Corner + Left_Corner)");
     expect(feet.pronunciation.length, 5);
-    expect(feet.pronunciation[0], Syllable(Cons.h, Vowel.a, Coda.ng));
-    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.sh));
+    expect(feet.pronunciation[0], Syllable(Cons.h, Vowel.a, Coda.sh));
+    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.ch));
     expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.u));
-    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o, Coda.sh));
+    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o, Coda.ch));
     expect(feet.pronunciation[4], Syllable.v(Vowel.a));
-    expect(feet.pronunciation.toString(), 'hɑːŋ.ɑːʃ.buː.bɔːʃ.ɑː');
+    expect(feet.pronunciation.toString(), 'hɑːʃ.ɑːʧ.buː.bɔːʧ.ɑː');
   });
 
   test('next() grams, toString & pronunciation is correct', () {
@@ -175,12 +175,12 @@ void main() {
     expect(shout.toString(), "Left_Arc + (Right_Line / Left_Line)");
     expect(shout.pronunciation.length, 5);
     expect(shout.pronunciation[0], Syllable(Cons.n, Vowel.o));
-    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.sh));
-    expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.ng));
-    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.sh));
+    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.ch));
+    expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.sh));
+    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.ch));
     expect(shout.pronunciation[4], Syllable.v(Vowel.a));
 
-    expect(shout.pronunciation.toString(), 'nɔː.ɑːʃ.ɜːŋ.ɔːʃ.ɑː');
+    expect(shout.pronunciation.toString(), 'nɔː.ɑːʧ.ɜːʃ.ɔːʧ.ɑː');
   });
 
   test('wrap() grams, toString & pronunciation is correct', () {
@@ -194,9 +194,9 @@ void main() {
 
     expect(eye.toString(), "Circle @ Dot");
     expect(eye.pronunciation.length, 2);
-    expect(eye.pronunciation.first, Syllable(Cons.n, Vowel.a, Coda.m));
+    expect(eye.pronunciation.first, Syllable(Cons.n, Vowel.a, Coda.ng));
     expect(eye.pronunciation.last, Syllable(Cons.h, Vowel.a));
-    expect(eye.pronunciation.toString(), 'nɑːm.hɑː');
+    expect(eye.pronunciation.toString(), 'nɑːŋ.hɑː');
 
     final gateDown = Quads.Gate.down;
     final family = circle.wrap(ClusterExpr(dot.next(dot).over(gateDown)));
@@ -209,13 +209,13 @@ void main() {
 
     expect(family.toString(), "Circle @ (Dot + Dot / Down_Gate)");
     expect(family.pronunciation.length, 6);
-    expect(family.pronunciation[0], Syllable(Cons.n, Vowel.a, Coda.m));
-    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.sh));
+    expect(family.pronunciation[0], Syllable(Cons.n, Vowel.a, Coda.ng));
+    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.ch));
     expect(family.pronunciation[2], Syllable(Cons.h, Vowel.a));
-    expect(family.pronunciation[3], Syllable(Cons.h, Vowel.a, Coda.ng));
-    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u, Coda.sh));
+    expect(family.pronunciation[3], Syllable(Cons.h, Vowel.a, Coda.sh));
+    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u, Coda.ch));
     expect(family.pronunciation[5], Syllable.v(Vowel.a));
-    expect(family.pronunciation.toString(), 'nɑːn.ɑːʃ.hɑː.hɑːŋ.duːʃ.ɑː');
+    expect(family.pronunciation.toString(), 'nɑːŋ.ɑːʧ.hɑː.hɑːʃ.duːʧ.ɑː');
   });
 
   test('test SingleExpr equality and hashcode works', () {

@@ -18,7 +18,7 @@
       }
     }
   },
-  "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Flake {Flake} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} Infinity {Infinity} Octo {Octo} other {???}}",
+  "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}",
   "@common_mono_name": {
     "type": "text",
     "placeholders": {
@@ -38,7 +38,7 @@
       }
     }
   },
-  "common_quad_name": "{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Bow {Bow} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Wave {Wave} Knot {Knot} Cover {Cover} other {???}}",
+  "common_quad_name": "{quad, select, Line {Line} Dots {Dots} Corner {Corner} Branch {Branch} Gate {Gate} Step {Step} Angle {Angle} Triangle {Triangle} Zap {Zap} Arrow {Arrow} Bow {Bow} Arc {Arc} Swirl {Swirl} Curve {Curve} Drop {Drop} Wave {Wave} other {???}}",
   "@common_quad_name": {
     "type": "text",
     "placeholders": {

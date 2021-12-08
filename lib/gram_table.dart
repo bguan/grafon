@@ -33,7 +33,7 @@ enum Mono {
   Empty,
   Dot,
   Cross,
-  Flake,
+  Hex,
   Square,
   Grid,
   X,
@@ -46,8 +46,6 @@ enum Mono {
   Star,
   Flower,
   Atom,
-  Infinity,
-  Octo,
 }
 
 /// MonoHelper is a singleton to only instantiates MonoGrams only once
@@ -236,47 +234,16 @@ class _MonoHelper {
     ], isFixedAspect: true),
   ];
 
-  final flakePaths = [
+  final hexPaths = [
     PolyStraight([
-      Vector2(0, .5),
-      Vector2(0, -.5),
+      Vector2(-.25, .4),
+      Vector2(-.5, .0),
+      Vector2(-.25, -.4),
+      Vector2(.25, -.4),
+      Vector2(.5, .0),
+      Vector2(.25, .4),
+      Vector2(-.25, .4),
     ]),
-    PolyStraight([
-      Vector2(-.4, .3),
-      Vector2(.4, -.3),
-    ]),
-    PolyStraight([
-      Vector2(.4, .3),
-      Vector2(-.4, -.3),
-    ]),
-  ];
-
-  final infinityPaths = [
-    PolyCurve.anchors([
-      Anchor.S,
-      Anchor.W,
-      Anchor.nw,
-      Anchor.se,
-      Anchor.E,
-      Anchor.ne,
-      Anchor.sw,
-      Anchor.W,
-      Anchor.N
-    ], isFixedAspect: true),
-  ];
-
-  final octoPaths = [
-    PolyStraight([
-      Vector2(-.2, -.5),
-      Vector2(0.2, -.5),
-      Vector2(0.5, -.2),
-      Vector2(0.5, 0.2),
-      Vector2(0.2, 0.5),
-      Vector2(-.2, 0.5),
-      Vector2(-.5, 0.2),
-      Vector2(-.5, -.2),
-      Vector2(-.2, -.5),
-    ], isFixedAspect: true),
   ];
 
   late final Map<Mono, MonoGram> enum2mono;
@@ -286,7 +253,7 @@ class _MonoHelper {
       Mono.Empty: MonoGram(emptyPaths, Cons.NIL),
       Mono.Dot: MonoGram(dotPaths, Cons.h),
       Mono.Cross: MonoGram(crossPaths, Cons.b),
-      Mono.Flake: MonoGram(flakePaths, Cons.p),
+      Mono.Hex: MonoGram(hexPaths, Cons.p),
       Mono.Square: MonoGram(squarePaths, Cons.d),
       Mono.Grid: MonoGram(gridPaths, Cons.t),
       Mono.X: MonoGram(xPaths, Cons.g),
@@ -299,8 +266,6 @@ class _MonoHelper {
       Mono.Eye: MonoGram(eyePaths, Cons.r),
       Mono.Atom: MonoGram(atomPaths, Cons.f),
       Mono.Flower: MonoGram(flowerPaths, Cons.v),
-      Mono.Infinity: MonoGram(infinityPaths, Cons.j),
-      Mono.Octo: MonoGram(octoPaths, Cons.ch),
     });
   }
 }
@@ -323,8 +288,6 @@ enum Quads {
   Curve,
   Drop,
   Wave,
-  Knot,
-  Cover,
 }
 
 /// QuadHelper is a singleton to only instantiates QuadGrams only once
@@ -467,31 +430,6 @@ class _QuadHelper {
     ),
   ];
 
-  final knotPaths = [
-    PolyCurve.anchors(
-      [
-        Anchor.NW,
-        Anchor.nw,
-        Anchor.se,
-        Anchor.E,
-        Anchor.ne,
-        Anchor.sw,
-        Anchor.SW,
-      ],
-    ),
-  ];
-
-  final coverPaths = [
-    PolyStraight(
-      [
-        Vector2(-.3, .5),
-        Vector2(.2, .3),
-        Vector2(.2, -.3),
-        Vector2(-.3, -.5),
-      ],
-    ),
-  ];
-
   late final Map<Quads, QuadGrams> enum2quads;
 
   _QuadHelper._internal() {
@@ -512,8 +450,6 @@ class _QuadHelper {
       Quads.Swirl: RotaFlipQuads(swirlPaths, Cons.r),
       Quads.Wave: RotaFlipQuads(wavePaths, Cons.f),
       Quads.Drop: RotatingQuads(dropPaths, Cons.v),
-      Quads.Knot: RotatingQuads(knotPaths, Cons.j),
-      Quads.Cover: RotatingQuads(coverPaths, Cons.ch),
     });
   }
 }

@@ -49,13 +49,12 @@ class GramTableView extends StatefulWidget {
 
 class _GramTableViewState extends State<GramTableView> {
   static const MIN_CLUSTER_WIDE_WTH = 150;
-  static const MIN_CLUSTER_TALL_WTH = 200;
+  static const MIN_CLUSTER_TALL_WTH = 150;
   static const HDR_CLUSTER_HGT_RATIO = 0.35;
   static const HDR_CLUSTER_WTH_RATIO = 0.25;
   static const INSET = 3.0;
   static final log = Logger("_GramTableViewState");
 
-  var _isAlt = false;
   var _binary = Op.Next;
 
   @override
@@ -71,16 +70,14 @@ class _GramTableViewState extends State<GramTableView> {
         (mediaSize.height - TOOL_BAR_HEIGHT - FOOTER_HEIGHT);
     final isTinyDev = pageWth < MIN_CLUSTER_WIDE_WTH;
     bool isWide =
-        pageWth > 1.5 * (MIN_CLUSTER_TALL_WTH / MIN_CLUSTER_WIDE_WTH) * pageHgt;
+        pageWth > 2 * (MIN_CLUSTER_TALL_WTH / MIN_CLUSTER_WIDE_WTH) * pageHgt;
     final minClusterWth = isWide ? MIN_CLUSTER_WIDE_WTH : MIN_CLUSTER_TALL_WTH;
     final numCols = isTinyDev
         ? 1
-        : (pageWth > 7 * minClusterWth && pageWth > 3 * pageHgt
-            ? 6
-            : (pageWth > 3 * minClusterWth ? 3 : 2));
+        : (pageWth > 4 * minClusterWth && pageWth > pageHgt ? 4 : 2);
 
     // if packing many columns per row, always use tall settings
-    if (numCols > 5) {
+    if (numCols >= 4) {
       isWide = false;
     }
 
@@ -120,29 +117,12 @@ class _GramTableViewState extends State<GramTableView> {
     );
 
     final onBinaryTap = (Op b) => () => setState(() {
-          if (_binary == b) {
-            if (_binary.coda.shortName.isEmpty || _isAlt) {
-              _isAlt = false;
-            } else if (b.coda.hasAlt) {
-              _isAlt = true;
-            }
-          } else {
-            _binary = b;
-            _isAlt = false;
-          }
-          log.finest(
-            'Set binary operator to ${_binary.shortName}'
-            '${_isAlt ? ' (alt)' : ''}',
-          );
+          _binary = b;
+          log.finest('Set binary operator to ${_binary.shortName}');
         });
 
-    final codaTxt = (Op b) => b.coda.shortName.isEmpty
-        ? ''
-        : (_binary == b
-            ? (_isAlt ? '…${b.coda.alt.shortName}' : '…${b.coda.shortName}')
-            : (b.coda.hasAlt
-                ? '${b.coda.shortName}, ${b.coda.alt.shortName}'
-                : b.coda.shortName));
+    final codaTxt =
+        (Op b) => b.coda.shortName.isEmpty ? '' : '…${b.coda.shortName}';
 
     final opLabel = (Op b) {
       final codas = codaTxt(b);
@@ -169,9 +149,7 @@ class _GramTableViewState extends State<GramTableView> {
               width: opBtnWth,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _binary == b
-                    ? (_isAlt ? scheme.primaryVariant : scheme.primary)
-                    : scheme.background,
+                color: _binary == b ? scheme.primary : scheme.background,
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
               child: Text(
@@ -199,7 +177,7 @@ class _GramTableViewState extends State<GramTableView> {
                   GramClusterWidget(
                     Mono.values[ri * numCols + ci],
                     (List<Gram> gs) async {
-                      final coda = _isAlt ? _binary.coda.alt : _binary.coda;
+                      final coda = _binary.coda;
                       speechSvc.pronounce(
                         gs.map(
                             (g) => Pronunciation([g.syllable.diffCoda(coda)])),

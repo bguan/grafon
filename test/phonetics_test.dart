@@ -96,7 +96,7 @@ void main() {
     expect(bash.diffConsonant(Cons.p), Syllable(Cons.p, Vowel.a, Coda.sh));
     expect(bash.diffVowel(Vowel.o), Syllable(Cons.b, Vowel.o, Coda.sh));
     expect(bash.diffExtension(Vowel.u), Syllable(Cons.b, Vowel.a, Coda.sh));
-    expect(bash.diffCoda(Coda.n), Syllable(Cons.b, Vowel.a, Coda.n));
+    expect(bash.diffCoda(Coda.ng), Syllable(Cons.b, Vowel.a, Coda.ng));
   });
 
   test('Pronunciation equality works', () {
@@ -128,8 +128,8 @@ void main() {
     final ashHa = Pronunciation([ash, ha]);
     expect(ashHa.toString(), 'ɑːʃ.hɑː');
 
-    final am = Syllable.vc(Vowel.a, Coda.m);
-    final amNa = Pronunciation([am, na]);
-    expect(amNa.toString(), 'ɑːm.nɑː');
+    final ang = Syllable.vc(Vowel.a, Coda.ng);
+    final angNa = Pronunciation([ang, na]);
+    expect(angNa.toString(), 'ɑːŋ.nɑː');
   });
 }

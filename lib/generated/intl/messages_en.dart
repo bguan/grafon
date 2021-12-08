@@ -33,7 +33,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'Empty': 'Empty',
             'Dot': 'Dot',
             'Cross': 'Cross',
-            'Flake': 'Flake',
+            'Hex': 'Hex',
             'Square': 'Square',
             'Grid': 'Grid',
             'X': 'X',
@@ -46,8 +46,6 @@ class MessageLookup extends MessageLookupByLibrary {
             'Star': 'Star',
             'Flower': 'Flower',
             'Atom': 'Atom',
-            'Infinity': 'Infinity',
-            'Octo': 'Octo',
             'other': '???',
           })}";
 
@@ -76,8 +74,6 @@ class MessageLookup extends MessageLookupByLibrary {
             'Curve': 'Curve',
             'Drop': 'Drop',
             'Wave': 'Wave',
-            'Knot': 'Knot',
-            'Cover': 'Cover',
             'other': '???',
           })}";
 

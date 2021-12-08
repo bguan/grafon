@@ -33,7 +33,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'Empty': '空',
             'Dot': '点',
             'Cross': '十字',
-            'Flake': '雪花',
+            'Hex': '蜂巢',
             'Square': '方',
             'Grid': '格',
             'X': '交叉',
@@ -46,8 +46,6 @@ class MessageLookup extends MessageLookupByLibrary {
             'Star': '星',
             'Flower': '花',
             'Atom': '原子',
-            'Infinity': '无限',
-            'Octo': '八角',
             'other': '???',
           })}";
 
@@ -76,8 +74,6 @@ class MessageLookup extends MessageLookupByLibrary {
             'Curve': '拐弯',
             'Drop': '滴',
             'Wave': '波',
-            'Knot': '结',
-            'Cover': '盖',
             'other': '???',
           })}";
 

@@ -14,7 +14,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import 'dart:ui';
+// import 'dart:ui';
 
 /// Constants to be share in multiple pieces of code
 
@@ -42,19 +42,3 @@ const LANG_TAG_TO_TTS_VOICE = {
   "en": "en-US-Wavenet-E",
   "zh": "cmn-CN-Wavenet-D",
 };
-
-const DEF_LOCALE = Locale.fromSubtags(languageCode: DEF_LANG_TAG);
-
-const EN = Locale.fromSubtags(languageCode: "en");
-
-const EN_US = Locale.fromSubtags(
-  languageCode: "en",
-  countryCode: "US",
-);
-
-const ZH = Locale.fromSubtags(languageCode: "zh");
-
-const ZH_CN = Locale.fromSubtags(
-  languageCode: "zh",
-  countryCode: "CN",
-);

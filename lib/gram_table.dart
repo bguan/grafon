@@ -503,7 +503,7 @@ class GramTable {
   }
 
   GramTable._internal() {
-    for (var cons in Cons.values) {
+    for (var cons in Cons.values.where((c) => !c.isSpecial)) {
       final mono = Mono.values.firstWhere((m) => m.gram.cons == cons);
       final quad = mono.quadPeer;
       _gramByConsVowel[cons] = Map.unmodifiable({

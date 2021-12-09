@@ -109,6 +109,21 @@ class S {
     );
   }
 
+  /// `{grp, select, beg {Begin} end {End} other {???}}`
+  String common_grp_name(Object grp) {
+    return Intl.select(
+      grp,
+      {
+        'beg': 'Begin',
+        'end': 'End',
+        'other': '???',
+      },
+      name: 'common_grp_name',
+      desc: '',
+      args: [grp],
+    );
+  }
+
   /// `{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}`
   String common_mono_name(Object mono) {
     return Intl.select(
@@ -194,6 +209,16 @@ class S {
     );
   }
 
+  /// `Group`
+  String get page_gram_table_grouping {
+    return Intl.message(
+      'Group',
+      name: 'page_gram_table_grouping',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Combo`
   String get page_gram_table_operators {
     return Intl.message(
@@ -201,6 +226,17 @@ class S {
       name: 'page_gram_table_operators',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `{grpName} {grpSymbol} {grpVoice}`
+  String page_gram_table_grp_label(
+      Object grpName, Object grpSymbol, Object grpVoice) {
+    return Intl.message(
+      '$grpName $grpSymbol $grpVoice',
+      name: 'page_gram_table_grp_label',
+      desc: '',
+      args: [grpName, grpSymbol, grpVoice],
     );
   }
 

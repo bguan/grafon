@@ -29,7 +29,13 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m1(mono) => "${Intl.select(mono, {
+  static String m1(grp) => "${Intl.select(grp, {
+            'beg': 'Begin',
+            'end': 'End',
+            'other': '???',
+          })}";
+
+  static String m2(mono) => "${Intl.select(mono, {
             'Empty': 'Empty',
             'Dot': 'Dot',
             'Cross': 'Cross',
@@ -49,7 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m2(op) => "${Intl.select(op, {
+  static String m3(op) => "${Intl.select(op, {
             'Next': 'Next',
             'Mix': 'Mix',
             'Over': 'Over',
@@ -57,7 +63,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m3(quad) => "${Intl.select(quad, {
+  static String m4(quad) => "${Intl.select(quad, {
             'Line': 'Line',
             'Dots': 'Dots',
             'Corner': 'Corner',
@@ -77,12 +83,16 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m4(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
+  static String m5(grpName, grpSymbol, grpVoice) =>
+      "${grpName} ${grpSymbol} ${grpVoice}";
 
-  static String m5(monoName, quadName, consonant) =>
+  static String m6(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
+
+  static String m7(monoName, quadName, consonant) =>
       "${monoName}, ${quadName} (${consonant}...)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
+
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "app_TTS_enabled_msg": MessageLookupByLibrary.simpleMessage(
             "Cloud Text to Speech initialized."),
@@ -90,15 +100,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "app_logout_tooltip": MessageLookupByLibrary.simpleMessage("Logout"),
         "app_title": MessageLookupByLibrary.simpleMessage("Grafon Language"),
         "common_face_name": m0,
-        "common_mono_name": m1,
-        "common_op_name": m2,
-        "common_quad_name": m3,
+        "common_grp_name": m1,
+        "common_mono_name": m2,
+        "common_op_name": m3,
+        "common_quad_name": m4,
         "page_core_words_title":
             MessageLookupByLibrary.simpleMessage("Core Words"),
-        "page_gram_table_op_label": m4,
+        "page_gram_table_grouping":
+            MessageLookupByLibrary.simpleMessage("Group"),
+        "page_gram_table_grp_label": m5,
+        "page_gram_table_op_label": m6,
         "page_gram_table_operators":
             MessageLookupByLibrary.simpleMessage("Combo"),
-        "page_gram_table_row_header": m5,
+        "page_gram_table_row_header": m7,
         "page_random_words_title":
             MessageLookupByLibrary.simpleMessage("Random Words (for Testing)")
       };

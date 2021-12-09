@@ -19,11 +19,9 @@
 library grafon_word_parser;
 
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:petitparser/debug.dart';
 import 'package:petitparser/petitparser.dart';
 
 import 'grafon_expr.dart';
-import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
@@ -36,9 +34,9 @@ class GrafonParser {
   GrafonParser() {
     final gTab = GramTable();
 
-    final Parser<Cons> consonant = ChoiceParser(
+    final Parser<Cons> gramCons = ChoiceParser(
       Cons.values
-          .where((c) => c != Cons.NIL)
+          .where((c) => c != Cons.NIL && !c.isSpecial)
           .map((c) => stringIgnoreCase(c.shortName)),
     ).map((s) => EnumToString.fromString(Cons.values, s)!);
 
@@ -48,9 +46,11 @@ class GrafonParser {
           .map((v) => stringIgnoreCase(v.shortName)),
     ).map((s) => EnumToString.fromString(Vowel.values, s)!);
 
-    final Parser<Gram> empty =
-        pattern(Mono.Empty.gram.pronunciation.syllables[0].vowel.shortName)
-            .map((_) => Mono.Empty.gram);
+    final Parser<Group> beg =
+        stringIgnoreCase(Group.beg.syllable.toString()).map((_) => Group.beg);
+
+    final Parser<Group> end =
+        stringIgnoreCase(Group.end.syllable.toString()).map((_) => Group.end);
 
     final opCodaParsers = (Op op) {
       return (op.coda.shortName.isEmpty
@@ -67,7 +67,7 @@ class GrafonParser {
 
     final Parser<Op> wrap = opCodaParsers(Op.Wrap);
 
-    final Parser<GrafonExpr> gram = (consonant.optional() & vowel).map((l) {
+    final Parser<GrafonExpr> gram = (gramCons.optional() & vowel).map((l) {
       l.removeWhere((e) => e == null);
       return gTab.atConsVowel(
         l.length == 1 ? Cons.NIL : l[0],
@@ -75,58 +75,18 @@ class GrafonParser {
       );
     });
 
-    final expr = undefined<GrafonExpr>();
+    final builder = ExpressionBuilder();
+    builder.group()
+      ..primitive(gram)
+      ..wrapper(beg, end, (b, GrafonExpr expr, e) => ClusterExpr(expr));
 
-    final Parser<GrafonExpr> cluster = (empty & mix & expr & mix & empty).map(
-      (l) => ClusterExpr(l[2]),
-    );
+    final binOp = (GrafonExpr a, Op op, GrafonExpr b) => BinaryOpExpr(a, op, b);
+    builder.group()..left(mix, binOp);
+    builder.group()..left(next, binOp);
+    builder.group()..left(over, binOp);
+    builder.group()..left(wrap, binOp);
 
-    final Parser<GrafonExpr> term = ChoiceParser([gram, cluster]);
-
-    final termCombiner = (List l, Op op) {
-      var expr = l.first;
-      var tail = l.skip(1);
-      for (var opTerm in tail) {
-        if (opTerm is! Iterable) {
-          throw FormatException("Invalid parse of termCombiner: $l");
-        }
-
-        if (opTerm.isEmpty) continue;
-
-        if (opTerm.first is! Iterable ||
-            opTerm.first.isEmpty ||
-            opTerm.first.first != op) {
-          throw FormatException("Invalid parse of termCombiner: $l");
-        }
-
-        final nextTerm = opTerm.first.skip(1).first;
-        if (nextTerm is! GrafonExpr) {
-          throw FormatException(
-              "Unexpected next term in termCombiner: $nextTerm");
-        }
-        expr = BinaryOpExpr(expr, op, nextTerm);
-      }
-      return expr;
-    };
-
-    final Parser<GrafonExpr> mixes = (term & (mix & term).star()).map(
-      (l) => termCombiner(l, Op.Mix),
-    );
-
-    final Parser<GrafonExpr> series = (mixes & (next & mixes).star()).map(
-      (l) => termCombiner(l, Op.Next),
-    );
-
-    final Parser<GrafonExpr> stacks = (series & (over & series).star()).map(
-      (l) => termCombiner(l, Op.Over),
-    );
-
-    final Parser<GrafonExpr> wraps = (stacks & (wrap & stacks).star()).map(
-      (l) => termCombiner(l, Op.Wrap),
-    );
-
-    expr.set(ChoiceParser([wraps, stacks, series, mixes, term]));
-    parser = DEBUG ? progress(resolve(expr.end())) : resolve(expr.end());
+    parser = builder.build().end().cast();
   }
 
   GrafonExpr parse(String input) {

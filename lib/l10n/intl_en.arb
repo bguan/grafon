@@ -18,6 +18,16 @@
       }
     }
   },
+  "common_grp_name": "{grp, select, beg {Begin} end {End} other {???}}",
+  "@common_grp_name": {
+    "type": "text",
+    "placeholders": {
+      "grp": {
+        "description": "Name of Group Marker",
+        "example": "beg"
+      }
+    }
+  },
   "common_mono_name": "{mono, select, Empty {Empty} Dot {Dot} Cross {Cross} Hex {Hex} Square {Square} Grid {Grid} X {X} Diamond {Diamond} Light {Light} Sun {Sun} Blob {Blob} Circle {Circle} Eye {Eye} Star {Star} Flower {Flower} Atom {Atom} other {???}}",
   "@common_mono_name": {
     "type": "text",
@@ -50,8 +60,28 @@
   },
   "page_core_words_title": "Core Words",
   "@page_core_words_title": {},
+  "page_gram_table_grouping": "Group",
+  "@page_gram_table_grouping": {},
   "page_gram_table_operators": "Combo",
   "@page_gram_table_operators": {},
+  "page_gram_table_grp_label": "{grpName} {grpSymbol} {grpVoice}",
+  "@page_gram_table_grp_label": {
+    "type": "text",
+    "placeholders": {
+      "grpName": {
+        "description": "Name of Grouping",
+        "example": "Begin"
+      },
+      "grpSymbol": {
+        "description": "Symbol of Grouping",
+        "example": "("
+      },
+      "grpVoice": {
+        "description": "Voice of Grouping",
+        "example": "ji"
+      }
+    }
+  },
   "page_gram_table_op_label": "{opName} {opSymbol} {codas}",
   "@page_gram_table_op_label": {
     "type": "text",

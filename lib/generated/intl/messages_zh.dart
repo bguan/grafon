@@ -29,7 +29,13 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m1(mono) => "${Intl.select(mono, {
+  static String m1(grp) => "${Intl.select(grp, {
+            'beg': '首',
+            'end': '尾',
+            'other': '???',
+          })}";
+
+  static String m2(mono) => "${Intl.select(mono, {
             'Empty': '空',
             'Dot': '点',
             'Cross': '十字',
@@ -49,7 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m2(op) => "${Intl.select(op, {
+  static String m3(op) => "${Intl.select(op, {
             'Next': '侧',
             'Mix': '掺',
             'Over': '盖',
@@ -57,7 +63,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m3(quad) => "${Intl.select(quad, {
+  static String m4(quad) => "${Intl.select(quad, {
             'Line': '线',
             'Dots': '双点',
             'Corner': '拐角',
@@ -77,12 +83,16 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': '???',
           })}";
 
-  static String m4(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
+  static String m5(grpName, grpSymbol, grpVoice) =>
+      "${grpName} ${grpSymbol} ${grpVoice}";
 
-  static String m5(monoName, quadName, consonant) =>
+  static String m6(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
+
+  static String m7(monoName, quadName, consonant) =>
       "${monoName}, ${quadName} (${consonant}...)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
+
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "app_TTS_enabled_msg":
             MessageLookupByLibrary.simpleMessage("云端发音系统已启动."),
@@ -90,13 +100,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "app_logout_tooltip": MessageLookupByLibrary.simpleMessage("退出"),
         "app_title": MessageLookupByLibrary.simpleMessage("形声语"),
         "common_face_name": m0,
-        "common_mono_name": m1,
-        "common_op_name": m2,
-        "common_quad_name": m3,
+        "common_grp_name": m1,
+        "common_mono_name": m2,
+        "common_op_name": m3,
+        "common_quad_name": m4,
         "page_core_words_title": MessageLookupByLibrary.simpleMessage("核心词"),
-        "page_gram_table_op_label": m4,
+        "page_gram_table_grouping": MessageLookupByLibrary.simpleMessage("集群"),
+        "page_gram_table_grp_label": m5,
+        "page_gram_table_op_label": m6,
         "page_gram_table_operators": MessageLookupByLibrary.simpleMessage("组合"),
-        "page_gram_table_row_header": m5,
+        "page_gram_table_row_header": m7,
         "page_random_words_title":
             MessageLookupByLibrary.simpleMessage("随意词（用于测试）")
       };

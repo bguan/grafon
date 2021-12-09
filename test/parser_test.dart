@@ -45,7 +45,7 @@ void main() {
   test('parsing all simple Grams in Gram Table', () {
     final gTab = GramTable();
     final gp = GrafonParser();
-    for (var c in Cons.values) {
+    for (var c in Cons.values.where((c) => !c.isSpecial)) {
       for (var v in Vowel.values.where((e) => e != Vowel.NIL)) {
         expect(
           gp.parse("${c.shortName}${v.shortName}"),
@@ -55,7 +55,7 @@ void main() {
     }
   });
 
-  test('parsing binary expr: gichdu', () {
+  test('parsing expr: gichdu', () {
     final gp = GrafonParser();
     expect(
       gp.parse("gichdu"),
@@ -63,7 +63,7 @@ void main() {
     );
   });
 
-  test('parsing binary expr: gidu', () {
+  test('parsing expr: gidu', () {
     final gp = GrafonParser();
     expect(
       gp.parse("gidu"),
@@ -71,7 +71,7 @@ void main() {
     );
   });
 
-  test('parsing binary expr: gishdu', () {
+  test('parsing expr: gishdu', () {
     final gp = GrafonParser();
     expect(
       gp.parse("gishdu"),
@@ -79,7 +79,7 @@ void main() {
     );
   });
 
-  test('parsing binary expr: gingdu', () {
+  test('parsing expr: gingdu', () {
     final gp = GrafonParser();
     expect(
       gp.parse("gingdu"),
@@ -90,10 +90,10 @@ void main() {
   test('parsing all grams all ops all grams', () {
     final gTab = GramTable();
     final gp = GrafonParser();
-    for (var c1 in Cons.values) {
+    for (var c1 in Cons.values.where((c) => !c.isSpecial)) {
       for (var v1 in Vowel.values.where((e) => e != Vowel.NIL)) {
         for (var o in Op.values) {
-          for (var c2 in Cons.values) {
+          for (var c2 in Cons.values.where((c) => !c.isSpecial)) {
             for (var v2 in Vowel.values.where((e) => e != Vowel.NIL)) {
               String os = o.coda.shortName;
               final c1n = c1.shortName;
@@ -115,5 +115,29 @@ void main() {
         }
       }
     }
+  });
+
+  test('parsing expr: nolashni', () {
+    final gp = GrafonParser();
+    expect(
+      gp.parse("nolashni"),
+      Quads.Arc.left.next(Mono.Star.gram).over(Quads.Arc.up),
+    );
+  });
+
+  test('parsing expr: jidaju', () {
+    final gp = GrafonParser();
+    expect(
+      gp.parse("jidaju"),
+      ClusterExpr(Mono.Square.gram),
+    );
+  });
+
+  test('parsing expr: nojianglaju', () {
+    final gp = GrafonParser();
+    expect(
+      gp.parse("nojianglaju"),
+      Quads.Arc.left.next(ClusterExpr(Mono.Empty.wrap(Mono.Star.gram))),
+    );
   });
 }

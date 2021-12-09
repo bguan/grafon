@@ -69,11 +69,13 @@ extension VowelHelper on Vowel {
   }
 }
 
-/// Consonants at the beginning of a syllable.
-enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s }
+/// Consonants at the beginning of a syllable. J is reserved for special use.
+enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s, j }
 
-/// Extension to map Consonant to the Pair and provide short name
+/// Extension to map Consonant to short name and phoneme
 extension ConsonantHelper on Cons {
+  bool get isSpecial => this == Cons.j;
+
   String get shortName =>
       this == Cons.NIL ? '' : EnumToString.convertToString(this);
 
@@ -82,6 +84,8 @@ extension ConsonantHelper on Cons {
     switch (this) {
       case Cons.r:
         return 'ɹ';
+      case Cons.j:
+        return 'ʤ';
       case Cons.NIL:
         return '';
       default:
@@ -103,12 +107,12 @@ extension ConsonantHelper on Cons {
 /// Coda is the ending consonant at the end of a syllable
 enum Coda { NIL, ch, sh, ng }
 
-/// Helper to map coda to get the group that its associated with and phoneme
+/// Helper to map coda to get short name and phoneme
 extension CodaHelper on Coda {
   String get shortName =>
       this == Coda.NIL ? '' : EnumToString.convertToString(this);
 
-  /// IPA Phoneme for base case
+  /// IPA Phoneme
   String get phoneme {
     switch (this) {
       case Coda.NIL:

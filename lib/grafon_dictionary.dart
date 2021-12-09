@@ -18,7 +18,7 @@
 /// Library where dictionary is populated
 library grafon_dictionary;
 
-import 'constants.dart';
+import 'grafon_expr.dart';
 import 'grafon_word.dart';
 import 'gram_table.dart';
 import 'localized_string.dart';
@@ -422,7 +422,7 @@ final _religious = WordGroup(
           ZH: ["佛教"]
         })),
     CoreWord(
-        Quads.Arc.left.next(Mono.Empty.wrap(Mono.Star.gram)).over(Quads.Arc.up),
+        Quads.Arc.left.next(Mono.Star.gram).over(Quads.Arc.up),
         LocStrs({
           EN: ["Islam"],
           ZH: ["伊斯兰教"]
@@ -457,6 +457,13 @@ final _randomGroup = WordGroup(
   LocStr({EN: 'Test expression rendering...', ZH: '测试方程绘图。'}),
   [
     CoreWord(
+      Quads.Arc.left.next(ClusterExpr(Mono.Empty.wrap(Mono.Star.gram))),
+      LocStrs({
+        EN: ["Crescent Moon and Star"],
+        ZH: ["弯月与星"]
+      }),
+    ),
+    CoreWord(
       Quads.Triangle.up.mix(Quads.Branch.down),
       LocStrs.def(["6"]),
     ),
@@ -481,7 +488,7 @@ final _randomGroup = WordGroup(
         CoreWord.def(Mono.Square.mix(Mono.X.gram)),
         CoreWord.def(Quads.Triangle.up.wrap(Quads.Triangle.down)),
       ],
-      LocStrs.def(["0,1,2,3,4,5,6,7,8,9"]),
+      LocStrs.def(["0, 1, 2, 3, 4, 5, 6, 7, 8, 9"]),
     )
   ],
 );

@@ -35,8 +35,8 @@ void main() {
     }
   });
 
-  test('Every Cons maps to a Mono', () {
-    for (final c in Cons.values) {
+  test('Every non special Cons maps to a Mono', () {
+    for (final c in Cons.values.where((c) => !c.isSpecial)) {
       expect(Mono.values.firstWhere((m) => m.gram.cons == c), isNotNull);
     }
   });
@@ -54,13 +54,13 @@ void main() {
   });
 
   test('Every Cons maps to a Quad', () {
-    for (final c in Cons.values) {
+    for (final c in Cons.values.where((c) => !c.isSpecial)) {
       expect(Quads.values.firstWhere((q) => q.grams.cons == c), isNotNull);
     }
   });
 
   test('GramTable test atConsVowel', () {
-    for (final c in Cons.values) {
+    for (final c in Cons.values.where((c) => !c.isSpecial)) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().atConsVowel(c, v);
 
@@ -88,7 +88,7 @@ void main() {
   });
 
   test('GramTable test at dynamics', () {
-    for (final c in Cons.values) {
+    for (final c in Cons.values.where((c) => !c.isSpecial)) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gra = GramTable().at(c, v);
         expect(gra.cons, c);
@@ -161,7 +161,7 @@ void main() {
   });
 
   test('GramTable numRows match num of Cons', () {
-    expect(GramTable().numRows, Cons.values.length);
+    expect(GramTable().numRows, Cons.values.where((c) => !c.isSpecial).length);
   });
 
   test('GramTable numCols match num of Vowels', () {

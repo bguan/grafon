@@ -65,6 +65,34 @@ extension OpExtension on Op {
   }
 }
 
+/// Grouping Operators
+enum Group { beg, end }
+
+/// Extending Group Enum to associate shortName, symbol and pronunciation
+extension GroupExtension on Group {
+  String get shortName => EnumToString.convertToString(this);
+
+  String get symbol {
+    switch (this) {
+      case Group.beg:
+        return '(';
+      case Group.end:
+      default:
+        return ')';
+    }
+  }
+
+  Syllable get syllable {
+    switch (this) {
+      case Group.beg:
+        return const Syllable(Cons.j, Vowel.i);
+      case Group.end:
+      default:
+        return const Syllable(Cons.j, Vowel.u);
+    }
+  }
+}
+
 /// abstract base class for all Grafon Expression.
 abstract class GrafonExpr {
   Pronunciation get pronunciation;
@@ -188,18 +216,19 @@ class ClusterExpr extends GrafonExpr {
     renderPlan = subExpr.renderPlan;
     final sList = subExpr.pronunciation.syllables;
     pronunciation = Pronunciation([
-      Mono.Empty.gram.syllable.diffCoda(Op.Mix.coda),
-      ...sList.take(sList.length - 1),
-      sList.last.diffCoda(Op.Mix.coda),
-      Mono.Empty.gram.syllable,
+      Group.beg.syllable,
+      ...sList,
+      Group.end.syllable,
     ]);
   }
 
   @override
-  String toString() => "(${subExpr.toString()})";
+  String toString() =>
+      "${Group.beg.symbol}${subExpr.toString()}${Group.end.symbol}";
 
   @override
-  String localize(S l10n) => "(${subExpr.localize(l10n)})";
+  String localize(S l10n) =>
+      "${Group.beg.symbol}${subExpr.localize(l10n)}${Group.end.symbol}";
 
   @override
   List<Gram> get grams => subExpr.grams;

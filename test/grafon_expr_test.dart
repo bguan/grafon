@@ -71,7 +71,7 @@ void main() {
   });
 
   test('SingleGram pronunciation matches gram equivalent', () {
-    for (final c in Cons.values) {
+    for (final c in Cons.values.where((c) => !c.isSpecial)) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final g = GramTable().atConsVowel(c, v);
         expect(
@@ -109,10 +109,10 @@ void main() {
     expect(hash.pronunciation.length, 6);
     expect(hash.pronunciation[0], Syllable.v(Vowel.i));
     expect(hash.pronunciation[1], Syllable.vc(Vowel.i, Coda.ch));
-    expect(hash.pronunciation[2], Syllable.vc(Vowel.a, Coda.ch));
+    expect(hash.pronunciation[2], Syllable(Cons.j, Vowel.i));
     expect(hash.pronunciation[3], Syllable.vc(Vowel.u, Coda.sh));
-    expect(hash.pronunciation[4], Syllable.vc(Vowel.u, Coda.ch));
-    expect(hash.pronunciation[5], Syllable.v(Vowel.a));
+    expect(hash.pronunciation[4], Syllable.v(Vowel.u));
+    expect(hash.pronunciation[5], Syllable(Cons.j, Vowel.u));
   });
 
   test('over() grams, toString & pronunciation is correct', () {
@@ -142,11 +142,11 @@ void main() {
     expect(feet.toString(), "Dot / (Down_Corner + Left_Corner)");
     expect(feet.pronunciation.length, 5);
     expect(feet.pronunciation[0], Syllable(Cons.h, Vowel.a, Coda.sh));
-    expect(feet.pronunciation[1], Syllable.vc(Vowel.a, Coda.ch));
+    expect(feet.pronunciation[1], Syllable(Cons.j, Vowel.i));
     expect(feet.pronunciation[2], Syllable(Cons.b, Vowel.u));
-    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o, Coda.ch));
-    expect(feet.pronunciation[4], Syllable.v(Vowel.a));
-    expect(feet.pronunciation.toString(), 'hɑːʃ.ɑːʧ.buː.bɔːʧ.ɑː');
+    expect(feet.pronunciation[3], Syllable(Cons.b, Vowel.o));
+    expect(feet.pronunciation[4], Syllable(Cons.j, Vowel.u));
+    expect(feet.pronunciation.toString(), 'hɑːʃ.ʤiː.buː.bɔː.ʤuː');
   });
 
   test('next() grams, toString & pronunciation is correct', () {
@@ -175,12 +175,12 @@ void main() {
     expect(shout.toString(), "Left_Arc + (Right_Line / Left_Line)");
     expect(shout.pronunciation.length, 5);
     expect(shout.pronunciation[0], Syllable(Cons.n, Vowel.o));
-    expect(shout.pronunciation[1], Syllable.vc(Vowel.a, Coda.ch));
+    expect(shout.pronunciation[1], Syllable(Cons.j, Vowel.i));
     expect(shout.pronunciation[2], Syllable.vc(Vowel.e, Coda.sh));
-    expect(shout.pronunciation[3], Syllable.vc(Vowel.o, Coda.ch));
-    expect(shout.pronunciation[4], Syllable.v(Vowel.a));
+    expect(shout.pronunciation[3], Syllable.v(Vowel.o));
+    expect(shout.pronunciation[4], Syllable(Cons.j, Vowel.u));
 
-    expect(shout.pronunciation.toString(), 'nɔː.ɑːʧ.ɜːʃ.ɔːʧ.ɑː');
+    expect(shout.pronunciation.toString(), 'nɔː.ʤiː.ɜːʃ.ɔː.ʤuː');
   });
 
   test('wrap() grams, toString & pronunciation is correct', () {
@@ -210,12 +210,12 @@ void main() {
     expect(family.toString(), "Circle @ (Dot + Dot / Down_Gate)");
     expect(family.pronunciation.length, 6);
     expect(family.pronunciation[0], Syllable(Cons.n, Vowel.a, Coda.ng));
-    expect(family.pronunciation[1], Syllable.vc(Vowel.a, Coda.ch));
+    expect(family.pronunciation[1], Syllable(Cons.j, Vowel.i));
     expect(family.pronunciation[2], Syllable(Cons.h, Vowel.a));
     expect(family.pronunciation[3], Syllable(Cons.h, Vowel.a, Coda.sh));
-    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u, Coda.ch));
-    expect(family.pronunciation[5], Syllable.v(Vowel.a));
-    expect(family.pronunciation.toString(), 'nɑːŋ.ɑːʧ.hɑː.hɑːʃ.duːʧ.ɑː');
+    expect(family.pronunciation[4], Syllable(Cons.d, Vowel.u));
+    expect(family.pronunciation[5], Syllable(Cons.j, Vowel.u));
+    expect(family.pronunciation.toString(), 'nɑːŋ.ʤiː.hɑː.hɑːʃ.duː.ʤuː');
   });
 
   test('test SingleExpr equality and hashcode works', () {

@@ -18,6 +18,16 @@
       }
     }
   },
+  "common_grp_name": "{grp, select, beg {首} end {尾} other {???}}",
+  "@common_grp_name": {
+    "type": "text",
+    "placeholders": {
+      "grp": {
+        "description": "Name of Group Marker",
+        "example": "beg"
+      }
+    }
+  },
   "common_mono_name": "{mono, select, Empty {空} Dot {点} Cross {十字} Hex {蜂巢} Square {方} Grid {格} X {交叉} Diamond {钻石} Light {光} Sun {日} Blob {泥团} Circle {园} Eye {目} Star {星} Flower {花} Atom {原子} other {???}}",
   "@common_mono_name": {
     "type": "text",
@@ -50,8 +60,28 @@
   },
   "page_core_words_title": "核心词",
   "@page_core_words_title": {},
+  "page_gram_table_grouping": "集群",
+  "@page_gram_table_grouping": {},
   "page_gram_table_operators": "组合",
   "@page_gram_table_operators": {},
+  "page_gram_table_grp_label": "{grpName} {grpSymbol} {grpVoice}",
+  "@page_gram_table_grp_label": {
+    "type": "text",
+    "placeholders": {
+      "grpName": {
+        "description": "Name of Grouping",
+        "example": "Begin"
+      },
+      "grpSymbol": {
+        "description": "Symbol of Grouping",
+        "example": "("
+      },
+      "grpVoice": {
+        "description": "Voice of Grouping",
+        "example": "ji"
+      }
+    }
+  },
   "page_gram_table_op_label": "{opName} {opSymbol} {codas}",
   "@page_gram_table_op_label": {
     "type": "text",

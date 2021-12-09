@@ -71,7 +71,7 @@ class MockCanvas extends Mock implements Canvas {
 void main() {
   testWidgets('GramTile has a CustomPaint for every Gram',
       (WidgetTester tester) async {
-    for (final c in Cons.values) {
+    for (final c in Cons.values.where((c) => !c.isSpecial)) {
       for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
         final gram = GramTable().atConsVowel(c, v);
         await tester.pumpWidget(GrafonTile(gram.renderPlan, height: 100));

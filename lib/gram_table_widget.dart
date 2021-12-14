@@ -56,6 +56,7 @@ class _GramTableViewState extends State<GramTableView> {
   static final log = Logger("_GramTableViewState");
 
   var _binary = Op.Next;
+  var _grouping = Group.Base;
 
   @override
   Widget build(BuildContext ctx) {
@@ -99,10 +100,8 @@ class _GramTableViewState extends State<GramTableView> {
         (cellDim + 2 * INSET) * (isWide ? 1 : 1 / (1 - HDR_CLUSTER_HGT_RATIO));
     final hdrWth = clusterWth * HDR_CLUSTER_WTH_RATIO;
     final hdrHgt = clusterHgt * HDR_CLUSTER_HGT_RATIO;
-    final btnWth = min(
-        200.0,
-        (clusterWth * numCols + 2 * numCols * INSET) /
-            (2 + Op.values.length + Group.values.length));
+    final btnWth = (clusterWth * numCols + 2 * numCols * INSET) /
+        (2 + Op.values.length + Group.values.length);
     final btnHgt = min(50.0, cellDim * .8);
     final opHeaderStyle = TextStyle(
       fontWeight: FontWeight.normal,
@@ -120,12 +119,13 @@ class _GramTableViewState extends State<GramTableView> {
 
     final onBinaryTap = (Op b) => () => setState(() {
           _binary = b;
-          log.finest('Set binary operator to ${_binary.shortName}');
+          log.finest('Set binary operator to $_binary');
         });
 
-    final onGroupingTap = (Group g) => () => speechSvc.pronounce([
-          Pronunciation([g.syllable])
-        ]);
+    final onGroupingTap = (Group g) => () => setState(() {
+          _grouping = g;
+          log.finest('Set grouping operator to $_grouping');
+        });
 
     final codaTxt = (Op b) => b.coda.shortName.isEmpty ? '' : b.coda.shortName;
 
@@ -137,7 +137,7 @@ class _GramTableViewState extends State<GramTableView> {
 
     final grpLabel = (Group grp) {
       return l10n.page_gram_table_grp_label(
-          l10n.common_grp_name(grp), grp.symbol, grp.syllable.shortName);
+          l10n.common_grp_name(grp), grp.symbol, grp.ext);
     };
 
     final opRow = Wrap(
@@ -184,14 +184,13 @@ class _GramTableViewState extends State<GramTableView> {
               width: btnWth,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: scheme.surface,
-                border: Border.all(color: scheme.primary),
+                color: _grouping == g ? scheme.primary : scheme.background,
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
               child: Text(
                 grpLabel(g),
                 textAlign: TextAlign.center,
-                style: opTxtStyle.copyWith(color: scheme.primary),
+                style: opTxtStyle,
                 maxLines: 2,
               ),
             ),
@@ -213,10 +212,18 @@ class _GramTableViewState extends State<GramTableView> {
                   GramClusterWidget(
                     Mono.values[ri * numCols + ci],
                     (List<Gram> gs) async {
-                      final coda = _binary.coda;
+                      final c = _binary.coda;
                       speechSvc.pronounce(
                         gs.map(
-                            (g) => Pronunciation([g.syllable.diffCoda(coda)])),
+                          (g) => Pronunciation(
+                            [
+                              g.syllable
+                                  .diffVowel(
+                                      _grouping.modVowel(g.syllable.vowel))
+                                  .diffCoda(c)
+                            ],
+                          ),
+                        ),
                         multiStitch: kIsWeb || Platform.isIOS,
                       );
                     },

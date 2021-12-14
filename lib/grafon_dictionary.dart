@@ -422,7 +422,9 @@ final _religious = WordGroup(
           ZH: ["佛教"]
         })),
     CoreWord(
-        Quads.Arc.left.next(Mono.Star.gram).over(Quads.Arc.up),
+        Quads.Arc.left
+            .next(ClusterExpr(Mono.Empty.wrap(Mono.Star.gram)))
+            .over(Quads.Arc.up),
         LocStrs({
           EN: ["Islam"],
           ZH: ["伊斯兰教"]

@@ -30,8 +30,9 @@ class MessageLookup extends MessageLookupByLibrary {
           })}";
 
   static String m1(grp) => "${Intl.select(grp, {
-            'beg': '首',
-            'end': '尾',
+            'Base': '基',
+            'Head': '首',
+            'Tail': '尾',
             'other': '???',
           })}";
 
@@ -84,12 +85,13 @@ class MessageLookup extends MessageLookupByLibrary {
           })}";
 
   static String m5(grpName, grpSymbol, grpVoice) =>
-      "${grpName} ${grpSymbol} ${grpVoice}";
+      "${grpName} ${grpSymbol}\n…${grpVoice}…";
 
-  static String m6(opName, opSymbol, codas) => "${opName} ${opSymbol} ${codas}";
+  static String m6(opName, opSymbol, codas) =>
+      "${opName} ${opSymbol}\n…${codas}";
 
   static String m7(monoName, quadName, consonant) =>
-      "${monoName}, ${quadName} (${consonant}...)";
+      "${monoName}, ${quadName} (${consonant}…)";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
 

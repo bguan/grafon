@@ -66,7 +66,7 @@ extension OpExtension on Op {
 }
 
 /// Grouping Operators
-enum Group { beg, end }
+enum Group { Base, Head, Tail }
 
 /// Extending Group Enum to associate shortName, symbol and pronunciation
 extension GroupExtension on Group {
@@ -74,21 +74,34 @@ extension GroupExtension on Group {
 
   String get symbol {
     switch (this) {
-      case Group.beg:
+      case Group.Head:
         return '(';
-      case Group.end:
-      default:
+      case Group.Tail:
         return ')';
+      default:
+        return '';
     }
   }
 
-  Syllable get syllable {
+  String get ext {
     switch (this) {
-      case Group.beg:
-        return const Syllable(Cons.j, Vowel.i);
-      case Group.end:
+      case Group.Head:
+        return 'w';
+      case Group.Tail:
+        return 'y';
       default:
-        return const Syllable(Cons.j, Vowel.u);
+        return '';
+    }
+  }
+
+  Vowel modVowel(Vowel v) {
+    switch (this) {
+      case Group.Head:
+        return v.headForm;
+      case Group.Tail:
+        return v.tailForm;
+      default:
+        return v.baseForm;
     }
   }
 }
@@ -124,6 +137,22 @@ abstract class GrafonExpr {
 
   /// generate a localized text string for the expression
   String localize(S l10n);
+
+  GrafonExpr swapHeadCons(Cons c) {
+    if (c == Cons.NIL) return this;
+
+    GramTable table = GramTable();
+    if (this is Gram) {
+      Gram g = this as Gram;
+      Syllable s = g.syllable;
+      assert(s.cons == Cons.NIL);
+      return table.atConsVowel(c, g.syllable.vowel);
+    }
+
+    BinaryOpExpr bin = this as BinaryOpExpr;
+
+    return BinaryOpExpr(bin.expr1.swapHeadCons(c), bin.op, bin.expr2);
+  }
 }
 
 /// BinaryExpr applies a Binary operation on a 2 expressions.
@@ -206,7 +235,7 @@ class BinaryOpExpr extends GrafonExpr {
 /// Cluster Expression ties a binary expr into a single group.
 /// Applying special pronunciation to the head gram and the tail op.
 class ClusterExpr extends GrafonExpr {
-  final GrafonExpr subExpr;
+  late final GrafonExpr subExpr;
   late final renderPlan;
   late final headGram;
   late final tailOp;
@@ -215,20 +244,26 @@ class ClusterExpr extends GrafonExpr {
   ClusterExpr(this.subExpr) {
     renderPlan = subExpr.renderPlan;
     final sList = subExpr.pronunciation.syllables;
+    final head = sList.first;
+    final body = sList.sublist(1, sList.length - 1);
+    final tail = sList.last;
     pronunciation = Pronunciation([
-      Group.beg.syllable,
-      ...sList,
-      Group.end.syllable,
+      head.headVowel(),
+      ...body,
+      tail.tailVowel(),
     ]);
   }
 
+  ClusterExpr.diffHeadCons(Cons headCons, GrafonExpr baseSubExpr)
+      : this(baseSubExpr.swapHeadCons(headCons));
+
   @override
   String toString() =>
-      "${Group.beg.symbol}${subExpr.toString()}${Group.end.symbol}";
+      "${Group.Head.symbol}${subExpr.toString()}${Group.Tail.symbol}";
 
   @override
   String localize(S l10n) =>
-      "${Group.beg.symbol}${subExpr.localize(l10n)}${Group.end.symbol}";
+      "${Group.Head.symbol}${subExpr.localize(l10n)}${Group.Tail.symbol}";
 
   @override
   List<Gram> get grams => subExpr.grams;

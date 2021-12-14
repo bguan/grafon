@@ -19,9 +19,11 @@
 library grafon_word_parser;
 
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:petitparser/debug.dart';
 import 'package:petitparser/petitparser.dart';
 
 import 'grafon_expr.dart';
+import 'gram_infra.dart';
 import 'gram_table.dart';
 import 'phonetics.dart';
 
@@ -36,21 +38,23 @@ class GrafonParser {
 
     final Parser<Cons> gramCons = ChoiceParser(
       Cons.values
-          .where((c) => c != Cons.NIL && !c.isSpecial)
+          .where((c) => c != Cons.NIL)
           .map((c) => stringIgnoreCase(c.shortName)),
     ).map((s) => EnumToString.fromString(Cons.values, s)!);
 
-    final Parser<Vowel> vowel = ChoiceParser(
+    final Parser<Vowel> baseVowel = ChoiceParser(
       Vowel.values
-          .where((v) => v != Vowel.NIL)
+          .where((v) => v.isBase)
           .map((v) => stringIgnoreCase(v.shortName)),
     ).map((s) => EnumToString.fromString(Vowel.values, s)!);
 
-    final Parser<Group> beg =
-        stringIgnoreCase(Group.beg.syllable.toString()).map((_) => Group.beg);
-
-    final Parser<Group> end =
-        stringIgnoreCase(Group.end.syllable.toString()).map((_) => Group.end);
+    final Parser<Gram> baseGram = (gramCons.optional() & baseVowel).map((l) {
+      l.removeWhere((e) => e == null);
+      return gTab.atConsVowel(
+        l.length == 1 ? Cons.NIL : l[0],
+        l[l.length == 1 ? 0 : 1],
+      );
+    });
 
     final opCodaParsers = (Op op) {
       return (op.coda.shortName.isEmpty
@@ -67,18 +71,21 @@ class GrafonParser {
 
     final Parser<Op> wrap = opCodaParsers(Op.Wrap);
 
-    final Parser<GrafonExpr> gram = (gramCons.optional() & vowel).map((l) {
-      l.removeWhere((e) => e == null);
-      return gTab.atConsVowel(
-        l.length == 1 ? Cons.NIL : l[0],
-        l[l.length == 1 ? 0 : 1],
-      );
-    });
+    final Parser<Cons> head =
+        (gramCons.optional() & stringIgnoreCase(Group.Head.ext))
+            .map((l) => l.first == null ? Cons.NIL : l.first as Cons);
+
+    final Parser<Group> tail =
+        stringIgnoreCase(Group.Tail.ext).map((_) => Group.Tail);
 
     final builder = ExpressionBuilder();
     builder.group()
-      ..primitive(gram)
-      ..wrapper(beg, end, (b, GrafonExpr expr, e) => ClusterExpr(expr));
+      ..primitive(baseGram)
+      ..wrapper(
+        head,
+        tail,
+        (h, GrafonExpr expr, t) => ClusterExpr.diffHeadCons(h as Cons, expr),
+      );
 
     final binOp = (GrafonExpr a, Op op, GrafonExpr b) => BinaryOpExpr(a, op, b);
     builder.group()..left(mix, binOp);
@@ -86,7 +93,9 @@ class GrafonParser {
     builder.group()..left(over, binOp);
     builder.group()..left(wrap, binOp);
 
-    parser = builder.build().end().cast();
+    Parser<GrafonExpr> p = builder.build().end().cast();
+
+    parser = DEBUG ? trace(p) : p;
   }
 
   GrafonExpr parse(String input) {

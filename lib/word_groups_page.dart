@@ -106,7 +106,7 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
     final pageHeight = mediaSize.height;
     final isWide = pageWidth > 1.2 * pageHeight;
     final cardGap = CARD_GAP_SCALE * pageWidth;
-    final sectionTextScale = isWide ? .75 : .65;
+    final sectionTextScale = isWide ? .75 : .66;
 
     final sectionScale = isWide ? 1.25 : 1.0;
     final numCols = min(6, (pageWidth / MIN_CARD_WIDTH).floor());

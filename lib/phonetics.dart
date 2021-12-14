@@ -22,10 +22,112 @@ import 'package:collection/collection.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 
 /// Basic vowels for the language. Can be combined into diphthong.
-enum Vowel { NIL, a, e, i, o, u }
+enum Vowel { NIL, a, e, i, o, u, wa, we, wi, wo, wu, ay, ey, iy, oy, uy }
 
 /// Extending Vowel to tie to phoneme and approximate voicing
 extension VowelHelper on Vowel {
+  bool get isBase =>
+      this == Vowel.a ||
+      this == Vowel.e ||
+      this == Vowel.i ||
+      this == Vowel.o ||
+      this == Vowel.u;
+
+  bool get isHead =>
+      this == Vowel.wa ||
+      this == Vowel.we ||
+      this == Vowel.wi ||
+      this == Vowel.wo ||
+      this == Vowel.wu;
+
+  bool get isTail =>
+      this == Vowel.ay ||
+      this == Vowel.ey ||
+      this == Vowel.iy ||
+      this == Vowel.oy ||
+      this == Vowel.uy;
+
+  Vowel get baseForm {
+    switch (this) {
+      case Vowel.a:
+      case Vowel.wa:
+      case Vowel.ay:
+        return Vowel.a;
+      case Vowel.e:
+      case Vowel.we:
+      case Vowel.ey:
+        return Vowel.e;
+      case Vowel.i:
+      case Vowel.wi:
+      case Vowel.iy:
+        return Vowel.i;
+      case Vowel.o:
+      case Vowel.wo:
+      case Vowel.oy:
+        return Vowel.o;
+      case Vowel.u:
+      case Vowel.wu:
+      case Vowel.uy:
+        return Vowel.u;
+      default:
+        return Vowel.NIL;
+    }
+  }
+
+  Vowel get headForm {
+    switch (this) {
+      case Vowel.a:
+      case Vowel.wa:
+      case Vowel.ay:
+        return Vowel.wa;
+      case Vowel.e:
+      case Vowel.we:
+      case Vowel.ey:
+        return Vowel.we;
+      case Vowel.i:
+      case Vowel.wi:
+      case Vowel.iy:
+        return Vowel.wi;
+      case Vowel.o:
+      case Vowel.wo:
+      case Vowel.oy:
+        return Vowel.wo;
+      case Vowel.u:
+      case Vowel.wu:
+      case Vowel.uy:
+        return Vowel.wu;
+      default:
+        return Vowel.NIL;
+    }
+  }
+
+  Vowel get tailForm {
+    switch (this) {
+      case Vowel.a:
+      case Vowel.wa:
+      case Vowel.ay:
+        return Vowel.ay;
+      case Vowel.e:
+      case Vowel.we:
+      case Vowel.ey:
+        return Vowel.ey;
+      case Vowel.i:
+      case Vowel.wi:
+      case Vowel.iy:
+        return Vowel.iy;
+      case Vowel.o:
+      case Vowel.wo:
+      case Vowel.oy:
+        return Vowel.oy;
+      case Vowel.u:
+      case Vowel.wu:
+      case Vowel.uy:
+        return Vowel.uy;
+      default:
+        return Vowel.NIL;
+    }
+  }
+
   String get shortName =>
       this == Vowel.NIL ? '' : EnumToString.convertToString(this);
 
@@ -34,48 +136,47 @@ extension VowelHelper on Vowel {
     switch (this) {
       case Vowel.a:
         return 'ɑː';
+      case Vowel.wa:
+        return 'wɑː';
+      case Vowel.ay:
+        return 'ɑːj';
       case Vowel.e:
         return 'ɜː';
+      case Vowel.we:
+        return 'wɜː';
+      case Vowel.ey:
+        return 'ɜːj';
       case Vowel.i:
         return 'iː';
+      case Vowel.wi:
+        return 'wi:';
+      case Vowel.iy:
+        return 'iːj';
       case Vowel.o:
         return 'ɔː';
+      case Vowel.wo:
+        return 'wɔː';
+      case Vowel.oy:
+        return 'ɔːj';
       case Vowel.u:
         return 'uː';
+      case Vowel.wu:
+        return 'wuː';
+      case Vowel.uy:
+        return 'uːj';
       case Vowel.NIL:
-        return '  ';
+        return '';
       default:
         return shortName;
     }
   }
-
-  /// hack to approximate intended voicing for english speakers
-  String get approxVoice {
-    switch (this) {
-      case Vowel.a:
-        return 'ar';
-      case Vowel.e:
-        return 'er';
-      case Vowel.i:
-        return 'ee';
-      case Vowel.o:
-        return 'or';
-      case Vowel.u:
-        return 'ooh';
-      case Vowel.NIL:
-      default:
-        return '';
-    }
-  }
 }
 
-/// Consonants at the beginning of a syllable. J is reserved for special use.
-enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s, j }
+/// Consonants at the beginning of a syllable.
+enum Cons { NIL, h, b, p, d, t, v, f, g, k, r, l, n, m, z, s }
 
 /// Extension to map Consonant to short name and phoneme
 extension ConsonantHelper on Cons {
-  bool get isSpecial => this == Cons.j;
-
   String get shortName =>
       this == Cons.NIL ? '' : EnumToString.convertToString(this);
 
@@ -84,22 +185,10 @@ extension ConsonantHelper on Cons {
     switch (this) {
       case Cons.r:
         return 'ɹ';
-      case Cons.j:
-        return 'ʤ';
       case Cons.NIL:
         return '';
       default:
         return shortName;
-    }
-  }
-
-  /// hack to approximate intended voicing for english speakers
-  String get approxVoice {
-    switch (this) {
-      case Cons.NIL:
-        return '';
-      default:
-        return this.shortName;
     }
   }
 }
@@ -189,47 +278,17 @@ class Syllable {
       VOWEL_MILLIS +
       (coda != Coda.NIL ? CODA_MILLIS : 0);
 
-  String get approxVoice {
-    // Hack to get TTS working
-
-    StringBuffer s = StringBuffer();
-
-    if (cons == Cons.NIL && vowel == Vowel.a) {
-      s.write('ah-');
-    } else if (cons == Cons.g && vowel == Vowel.i) {
-      s.write('ghee');
-    } else if (cons == Cons.g && vowel == Vowel.e) {
-      s.write('gher');
-    } else if (cons == Cons.f && vowel == Vowel.e) {
-      s.write('fur');
-    } else if (cons == Cons.m && vowel == Vowel.e) {
-      s.write('mur');
-    } else if (cons == Cons.z && vowel == Vowel.e) {
-      s.write('zur');
-    } else if (cons == Cons.n && vowel == Vowel.e) {
-      s.write('nur');
-    } else if (cons == Cons.n && vowel == Vowel.i) {
-      s.write('ni');
-    } else if (cons == Cons.r && vowel == Vowel.e) {
-      s.write('rhur');
-    } else if (cons == Cons.r && vowel == Vowel.o) {
-      s.write('raw');
-    } else if (cons == Cons.s && vowel == Vowel.a) {
-      s.write('sah');
-    } else {
-      if (cons != Cons.NIL) s.write(cons.approxVoice);
-      s.write(vowel.approxVoice);
-    }
-
-    s.write(coda.approxVoice);
-    return s.toString();
-  }
-
   /// make a syllable based on another with a different consonant
   Syllable diffConsonant(Cons c) => Syllable(c, vowel, coda);
 
   /// make a syllable based on another with a different vowel
   Syllable diffVowel(Vowel v) => Syllable(cons, v, coda);
+
+  /// make a syllable based on vowel in its head form
+  Syllable headVowel() => Syllable(cons, vowel.headForm, coda);
+
+  /// make a syllable based on vowel in its tail form
+  Syllable tailVowel() => Syllable(cons, vowel.tailForm, coda);
 
   /// make a syllable based on another with a different vowel extension
   Syllable diffExtension(Vowel e) => Syllable(cons, vowel, coda);
@@ -252,24 +311,20 @@ class Pronunciation {
 
   /// voicing, transformed as needed
   late final String _phonemes; // IPA phonemes
-  late final String _approxVoice; // what English speaker should pronounce
 
-  /// constructor, precompute voicing, fragments, approx string representation
+  /// constructor, precompute voicing, fragments representation
   Pronunciation(this.syllables) {
     final fragmentList = <String>[];
     final phonemeList = <String>[];
-    final approxList = <String>[];
 
     for (int i = 0; i < syllables.length; i++) {
       final cur = syllables[i];
       final syllable = cur;
       fragmentList.add(syllable.shortName);
       phonemeList.add(syllable.pronunciation);
-      approxList.add(syllable.approxVoice);
     }
     fragmentSequence = List.unmodifiable(fragmentList);
     _phonemes = phonemeList.join('.');
-    _approxVoice = approxList.join('-');
   }
 
   @override
@@ -290,8 +345,6 @@ class Pronunciation {
   String toString() => _phonemes;
 
   String get phonemes => _phonemes;
-
-  String get approxVoice => _approxVoice;
 
   Syllable operator [](int index) => syllables[index];
 

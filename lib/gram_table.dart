@@ -503,7 +503,7 @@ class GramTable {
   }
 
   GramTable._internal() {
-    for (var cons in Cons.values.where((c) => !c.isSpecial)) {
+    for (var cons in Cons.values) {
       final mono = Mono.values.firstWhere((m) => m.gram.cons == cons);
       final quad = mono.quadPeer;
       _gramByConsVowel[cons] = Map.unmodifiable({
@@ -514,7 +514,7 @@ class GramTable {
     }
   }
 
-  Gram atConsVowel(Cons c, Vowel v) => _gramByConsVowel[c]![v]!;
+  Gram atConsVowel(Cons c, Vowel v) => _gramByConsVowel[c]![v.baseForm]!;
 
   Gram atMonoFace(Mono m, Face f) => atConsVowel(m.gram.cons, f.vowel);
 
@@ -540,7 +540,7 @@ class GramTable {
     Gram g;
     if (c is Vowel) {
       final Vowel v = c;
-      g = v2g[v]!;
+      g = v2g[v.baseForm]!;
     } else if (c is Face) {
       final Face f = c;
       g = v2g[f.vowel]!;

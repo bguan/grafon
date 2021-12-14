@@ -213,12 +213,12 @@ void main() {
     expect(facesFromVowels, Set.of(Face.values));
   });
 
-  test('Faces should cover all Vowels', () {
+  test('Faces should cover all Base Vowels', () {
     final vowelsFromFaces = Set.of([
       ...Face.values.map((f) => f.vowel),
     ]);
 
-    expect(vowelsFromFaces, Set.of(Vowel.values.where((e) => e != Vowel.NIL)));
+    expect(vowelsFromFaces, Set.of(Vowel.values.where((v) => v.isBase)));
   });
 
   test('Vowels short names should all be unique', () {

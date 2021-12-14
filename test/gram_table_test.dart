@@ -36,7 +36,7 @@ void main() {
   });
 
   test('Every non special Cons maps to a Mono', () {
-    for (final c in Cons.values.where((c) => !c.isSpecial)) {
+    for (final c in Cons.values) {
       expect(Mono.values.firstWhere((m) => m.gram.cons == c), isNotNull);
     }
   });
@@ -54,18 +54,23 @@ void main() {
   });
 
   test('Every Cons maps to a Quad', () {
-    for (final c in Cons.values.where((c) => !c.isSpecial)) {
+    for (final c in Cons.values) {
       expect(Quads.values.firstWhere((q) => q.grams.cons == c), isNotNull);
     }
   });
 
   test('GramTable test atConsVowel', () {
-    for (final c in Cons.values.where((c) => !c.isSpecial)) {
-      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
-        final gra = GramTable().atConsVowel(c, v);
+    for (final c in Cons.values) {
+      for (final v in Vowel.values.where((v) => v.isBase)) {
+        final graB = GramTable().atConsVowel(c, v);
+        final graH = GramTable().atConsVowel(c, v.headForm);
+        final graT = GramTable().atConsVowel(c, v.tailForm);
 
-        expect(gra.cons, c);
-        expect(gra.vowel, v);
+        expect(graB.cons, c);
+        expect(graB.vowel, v);
+
+        expect(graH, graB);
+        expect(graT, graB);
       }
     }
   });
@@ -88,11 +93,15 @@ void main() {
   });
 
   test('GramTable test at dynamics', () {
-    for (final c in Cons.values.where((c) => !c.isSpecial)) {
-      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
+    for (final c in Cons.values) {
+      for (final v in Vowel.values.where((e) => e.isBase)) {
         final gra = GramTable().at(c, v);
+        final graH = GramTable().at(c, v.headForm);
+        final graT = GramTable().at(c, v.tailForm);
         expect(gra.cons, c);
         expect(gra.vowel, v);
+        expect(graH, gra);
+        expect(graT, gra);
       }
       for (final f in Face.values) {
         final gra = GramTable().at(c, f);
@@ -114,7 +123,7 @@ void main() {
           expect(gra, isA<QuadGram>());
         }
       }
-      for (final v in Vowel.values.where((e) => e != Vowel.NIL)) {
+      for (final v in Vowel.values.where((v) => v.isBase)) {
         final gra = GramTable().at(m, v);
         expect(gra.cons, m.gram.cons);
         expect(gra.vowel, v);
@@ -133,7 +142,7 @@ void main() {
           expect(gra, isA<MonoGram>());
         }
       }
-      for (final v in Vowel.values.where((v) => v != Vowel.NIL)) {
+      for (final v in Vowel.values.where((v) => v.isBase)) {
         final gra = GramTable().at(q, v);
         if (v.face != Face.Center) {
           expect(gra.cons, q[v.face].gram.cons);
@@ -161,12 +170,11 @@ void main() {
   });
 
   test('GramTable numRows match num of Cons', () {
-    expect(GramTable().numRows, Cons.values.where((c) => !c.isSpecial).length);
+    expect(GramTable().numRows, Cons.values.length);
   });
 
-  test('GramTable numCols match num of Vowels', () {
-    expect(
-        GramTable().numCols, Vowel.values.where((e) => e != Vowel.NIL).length);
+  test('GramTable numCols match num of Base Vowels', () {
+    expect(GramTable().numCols, Vowel.values.where((v) => v.isBase).length);
   });
 
   test('GramTable numCols match num of Faces', () {

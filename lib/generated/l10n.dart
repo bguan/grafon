@@ -109,13 +109,14 @@ class S {
     );
   }
 
-  /// `{grp, select, beg {Begin} end {End} other {???}}`
+  /// `{grp, select, Base {Base} Head {Head} Tail {Tail} other {???}}`
   String common_grp_name(Object grp) {
     return Intl.select(
       grp,
       {
-        'beg': 'Begin',
-        'end': 'End',
+        'Base': 'Base',
+        'Head': 'Head',
+        'Tail': 'Tail',
         'other': '???',
       },
       name: 'common_grp_name',
@@ -229,33 +230,33 @@ class S {
     );
   }
 
-  /// `{grpName} {grpSymbol} {grpVoice}`
+  /// `{grpName} {grpSymbol} \n…{grpVoice}`
   String page_gram_table_grp_label(
       Object grpName, Object grpSymbol, Object grpVoice) {
     return Intl.message(
-      '$grpName $grpSymbol $grpVoice',
+      '$grpName $grpSymbol \n…$grpVoice',
       name: 'page_gram_table_grp_label',
       desc: '',
       args: [grpName, grpSymbol, grpVoice],
     );
   }
 
-  /// `{opName} {opSymbol} {codas}`
+  /// `{opName} {opSymbol}\n…{codas}`
   String page_gram_table_op_label(
       Object opName, Object opSymbol, Object codas) {
     return Intl.message(
-      '$opName $opSymbol $codas',
+      '$opName $opSymbol\n…$codas',
       name: 'page_gram_table_op_label',
       desc: '',
       args: [opName, opSymbol, codas],
     );
   }
 
-  /// `{monoName}, {quadName} ({consonant}...)`
+  /// `{monoName}, {quadName} ({consonant}…)`
   String page_gram_table_row_header(
       Object monoName, Object quadName, Object consonant) {
     return Intl.message(
-      '$monoName, $quadName ($consonant...)',
+      '$monoName, $quadName ($consonant…)',
       name: 'page_gram_table_row_header',
       desc: '',
       args: [monoName, quadName, consonant],

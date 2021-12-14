@@ -18,13 +18,13 @@
       }
     }
   },
-  "common_grp_name": "{grp, select, beg {Begin} end {End} other {???}}",
+  "common_grp_name": "{grp, select, Base {Base} Head {Head} Tail {Tail} other {???}}",
   "@common_grp_name": {
     "type": "text",
     "placeholders": {
       "grp": {
-        "description": "Name of Group Marker",
-        "example": "beg"
+        "description": "Name of Grouping Marker",
+        "example": "Head"
       }
     }
   },
@@ -64,7 +64,7 @@
   "@page_gram_table_grouping": {},
   "page_gram_table_operators": "Combo",
   "@page_gram_table_operators": {},
-  "page_gram_table_grp_label": "{grpName} {grpSymbol} {grpVoice}",
+  "page_gram_table_grp_label": "{grpName} {grpSymbol} \n…{grpVoice}",
   "@page_gram_table_grp_label": {
     "type": "text",
     "placeholders": {
@@ -82,7 +82,7 @@
       }
     }
   },
-  "page_gram_table_op_label": "{opName} {opSymbol} {codas}",
+  "page_gram_table_op_label": "{opName} {opSymbol}\n…{codas}",
   "@page_gram_table_op_label": {
     "type": "text",
     "placeholders": {
@@ -96,11 +96,11 @@
       },
       "codas": {
         "description": "Optional coda for gram left of operator",
-        "example": "...n, ...ng"
+        "example": "…n, …ng"
       }
     }
   },
-  "page_gram_table_row_header": "{monoName}, {quadName} ({consonant}...)",
+  "page_gram_table_row_header": "{monoName}, {quadName} ({consonant}…)",
   "@page_gram_table_row_header": {
     "type": "text",
     "placeholders": {

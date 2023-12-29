@@ -236,8 +236,8 @@ class LineMetrics {
     this.yMax = GRAM_DIM / 2,
     this.xAvg = 0,
     this.yAvg = 0,
-    this.minWidth: MIN_GRAM_WIDTH,
-    this.minHeight: MIN_GRAM_HEIGHT,
+    this.minWidth = MIN_GRAM_WIDTH,
+    this.minHeight = MIN_GRAM_HEIGHT,
   });
 
   @override
@@ -288,8 +288,8 @@ class LineMetrics {
 
   LineMetrics.ofPoints(
     Iterable<Vector2> pts, {
-    this.minWidth: MIN_GRAM_WIDTH,
-    this.minHeight: MIN_GRAM_HEIGHT,
+    this.minWidth = MIN_GRAM_WIDTH,
+    this.minHeight = MIN_GRAM_HEIGHT,
     isZeroAvg = false,
   }) {
     double xMin = double.maxFinite,
@@ -492,8 +492,8 @@ class InvisiDot extends PolyLine {
     Iterable<Vector2> vs, {
     bool isFixedAspect = false,
     bool isZeroAvg = false,
-    this.minWidth: MIN_GRAM_WIDTH,
-    this.minHeight: MIN_GRAM_HEIGHT,
+    this.minWidth = MIN_GRAM_WIDTH,
+    this.minHeight = MIN_GRAM_HEIGHT,
   })  : metrics = LineMetrics.ofPoints(
           vs,
           minWidth: minWidth,
@@ -510,8 +510,8 @@ class InvisiDot extends PolyLine {
     List<Anchor> anchors, {
     bool isFixedAspect = false,
     bool isZeroAvg = false,
-    this.minWidth: MIN_GRAM_WIDTH,
-    this.minHeight: MIN_GRAM_HEIGHT,
+    this.minWidth = MIN_GRAM_WIDTH,
+    this.minHeight = MIN_GRAM_HEIGHT,
   }) : super(
           List.unmodifiable(anchors.map((a) => a.vector)),
           isFixedAspect: isFixedAspect,
@@ -647,7 +647,7 @@ class PolyExtended extends PolyStraight {
   PolyExtended(
     Iterable<Vector2> vs, {
     bool isFixedAspect = false,
-    bool isZeroAvg: false,
+    bool isZeroAvg = false,
   }) : super(
           extend(vs),
           isFixedAspect: isFixedAspect,
@@ -714,7 +714,7 @@ class PolyCurve extends PolyLine {
   PolyCurve(
     Iterable<Vector2> vs, {
     bool isFixedAspect = false,
-    bool isZeroAvg: false,
+    bool isZeroAvg = false,
   }) : super(
           vs,
           isFixedAspect: isFixedAspect,
@@ -857,7 +857,7 @@ abstract class Gram extends GrafonExpr {
   final RenderPlan renderPlan;
   late final int _hashCode;
 
-  Gram(paths, this.cons, {recenter: true})
+  Gram(paths, this.cons, {recenter = true})
       : _lines = List.unmodifiable(paths),
         renderPlan = RenderPlan(paths, recenter: recenter) {
     this._hashCode = cons.hashCode ^
@@ -916,7 +916,7 @@ abstract class Gram extends GrafonExpr {
 class MonoGram extends Gram {
   final face = Face.Center;
 
-  MonoGram(Iterable<PolyLine> paths, Cons cons, {recenter: true})
+  MonoGram(Iterable<PolyLine> paths, Cons cons, {recenter = true})
       : super(paths, cons, recenter: recenter);
 
   @override
@@ -934,7 +934,7 @@ class MonoGram extends Gram {
 class QuadGram extends Gram {
   final Face face;
 
-  QuadGram(Iterable<PolyLine> paths, this.face, Cons cons, {recenter: true})
+  QuadGram(Iterable<PolyLine> paths, this.face, Cons cons, {recenter = true})
       : super(paths, cons, recenter: recenter);
 
   @override
@@ -959,7 +959,7 @@ abstract class QuadGrams {
     required List<PolyLine> u,
     required List<PolyLine> l,
     required List<PolyLine> d,
-    recenter: true,
+    recenter = true,
   }) : f2g = Map.unmodifiable({
           Face.Right: QuadGram(r, Face.Right, cons, recenter: recenter),
           Face.Up: QuadGram(u, Face.Up, cons, recenter: recenter),
@@ -1011,7 +1011,7 @@ List<PolyLine> hFlip(List<PolyLine> paths) =>
 
 /// In RotatingRow, quads are rotated by full step of 90'
 class RotatingQuads extends QuadGrams {
-  RotatingQuads(List<PolyLine> r, Cons cons, {recenter: true})
+  RotatingQuads(List<PolyLine> r, Cons cons, {recenter = true})
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
 
   static List<PolyLine> r2u(List<PolyLine> rightPaths) => turn(rightPaths);
@@ -1025,7 +1025,7 @@ class RotatingQuads extends QuadGrams {
 
 /// In SemiRotatingRow, quads are rotated by semi step of 45'
 class SemiRotatingQuads extends QuadGrams {
-  SemiRotatingQuads(List<PolyLine> r, Cons cons, {recenter: true})
+  SemiRotatingQuads(List<PolyLine> r, Cons cons, {recenter = true})
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => turn(r, isSemi: true);
@@ -1042,7 +1042,7 @@ class SemiRotatingQuads extends QuadGrams {
 /// Up paths are obtained by flipping horizontally then vertically;
 /// Down paths are obtained by horizontal flipping Up paths.
 class FlipQuads extends QuadGrams {
-  FlipQuads(List<PolyLine> r, Cons cons, {recenter: true})
+  FlipQuads(List<PolyLine> r, Cons cons, {recenter = true})
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => vFlip(hFlip(r));
@@ -1057,7 +1057,7 @@ class FlipQuads extends QuadGrams {
 /// Up paths are obtained by rotating Right paths by 90' then hFlip;
 /// Down paths are obtained by vertically flipping Up paths.
 class RotaFlipQuads extends QuadGrams {
-  RotaFlipQuads(List<PolyLine> r, Cons cons, {recenter: true})
+  RotaFlipQuads(List<PolyLine> r, Cons cons, {recenter = true})
       : super(cons, r: r, u: r2u(r), l: r2l(r), d: r2d(r), recenter: recenter);
 
   static List<PolyLine> r2u(List<PolyLine> r) => hFlip(turn(r));

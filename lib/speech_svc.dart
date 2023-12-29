@@ -18,7 +18,6 @@
 /// Speech generation service
 library speech_svc;
 
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:googleapis/texttospeech/v1.dart';

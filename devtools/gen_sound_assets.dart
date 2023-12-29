@@ -65,12 +65,11 @@ Future<void> main() async {
     for (var cc in Cons.values) {
       for (var v in Vowel.values.where((v) => v != Vowel.NIL)) {
         for (var t in Coda.values) {
-          final cn =
-              cc is Cons ? cc.shortName : (cc is Coda ? cc.shortName : '');
+          final cn = cc.shortName;
           final vn = v.shortName;
           final tn = t.shortName;
           final s = "$cn$vn$tn";
-          final cp = cc is Cons ? cc.phoneme : (cc is Coda ? cc.phoneme : '');
+          final cp = cc.phoneme;
           final vp = v.phoneme;
           final tp = t.phoneme;
           final p = "$cp$vp$tp";

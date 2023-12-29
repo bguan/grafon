@@ -20,14 +20,11 @@ library word_groups_page;
 
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:grafon/constants.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'generated/l10n.dart';
@@ -86,6 +83,8 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
   static const CARD_GAP_SCALE = .02;
   static const STD_PAD = 8.0;
 
+  static final log = Logger("_WordGroupsPageState");
+
   final String title;
   final List<WordGroup> groups;
   late final List<bool> _expandedFlag;
@@ -126,28 +125,28 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
       fontWeight: FontWeight.bold,
       fontStyle: FontStyle.normal,
       height: 1.5,
-      color: scheme.primaryVariant,
+      color: scheme.secondary,
       fontSize: 18 * sectionScale,
     );
     final sectionStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontStyle: FontStyle.normal,
       height: 1.2,
-      color: scheme.primaryVariant,
+      color: scheme.secondary,
       fontSize: 14 * sectionScale,
     );
     final groupDescStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.2,
-      color: scheme.primaryVariant,
+      color: scheme.secondary,
       fontSize: 12 * sectionScale,
     );
     final voicingStyle = TextStyle(
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
-      color: scheme.primaryVariant,
+      color: scheme.secondary,
       fontSize: 10 * sectionScale,
     );
 
@@ -180,8 +179,9 @@ class _WordGroupsPageState extends State<WordGroupsPage> {
             elevation: 0,
             expandedHeaderPadding: EdgeInsets.zero,
             expansionCallback: (int index, bool isExpanded) {
+              log.finest('Expansionn called for group $index');
               setState(() {
-                _expandedFlag[index] = !isExpanded;
+                _expandedFlag[index] = isExpanded;
               });
             },
             children: [
@@ -293,7 +293,7 @@ class MultiWordWidget extends StatelessWidget {
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.normal,
       height: 1.2,
-      color: scheme.primaryVariant,
+      color: scheme.secondary,
       fontSize: 11 * textScale,
     );
     final wordTitleStyle = wordDescStyle.copyWith(
@@ -305,7 +305,7 @@ class MultiWordWidget extends StatelessWidget {
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic,
       height: 1.2,
-      color: scheme.primaryVariant,
+      color: scheme.secondary,
       fontSize: 10 * textScale,
     );
     final tinyLineStyle = TextStyle(

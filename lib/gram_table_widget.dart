@@ -20,9 +20,7 @@ library gram_table_widget;
 
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -101,7 +99,7 @@ class _GramTableViewState extends State<GramTableView> {
     final hdrWth = clusterWth * HDR_CLUSTER_WTH_RATIO;
     final hdrHgt = clusterHgt * HDR_CLUSTER_HGT_RATIO;
     final btnWth = (clusterWth * numCols + 2 * numCols * INSET) /
-        (2 + Op.values.length + Group.values.length);
+        (4 + Op.values.length + Group.values.length);
     final btnHgt = min(50.0, cellDim * .8);
     final opHeaderStyle = TextStyle(
       fontWeight: FontWeight.normal,
@@ -113,7 +111,7 @@ class _GramTableViewState extends State<GramTableView> {
     final opTxtStyle = TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: btnHgt * (isWide ? .5 : .35),
+      fontSize: btnHgt * (isWide ? .5 : .25),
       backgroundColor: Colors.transparent,
     );
 
@@ -143,8 +141,8 @@ class _GramTableViewState extends State<GramTableView> {
     final opRow = Wrap(
       spacing: 2 * INSET,
       runSpacing: 2 * INSET,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.start,
+      alignment: WrapAlignment.start,
       children: [
         Text(
           l10n.page_gram_table_operators,
@@ -159,7 +157,7 @@ class _GramTableViewState extends State<GramTableView> {
               width: btnWth,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _binary == b ? scheme.primary : scheme.background,
+                color: _binary == b ? scheme.primary : scheme.secondary,
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
               child: Text(
@@ -184,7 +182,7 @@ class _GramTableViewState extends State<GramTableView> {
               width: btnWth,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _grouping == g ? scheme.primary : scheme.background,
+                color: _grouping == g ? scheme.primary : scheme.secondary,
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
               child: Text(

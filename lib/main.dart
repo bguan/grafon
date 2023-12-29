@@ -18,11 +18,8 @@
 import 'package:audio_session/audio_session.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/texttospeech/v1.dart';
@@ -144,8 +141,9 @@ class GrafonAppState extends State<GrafonApp> {
   }
 
   Future<void> _openBrowser(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       throw 'Could not launch $url';
     }
@@ -267,7 +265,7 @@ class GrafonAppState extends State<GrafonApp> {
           toolbarHeight: TOOL_BAR_HEIGHT,
           title: Text(
             l10n.app_title,
-            style: theme.headline6?.copyWith(
+            style: theme.titleLarge?.copyWith(
               color: scheme.surface,
               fontWeight: FontWeight.bold,
               fontSize: TOOL_BAR_HEIGHT / 1.6,

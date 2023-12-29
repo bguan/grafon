@@ -40,7 +40,7 @@ class RenderPlan {
   late final int hashCode;
   late final bool isFixedAspect;
 
-  RenderPlan(Iterable<PolyLine> lines, {bool recenter: true}) {
+  RenderPlan(Iterable<PolyLine> lines, {bool recenter = true}) {
     bool isFA = false;
     double xMin = double.maxFinite,
         yMin = double.maxFinite,
@@ -299,7 +299,7 @@ class RenderPlan {
   }
 
   /// Transform this render plan by unary operation to generate a new render.
-  RenderPlan byBinary(Op op, RenderPlan that, {gap: GRAM_GAP}) {
+  RenderPlan byBinary(Op op, RenderPlan that, {gap = GRAM_GAP}) {
     var r1 = this;
     var r2 = that;
     final isFA = this.isFixedAspect || that.isFixedAspect;
